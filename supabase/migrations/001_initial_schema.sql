@@ -1,5 +1,4 @@
 -- Enable UUID extension
-create extension if not exists "uuid-ossp";
 
 -- =====================
 -- USER PROFILES
@@ -23,11 +22,11 @@ create policy "Users manage own profile"
 -- FAMILY INVITES
 -- =====================
 create table family_invites (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   invited_email text not null,
   role text not null check (role in ('VIEWER', 'EDITOR')),
-  token uuid not null default uuid_generate_v4(),
+  token uuid not null default gen_random_uuid(),
   accepted_at timestamptz,
   created_at timestamptz not null default now(),
   unique(owner_id, invited_email)
@@ -43,7 +42,7 @@ create policy "Owner manages invites"
 -- FAMILY MEMBERS
 -- =====================
 create table family_members (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   member_id uuid not null references user_profiles(id) on delete cascade,
   role text not null check (role in ('VIEWER', 'EDITOR')),
@@ -65,7 +64,7 @@ create policy "Member reads own membership"
 -- DOMAIN LISTS
 -- =====================
 create table domain_lists (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   code text not null,
   name text not null,
@@ -97,7 +96,7 @@ create policy "Family members read domain lists"
 -- ACCOUNTS
 -- =====================
 create table accounts (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
   type_id uuid references domain_lists(id),
@@ -149,7 +148,7 @@ create policy "Family editors update accounts"
 -- CREDIT CARDS
 -- =====================
 create table credit_cards (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
   last_four_digits text,
@@ -181,7 +180,7 @@ create policy "Family members read credit cards"
 -- CATEGORIES
 -- =====================
 create table categories (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
   color text not null default '#6366f1',
@@ -210,7 +209,7 @@ create policy "Family members read categories"
 -- CREDIT CARD BILLS
 -- =====================
 create table credit_card_bills (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   credit_card_id uuid not null references credit_cards(id) on delete cascade,
   year integer not null,
@@ -244,7 +243,7 @@ create policy "Family members read bills"
 -- RECURRING TEMPLATES
 -- =====================
 create table recurring_templates (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
   amount numeric(15, 2) not null,
@@ -267,7 +266,7 @@ create policy "Owner manages recurring templates"
 -- TRANSACTIONS
 -- =====================
 create table transactions (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
   amount numeric(15, 2) not null,
@@ -331,7 +330,7 @@ create policy "Family editors update transactions"
 -- ENTRIES
 -- =====================
 create table entries (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
   amount numeric(15, 2) not null,
@@ -386,7 +385,7 @@ create policy "Family editors update entries"
 -- SAVINGS MOVEMENTS
 -- =====================
 create table savings_movements (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
   amount numeric(15, 2) not null,
@@ -417,7 +416,7 @@ create policy "Family members read savings"
 -- GOALS
 -- =====================
 create table goals (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   category_id uuid not null references categories(id) on delete cascade,
   monthly_limit numeric(15, 2) not null,
@@ -448,7 +447,7 @@ create policy "Family members read goals"
 -- PEOPLE (labels)
 -- =====================
 create table people (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
   created_at timestamptz not null default now(),

@@ -4,7 +4,7 @@
 
 -- One-time tokens used to link a Telegram chat to a Supabase user
 create table telegram_links (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid not null references user_profiles(id) on delete cascade,
   token text not null unique,
   used boolean not null default false,
@@ -20,7 +20,7 @@ create policy "Owner manages telegram links"
 
 -- Active subscription linking a user to a Telegram chat
 create table telegram_subscriptions (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid not null references user_profiles(id) on delete cascade unique,
   chat_id bigint not null,
   notifications_enabled boolean not null default true,
