@@ -48,8 +48,7 @@
                   "maximumError": "4kb"
                 }
               ],
-              "outputHashing": "all",
-              "baseHref": "/TSI.FinTrack/"
+              "outputHashing": "all"
             },
             "development": {
               "optimization": false,
