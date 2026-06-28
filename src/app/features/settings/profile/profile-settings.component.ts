@@ -10,6 +10,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { TelegramService, TelegramSubscription } from '../../../core/services/telegram.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -25,6 +26,7 @@ export class ProfileSettingsComponent implements OnInit {
   private readonly profileService = inject(UserProfileService);
   private readonly telegramService = inject(TelegramService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -78,10 +80,12 @@ export class ProfileSettingsComponent implements OnInit {
         this.saving.set(false);
         this.saved.set(true);
         setTimeout(() => this.saved.set(false), 3000);
+        this.toast.success('Perfil salvo com sucesso!');
       },
       error: (err) => {
         this.logger.error('Failed to save profile', err);
         this.saving.set(false);
+        this.toast.error('Erro ao salvar perfil.');
       },
     });
   }
