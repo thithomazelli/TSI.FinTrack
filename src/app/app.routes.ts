@@ -49,6 +49,11 @@ export const routes: Routes = [
           import('./features/goals/goals.component').then(m => m.GoalsComponent),
       },
       {
+        path: 'recurring',
+        loadComponent: () =>
+          import('./features/recurring/recurring.component').then(m => m.RecurringComponent),
+      },
+      {
         path: 'reports',
         loadComponent: () =>
           import('./features/reports/reports.component').then(m => m.ReportsComponent),
@@ -60,42 +65,16 @@ export const routes: Routes = [
       },
       {
         path: 'settings',
+        loadComponent: () =>
+          import('./features/settings/settings-shell.component').then(m => m.SettingsShellComponent),
         children: [
-          {
-            path: 'profile',
-            loadComponent: () =>
-              import('./features/settings/profile/profile-settings.component').then(m => m.ProfileSettingsComponent),
-          },
-          {
-            path: 'family',
-            loadComponent: () =>
-              import('./features/settings/family/family-settings.component').then(m => m.FamilySettingsComponent),
-          },
-          {
-            path: 'accounts',
-            loadComponent: () =>
-              import('./features/settings/accounts/accounts-settings.component').then(m => m.AccountsSettingsComponent),
-          },
-          {
-            path: 'credit-cards',
-            loadComponent: () =>
-              import('./features/settings/credit-cards/credit-cards-settings.component').then(m => m.CreditCardsSettingsComponent),
-          },
-          {
-            path: 'categories',
-            loadComponent: () =>
-              import('./features/settings/categories/categories-settings.component').then(m => m.CategoriesSettingsComponent),
-          },
-          {
-            path: 'goals',
-            loadComponent: () =>
-              import('./features/settings/goals/goals-settings.component').then(m => m.GoalsSettingsComponent),
-          },
-          {
-            path: 'domains',
-            loadComponent: () =>
-              import('./features/settings/domains/domains-settings.component').then(m => m.DomainsSettingsComponent),
-          },
+          { path: 'profile', loadComponent: () => import('./features/settings/profile/profile-settings.component').then(m => m.ProfileSettingsComponent) },
+          { path: 'family', loadComponent: () => import('./features/settings/family/family-settings.component').then(m => m.FamilySettingsComponent) },
+          { path: 'accounts', loadComponent: () => import('./features/settings/accounts/accounts-settings.component').then(m => m.AccountsSettingsComponent) },
+          { path: 'credit-cards', loadComponent: () => import('./features/settings/credit-cards/credit-cards-settings.component').then(m => m.CreditCardsSettingsComponent) },
+          { path: 'categories', loadComponent: () => import('./features/settings/categories/categories-settings.component').then(m => m.CategoriesSettingsComponent) },
+          { path: 'goals', loadComponent: () => import('./features/settings/goals/goals-settings.component').then(m => m.GoalsSettingsComponent) },
+          { path: 'domains', loadComponent: () => import('./features/settings/domains/domains-settings.component').then(m => m.DomainsSettingsComponent) },
           { path: '', redirectTo: 'profile', pathMatch: 'full' },
         ],
       },

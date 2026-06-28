@@ -1,0 +1,131 @@
+<div class="page-header">
+  <h2 class="page-title">Recorrentes</h2>
+  <div class="header-right">
+    <button class="btn btn-primary" (click)="openCreate()">+ Nova Recorrência</button>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="loading-text">Carregando...</p>
+} @else if (templates().length === 0) {
+  <div class="empty-state">
+    <p>Nenhuma despesa ou entrada recorrente cadastrada.</p>
+    <button class="btn btn-primary" (click)="openCreate()">Criar primeira recorrência</button>
+  </div>
+} @else {
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Tipo</th>
+          <th>Dia</th>
+          <th>Categoria</th>
+          <th class="text-right">Valor</th>
+          <th>Status</th>
+          <th class="text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of templates(); track t.id) {
+          <tr [class.row-inactive]="!t.isActive">
+            <td>{{ t.description }}</td>
+            <td>
+              <span class="type-badge type-badge--{{ t.type.toLowerCase() }}">
+                {{ t.type === 'TRANSACTION' ? 'Despesa' : 'Entrada' }}
+              </span>
+            </td>
+            <td>Dia {{ t.dayOfMonth }}</td>
+            <td class="col-muted">{{ categoryName(t.categoryId) }}</td>
+            <td class="col-amount">R$ {{ t.amount | number:'1.2-2' }}</td>
+            <td>
+              <button class="status-toggle" [class.active]="t.isActive" (click)="toggleActive(t)" [title]="t.isActive ? 'Pausar' : 'Ativar'">
+                {{ t.isActive ? 'Ativo' : 'Pausado' }}
+              </button>
+            </td>
+            <td class="text-right">
+              <button class="btn-icon" (click)="openEdit(t)" title="Editar">✏️</button>
+              <button class="btn-icon btn-icon--danger" (click)="delete(t)" title="Excluir">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal">
+    <h3 class="modal-title">{{ editingId() ? 'Editar Recorrência' : 'Nova Recorrência' }}</h3>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Descrição</label>
+        <input class="input" type="text" [(ngModel)]="formDescription" placeholder="Ex: Netflix, Aluguel..." />
+      </div>
+      <div class="form-field form-field--sm">
+        <label>Tipo</label>
+        <select class="input" [(ngModel)]="formType">
+          <option value="TRANSACTION">Despesa</option>
+          <option value="ENTRY">Entrada</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Valor (R$)</label>
+        <input class="input" type="number" min="0.01" step="0.01" [(ngModel)]="formAmount" />
+      </div>
+      <div class="form-field form-field--sm">
+        <label>Dia do mês</label>
+        <select class="input" [(ngModel)]="formDayOfMonth">
+          @for (d of days; track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Categoria</label>
+        <select class="input" [(ngModel)]="formCategoryId">
+          <option value="">— Nenhuma —</option>
+          @for (c of categories(); track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Conta</label>
+        <select class="input" [(ngModel)]="formAccountId" [disabled]="!!formCreditCardId">
+          <option value="">— Nenhuma —</option>
+          @for (a of accounts(); track a.id) {
+            <option [value]="a.id">{{ a.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Cartão de crédito</label>
+        <select class="input" [(ngModel)]="formCreditCardId">
+          <option value="">— Nenhum —</option>
+          @for (c of cards(); track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+}

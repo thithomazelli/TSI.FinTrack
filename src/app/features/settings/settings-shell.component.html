@@ -1,0 +1,11 @@
+<div class="page">
+  <h2 class="page-title">Configurações</h2>
+  <nav class="settings-tabs">
+    @for (tab of tabs; track tab.path) {
+      <a class="settings-tab" [routerLink]="tab.path" routerLinkActive="active">{{ tab.label }}</a>
+    }
+  </nav>
+  <div class="settings-content">
+    <router-outlet />
+  </div>
+</div>

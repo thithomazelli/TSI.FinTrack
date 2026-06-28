@@ -57,6 +57,7 @@ export class EntriesComponent implements OnInit {
   formTypeId = '';
   formAccountId = '';
   formLabels: string[] = [];
+  readonly formStatus = signal('REALIZED');
 
   ngOnInit(): void {
     this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
@@ -95,6 +96,7 @@ export class EntriesComponent implements OnInit {
     this.formTypeId = this.entryTypes()[0]?.id ?? '';
     this.formAccountId = this.accounts()[0]?.id ?? '';
     this.formLabels = [];
+    this.formStatus.set('REALIZED');
     this.showForm.set(true);
   }
 
@@ -106,6 +108,7 @@ export class EntriesComponent implements OnInit {
     this.formTypeId = entry.typeId ?? '';
     this.formAccountId = entry.accountId ?? '';
     this.formLabels = [...entry.labels];
+    this.formStatus.set(entry.status ?? 'REALIZED');
     this.showForm.set(true);
   }
 
@@ -125,6 +128,7 @@ export class EntriesComponent implements OnInit {
       typeId: this.formTypeId || null,
       accountId: this.formAccountId || null,
       labels: this.formLabels,
+      status: this.formStatus(),
     };
 
     const id = this.editingId();

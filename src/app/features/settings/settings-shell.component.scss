@@ -1,0 +1,29 @@
+.settings-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.settings-tab {
+  padding: 0.6rem 1.1rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-2);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: var(--color-text); }
+  &.active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+}
+
+.settings-content { }

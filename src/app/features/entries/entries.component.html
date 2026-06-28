@@ -94,6 +94,13 @@
     </div>
 
     <div class="form-row">
+      <div class="form-field form-field--sm">
+        <label>Status</label>
+        <select class="input" [(ngModel)]="formStatus">
+          <option value="REALIZED">Realizado</option>
+          <option value="PROJECTED">Projetado</option>
+        </select>
+      </div>
       <div class="form-field">
         <label>{{ 'entries.type' | translate }}</label>
         <select class="input" [(ngModel)]="formTypeId">

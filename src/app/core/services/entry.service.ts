@@ -21,6 +21,7 @@ export interface CreateEntryPayload {
   typeId: string | null;
   accountId: string | null;
   labels: string[];
+  status?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -72,6 +73,7 @@ export class EntryService {
           type_id: payload.typeId,
           account_id: payload.accountId,
           labels: payload.labels,
+          status: payload.status ?? 'REALIZED',
         })
         .select()
         .single()
@@ -91,6 +93,7 @@ export class EntryService {
     if (payload.typeId !== undefined) row['type_id'] = payload.typeId;
     if (payload.accountId !== undefined) row['account_id'] = payload.accountId;
     if (payload.labels !== undefined) row['labels'] = payload.labels;
+    if (payload.status !== undefined) row['status'] = payload.status;
 
     return from(
       this.supabase.client
