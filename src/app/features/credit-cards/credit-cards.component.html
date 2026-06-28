@@ -1,3 +1,78 @@
 <div class="page">
-  <h2 class="page-title">Cartões de Crédito</h2>
+  <div class="page-header">
+    <h2>{{ 'creditCards.bills' | translate }}</h2>
+    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="bills-grid">
+      @for (bill of bills(); track bill.id) {
+        <div class="bill-card" [class]="statusClass(bill.status)">
+          <div class="bill-card-header">
+            <div class="card-info">
+              <span class="card-name">{{ bill.credit_cards?.name ?? bill.creditCardId }}</span>
+              @if (bill.credit_cards?.last_four_digits) {
+                <span class="card-digits">•••• {{ bill.credit_cards?.last_four_digits }}</span>
+              }
+            </div>
+            <span class="bill-status-badge" [class]="statusClass(bill.status)">
+              {{ bill.status }}
+            </span>
+          </div>
+
+          <div class="bill-amount">
+            {{ bill.totalAmount | number:'1.2-2' }}
+          </div>
+
+          @if (bill.dueDate) {
+            <div class="bill-due">
+              {{ 'creditCards.dueDay' | translate }}: {{ bill.dueDate | slice:0:10 }}
+            </div>
+          }
+
+          <div class="bill-actions">
+            <button
+              class="btn btn-sm btn-ghost"
+              [disabled]="updatingId() === bill.id"
+              (click)="updateStatus(bill, nextStatus(bill.status))"
+            >
+              @if (bill.status === BillStatus.Open) {
+                {{ 'creditCards.closeBill' | translate }}
+              } @else if (bill.status === BillStatus.Closed) {
+                {{ 'creditCards.markPaid' | translate }}
+              } @else {
+                {{ 'creditCards.reopen' | translate }}
+              }
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (bills().length > 0) {
+      <div class="total-bar">
+        <span>{{ 'common.total' | translate }}</span>
+        <strong>{{ totalAmount() | number:'1.2-2' }}</strong>
+      </div>
+    }
+
+    @if (cardsWithoutBill().length > 0) {
+      <div class="add-bill-section">
+        <p class="add-bill-hint">{{ 'creditCards.addBillHint' | translate }}</p>
+        <div class="add-bill-cards">
+          @for (card of cardsWithoutBill(); track card.id) {
+            <button class="btn btn-ghost btn-sm" (click)="createBillForCard(card)">
+              + {{ card.name }} (•••• {{ card.lastFourDigits }})
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    @if (bills().length === 0 && cardsWithoutBill().length === 0) {
+      <p class="no-results">{{ 'common.noResults' | translate }}</p>
+    }
+  }
 </div>

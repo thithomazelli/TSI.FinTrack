@@ -99,7 +99,12 @@
     "creditLimit": "Limite de crédito",
     "closingDay": "Dia de fechamento",
     "dueDay": "Dia de vencimento",
-    "archiveConfirm": "Arquivar o cartão \"{{name}}\"? O histórico será preservado."
+    "archiveConfirm": "Arquivar o cartão \"{{name}}\"? O histórico será preservado.",
+    "bills": "Faturas de Cartão",
+    "closeBill": "Fechar Fatura",
+    "markPaid": "Marcar como Pago",
+    "reopen": "Reabrir",
+    "addBillHint": "Abrir fatura para cartão:"
   },
   "domains": {
     "title": "Domínios",
@@ -141,7 +146,8 @@
     "totalIncome": "Total de Entradas",
     "totalExpenses": "Total de Gastos",
     "balance": "Saldo do Mês",
-    "projected": "Projetado"
+    "projected": "Projetado",
+    "topCategories": "Top Categorias"
   },
   "goals": {
     "title": "Metas",

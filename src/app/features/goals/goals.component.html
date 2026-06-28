@@ -1,3 +1,84 @@
 <div class="page">
-  <h2 class="page-title">Metas</h2>
+  <div class="page-header">
+    <h2>{{ 'goals.title' | translate }}</h2>
+    <div class="header-actions">
+      <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+      <button class="btn btn-primary" (click)="openAddForm()">{{ 'goals.add' | translate }}</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="goals-list">
+      @for (row of goalRows(); track row.goal.id) {
+        <div class="goal-item" [class.exceeded]="row.exceeded">
+          <div class="goal-top">
+            <div class="goal-category">
+              @if (row.category?.color) {
+                <span class="cat-dot" [style.background]="row.category!.color"></span>
+              }
+              <span>{{ row.category?.name ?? row.goal.categoryId }}</span>
+            </div>
+            <div class="goal-actions">
+              <button class="btn btn-ghost btn-sm" (click)="openEditForm(row)">{{ 'common.edit' | translate }}</button>
+              <button class="btn btn-danger-ghost btn-sm" (click)="deleteGoal(row.goal.id)">{{ 'common.delete' | translate }}</button>
+            </div>
+          </div>
+
+          <div class="goal-progress-bar">
+            <div class="goal-progress-fill" [style.width.%]="row.progress" [class.exceeded]="row.exceeded"></div>
+          </div>
+
+          <div class="goal-numbers">
+            <span class="goal-spent">{{ 'goals.spent' | translate }}: R$ {{ row.spent | number:'1.2-2' }}</span>
+            <span class="goal-limit">{{ 'goals.monthlyLimit' | translate }}: R$ {{ row.goal.monthlyLimit | number:'1.2-2' }}</span>
+            @if (row.exceeded) {
+              <span class="goal-exceeded">{{ 'goals.exceeded' | translate }}: R$ {{ (row.spent - row.goal.monthlyLimit) | number:'1.2-2' }}</span>
+            } @else {
+              <span class="goal-remaining">{{ 'goals.remaining' | translate }}: R$ {{ row.remaining | number:'1.2-2' }}</span>
+            }
+          </div>
+        </div>
+      }
+
+      @if (goalRows().length === 0) {
+        <p class="no-results">{{ 'common.noResults' | translate }}</p>
+      }
+    </div>
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">
+        {{ (editingId() ? 'goals.edit' : 'goals.add') | translate }}
+      </h3>
+
+      <div class="form-field">
+        <label>{{ 'common.category' | translate }}</label>
+        <select class="input" [value]="formCategoryId()" (change)="formCategoryId.set($any($event.target).value)" [disabled]="!!editingId()">
+          <option value="">--</option>
+          @for (cat of (editingId() ? categories() : categoriesWithoutGoal()); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>{{ 'goals.monthlyLimit' | translate }}</label>
+        <input class="input" type="number" min="0" step="0.01"
+          [value]="formMonthlyLimit()"
+          (input)="formMonthlyLimit.set(+$any($event.target).value)" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+        <button class="btn btn-primary" [disabled]="saving() || !formCategoryId() || !formMonthlyLimit()" (click)="saveGoal()">
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

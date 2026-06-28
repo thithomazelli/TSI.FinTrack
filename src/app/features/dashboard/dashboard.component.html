@@ -1,4 +1,73 @@
-<div class="dashboard">
-  <h2 class="page-title">Dashboard</h2>
-  <p class="page-subtitle">Resumo financeiro do mês</p>
+<div class="page dashboard">
+  <div class="page-header">
+    <div>
+      <h2>{{ 'dashboard.title' | translate }}</h2>
+      <p class="subtitle">{{ 'dashboard.subtitle' | translate }}</p>
+    </div>
+    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="summary-cards">
+      <div class="summary-card income">
+        <span class="card-label">{{ 'dashboard.totalIncome' | translate }}</span>
+        <span class="card-value">R$ {{ totalIncome() | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-card expenses">
+        <span class="card-label">{{ 'dashboard.totalExpenses' | translate }}</span>
+        <span class="card-value">R$ {{ totalExpensesRealized() | number:'1.2-2' }}</span>
+        <span class="card-sub">{{ 'dashboard.projected' | translate }}: R$ {{ totalExpensesProjected() | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-card balance" [class.negative]="balanceRealized() < 0">
+        <span class="card-label">{{ 'dashboard.balance' | translate }}</span>
+        <span class="card-value">R$ {{ balanceRealized() | number:'1.2-2' }}</span>
+        <span class="card-sub">{{ 'dashboard.projected' | translate }}: R$ {{ balanceProjected() | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    @if (goalSummaries().length > 0) {
+      <section class="dashboard-section">
+        <h3>{{ 'goals.title' | translate }}</h3>
+        <div class="goals-grid">
+          @for (row of goalSummaries(); track row.goal.id) {
+            <div class="goal-card" [class.exceeded]="row.exceeded">
+              <div class="goal-card-top">
+                @if (row.category?.color) {
+                  <span class="cat-dot" [style.background]="row.category!.color"></span>
+                }
+                <span class="goal-cat-name">{{ row.category?.name ?? row.goal.categoryId }}</span>
+                <span class="goal-pct">{{ row.progress | number:'1.0-0' }}%</span>
+              </div>
+              <div class="goal-bar">
+                <div class="goal-bar-fill" [style.width.%]="row.progress" [class.exceeded]="row.exceeded"></div>
+              </div>
+              <div class="goal-card-bottom">
+                <span>R$ {{ row.spent | number:'1.2-2' }}</span>
+                <span>/ R$ {{ row.goal.monthlyLimit | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (topCategories().length > 0) {
+      <section class="dashboard-section">
+        <h3>{{ 'dashboard.topCategories' | translate }}</h3>
+        <div class="top-categories">
+          @for (cat of topCategories(); track cat.name) {
+            <div class="top-cat-row">
+              <span class="cat-dot" [style.background]="cat.color"></span>
+              <span class="top-cat-name">{{ cat.name }}</span>
+              <span class="top-cat-amount">R$ {{ cat.amount | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
 </div>

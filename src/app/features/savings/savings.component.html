@@ -1,3 +1,108 @@
 <div class="page">
-  <h2 class="page-title">Poupança</h2>
+  <div class="page-header">
+    <h2>{{ 'savings.title' | translate }}</h2>
+    <button class="btn btn-primary" (click)="openForm()">{{ 'savings.add' | translate }}</button>
+  </div>
+
+  <div class="balance-card">
+    <span class="balance-label">{{ 'savings.balance' | translate }}</span>
+    <span class="balance-value">R$ {{ balance() | number:'1.2-2' }}</span>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <table class="list">
+      <thead>
+        <tr>
+          <th>{{ 'common.date' | translate }}</th>
+          <th>{{ 'common.description' | translate }}</th>
+          <th>{{ 'common.type' | translate }}</th>
+          <th>{{ 'common.account' | translate }}</th>
+          <th class="text-right">{{ 'common.amount' | translate }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of movements(); track m.id) {
+          <tr>
+            <td>{{ m.date | slice:0:10 }}</td>
+            <td>{{ m.description }}</td>
+            <td>{{ typeLabel(m.typeId) }}</td>
+            <td>{{ accountName(m.accountId) }}</td>
+            <td class="text-right">R$ {{ m.amount | number:'1.2-2' }}</td>
+            <td class="actions-cell">
+              <button
+                class="btn btn-danger-ghost btn-sm"
+                [disabled]="deletingId() === m.id"
+                (click)="deleteMovement(m.id)"
+              >{{ 'common.delete' | translate }}</button>
+            </td>
+          </tr>
+        }
+        @if (movements().length === 0) {
+          <tr>
+            <td colspan="6" class="no-results">{{ 'common.noResults' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ 'savings.add' | translate }}</h3>
+
+      <div class="form-field">
+        <label>{{ 'common.type' | translate }}</label>
+        <select class="input" [value]="formTypeId()" (change)="formTypeId.set($any($event.target).value)">
+          @for (t of types(); track t.id) {
+            <option [value]="t.id">{{ t.value }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>{{ 'common.description' | translate }}</label>
+        <input class="input" type="text"
+          [value]="formDescription()"
+          (input)="formDescription.set($any($event.target).value)" />
+      </div>
+
+      <div class="form-field">
+        <label>{{ 'common.amount' | translate }}</label>
+        <input class="input" type="number" min="0" step="0.01"
+          [value]="formAmount()"
+          (input)="formAmount.set(+$any($event.target).value)" />
+      </div>
+
+      <div class="form-field">
+        <label>{{ 'common.date' | translate }}</label>
+        <input class="input" type="date"
+          [value]="formDate()"
+          (input)="formDate.set($any($event.target).value)" />
+      </div>
+
+      <div class="form-field">
+        <label>{{ 'common.account' | translate }}</label>
+        <select class="input" [value]="formAccountId()" (change)="formAccountId.set($any($event.target).value)">
+          <option value="">--</option>
+          @for (a of accounts(); track a.id) {
+            <option [value]="a.id">{{ a.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+        <button class="btn btn-primary"
+          [disabled]="saving() || !formDescription() || !formAmount() || !formTypeId()"
+          (click)="saveMovement()">
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

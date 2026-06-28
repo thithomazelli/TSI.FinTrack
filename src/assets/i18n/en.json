@@ -99,7 +99,12 @@
     "creditLimit": "Credit limit",
     "closingDay": "Closing day",
     "dueDay": "Due day",
-    "archiveConfirm": "Archive card \"{{name}}\"? History will be preserved."
+    "archiveConfirm": "Archive card \"{{name}}\"? History will be preserved.",
+    "bills": "Credit Card Bills",
+    "closeBill": "Close Bill",
+    "markPaid": "Mark as Paid",
+    "reopen": "Reopen",
+    "addBillHint": "Open bill for card:"
   },
   "domains": {
     "title": "Domains",
@@ -141,7 +146,8 @@
     "totalIncome": "Total Income",
     "totalExpenses": "Total Expenses",
     "balance": "Monthly Balance",
-    "projected": "Projected"
+    "projected": "Projected",
+    "topCategories": "Top Categories"
   },
   "goals": {
     "title": "Goals",

@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 export class MonthPickerComponent {
   readonly year = model<number>(new Date().getFullYear());
   readonly month = model<number>(new Date().getMonth() + 1);
-  readonly changed = output<{ year: number; month: number }>();
+  readonly monthChanged = output<{ year: number; month: number }>();
 
   prev(): void {
     let m = this.month() - 1;
@@ -20,7 +20,7 @@ export class MonthPickerComponent {
     if (m < 1) { m = 12; y--; }
     this.year.set(y);
     this.month.set(m);
-    this.changed.emit({ year: y, month: m });
+    this.monthChanged.emit({ year: y, month: m });
   }
 
   next(): void {
@@ -29,7 +29,7 @@ export class MonthPickerComponent {
     if (m > 12) { m = 1; y++; }
     this.year.set(y);
     this.month.set(m);
-    this.changed.emit({ year: y, month: m });
+    this.monthChanged.emit({ year: y, month: m });
   }
 
   get label(): string {

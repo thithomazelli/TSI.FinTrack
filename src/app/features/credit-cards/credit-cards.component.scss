@@ -1,1 +1,140 @@
+.bills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
 
+.bill-card {
+  background: var(--surface, #fff);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &.status-paid {
+    border-color: #4caf50;
+    background: #f1faf1;
+  }
+
+  &.status-closed {
+    border-color: #ff9800;
+    background: #fffbf2;
+  }
+}
+
+.bill-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.card-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.card-digits {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.bill-status-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.status-open {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &.status-closed {
+    background: #fff3e0;
+    color: #e65100;
+  }
+
+  &.status-paid {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+}
+
+.bill-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+
+  &::before {
+    content: 'R$ ';
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #888;
+  }
+}
+
+.bill-due {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.bill-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+
+  strong {
+    font-size: 1.1rem;
+
+    &::before {
+      content: 'R$ ';
+      font-weight: 400;
+      color: #888;
+    }
+  }
+}
+
+.add-bill-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+}
+
+.add-bill-hint {
+  margin: 0 0 0.75rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.add-bill-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.loading-text,
+.no-results {
+  color: #888;
+  text-align: center;
+  padding: 2rem;
+}
