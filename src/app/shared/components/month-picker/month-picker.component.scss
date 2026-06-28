@@ -1,31 +1,36 @@
 .month-picker {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 6px 12px;
+  transition: background var(--transition), border-color var(--transition);
 }
 
 .label {
   font-weight: 600;
-  font-size: 14px;
-  min-width: 160px;
+  font-size: 0.875rem;
+  min-width: 140px;
   text-align: center;
   text-transform: capitalize;
+  color: var(--color-text);
 }
 
 .nav-btn {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 1.1rem;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--color-text-2);
   line-height: 1;
-  padding: 0 4px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color var(--transition), background var(--transition);
 
   &:hover {
-    color: #1a1a2e;
+    color: var(--color-text);
+    background: var(--color-surface-2);
   }
 }

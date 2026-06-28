@@ -8,7 +8,7 @@ export class ThemeService {
 
   constructor() {
     const saved = localStorage.getItem(KEY);
-    // Default is light mode; only go dark if user explicitly chose it
+    // Default is light; only dark if user explicitly saved 'dark'
     const dark = saved === 'dark';
     this.apply(dark);
   }
