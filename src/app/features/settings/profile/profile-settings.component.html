@@ -65,6 +65,9 @@
             <p class="link-note">O token expira após o primeiro uso.</p>
           </div>
         } @else {
+          @if (telegramError()) {
+            <div class="error-box">❌ {{ telegramError() }}</div>
+          }
           <button class="btn btn-primary" (click)="generateTelegramLink()">Conectar Telegram</button>
         }
       }

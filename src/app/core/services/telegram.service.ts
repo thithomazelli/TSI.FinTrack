@@ -39,8 +39,13 @@ export class TelegramService {
   generateLinkToken(userId: string, botUsername: string): Observable<{ url: string; token: string }> {
     const token = crypto.randomUUID().replace(/-/g, '');
     return from(
-      this.supabase.from('telegram_links').insert({ user_id: userId, token })
-    ).pipe(map(() => ({ url: `https://t.me/${botUsername}?start=${token}`, token })));
+      this.supabase.from('telegram_links').insert({ user_id: userId, token }).select()
+    ).pipe(
+      map((res) => {
+        if (res.error) throw new Error(res.error.message);
+        return { url: `https://t.me/${botUsername}?start=${token}`, token };
+      })
+    );
   }
 
   disconnect(userId: string): Observable<void> {

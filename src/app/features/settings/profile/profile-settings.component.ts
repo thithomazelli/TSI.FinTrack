@@ -37,6 +37,7 @@ export class ProfileSettingsComponent implements OnInit {
   readonly telegramLoading = signal(false);
   readonly telegramLinkUrl = signal<string | null>(null);
   readonly telegramToken = signal<string | null>(null);
+  readonly telegramError = signal<string | null>(null);
   readonly copied = signal(false);
   readonly telegramNotifications = signal(true);
 
@@ -93,10 +94,12 @@ export class ProfileSettingsComponent implements OnInit {
       next: ({ url, token }) => {
         this.telegramLinkUrl.set(url);
         this.telegramToken.set(token);
+        this.telegramError.set(null);
         this.telegramLoading.set(false);
       },
       error: (err) => {
         this.logger.error('Failed to generate Telegram link', err);
+        this.telegramError.set(err?.message ?? 'Erro ao gerar token. Verifique o console.');
         this.telegramLoading.set(false);
       },
     });
