@@ -8,18 +8,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-left: 3px solid #10b981;
-  border-radius: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-success);
+  border-radius: var(--radius-md);
   padding: 12px 20px;
   margin-bottom: 20px;
+  transition: background var(--transition), border-color var(--transition);
 }
 
 .total-label {
   font-size: 12px;
-  color: #6b7280;
-  font-weight: 500;
+  color: var(--color-text-2);
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -27,29 +28,27 @@
 .total-value {
   font-size: 20px;
   font-weight: 700;
-  color: #059669;
+  color: var(--color-success);
 }
 
 .col-date {
   white-space: nowrap;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-2);
 }
 
 .col-muted {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-2);
 }
 
 .col-amount {
   font-weight: 600;
-  color: #059669;
+  color: var(--color-success);
   white-space: nowrap;
 }
 
-.text-right {
-  text-align: right;
-}
+.text-right { text-align: right; }
 
 .entry-desc {
   display: flex;
@@ -60,14 +59,8 @@
 
 .label-chip {
   font-size: 11px;
-  background: #ede9fe;
-  color: #5b21b6;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
   padding: 1px 6px;
   border-radius: 99px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
 }
