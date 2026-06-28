@@ -8,8 +8,8 @@ export class ThemeService {
 
   constructor() {
     const saved = localStorage.getItem(KEY);
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const dark = saved ? saved === 'dark' : prefersDark;
+    // Default is light mode; only go dark if user explicitly chose it
+    const dark = saved === 'dark';
     this.apply(dark);
   }
 
