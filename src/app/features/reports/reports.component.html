@@ -1,51 +1,272 @@
 <div class="page">
+
+  <!-- Filters bar -->
   <div class="page-header">
-    <h2>{{ 'reports.title' | translate }}</h2>
+    <div>
+      <h2>Relatórios</h2>
+      <p class="subtitle">Análise financeira completa</p>
+    </div>
     <div class="filters">
-      <label>{{ 'common.year' | translate }}</label>
-      <select class="input" [value]="filterYear()"
-        (change)="filterYear.set(+$any($event.target).value); onYearChange()">
-        @for (y of [currentYear, currentYear - 1, currentYear - 2]; track y) {
-          <option [value]="y">{{ y }}</option>
-        }
-      </select>
+      <div class="filter-group">
+        <label class="filter-label">Ano</label>
+        <select class="form-select filter-select" [value]="filterYear()"
+          (change)="filterYear.set(+$any($event.target).value); onYearChange()">
+          @for (y of availableYears; track y) {
+            <option [value]="y">{{ y }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Mês</label>
+        <select class="form-select filter-select" [value]="filterMonth()"
+          (change)="filterMonth.set(+$any($event.target).value); onMonthChange()">
+          @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m; let i = $index) {
+            <option [value]="m">{{ ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][i] }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Meta renda</label>
+        <div class="target-wrap">
+          <input type="number" class="form-input filter-input" [value]="incomeTarget()"
+            (input)="incomeTarget.set(+$any($event.target).value)" min="10" max="100" />
+          <span class="target-pct">%</span>
+        </div>
+      </div>
     </div>
   </div>
 
   @if (loading()) {
-    <p class="loading-text">{{ 'common.loading' | translate }}</p>
-  } @else {
-    <div class="charts-grid">
-      <div class="chart-card chart-wide">
-        <h3 class="chart-title">Evolução mensal — Entradas × Gastos × Saldo</h3>
-        @if (monthlyPoints().length > 0) {
-          <canvas baseChart
-            [data]="evolutionChartData()"
-            [options]="evolutionChartOptions"
-            type="line">
-          </canvas>
-        }
-      </div>
-
-      @if (categorySpend().length > 0) {
+    <div class="loading-grid">
+      @for (i of [1,2,3,4,5,6]; track i) {
         <div class="chart-card">
-          <h3 class="chart-title">Gastos por categoria no ano</h3>
-          <canvas baseChart
-            [data]="categoryChartData()"
-            [options]="categoryChartOptions"
-            type="pie">
-          </canvas>
-        </div>
-
-        <div class="chart-card">
-          <h3 class="chart-title">Ranking de categorias</h3>
-          <canvas baseChart
-            [data]="categoryBarData()"
-            [options]="categoryBarOptions"
-            type="bar">
-          </canvas>
+          <div class="skeleton" style="height:18px;width:55%;margin-bottom:1rem"></div>
+          <div class="skeleton" style="height:210px"></div>
         </div>
       }
     </div>
+  } @else {
+
+    <!-- ── Seção 1: Visão Geral ── -->
+    <div class="reports-section">
+      <h3 class="section-title">Visão Geral — {{ filterYear() }}</h3>
+      <div class="charts-grid">
+
+        <!-- Chart 3: Evolução mensal entradas × gastos × saldo -->
+        <div class="chart-card chart-wide animate-fade-up stagger-1">
+          <div class="chart-header">
+            <span class="chart-title">Evolução mensal — Entradas × Gastos × Saldo</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas baseChart [data]="evolutionChartData()" [options]="lineOptions()" type="line"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 1: % renda gasta por mês -->
+        <div class="chart-card animate-fade-up stagger-2">
+          <div class="chart-header">
+            <span class="chart-title">% da renda gasta por mês</span>
+            <span class="chart-hint">Meta: {{ incomeTarget() }}% · vermelho = acima da meta</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas baseChart [data]="incomeRatioChartData()" [options]="incomeRatioOptions()" type="bar"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 5: Fluxo de caixa acumulado -->
+        <div class="chart-card animate-fade-up stagger-3">
+          <div class="chart-header">
+            <span class="chart-title">Fluxo de caixa acumulado</span>
+            <span class="chart-hint">Saldo líquido mês a mês</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas baseChart [data]="cashFlowChartData()" [options]="lineOptions()" type="line"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Seção 2: Categorias ── -->
+    <div class="reports-section">
+      <h3 class="section-title">Categorias</h3>
+      <div class="charts-grid">
+
+        <!-- Chart 4: Ranking anual -->
+        <div class="chart-card animate-fade-up stagger-1">
+          <div class="chart-header">
+            <span class="chart-title">Ranking de gastos — {{ filterYear() }}</span>
+          </div>
+          @if (categorySpend().length > 0) {
+            <div class="chart-wrap">
+              <canvas baseChart [data]="rankingBarData()" [options]="hBarOptions()" type="bar"></canvas>
+            </div>
+          } @else {
+            <p class="chart-empty">Sem dados para o ano selecionado.</p>
+          }
+        </div>
+
+        <!-- Chart 9: Média mensal por categoria -->
+        <div class="chart-card animate-fade-up stagger-2">
+          <div class="chart-header">
+            <span class="chart-title">Média mensal por categoria</span>
+          </div>
+          @if (categorySpend().length > 0) {
+            <div class="chart-wrap">
+              <canvas baseChart [data]="avgMonthlyBarData()" [options]="hBarOptions()" type="bar"></canvas>
+            </div>
+          } @else {
+            <p class="chart-empty">Sem dados para o ano selecionado.</p>
+          }
+        </div>
+
+        <!-- Chart 2: Gastos por categoria no mês selecionado -->
+        <div class="chart-card animate-fade-up stagger-3">
+          <div class="chart-header">
+            <span class="chart-title">Gastos por categoria —
+              {{ ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][filterMonth()-1] }}/{{ filterYear() }}
+            </span>
+          </div>
+          @if (monthCategorySpend().length > 0) {
+            <div class="chart-wrap chart-wrap-sm">
+              <canvas baseChart [data]="categoryPieData()" [options]="doughnutOptions()" type="doughnut"></canvas>
+            </div>
+            <div class="cat-legend">
+              @for (cat of monthCategorySpend(); track cat.categoryId) {
+                <div class="cat-legend-row">
+                  <span class="cat-dot" [style.background]="cat.color"></span>
+                  <span class="cat-legend-name">{{ cat.name }}</span>
+                  <span class="cat-legend-val">{{ formatCurrency(cat.amount) }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="chart-empty">Sem gastos registrados neste mês.</p>
+          }
+        </div>
+
+        <!-- Chart 8: Despesa por forma de pagamento -->
+        <div class="chart-card animate-fade-up stagger-4">
+          <div class="chart-header">
+            <span class="chart-title">Forma de pagamento — {{ filterYear() }}</span>
+          </div>
+          @if (paymentTypeSpend().length > 0) {
+            <div class="chart-wrap chart-wrap-sm">
+              <canvas baseChart [data]="paymentTypeChartData()" [options]="doughnutOptions()" type="doughnut"></canvas>
+            </div>
+            <div class="cat-legend">
+              @for (p of paymentTypeSpend(); track p.label) {
+                <div class="cat-legend-row">
+                  <span class="cat-dot" [style.background]="p.color"></span>
+                  <span class="cat-legend-name">{{ p.label }}</span>
+                  <span class="cat-legend-val">{{ formatCurrency(p.amount) }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="chart-empty">Sem dados para o ano selecionado.</p>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Seção 3: Comparativos ── -->
+    <div class="reports-section">
+      <h3 class="section-title">Comparativos</h3>
+      <div class="charts-grid">
+
+        <!-- Chart 6: Ano a ano por categoria -->
+        <div class="chart-card chart-wide animate-fade-up stagger-1">
+          <div class="chart-header">
+            <span class="chart-title">Comparativo ano a ano — top categorias</span>
+            <span class="chart-hint">{{ filterYear() - 1 }} vs {{ filterYear() }}</span>
+          </div>
+          @if (categorySpend().length > 0) {
+            <div class="chart-wrap">
+              <canvas baseChart [data]="yoyChartData()" [options]="yoyOptions()" type="bar"></canvas>
+            </div>
+          } @else {
+            <p class="chart-empty">Sem dados suficientes para comparação.</p>
+          }
+        </div>
+
+        <!-- Chart 7: Evolução de categoria específica (24 meses) -->
+        <div class="chart-card chart-wide animate-fade-up stagger-2">
+          <div class="chart-header">
+            <span class="chart-title">Evolução por categoria — últimos 24 meses</span>
+          </div>
+          <div class="chart-filter-inline">
+            <label class="filter-label">Categoria</label>
+            <select class="form-select filter-select" [value]="filterCategoryId()"
+              (change)="filterCategoryId.set($any($event.target).value); onCategoryChange()">
+              <option value="">Selecione uma categoria...</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+          @if (loadingCatEvol()) {
+            <div class="skeleton" style="height:220px;margin-top:1rem;border-radius:var(--radius-md)"></div>
+          } @else if (filterCategoryId() && catEvolPoints().length > 0) {
+            <div class="chart-wrap">
+              <canvas baseChart [data]="catEvolChartData()" [options]="lineOptions()" type="line"></canvas>
+            </div>
+          } @else {
+            <p class="chart-empty">Selecione uma categoria para ver a evolução nos últimos 24 meses.</p>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Seção 4: Poupança ── -->
+    @if (savingsMovements().length > 0) {
+      <div class="reports-section">
+        <h3 class="section-title">Poupança</h3>
+        <div class="charts-grid">
+          <!-- Chart 11: Evolução saldo poupança -->
+          <div class="chart-card chart-wide animate-fade-up stagger-1">
+            <div class="chart-header">
+              <span class="chart-title">Evolução do saldo em poupança</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas baseChart [data]="savingsChartData()" [options]="lineOptions()" type="line"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Seção 5: Resumo numérico ── -->
+    <div class="reports-section">
+      <h3 class="section-title">Resumo — {{ filterYear() }}</h3>
+      <div class="summary-row animate-fade-up stagger-1">
+        <div class="summary-stat">
+          <span class="stat-label">Total entradas</span>
+          <span class="stat-value income">{{ formatCurrency(monthlyPoints().reduce(toIncome, 0)) }}</span>
+        </div>
+        <div class="summary-stat">
+          <span class="stat-label">Total gastos</span>
+          <span class="stat-value expense">{{ formatCurrency(monthlyPoints().reduce(toExpense, 0)) }}</span>
+        </div>
+        <div class="summary-stat">
+          <span class="stat-label">Saldo líquido</span>
+          <span class="stat-value"
+            [class.income]="monthlyPoints().reduce(toBalance, 0) >= 0"
+            [class.expense]="monthlyPoints().reduce(toBalance, 0) < 0">
+            {{ formatCurrency(monthlyPoints().reduce(toBalance, 0)) }}
+          </span>
+        </div>
+        @if (categorySpend().length > 0) {
+          <div class="summary-stat">
+            <span class="stat-label">Maior gasto</span>
+            <span class="stat-value">{{ categorySpend()[0].name }}</span>
+            <span class="stat-sub">{{ formatCurrency(categorySpend()[0].amount) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
   }
 </div>
