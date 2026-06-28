@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
@@ -18,4 +18,5 @@ export class AppComponent {
   private readonly authService = inject(AuthService);
   readonly _theme = inject(ThemeService);
   readonly session$ = this.authService.session$;
+  readonly menuOpen = signal(false);
 }

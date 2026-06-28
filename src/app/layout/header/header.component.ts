@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { filter, map, startWith } from 'rxjs';
 
 const ROUTE_TITLES: Record<string, string> = {
   '/dashboard':    'Dashboard',
@@ -29,6 +28,7 @@ export class HeaderComponent {
   private readonly router = inject(Router);
 
   readonly session$ = this.authService.session$;
+  readonly menuToggle = output<void>();
 
   get pageTitle(): string {
     const url = this.router.url.split('?')[0];

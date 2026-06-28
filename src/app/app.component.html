@@ -1,7 +1,12 @@
 @if (session$ | async) {
-  <tsi-sidebar />
+  <tsi-sidebar [open]="menuOpen()" (close)="menuOpen.set(false)" />
+
+  @if (menuOpen()) {
+    <div class="sidebar-backdrop" (click)="menuOpen.set(false)"></div>
+  }
+
   <div class="main-layout">
-    <tsi-header />
+    <tsi-header (menuToggle)="menuOpen.set(!menuOpen())" />
     <main class="main-content">
       <router-outlet />
     </main>

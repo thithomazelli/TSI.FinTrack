@@ -1,6 +1,11 @@
 <header class="header animate-fade-down">
   <div class="header-left">
-    <div class="breadcrumb">{{ pageTitle }}</div>
+    <button class="hamburger" (click)="menuToggle.emit()" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="breadcrumb">{{ pageTitle }}</span>
   </div>
 
   @if (session$ | async; as session) {
@@ -15,7 +20,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
         </svg>
-        Sair
+        <span class="signout-label">Sair</span>
       </button>
     </div>
   }
