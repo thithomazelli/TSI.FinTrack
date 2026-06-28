@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { CreditCardService } from '../../../core/services/credit-card.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -15,7 +14,7 @@ import { CreditCard } from '../../../core/models/interfaces/credit-card.interfac
 @Component({
   selector: 'tsi-credit-cards-settings',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule],
   templateUrl: './credit-cards-settings.component.html',
   styleUrls: ['./credit-cards-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +30,7 @@ export class CreditCardsSettingsComponent implements OnInit {
   readonly showArchived = signal(false);
   readonly editingId = signal<string | null>(null);
   readonly showForm = signal(false);
+  readonly deletingItem = signal<CreditCard | null>(null);
 
   formName = '';
   formLastFour = '';
@@ -119,15 +119,29 @@ export class CreditCardsSettingsComponent implements OnInit {
     });
   }
 
-  archive(card: CreditCard): void {
+  confirmDelete(card: CreditCard): void {
+    this.deletingItem.set(card);
+  }
+
+  cancelDelete(): void {
+    this.deletingItem.set(null);
+  }
+
+  archive(): void {
+    const card = this.deletingItem();
+    if (!card) return;
+    this.saving.set(true);
     this.cardService.archive(card.id).subscribe({
       next: () => {
-        this.toast.success('Cartão excluído.');
+        this.toast.success('Cartão arquivado.');
+        this.deletingItem.set(null);
+        this.saving.set(false);
         this.load();
       },
       error: err => {
         this.logger.error('Failed to archive card', err);
         this.toast.error('Erro ao arquivar cartão.');
+        this.saving.set(false);
       },
     });
   }

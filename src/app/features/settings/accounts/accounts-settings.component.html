@@ -2,62 +2,70 @@
   <div class="page-header">
     <div class="header-actions">
       <button class="btn btn-ghost btn-sm" (click)="toggleArchived()">
-        {{ (showArchived() ? 'common.active' : 'common.archived') | translate }}
+        {{ showArchived() ? 'Ativas' : 'Arquivadas' }}
       </button>
-      <button class="btn btn-primary" (click)="openCreate()">
-        + {{ 'accounts.add' | translate }}
-      </button>
+      <button class="btn btn-primary" (click)="openCreate()">+ Nova Conta</button>
     </div>
   </div>
 
   @if (loading()) {
-    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+    <p class="state-msg">Carregando...</p>
   } @else if (accounts().length === 0) {
-    <p class="state-msg">{{ 'common.noResults' | translate }}</p>
+    <p class="state-msg">Nenhuma conta encontrada.</p>
   } @else {
-    <div class="list">
-      @for (acc of accounts(); track acc.id) {
-        <div class="list-item">
-          <div class="item-info">
-            <span class="item-name">{{ acc.name }}</span>
-            <span class="item-meta">{{ typeName(acc.typeId) }}</span>
-          </div>
-          <span class="item-balance">{{ acc.balance | number:'1.2-2' }}</span>
-          @if (acc.isArchived) {
-            <span class="badge badge-system">{{ 'common.archived' | translate }}</span>
-          }
-          <div class="item-actions">
-            @if (!acc.isArchived) {
-              <button class="btn btn-ghost btn-sm" (click)="openEdit(acc)">
-                {{ 'common.edit' | translate }}
-              </button>
-              <button class="btn btn-danger-ghost btn-sm" (click)="archive(acc)">
-                {{ 'common.archive' | translate }}
-              </button>
-            } @else {
-              <button class="btn btn-ghost btn-sm" (click)="restore(acc)">
-                {{ 'common.restore' | translate }}
-              </button>
-            }
-          </div>
-        </div>
-      }
-    </div>
+    <table class="settings-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Tipo</th>
+          <th class="th-right">Saldo</th>
+          <th class="th-right td-actions">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (acc of accounts(); track acc.id) {
+          <tr>
+            <td>
+              {{ acc.name }}
+              @if (acc.isArchived) {
+                <span class="badge badge-system" style="margin-left:6px">Arquivada</span>
+              }
+            </td>
+            <td>{{ typeName(acc.typeId) }}</td>
+            <td style="text-align:right; font-weight:600; color:#059669">
+              {{ acc.balance | number:'1.2-2' }}
+            </td>
+            <td class="td-actions">
+              @if (!acc.isArchived) {
+                <button class="btn-action" (click)="openEdit(acc)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Editar
+                </button>
+                <button class="btn-action btn-action--danger" (click)="confirmDelete(acc)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                  Arquivar
+                </button>
+              } @else {
+                <button class="btn-action" (click)="restore(acc)">Restaurar</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   }
 </div>
 
 @if (showForm()) {
-  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="backdrop" (click)="closeForm()"></div>
   <div class="modal">
-    <h3 class="modal-title">
-      {{ (editingId() ? 'accounts.edit' : 'accounts.add') | translate }}
-    </h3>
+    <h3 class="modal-title">{{ editingId() ? 'Editar Conta' : 'Nova Conta' }}</h3>
     <div class="form-field">
-      <label>{{ 'accounts.name' | translate }}</label>
+      <label>Nome</label>
       <input class="input" [(ngModel)]="formName" />
     </div>
     <div class="form-field">
-      <label>{{ 'accounts.type' | translate }}</label>
+      <label>Tipo</label>
       <select class="input" [(ngModel)]="formTypeId">
         @for (type of accountTypes(); track type.id) {
           <option [value]="type.id">{{ type.name }}</option>
@@ -65,20 +73,32 @@
       </select>
     </div>
     <div class="form-field">
-      <label>{{ 'accounts.balance' | translate }}</label>
+      <label>Saldo inicial</label>
       <input class="input" type="number" [(ngModel)]="formBalance" />
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" (click)="closeForm()">
-        {{ 'common.cancel' | translate }}
-      </button>
+      <button class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
       <button
         class="btn btn-primary"
         (click)="save()"
         [disabled]="saving() || !formName.trim()"
       >
-        {{ 'common.save' | translate }}
+        {{ saving() ? 'Salvando...' : 'Salvar' }}
       </button>
+    </div>
+  </div>
+}
+
+@if (deletingItem()) {
+  <div class="backdrop" (click)="cancelDelete()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">Arquivar conta</h3>
+    <p class="confirm-msg">
+      Tem certeza que deseja arquivar <strong>{{ deletingItem()!.name }}</strong>?
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
+      <button class="btn-danger" (click)="archive()" [disabled]="saving()">Arquivar</button>
     </div>
   </div>
 }

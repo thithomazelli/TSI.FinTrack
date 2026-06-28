@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { AccountService } from '../../../core/services/account.service';
 import { DomainListService } from '../../../core/services/domain-list.service';
 import { LoggingService } from '../../../core/services/logging.service';
@@ -18,7 +17,7 @@ import { DomainList } from '../../../core/models/interfaces/domain-list.interfac
 @Component({
   selector: 'tsi-accounts-settings',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, TranslatePipe],
+  imports: [DecimalPipe, FormsModule],
   templateUrl: './accounts-settings.component.html',
   styleUrls: ['./accounts-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +35,7 @@ export class AccountsSettingsComponent implements OnInit {
   readonly showArchived = signal(false);
   readonly editingId = signal<string | null>(null);
   readonly showForm = signal(false);
+  readonly deletingItem = signal<Account | null>(null);
 
   formName = '';
   formTypeId = '';
@@ -116,15 +116,29 @@ export class AccountsSettingsComponent implements OnInit {
     });
   }
 
-  archive(account: Account): void {
+  confirmDelete(account: Account): void {
+    this.deletingItem.set(account);
+  }
+
+  cancelDelete(): void {
+    this.deletingItem.set(null);
+  }
+
+  archive(): void {
+    const account = this.deletingItem();
+    if (!account) return;
+    this.saving.set(true);
     this.accountService.archive(account.id).subscribe({
       next: () => {
-        this.toast.success('Conta excluída.');
+        this.toast.success('Conta arquivada.');
+        this.deletingItem.set(null);
+        this.saving.set(false);
         this.load();
       },
       error: err => {
         this.logger.error('Failed to archive account', err);
         this.toast.error('Erro ao arquivar conta.');
+        this.saving.set(false);
       },
     });
   }
