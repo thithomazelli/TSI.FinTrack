@@ -48,11 +48,21 @@
 
         @if (telegramLinkUrl()) {
           <div class="link-box">
-            <p>Clique no link abaixo para abrir o bot e ativar as notificações:</p>
+            <p class="link-step"><b>Opção 1</b> — Clique para abrir direto no Telegram:</p>
             <a class="telegram-link" [href]="telegramLinkUrl()!" target="_blank" rel="noopener">
-              Abrir no Telegram
+              Abrir &#64;TsiFinTack_bot
             </a>
-            <p class="link-note">O link expira após o primeiro uso.</p>
+            <p class="link-step"><b>Opção 2</b> — Se o link não enviar o token automaticamente, copie o comando abaixo e envie manualmente no bot:</p>
+            <div class="token-row">
+              <code class="token-code">/start {{ telegramToken() }}</code>
+              <button class="btn-copy" (click)="copyToken()" title="Copiar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                </svg>
+                {{ copied() ? 'Copiado!' : 'Copiar' }}
+              </button>
+            </div>
+            <p class="link-note">O token expira após o primeiro uso.</p>
           </div>
         } @else {
           <button class="btn btn-primary" (click)="generateTelegramLink()">Conectar Telegram</button>

@@ -36,6 +36,8 @@ export class ProfileSettingsComponent implements OnInit {
   readonly telegramSub = signal<TelegramSubscription | null>(null);
   readonly telegramLoading = signal(false);
   readonly telegramLinkUrl = signal<string | null>(null);
+  readonly telegramToken = signal<string | null>(null);
+  readonly copied = signal(false);
   readonly telegramNotifications = signal(true);
 
   readonly botUsername = (environment as Record<string, unknown>)['telegramBotUsername'] as string | undefined ?? 'TSIFinTrackBot';
@@ -88,8 +90,9 @@ export class ProfileSettingsComponent implements OnInit {
     if (!user) return;
     this.telegramLoading.set(true);
     this.telegramService.generateLinkToken(user.id, this.botUsername).subscribe({
-      next: (url) => {
+      next: ({ url, token }) => {
         this.telegramLinkUrl.set(url);
+        this.telegramToken.set(token);
         this.telegramLoading.set(false);
       },
       error: (err) => {
@@ -107,12 +110,22 @@ export class ProfileSettingsComponent implements OnInit {
       next: () => {
         this.telegramSub.set(null);
         this.telegramLinkUrl.set(null);
+        this.telegramToken.set(null);
         this.telegramLoading.set(false);
       },
       error: (err) => {
         this.logger.error('Failed to disconnect Telegram', err);
         this.telegramLoading.set(false);
       },
+    });
+  }
+
+  copyToken(): void {
+    const token = this.telegramToken();
+    if (!token) return;
+    navigator.clipboard.writeText(`/start ${token}`).then(() => {
+      this.copied.set(true);
+      setTimeout(() => this.copied.set(false), 2500);
     });
   }
 

@@ -173,3 +173,45 @@
     background: #ffebee;
   }
 }
+
+.link-step {
+  font-size: 0.85rem;
+  color: var(--color-text-2);
+  margin: 0.75rem 0 0.4rem;
+}
+
+.token-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+}
+
+.token-code {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--color-text);
+  word-break: break-all;
+  font-family: monospace;
+}
+
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  color: var(--color-text-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition);
+  flex-shrink: 0;
+
+  &:hover { background: var(--color-border); color: var(--color-text); }
+}
