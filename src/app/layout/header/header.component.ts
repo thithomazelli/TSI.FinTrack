@@ -1,29 +1,41 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { LanguageService } from '../../core/services/language.service';
-import { Language } from '../../core/models/enums/language.enum';
+import { filter, map, startWith } from 'rxjs';
+
+const ROUTE_TITLES: Record<string, string> = {
+  '/dashboard':    'Dashboard',
+  '/entries':      'Entradas',
+  '/transactions': 'Transações',
+  '/credit-cards': 'Cartões de Crédito',
+  '/savings':      'Poupança',
+  '/goals':        'Metas',
+  '/reports':      'Relatórios',
+  '/import':       'Importar',
+  '/settings':     'Configurações',
+};
 
 @Component({
   selector: 'tsi-header',
   standalone: true,
-  imports: [AsyncPipe, TranslatePipe],
+  imports: [AsyncPipe],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
-  readonly languageService = inject(LanguageService);
+  private readonly router = inject(Router);
+
   readonly session$ = this.authService.session$;
-  readonly Language = Language;
+
+  get pageTitle(): string {
+    const url = this.router.url.split('?')[0];
+    return ROUTE_TITLES[url] ?? 'TSI FinTrack';
+  }
 
   signOut(): void {
     this.authService.signOut().subscribe();
-  }
-
-  setLanguage(lang: Language): void {
-    this.languageService.setLanguage(lang);
   }
 }

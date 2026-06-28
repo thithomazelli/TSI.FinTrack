@@ -1,75 +1,83 @@
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-down { animation: fadeInDown 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
 .header {
   height: 60px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 1.5rem;
   position: fixed;
   top: 0;
-  left: 220px;
+  left: 230px;
   right: 0;
   z-index: 100;
+  transition: background var(--transition), border-color var(--transition);
+  backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
 }
 
-.header-title {
+.breadcrumb {
+  font-size: 0.95rem;
   font-weight: 600;
-  font-size: 16px;
-  color: #1a1a2e;
+  color: var(--color-text);
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
 }
 
-.header-email {
-  font-size: 14px;
-  color: #666;
-}
-
-.lang-switcher {
+.user-info {
   display: flex;
-  gap: 2px;
-  background: #f3f4f6;
-  border-radius: 6px;
-  padding: 2px;
+  align-items: center;
+  gap: 0.6rem;
 }
 
-.lang-btn {
-  background: none;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  color: #6b7280;
-  transition: all 0.15s;
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
 
-  &.active {
-    background: #fff;
-    color: #1a1a2e;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
+.user-email {
+  font-size: 0.85rem;
+  color: var(--color-text-2);
 
-  &:hover:not(.active) {
-    color: #374151;
-  }
+  @media (max-width: 640px) { display: none; }
 }
 
 .btn-signout {
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.82rem;
+  color: var(--color-text-2);
   cursor: pointer;
-  color: #374151;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
 
   &:hover {
-    background: #f3f4f6;
+    background: var(--color-surface-2);
+    color: var(--color-danger);
+    border-color: var(--color-danger);
   }
 }

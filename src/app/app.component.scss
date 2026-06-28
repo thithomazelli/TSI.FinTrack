@@ -1,5 +1,5 @@
 .main-layout {
-  margin-left: 220px;
+  margin-left: 230px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -8,5 +8,6 @@
 .main-content {
   margin-top: 60px;
   flex: 1;
-  background: #f9fafb;
+  background: var(--color-bg);
+  transition: background var(--transition);
 }

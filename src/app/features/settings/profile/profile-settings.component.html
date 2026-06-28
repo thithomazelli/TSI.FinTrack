@@ -1,39 +1,63 @@
 <div class="page">
-  <div class="page-header">
-    <h2>{{ 'settings.profile' | translate }}</h2>
-  </div>
+  <h2 class="page-title">Perfil</h2>
 
   @if (loading()) {
-    <p class="loading-text">{{ 'common.loading' | translate }}</p>
-  } @else if (profile()) {
-    <div class="profile-card">
-      @if (profile()!.avatarUrl) {
-        <img class="avatar" [src]="profile()!.avatarUrl!" alt="avatar" />
-      } @else {
-        <div class="avatar-placeholder">
-          {{ (profile()!.fullName || profile()!.email)[0].toUpperCase() }}
-        </div>
-      }
-
-      <div class="profile-email">{{ profile()!.email }}</div>
-    </div>
-
-    <div class="form-section">
-      <div class="form-field">
-        <label>{{ 'common.name' | translate }}</label>
-        <input class="input" type="text"
-          [value]="formName()"
-          (input)="formName.set($any($event.target).value)" />
+    <p class="loading-text">Carregando...</p>
+  } @else {
+    <!-- Profile form -->
+    <section class="settings-section">
+      <h3 class="section-title">Dados pessoais</h3>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" [value]="email()" disabled />
       </div>
-
+      <div class="form-group">
+        <label class="form-label">Nome de exibição</label>
+        <input class="form-input" type="text" [ngModel]="fullName()" (ngModelChange)="fullName.set($event)" placeholder="Seu nome" />
+      </div>
       <div class="form-actions">
-        @if (saved()) {
-          <span class="saved-msg">{{ 'common.success.saved' | translate }}</span>
-        }
-        <button class="btn btn-primary" [disabled]="saving() || !formName()" (click)="save()">
-          {{ 'common.save' | translate }}
+        <button class="btn btn-primary" (click)="saveProfile()" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar' }}
         </button>
+        @if (saved()) {
+          <span class="save-feedback">Salvo!</span>
+        }
       </div>
-    </div>
+    </section>
+
+    <!-- Telegram section -->
+    <section class="settings-section">
+      <h3 class="section-title">Telegram</h3>
+
+      @if (telegramLoading()) {
+        <p class="loading-text">Carregando...</p>
+      } @else if (telegramSub()) {
+        <div class="telegram-connected">
+          <span class="connected-badge">Conectado</span>
+          <p class="telegram-info">Seu Telegram está vinculado. Você receberá notificações de faturas, metas e resumos mensais.</p>
+          <div class="form-group toggle-row">
+            <label class="form-label">Notificações</label>
+            <button class="toggle-btn" [class.active]="telegramNotifications()" (click)="toggleNotifications()">
+              {{ telegramNotifications() ? 'Ativadas' : 'Desativadas' }}
+            </button>
+          </div>
+          <button class="btn btn-danger-outline" (click)="disconnectTelegram()">Desconectar Telegram</button>
+        </div>
+      } @else {
+        <p class="telegram-info">Conecte seu Telegram para receber alertas de vencimentos, metas ultrapassadas e resumos mensais diretamente no seu celular.</p>
+
+        @if (telegramLinkUrl()) {
+          <div class="link-box">
+            <p>Clique no link abaixo para abrir o bot e ativar as notificações:</p>
+            <a class="telegram-link" [href]="telegramLinkUrl()!" target="_blank" rel="noopener">
+              Abrir no Telegram
+            </a>
+            <p class="link-note">O link expira após o primeiro uso.</p>
+          </div>
+        } @else {
+          <button class="btn btn-primary" (click)="generateTelegramLink()">Conectar Telegram</button>
+        }
+      }
+    </section>
   }
 </div>
