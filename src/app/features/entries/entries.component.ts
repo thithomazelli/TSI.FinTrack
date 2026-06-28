@@ -13,6 +13,7 @@ import { EntryService, CreateEntryPayload } from '../../core/services/entry.serv
 import { AccountService } from '../../core/services/account.service';
 import { DomainListService } from '../../core/services/domain-list.service';
 import { LoggingService } from '../../core/services/logging.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { Entry } from '../../core/models/interfaces/entry.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { DomainList } from '../../core/models/interfaces/domain-list.interface';
@@ -32,6 +33,7 @@ export class EntriesComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly domainListService = inject(DomainListService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly entries = signal<Entry[]>([]);
   readonly accounts = signal<Account[]>([]);
@@ -74,6 +76,7 @@ export class EntriesComponent implements OnInit {
         error: err => {
           this.logger.error('Failed to load entries', err);
           this.loading.set(false);
+          this.toast.error('Erro ao carregar entradas.');
         },
       });
   }
@@ -133,8 +136,10 @@ export class EntriesComponent implements OnInit {
       next: saved => {
         if (id) {
           this.entries.update(list => list.map(e => (e.id === id ? saved : e)));
+          this.toast.success('Entrada atualizada com sucesso!');
         } else {
           this.load();
+          this.toast.success('Entrada adicionada com sucesso!');
         }
         this.saving.set(false);
         this.closeForm();
@@ -142,14 +147,21 @@ export class EntriesComponent implements OnInit {
       error: err => {
         this.logger.error('Failed to save entry', err);
         this.saving.set(false);
+        this.toast.error('Erro ao salvar entrada.');
       },
     });
   }
 
   delete(entry: Entry): void {
     this.entryService.delete(entry.id).subscribe({
-      next: () => this.entries.update(list => list.filter(e => e.id !== entry.id)),
-      error: err => this.logger.error('Failed to delete entry', err),
+      next: () => {
+        this.entries.update(list => list.filter(e => e.id !== entry.id));
+        this.toast.success('Entrada excluída.');
+      },
+      error: err => {
+        this.logger.error('Failed to delete entry', err);
+        this.toast.error('Erro ao excluir entrada.');
+      },
     });
   }
 

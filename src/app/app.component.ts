@@ -5,11 +5,12 @@ import { AuthService } from './core/auth/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { HeaderComponent } from './layout/header/header.component';
+import { ToastComponent } from './shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AsyncPipe, SidebarComponent, HeaderComponent],
+  imports: [RouterOutlet, AsyncPipe, SidebarComponent, HeaderComponent, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

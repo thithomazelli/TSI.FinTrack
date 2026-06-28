@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { FamilyService, FamilyInvite } from '../../../core/services/family.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { FamilyMember } from '../../../core/models/interfaces/family-member.interface';
 import { FamilyRole } from '../../../core/models/enums/family-role.enum';
 
@@ -23,6 +24,7 @@ import { FamilyRole } from '../../../core/models/enums/family-role.enum';
 export class FamilySettingsComponent implements OnInit {
   private readonly familyService = inject(FamilyService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly FamilyRole = FamilyRole;
 
@@ -74,11 +76,13 @@ export class FamilySettingsComponent implements OnInit {
     this.familyService.invite(email, this.formRole()).subscribe({
       next: (invite) => {
         this.invites.update((list) => [invite, ...list]);
+        this.toast.success('Membro convidado com sucesso!');
         this.saving.set(false);
         this.closeForm();
       },
       error: (err) => {
         this.logger.error('Failed to send invite', err);
+        this.toast.error('Erro ao enviar convite.');
         this.saving.set(false);
       },
     });
@@ -86,26 +90,43 @@ export class FamilySettingsComponent implements OnInit {
 
   updateRole(member: FamilyMember, role: FamilyRole): void {
     this.familyService.updateMemberRole(member.id, role).subscribe({
-      next: (updated) =>
+      next: (updated) => {
         this.members.update((list) =>
           list.map((m) => (m.id === updated.id ? { ...m, role: updated.role } : m))
-        ),
-      error: (err) => this.logger.error('Failed to update role', err),
+        );
+        this.toast.success('Membro atualizado com sucesso!');
+      },
+      error: (err) => {
+        this.logger.error('Failed to update role', err);
+        this.toast.error('Erro ao atualizar membro.');
+      },
     });
   }
 
   revoke(member: FamilyMember): void {
     if (!confirm('')) return;
     this.familyService.revokeMember(member.id).subscribe({
-      next: () => this.members.update((list) => list.filter((m) => m.id !== member.id)),
-      error: (err) => this.logger.error('Failed to revoke member', err),
+      next: () => {
+        this.members.update((list) => list.filter((m) => m.id !== member.id));
+        this.toast.success('Membro excluído.');
+      },
+      error: (err) => {
+        this.logger.error('Failed to revoke member', err);
+        this.toast.error('Erro ao remover membro.');
+      },
     });
   }
 
   cancelInvite(invite: FamilyInvite): void {
     this.familyService.cancelInvite(invite.id).subscribe({
-      next: () => this.invites.update((list) => list.filter((i) => i.id !== invite.id)),
-      error: (err) => this.logger.error('Failed to cancel invite', err),
+      next: () => {
+        this.invites.update((list) => list.filter((i) => i.id !== invite.id));
+        this.toast.success('Convite excluído.');
+      },
+      error: (err) => {
+        this.logger.error('Failed to cancel invite', err);
+        this.toast.error('Erro ao cancelar convite.');
+      },
     });
   }
 }

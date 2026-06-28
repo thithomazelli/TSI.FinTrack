@@ -14,6 +14,7 @@ import { CategoryService } from '../../core/services/category.service';
 import { AccountService } from '../../core/services/account.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { LoggingService } from '../../core/services/logging.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { Category } from '../../core/models/interfaces/category.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
@@ -36,6 +37,7 @@ export class TransactionsComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly cardService = inject(CreditCardService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly TransactionStatus = TransactionStatus;
 
@@ -102,6 +104,7 @@ export class TransactionsComponent implements OnInit {
         error: err => {
           this.logger.error('Failed to load transactions', err);
           this.loading.set(false);
+          this.toast.error('Erro ao carregar transações.');
         },
       });
   }
@@ -183,22 +186,26 @@ export class TransactionsComponent implements OnInit {
           this.transactions.update(list => list.map(t => (t.id === id ? saved : t)));
           this.saving.set(false);
           this.closeForm();
+          this.toast.success('Transação atualizada com sucesso!');
         },
         error: err => {
           this.logger.error('Failed to update transaction', err);
           this.saving.set(false);
+          this.toast.error('Erro ao atualizar transação.');
         },
       });
     } else {
       this.transactionService.create(payload).subscribe({
-        next: saved => {
+        next: () => {
           this.load();
           this.saving.set(false);
           this.closeForm();
+          this.toast.success('Transação adicionada com sucesso!');
         },
         error: err => {
           this.logger.error('Failed to create transaction', err);
           this.saving.set(false);
+          this.toast.error('Erro ao criar transação.');
         },
       });
     }
@@ -206,8 +213,14 @@ export class TransactionsComponent implements OnInit {
 
   delete(tx: Transaction): void {
     this.transactionService.delete(tx.id).subscribe({
-      next: () => this.transactions.update(list => list.filter(t => t.id !== tx.id)),
-      error: err => this.logger.error('Failed to delete transaction', err),
+      next: () => {
+        this.transactions.update(list => list.filter(t => t.id !== tx.id));
+        this.toast.success('Transação excluída.');
+      },
+      error: err => {
+        this.logger.error('Failed to delete transaction', err);
+        this.toast.error('Erro ao excluir transação.');
+      },
     });
   }
 

@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { Category } from '../../../core/models/interfaces/category.interface';
 
 const DEFAULT_COLOR = '#6366f1';
@@ -24,6 +25,7 @@ const DEFAULT_COLOR = '#6366f1';
 export class CategoriesSettingsComponent implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly categories = signal<Category[]>([]);
   readonly loading = signal(false);
@@ -88,11 +90,13 @@ export class CategoriesSettingsComponent implements OnInit {
             ? list.map(c => (c.id === id ? saved : c))
             : [...list, saved].sort((a, b) => a.name.localeCompare(b.name))
         );
+        this.toast.success(id ? 'Categoria atualizada com sucesso!' : 'Categoria criada com sucesso!');
         this.saving.set(false);
         this.closeForm();
       },
       error: err => {
         this.logger.error('Failed to save category', err);
+        this.toast.error('Erro ao salvar categoria.');
         this.saving.set(false);
       },
     });
@@ -100,8 +104,14 @@ export class CategoriesSettingsComponent implements OnInit {
 
   delete(cat: Category): void {
     this.categoryService.delete(cat.id).subscribe({
-      next: () => this.categories.update(list => list.filter(c => c.id !== cat.id)),
-      error: err => this.logger.error('Failed to delete category', err),
+      next: () => {
+        this.categories.update(list => list.filter(c => c.id !== cat.id));
+        this.toast.success('Categoria excluída.');
+      },
+      error: err => {
+        this.logger.error('Failed to delete category', err);
+        this.toast.error('Erro ao excluir categoria.');
+      },
     });
   }
 }

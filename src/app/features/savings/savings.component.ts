@@ -13,6 +13,7 @@ import { SavingsService } from '../../core/services/savings.service';
 import { DomainListService } from '../../core/services/domain-list.service';
 import { AccountService } from '../../core/services/account.service';
 import { LoggingService } from '../../core/services/logging.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { SavingsMovement } from '../../core/models/interfaces/savings-movement.interface';
 import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
@@ -30,6 +31,7 @@ export class SavingsComponent implements OnInit {
   private readonly domainService = inject(DomainListService);
   private readonly accountService = inject(AccountService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly movements = signal<SavingsMovement[]>([]);
   readonly types = signal<DomainList[]>([]);
@@ -111,10 +113,12 @@ export class SavingsComponent implements OnInit {
           this.movements.update((list) => [movement, ...list]);
           this.saving.set(false);
           this.closeForm();
+          this.toast.success('Movimentação registrada com sucesso!');
         },
         error: (err) => {
           this.logger.error('Failed to save movement', err);
           this.saving.set(false);
+          this.toast.error('Erro ao registrar movimentação.');
         },
       });
   }
@@ -126,10 +130,12 @@ export class SavingsComponent implements OnInit {
       next: () => {
         this.movements.update((list) => list.filter((m) => m.id !== id));
         this.deletingId.set(null);
+        this.toast.success('Movimentação excluída.');
       },
       error: (err) => {
         this.logger.error('Failed to delete movement', err);
         this.deletingId.set(null);
+        this.toast.error('Erro ao excluir movimentação.');
       },
     });
   }

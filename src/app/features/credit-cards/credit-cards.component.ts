@@ -11,6 +11,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CreditCardBillService } from '../../core/services/credit-card-bill.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { LoggingService } from '../../core/services/logging.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { CreditCardBill } from '../../core/models/interfaces/credit-card-bill.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { BillStatus } from '../../core/models/enums/bill-status.enum';
@@ -32,6 +33,7 @@ export class CreditCardsComponent implements OnInit {
   private readonly billService = inject(CreditCardBillService);
   private readonly cardService = inject(CreditCardService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly BillStatus = BillStatus;
 
@@ -88,10 +90,12 @@ export class CreditCardsComponent implements OnInit {
           list.map((b) => (b.id === updated.id ? { ...b, ...updated } : b))
         );
         this.updatingId.set(null);
+        this.toast.success('Status da fatura atualizado.');
       },
       error: (err) => {
         this.logger.error('Failed to update bill status', err);
         this.updatingId.set(null);
+        this.toast.error('Erro ao atualizar status da fatura.');
       },
     });
   }

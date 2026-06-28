@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DomainListService } from '../../../core/services/domain-list.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { DomainList } from '../../../core/models/interfaces/domain-list.interface';
 
 @Component({
@@ -23,6 +24,7 @@ import { DomainList } from '../../../core/models/interfaces/domain-list.interfac
 export class DomainsSettingsComponent implements OnInit {
   private readonly domainListService = inject(DomainListService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly allItems = signal<DomainList[]>([]);
   readonly loading = signal(false);
@@ -95,11 +97,13 @@ export class DomainsSettingsComponent implements OnInit {
       .subscribe({
         next: saved => {
           this.allItems.update(list => list.map(i => (i.id === id ? saved : i)));
+          this.toast.success('Domínio atualizado com sucesso!');
           this.saving.set(false);
           this.closeForm();
         },
         error: err => {
           this.logger.error('Failed to update domain list item', err);
+          this.toast.error('Erro ao atualizar domínio.');
           this.saving.set(false);
         },
       });
@@ -108,8 +112,14 @@ export class DomainsSettingsComponent implements OnInit {
   delete(item: DomainList): void {
     if (item.isSystem) return;
     this.domainListService.delete(item.id).subscribe({
-      next: () => this.allItems.update(list => list.filter(i => i.id !== item.id)),
-      error: err => this.logger.error('Failed to delete domain list item', err),
+      next: () => {
+        this.allItems.update(list => list.filter(i => i.id !== item.id));
+        this.toast.success('Domínio excluído.');
+      },
+      error: err => {
+        this.logger.error('Failed to delete domain list item', err);
+        this.toast.error('Erro ao excluir domínio.');
+      },
     });
   }
 }

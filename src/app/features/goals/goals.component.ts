@@ -13,6 +13,7 @@ import { GoalService } from '../../core/services/goal.service';
 import { CategoryService } from '../../core/services/category.service';
 import { TransactionService } from '../../core/services/transaction.service';
 import { LoggingService } from '../../core/services/logging.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { Goal } from '../../core/models/interfaces/goal.interface';
 import { Category } from '../../core/models/interfaces/category.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
@@ -40,6 +41,7 @@ export class GoalsComponent implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly transactionService = inject(TransactionService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly goals = signal<Goal[]>([]);
   readonly categories = signal<Category[]>([]);
@@ -161,10 +163,12 @@ export class GoalsComponent implements OnInit {
           });
           this.saving.set(false);
           this.closeForm();
+          this.toast.success('Meta salva com sucesso!');
         },
         error: (err) => {
           this.logger.error('Failed to save goal', err);
           this.saving.set(false);
+          this.toast.error('Erro ao salvar meta.');
         },
       });
   }
@@ -172,8 +176,14 @@ export class GoalsComponent implements OnInit {
   deleteGoal(id: string): void {
     if (!confirm('')) return;
     this.goalService.delete(id).subscribe({
-      next: () => this.goals.update((list) => list.filter((g) => g.id !== id)),
-      error: (err) => this.logger.error('Failed to delete goal', err),
+      next: () => {
+        this.goals.update((list) => list.filter((g) => g.id !== id));
+        this.toast.success('Meta excluída.');
+      },
+      error: (err) => {
+        this.logger.error('Failed to delete goal', err);
+        this.toast.error('Erro ao excluir meta.');
+      },
     });
   }
 }

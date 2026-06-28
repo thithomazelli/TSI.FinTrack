@@ -11,6 +11,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AccountService } from '../../../core/services/account.service';
 import { DomainListService } from '../../../core/services/domain-list.service';
 import { LoggingService } from '../../../core/services/logging.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { Account } from '../../../core/models/interfaces/account.interface';
 import { DomainList } from '../../../core/models/interfaces/domain-list.interface';
 
@@ -26,6 +27,7 @@ export class AccountsSettingsComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly domainListService = inject(DomainListService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
 
   readonly accounts = signal<Account[]>([]);
   readonly accountTypes = signal<DomainList[]>([]);
@@ -102,11 +104,13 @@ export class AccountsSettingsComponent implements OnInit {
         this.accounts.update(list =>
           id ? list.map(a => (a.id === id ? saved : a)) : [...list, saved]
         );
+        this.toast.success(id ? 'Conta atualizada com sucesso!' : 'Conta criada com sucesso!');
         this.saving.set(false);
         this.closeForm();
       },
       error: err => {
         this.logger.error('Failed to save account', err);
+        this.toast.error('Erro ao salvar conta.');
         this.saving.set(false);
       },
     });
@@ -114,15 +118,27 @@ export class AccountsSettingsComponent implements OnInit {
 
   archive(account: Account): void {
     this.accountService.archive(account.id).subscribe({
-      next: () => this.load(),
-      error: err => this.logger.error('Failed to archive account', err),
+      next: () => {
+        this.toast.success('Conta excluída.');
+        this.load();
+      },
+      error: err => {
+        this.logger.error('Failed to archive account', err);
+        this.toast.error('Erro ao arquivar conta.');
+      },
     });
   }
 
   restore(account: Account): void {
     this.accountService.restore(account.id).subscribe({
-      next: () => this.load(),
-      error: err => this.logger.error('Failed to restore account', err),
+      next: () => {
+        this.toast.success('Conta restaurada com sucesso!');
+        this.load();
+      },
+      error: err => {
+        this.logger.error('Failed to restore account', err);
+        this.toast.error('Erro ao restaurar conta.');
+      },
     });
   }
 
