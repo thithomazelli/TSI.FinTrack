@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
+import { ThemeService } from './core/services/theme.service';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { HeaderComponent } from './layout/header/header.component';
 
@@ -15,5 +16,6 @@ import { HeaderComponent } from './layout/header/header.component';
 })
 export class AppComponent {
   private readonly authService = inject(AuthService);
+  readonly _theme = inject(ThemeService);
   readonly session$ = this.authService.session$;
 }

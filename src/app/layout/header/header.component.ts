@@ -1,6 +1,20 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
+import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { filter, map, startWith } from 'rxjs';
+
+const ROUTE_TITLES: Record<string, string> = {
+  '/dashboard':    'Dashboard',
+  '/entries':      'Entradas',
+  '/transactions': 'Transações',
+  '/credit-cards': 'Cartões de Crédito',
+  '/savings':      'Poupança',
+  '/goals':        'Metas',
+  '/reports':      'Relatórios',
+  '/import':       'Importar',
+  '/settings':     'Configurações',
+};
 
 @Component({
   selector: 'tsi-header',
@@ -12,7 +26,14 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   readonly session$ = this.authService.session$;
+
+  get pageTitle(): string {
+    const url = this.router.url.split('?')[0];
+    return ROUTE_TITLES[url] ?? 'TSI FinTrack';
+  }
 
   signOut(): void {
     this.authService.signOut().subscribe();
