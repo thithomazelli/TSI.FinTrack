@@ -42,6 +42,9 @@
               <td>
                 <div class="entry-desc">
                   <span>{{ entry.description }}</span>
+                  @if (entry.status === 'PROJECTED') {
+                    <span class="status-badge status-badge--projected">Projetado</span>
+                  }
                   @if (entry.labels.length > 0) {
                     @for (l of entry.labels; track l) {
                       <span class="label-chip">{{ l }}</span>

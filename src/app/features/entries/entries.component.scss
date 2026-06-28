@@ -64,3 +64,15 @@
   padding: 1px 6px;
   border-radius: 99px;
 }
+
+.status-badge {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+
+  &--projected {
+    background: color-mix(in srgb, #f59e0b 15%, var(--color-surface));
+    color: #f59e0b;
+  }
+}
