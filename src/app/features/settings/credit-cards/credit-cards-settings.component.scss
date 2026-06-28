@@ -3,13 +3,6 @@
   gap: 10px;
 }
 
-.item-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
 .last-four {
   font-size: 12px;
   color: #9ca3af;
@@ -17,8 +10,175 @@
   font-weight: 400;
 }
 
+/* ── local modal styles (global doesn't penetrate encapsulation) ── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 200;
+  animation: fadeIn 0.2s ease both;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 201;
+  width: min(520px, calc(100vw - 2rem));
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+  overflow-y: auto;
+  max-height: calc(100vh - 4rem);
+
+  &--sm { width: min(380px, calc(100vw - 2rem)); }
+
+  @media (max-width: 480px) {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 90vh;
+    animation: slideUp 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  color: var(--color-text);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
 .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  @media (max-width: 480px) { flex-direction: column; }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+
+  label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-2);
+  }
+
+  &--sm { flex: 0 0 140px; }
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  &:focus { outline: none; border-color: var(--color-accent); }
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: #dc2626; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.confirm-msg {
+  color: var(--color-text);
+  line-height: 1.6;
+  margin-bottom: 0.25rem;
+}
+
+@keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes scaleIn { from { opacity: 0; transform: translate(-50%, -48%) scale(0.96) } to { opacity: 1; transform: translate(-50%, -50%) scale(1) } }
+@keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-2);
+    padding: 0 12px 10px;
+    border-bottom: 1px solid var(--color-border);
+    &.th-right { text-align: right; }
+  }
+
+  tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.12s;
+    &:last-child { border-bottom: none; }
+    &:hover { background: var(--color-bg); }
+  }
+
+  td { padding: 10px 12px; vertical-align: middle; }
+}
+
+.td-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+
+  & + & { margin-left: 6px; }
+  &:hover { background: var(--color-bg); color: var(--color-text); }
+  &--danger:hover {
+    background: color-mix(in srgb, #ef4444 10%, transparent);
+    color: #ef4444;
+    border-color: #ef4444;
+  }
 }

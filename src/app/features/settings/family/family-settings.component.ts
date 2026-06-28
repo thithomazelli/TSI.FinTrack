@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { FamilyService, FamilyInvite } from '../../../core/services/family.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -16,7 +15,7 @@ import { FamilyRole } from '../../../core/models/enums/family-role.enum';
 @Component({
   selector: 'tsi-family-settings',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule],
   templateUrl: './family-settings.component.html',
   styleUrls: ['./family-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +32,7 @@ export class FamilySettingsComponent implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly showForm = signal(false);
+  readonly deletingItem = signal<FamilyMember | null>(null);
 
   readonly formEmail = signal('');
   readonly formRole = signal<FamilyRole>(FamilyRole.Viewer);
@@ -103,16 +103,29 @@ export class FamilySettingsComponent implements OnInit {
     });
   }
 
-  revoke(member: FamilyMember): void {
-    if (!confirm('')) return;
+  confirmDelete(member: FamilyMember): void {
+    this.deletingItem.set(member);
+  }
+
+  cancelDelete(): void {
+    this.deletingItem.set(null);
+  }
+
+  revoke(): void {
+    const member = this.deletingItem();
+    if (!member) return;
+    this.saving.set(true);
     this.familyService.revokeMember(member.id).subscribe({
       next: () => {
         this.members.update((list) => list.filter((m) => m.id !== member.id));
-        this.toast.success('Membro excluído.');
+        this.toast.success('Membro removido.');
+        this.deletingItem.set(null);
+        this.saving.set(false);
       },
       error: (err) => {
         this.logger.error('Failed to revoke member', err);
         this.toast.error('Erro ao remover membro.');
+        this.saving.set(false);
       },
     });
   }
@@ -121,7 +134,7 @@ export class FamilySettingsComponent implements OnInit {
     this.familyService.cancelInvite(invite.id).subscribe({
       next: () => {
         this.invites.update((list) => list.filter((i) => i.id !== invite.id));
-        this.toast.success('Convite excluído.');
+        this.toast.success('Convite cancelado.');
       },
       error: (err) => {
         this.logger.error('Failed to cancel invite', err);

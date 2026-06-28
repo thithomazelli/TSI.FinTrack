@@ -1,7 +1,7 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <p class="page-subtitle">{{ 'domains.subtitle' | translate }}</p>
+      <p class="page-subtitle">Gerencie os valores de domínio utilizados no sistema.</p>
     </div>
   </div>
 
@@ -21,64 +21,62 @@
   </div>
 
   @if (loading()) {
-    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+    <p class="state-msg">Carregando...</p>
   } @else {
-    <div class="table-wrap">
-      <table>
-        <thead>
+    <table class="settings-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Valor</th>
+          <th>Sistema</th>
+          <th class="th-right td-actions">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of filteredItems(); track item.id) {
           <tr>
-            <th>{{ 'domains.code' | translate }}</th>
-            <th>{{ 'common.name' | translate }}</th>
-            <th>{{ 'domains.value' | translate }}</th>
-            <th>{{ 'domains.isSystem' | translate }}</th>
-            <th>{{ 'common.actions' | translate }}</th>
+            <td><code class="code-chip">{{ item.code }}</code></td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.value }}</td>
+            <td>
+              @if (item.isSystem) {
+                <span class="badge badge-system">Sistema</span>
+              }
+            </td>
+            <td class="td-actions">
+              <button class="btn-action" (click)="openEdit(item)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+              </button>
+              @if (!item.isSystem) {
+                <button class="btn-action btn-action--danger" (click)="confirmDelete(item)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                  Excluir
+                </button>
+              }
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          @for (item of filteredItems(); track item.id) {
-            <tr>
-              <td><code class="code-chip">{{ item.code }}</code></td>
-              <td>{{ item.name }}</td>
-              <td>{{ item.value }}</td>
-              <td>
-                @if (item.isSystem) {
-                  <span class="badge badge-system">{{ 'domains.isSystem' | translate }}</span>
-                }
-              </td>
-              <td>
-                <div class="item-actions">
-                  <button class="btn btn-ghost btn-sm" (click)="openEdit(item)">
-                    {{ 'common.edit' | translate }}
-                  </button>
-                  @if (!item.isSystem) {
-                    <button class="btn btn-danger-ghost btn-sm" (click)="delete(item)">
-                      {{ 'common.delete' | translate }}
-                    </button>
-                  }
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+        }
+      </tbody>
+    </table>
   }
 </div>
 
 @if (showForm()) {
-  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="backdrop" (click)="closeForm()"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ 'domains.edit' | translate }}</h3>
+    <h3 class="modal-title">Editar Domínio</h3>
     @if (editingId()) {
-      <p class="system-hint">{{ 'domains.systemHint' | translate }}</p>
+      <p class="system-hint">Itens de sistema têm nome editável mas valor e código são fixos.</p>
     }
     <div class="form-field">
-      <label>{{ 'common.name' | translate }}</label>
+      <label>Nome</label>
       <input class="input" [(ngModel)]="formName" />
     </div>
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.color' | translate }}</label>
+        <label>Cor</label>
         <input class="input input-color" type="color" [(ngModel)]="formColor" />
       </div>
       <div class="form-field">
@@ -87,16 +85,29 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" (click)="closeForm()">
-        {{ 'common.cancel' | translate }}
-      </button>
+      <button class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
       <button
         class="btn btn-primary"
         (click)="save()"
         [disabled]="saving() || !formName.trim()"
       >
-        {{ 'common.save' | translate }}
+        {{ saving() ? 'Salvando...' : 'Salvar' }}
       </button>
+    </div>
+  </div>
+}
+
+@if (deletingItem()) {
+  <div class="backdrop" (click)="cancelDelete()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">Excluir domínio</h3>
+    <p class="confirm-msg">
+      Tem certeza que deseja excluir <strong>{{ deletingItem()!.name }}</strong>?
+      Esta ação não pode ser desfeita.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
+      <button class="btn-danger" (click)="delete()" [disabled]="saving()">Excluir</button>
     </div>
   </div>
 }

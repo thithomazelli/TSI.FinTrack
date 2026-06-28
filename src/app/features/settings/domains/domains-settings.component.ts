@@ -7,7 +7,6 @@ import {
   computed,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { DomainListService } from '../../../core/services/domain-list.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -16,7 +15,7 @@ import { DomainList } from '../../../core/models/interfaces/domain-list.interfac
 @Component({
   selector: 'tsi-domains-settings',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule],
   templateUrl: './domains-settings.component.html',
   styleUrls: ['./domains-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +31,7 @@ export class DomainsSettingsComponent implements OnInit {
   readonly editingId = signal<string | null>(null);
   readonly showForm = signal(false);
   readonly selectedCode = signal<string | null>(null);
+  readonly deletingItem = signal<DomainList | null>(null);
 
   readonly codes = computed(() =>
     [...new Set(this.allItems().map(i => i.code))]
@@ -109,16 +109,30 @@ export class DomainsSettingsComponent implements OnInit {
       });
   }
 
-  delete(item: DomainList): void {
+  confirmDelete(item: DomainList): void {
     if (item.isSystem) return;
+    this.deletingItem.set(item);
+  }
+
+  cancelDelete(): void {
+    this.deletingItem.set(null);
+  }
+
+  delete(): void {
+    const item = this.deletingItem();
+    if (!item) return;
+    this.saving.set(true);
     this.domainListService.delete(item.id).subscribe({
       next: () => {
         this.allItems.update(list => list.filter(i => i.id !== item.id));
         this.toast.success('Domínio excluído.');
+        this.deletingItem.set(null);
+        this.saving.set(false);
       },
       error: err => {
         this.logger.error('Failed to delete domain list item', err);
         this.toast.error('Erro ao excluir domínio.');
+        this.saving.set(false);
       },
     });
   }
