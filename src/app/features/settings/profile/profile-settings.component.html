@@ -1,3 +1,39 @@
 <div class="page">
-  <h2 class="page-title">Perfil</h2>
+  <div class="page-header">
+    <h2>{{ 'settings.profile' | translate }}</h2>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else if (profile()) {
+    <div class="profile-card">
+      @if (profile()!.avatarUrl) {
+        <img class="avatar" [src]="profile()!.avatarUrl!" alt="avatar" />
+      } @else {
+        <div class="avatar-placeholder">
+          {{ (profile()!.fullName || profile()!.email)[0].toUpperCase() }}
+        </div>
+      }
+
+      <div class="profile-email">{{ profile()!.email }}</div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-field">
+        <label>{{ 'common.name' | translate }}</label>
+        <input class="input" type="text"
+          [value]="formName()"
+          (input)="formName.set($any($event.target).value)" />
+      </div>
+
+      <div class="form-actions">
+        @if (saved()) {
+          <span class="saved-msg">{{ 'common.success.saved' | translate }}</span>
+        }
+        <button class="btn btn-primary" [disabled]="saving() || !formName()" (click)="save()">
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  }
 </div>

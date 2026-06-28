@@ -1,1 +1,24 @@
+.family-section {
+  margin-bottom: 2rem;
+}
 
+.section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+  margin: 0 0 0.75rem;
+}
+
+.input-sm {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+.loading-text,
+.no-results {
+  color: #888;
+  text-align: center;
+  padding: 2rem;
+}

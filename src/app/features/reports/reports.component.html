@@ -1,3 +1,51 @@
 <div class="page">
-  <h2 class="page-title">Relatórios</h2>
+  <div class="page-header">
+    <h2>{{ 'reports.title' | translate }}</h2>
+    <div class="filters">
+      <label>{{ 'common.year' | translate }}</label>
+      <select class="input" [value]="filterYear()"
+        (change)="filterYear.set(+$any($event.target).value); onYearChange()">
+        @for (y of [currentYear, currentYear - 1, currentYear - 2]; track y) {
+          <option [value]="y">{{ y }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="charts-grid">
+      <div class="chart-card chart-wide">
+        <h3 class="chart-title">Evolução mensal — Entradas × Gastos × Saldo</h3>
+        @if (monthlyPoints().length > 0) {
+          <canvas baseChart
+            [data]="evolutionChartData()"
+            [options]="evolutionChartOptions"
+            type="line">
+          </canvas>
+        }
+      </div>
+
+      @if (categorySpend().length > 0) {
+        <div class="chart-card">
+          <h3 class="chart-title">Gastos por categoria no ano</h3>
+          <canvas baseChart
+            [data]="categoryChartData()"
+            [options]="categoryChartOptions"
+            type="pie">
+          </canvas>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">Ranking de categorias</h3>
+          <canvas baseChart
+            [data]="categoryBarData()"
+            [options]="categoryBarOptions"
+            type="bar">
+          </canvas>
+        </div>
+      }
+    </div>
+  }
 </div>

@@ -1,3 +1,111 @@
 <div class="page">
-  <h2 class="page-title">Família</h2>
+  <div class="page-header">
+    <h2>{{ 'family.title' | translate }}</h2>
+    <button class="btn btn-primary" (click)="openForm()">{{ 'family.invite' | translate }}</button>
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else {
+    @if (members().length > 0) {
+      <section class="family-section">
+        <h3 class="section-title">Membros ativos</h3>
+        <table class="list">
+          <thead>
+            <tr>
+              <th>{{ 'common.name' | translate }}</th>
+              <th>{{ 'family.email' | translate }}</th>
+              <th>{{ 'family.role' | translate }}</th>
+              <th>{{ 'common.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (member of members(); track member.id) {
+              <tr>
+                <td>{{ member.memberProfile?.fullName }}</td>
+                <td>{{ member.memberProfile?.email }}</td>
+                <td>
+                  <select class="input input-sm"
+                    [value]="member.role"
+                    (change)="updateRole(member, $any($event.target).value)">
+                    <option [value]="FamilyRole.Viewer">{{ 'family.viewer' | translate }}</option>
+                    <option [value]="FamilyRole.Editor">{{ 'family.editor' | translate }}</option>
+                  </select>
+                </td>
+                <td>
+                  <button class="btn btn-danger-ghost btn-sm" (click)="revoke(member)">
+                    {{ 'family.revoke' | translate }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+
+    @if (invites().length > 0) {
+      <section class="family-section">
+        <h3 class="section-title">{{ 'family.pending' | translate }}</h3>
+        <table class="list">
+          <thead>
+            <tr>
+              <th>{{ 'family.email' | translate }}</th>
+              <th>{{ 'family.role' | translate }}</th>
+              <th>{{ 'common.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (invite of invites(); track invite.id) {
+              <tr>
+                <td>{{ invite.email }}</td>
+                <td>{{ invite.role }}</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" (click)="cancelInvite(invite)">
+                    {{ 'common.delete' | translate }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+
+    @if (members().length === 0 && invites().length === 0) {
+      <p class="no-results">{{ 'common.noResults' | translate }}</p>
+    }
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">{{ 'family.invite' | translate }}</h3>
+
+      <div class="form-field">
+        <label>{{ 'family.email' | translate }}</label>
+        <input class="input" type="email" autocomplete="email"
+          [value]="formEmail()"
+          (input)="formEmail.set($any($event.target).value)" />
+      </div>
+
+      <div class="form-field">
+        <label>{{ 'family.role' | translate }}</label>
+        <select class="input" [value]="formRole()" (change)="formRole.set($any($event.target).value)">
+          <option [value]="FamilyRole.Viewer">{{ 'family.viewer' | translate }}</option>
+          <option [value]="FamilyRole.Editor">{{ 'family.editor' | translate }}</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+        <button class="btn btn-primary"
+          [disabled]="saving() || !formEmail()"
+          (click)="sendInvite()">
+          {{ 'family.invite' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

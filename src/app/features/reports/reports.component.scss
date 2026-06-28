@@ -1,1 +1,44 @@
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 
+  label {
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .input {
+    width: auto;
+  }
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.chart-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.25rem;
+
+  &.chart-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.chart-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem;
+}
+
+.loading-text {
+  color: #888;
+  text-align: center;
+  padding: 2rem;
+}
