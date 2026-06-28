@@ -1,1 +1,83 @@
+.cat-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem;
+}
 
+.color-dot {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.08);
+  vertical-align: middle;
+}
+
+.cat-name {
+  font-weight: 500;
+}
+
+.text-right { text-align: right; }
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-left: 6px;
+
+  &:hover {
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  &--danger {
+    &:hover {
+      background: color-mix(in srgb, #ef4444 10%, var(--color-surface));
+      color: #ef4444;
+      border-color: #ef4444;
+    }
+  }
+}
+
+.input--color {
+  height: 40px;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.state-msg {
+  color: var(--color-text-2);
+  text-align: center;
+  padding: 2rem;
+}
+
+.confirm-msg {
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.modal--sm {
+  width: min(420px, calc(100vw - 2rem));
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: #dc2626; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}

@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -17,7 +16,7 @@ const DEFAULT_COLOR = '#6366f1';
 @Component({
   selector: 'tsi-categories-settings',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule],
   templateUrl: './categories-settings.component.html',
   styleUrls: ['./categories-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +31,7 @@ export class CategoriesSettingsComponent implements OnInit {
   readonly saving = signal(false);
   readonly editingId = signal<string | null>(null);
   readonly showForm = signal(false);
+  readonly deletingCat = signal<Category | null>(null);
 
   formName = '';
   formColor = DEFAULT_COLOR;
@@ -90,7 +90,7 @@ export class CategoriesSettingsComponent implements OnInit {
             ? list.map(c => (c.id === id ? saved : c))
             : [...list, saved].sort((a, b) => a.name.localeCompare(b.name))
         );
-        this.toast.success(id ? 'Categoria atualizada com sucesso!' : 'Categoria criada com sucesso!');
+        this.toast.success(id ? 'Categoria atualizada!' : 'Categoria criada!');
         this.saving.set(false);
         this.closeForm();
       },
@@ -102,15 +102,29 @@ export class CategoriesSettingsComponent implements OnInit {
     });
   }
 
-  delete(cat: Category): void {
+  confirmDelete(cat: Category): void {
+    this.deletingCat.set(cat);
+  }
+
+  cancelDelete(): void {
+    this.deletingCat.set(null);
+  }
+
+  delete(): void {
+    const cat = this.deletingCat();
+    if (!cat) return;
+    this.saving.set(true);
     this.categoryService.delete(cat.id).subscribe({
       next: () => {
         this.categories.update(list => list.filter(c => c.id !== cat.id));
         this.toast.success('Categoria excluída.');
+        this.deletingCat.set(null);
+        this.saving.set(false);
       },
       error: err => {
         this.logger.error('Failed to delete category', err);
         this.toast.error('Erro ao excluir categoria.');
+        this.saving.set(false);
       },
     });
   }
