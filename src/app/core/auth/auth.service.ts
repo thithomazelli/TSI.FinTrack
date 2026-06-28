@@ -37,10 +37,12 @@ export class AuthService {
     return this.sessionSubject.value?.user ?? null;
   }
 
+  private readonly redirectTo = `${window.location.origin}/TSI.FinTrack/`;
+
   signInWithGoogle(): Observable<void> {
     return from(
       this.supabase.client.auth
-        .signInWithOAuth({ provider: 'google' })
+        .signInWithOAuth({ provider: 'google', options: { redirectTo: this.redirectTo } })
         .then(() => undefined)
     );
   }
@@ -48,7 +50,7 @@ export class AuthService {
   signInWithApple(): Observable<void> {
     return from(
       this.supabase.client.auth
-        .signInWithOAuth({ provider: 'apple' })
+        .signInWithOAuth({ provider: 'apple', options: { redirectTo: this.redirectTo } })
         .then(() => undefined)
     );
   }
