@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, output } from '@angular/cor
 import { AsyncPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 const ROUTE_TITLES: Record<string, string> = {
   '/dashboard':    'Dashboard',
@@ -26,6 +27,7 @@ const ROUTE_TITLES: Record<string, string> = {
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  readonly themeService = inject(ThemeService);
 
   readonly session$ = this.authService.session$;
   readonly menuToggle = output<void>();
