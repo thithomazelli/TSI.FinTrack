@@ -1,6 +1,6 @@
 .toast-container {
   position: fixed;
-  bottom: 1.5rem;
+  top: 1.25rem;
   right: 1.5rem;
   z-index: 9999;
   display: flex;
@@ -9,7 +9,7 @@
   pointer-events: none;
 
   @media (max-width: 480px) {
-    bottom: 1rem;
+    top: 1rem;
     right: 1rem;
     left: 1rem;
   }
@@ -50,6 +50,6 @@
 }
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  from { opacity: 0; transform: translateY(-12px) scale(0.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }

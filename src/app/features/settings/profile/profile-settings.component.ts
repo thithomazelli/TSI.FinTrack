@@ -75,7 +75,7 @@ export class ProfileSettingsComponent implements OnInit {
     const user = this.auth.currentUser;
     if (!user) return;
     this.saving.set(true);
-    this.profileService.upsert({ id: user.id, fullName: this.fullName() }).subscribe({
+    this.profileService.upsert({ id: user.id, fullName: this.fullName(), email: user.email ?? '' }).subscribe({
       next: () => {
         this.saving.set(false);
         this.saved.set(true);
