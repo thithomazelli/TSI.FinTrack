@@ -1,0 +1,31 @@
+.month-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 160px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #6b7280;
+  line-height: 1;
+  padding: 0 4px;
+
+  &:hover {
+    color: #1a1a2e;
+  }
+}

@@ -1,3 +1,133 @@
 <div class="page">
-  <h2 class="page-title">Entradas</h2>
+  <div class="page-header">
+    <h2 class="page-title">{{ 'entries.title' | translate }}</h2>
+    <div class="header-right">
+      <tsi-month-picker
+        [year]="year()"
+        [month]="month()"
+        (changed)="onMonthChanged($event)"
+      />
+      <button class="btn btn-primary" (click)="openCreate()">
+        + {{ 'entries.add' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <div class="total-bar">
+    <span class="total-label">Total</span>
+    <span class="total-value">R$ {{ total() | number:'1.2-2' }}</span>
+  </div>
+
+  @if (loading()) {
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+  } @else if (entries().length === 0) {
+    <p class="state-msg">{{ 'common.noResults' | translate }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'common.date' | translate }}</th>
+            <th>{{ 'common.description' | translate }}</th>
+            <th>{{ 'entries.type' | translate }}</th>
+            <th>{{ 'common.account' | translate }}</th>
+            <th class="text-right">{{ 'common.amount' | translate }}</th>
+            <th>{{ 'common.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of entries(); track entry.id) {
+            <tr>
+              <td class="col-date">{{ entry.date }}</td>
+              <td>
+                <div class="entry-desc">
+                  <span>{{ entry.description }}</span>
+                  @if (entry.labels.length > 0) {
+                    @for (l of entry.labels; track l) {
+                      <span class="label-chip">{{ l }}</span>
+                    }
+                  }
+                </div>
+              </td>
+              <td class="col-muted">{{ typeName(entry.typeId) }}</td>
+              <td class="col-muted">{{ accountName(entry.accountId) }}</td>
+              <td class="col-amount text-right">R$ {{ entry.amount | number:'1.2-2' }}</td>
+              <td>
+                <div class="item-actions">
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(entry)">
+                    {{ 'common.edit' | translate }}
+                  </button>
+                  <button class="btn btn-danger-ghost btn-sm" (click)="delete(entry)">
+                    {{ 'common.delete' | translate }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal">
+    <h3 class="modal-title">
+      {{ (editingId() ? 'entries.edit' : 'entries.add') | translate }}
+    </h3>
+
+    <div class="form-field">
+      <label>{{ 'common.description' | translate }}</label>
+      <input class="input" [(ngModel)]="formDescription" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>{{ 'common.amount' | translate }}</label>
+        <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formAmount" />
+      </div>
+      <div class="form-field">
+        <label>{{ 'common.date' | translate }}</label>
+        <input class="input" type="date" [(ngModel)]="formDate" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>{{ 'entries.type' | translate }}</label>
+        <select class="input" [(ngModel)]="formTypeId">
+          <option value="">—</option>
+          @for (type of entryTypes(); track type.id) {
+            <option [value]="type.id">{{ type.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>{{ 'common.account' | translate }}</label>
+        <select class="input" [(ngModel)]="formAccountId">
+          <option value="">—</option>
+          @for (acc of accounts(); track acc.id) {
+            <option [value]="acc.id">{{ acc.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>{{ 'entries.labels' | translate }}</label>
+      <tsi-labels-input [(labels)]="formLabels" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button
+        class="btn btn-primary"
+        (click)="save()"
+        [disabled]="saving() || !formDescription.trim() || formAmount <= 0"
+      >
+        {{ 'common.save' | translate }}
+      </button>
+    </div>
+  </div>
+}

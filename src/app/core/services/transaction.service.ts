@@ -1,0 +1,197 @@
+import { Injectable, inject } from '@angular/core';
+import { Observable, from } from 'rxjs';
+import { SupabaseService } from './supabase.service';
+import { LoggingService } from './logging.service';
+import { AuthService } from '../auth/auth.service';
+import { Transaction } from '../models/interfaces/transaction.interface';
+import { TransactionStatus } from '../models/enums/transaction-status.enum';
+
+const TABLE = 'transactions';
+
+export interface TransactionFilter {
+  year: number;
+  month: number;
+  categoryId?: string;
+  accountId?: string;
+  creditCardId?: string;
+  status?: TransactionStatus;
+}
+
+export interface CreateTransactionPayload {
+  description: string;
+  amount: number;
+  date: string;
+  categoryId: string | null;
+  accountId: string | null;
+  creditCardId: string | null;
+  status: TransactionStatus;
+  totalInstallments: number | null;
+  recurringTemplateId: string | null;
+  originalCurrency: string | null;
+  originalAmount: number | null;
+  exchangeRate: number | null;
+  labels: string[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class TransactionService {
+  private readonly supabase = inject(SupabaseService);
+  private readonly logger = inject(LoggingService);
+  private readonly auth = inject(AuthService);
+
+  private get ownerId(): string {
+    return this.auth.currentUser!.id;
+  }
+
+  getByMonth(filter: TransactionFilter): Observable<Transaction[]> {
+    this.logger.debug('Fetching transactions', filter);
+    const startDate = `${filter.year}-${String(filter.month).padStart(2, '0')}-01`;
+    const endDate = new Date(filter.year, filter.month, 0)
+      .toISOString()
+      .split('T')[0];
+
+    let query = this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('owner_id', this.ownerId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: false });
+
+    if (filter.categoryId) query = query.eq('category_id', filter.categoryId);
+    if (filter.accountId) query = query.eq('account_id', filter.accountId);
+    if (filter.creditCardId) query = query.eq('credit_card_id', filter.creditCardId);
+    if (filter.status) query = query.eq('status', filter.status);
+
+    return from(
+      query.then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []) as Transaction[];
+      })
+    );
+  }
+
+  create(payload: CreateTransactionPayload): Observable<Transaction[]> {
+    this.logger.info('Creating transaction', payload.description);
+    const ownerId = this.ownerId;
+
+    if (payload.totalInstallments && payload.totalInstallments > 1) {
+      return this.createInstallments(payload, ownerId);
+    }
+
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .insert(this.toRow(payload, ownerId))
+        .select()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []) as Transaction[];
+        })
+    );
+  }
+
+  private createInstallments(
+    payload: CreateTransactionPayload,
+    ownerId: string
+  ): Observable<Transaction[]> {
+    const groupId = crypto.randomUUID();
+    const total = payload.totalInstallments!;
+    const baseDate = new Date(payload.date + 'T00:00:00');
+    const installmentAmount = Math.round((payload.amount / total) * 100) / 100;
+
+    const rows = Array.from({ length: total }, (_, i) => {
+      const installDate = new Date(baseDate);
+      installDate.setMonth(installDate.getMonth() + i);
+      return {
+        ...this.toRow(
+          { ...payload, amount: installmentAmount, totalInstallments: total },
+          ownerId
+        ),
+        installment_number: i + 1,
+        total_installments: total,
+        installment_group_id: groupId,
+        date: installDate.toISOString().split('T')[0],
+      };
+    });
+
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .insert(rows)
+        .select()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []) as Transaction[];
+        })
+    );
+  }
+
+  update(id: string, payload: Partial<CreateTransactionPayload>): Observable<Transaction> {
+    this.logger.info('Updating transaction', id);
+    const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (payload.description !== undefined) row['description'] = payload.description;
+    if (payload.amount !== undefined) row['amount'] = payload.amount;
+    if (payload.date !== undefined) row['date'] = payload.date;
+    if (payload.categoryId !== undefined) row['category_id'] = payload.categoryId;
+    if (payload.accountId !== undefined) row['account_id'] = payload.accountId;
+    if (payload.creditCardId !== undefined) row['credit_card_id'] = payload.creditCardId;
+    if (payload.status !== undefined) row['status'] = payload.status;
+    if (payload.labels !== undefined) row['labels'] = payload.labels;
+    if (payload.originalCurrency !== undefined) row['original_currency'] = payload.originalCurrency;
+    if (payload.originalAmount !== undefined) row['original_amount'] = payload.originalAmount;
+    if (payload.exchangeRate !== undefined) row['exchange_rate'] = payload.exchangeRate;
+
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update(row)
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .select()
+        .single()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return data as Transaction;
+        })
+    );
+  }
+
+  delete(id: string): Observable<void> {
+    this.logger.info('Deleting transaction', id);
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .delete()
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .then(({ error }) => {
+          if (error) throw error;
+        })
+    );
+  }
+
+  private toRow(
+    payload: CreateTransactionPayload,
+    ownerId: string
+  ): Record<string, unknown> {
+    return {
+      owner_id: ownerId,
+      description: payload.description,
+      amount: payload.amount,
+      date: payload.date,
+      category_id: payload.categoryId,
+      account_id: payload.accountId,
+      credit_card_id: payload.creditCardId,
+      status: payload.status,
+      installment_number: null,
+      total_installments: null,
+      installment_group_id: null,
+      recurring_template_id: payload.recurringTemplateId,
+      original_currency: payload.originalCurrency,
+      original_amount: payload.originalAmount,
+      exchange_rate: payload.exchangeRate,
+      labels: payload.labels,
+    };
+  }
+}

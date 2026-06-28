@@ -1,1 +1,73 @@
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
+.total-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid #10b981;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+}
+
+.total-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.total-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.col-date {
+  white-space: nowrap;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.col-muted {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.col-amount {
+  font-weight: 600;
+  color: #059669;
+  white-space: nowrap;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.entry-desc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.label-chip {
+  font-size: 11px;
+  background: #ede9fe;
+  color: #5b21b6;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}

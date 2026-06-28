@@ -1,0 +1,26 @@
+<div class="labels-wrap">
+  <div class="chips-input" (click)="inputEl.focus()">
+    @for (label of labels(); track label) {
+      <span class="chip">
+        {{ label }}
+        <button type="button" class="chip-remove" (click)="removeLabel(label)">×</button>
+      </span>
+    }
+    <input
+      #inputEl
+      class="chip-input"
+      [value]="inputValue()"
+      (input)="onInput($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+      (blur)="closeDropdown()"
+    />
+  </div>
+
+  @if (showDropdown() && suggestions().length > 0) {
+    <ul class="dropdown">
+      @for (s of suggestions(); track s) {
+        <li class="dropdown-item" (mousedown)="addLabel(s)">{{ s }}</li>
+      }
+    </ul>
+  }
+</div>
