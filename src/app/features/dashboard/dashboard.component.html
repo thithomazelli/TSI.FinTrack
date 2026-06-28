@@ -10,6 +10,29 @@
   @if (loading()) {
     <p class="loading-text">{{ 'common.loading' | translate }}</p>
   } @else {
+    <!-- Alerts -->
+    @if (visibleAlerts().length > 0) {
+      <div class="alerts-section">
+        @for (alert of visibleAlerts(); track alert.id) {
+          <div class="alert-item" [class]="'alert-' + alert.level">
+            <div class="alert-body">
+              <span class="alert-icon">
+                @if (alert.level === 'danger') { ⚠️ }
+                @else if (alert.level === 'warning') { 🔔 }
+                @else { ℹ️ }
+              </span>
+              <div class="alert-text">
+                <strong>{{ alert.title }}</strong>
+                <span class="alert-detail">{{ alert.detail }}</span>
+              </div>
+            </div>
+            <button class="alert-dismiss" (click)="dismissAlert(alert.id)" title="Dispensar">✕</button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Summary cards -->
     <div class="summary-cards">
       <div class="summary-card income">
         <span class="card-label">{{ 'dashboard.totalIncome' | translate }}</span>
@@ -29,6 +52,7 @@
       </div>
     </div>
 
+    <!-- Goals grid -->
     @if (goalSummaries().length > 0) {
       <section class="dashboard-section">
         <h3>{{ 'goals.title' | translate }}</h3>
@@ -55,6 +79,7 @@
       </section>
     }
 
+    <!-- Top categories -->
     @if (topCategories().length > 0) {
       <section class="dashboard-section">
         <h3>{{ 'dashboard.topCategories' | translate }}</h3>

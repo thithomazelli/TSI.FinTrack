@@ -1,3 +1,77 @@
+.alerts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.alert-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid transparent;
+
+  &.alert-danger {
+    background: #fff3f3;
+    border-left-color: #f44336;
+  }
+
+  &.alert-warning {
+    background: #fffbf0;
+    border-left-color: #ff9800;
+  }
+
+  &.alert-info {
+    background: #f0f7ff;
+    border-left-color: #2196f3;
+  }
+}
+
+.alert-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.alert-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.alert-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  strong {
+    font-size: 0.9rem;
+  }
+}
+
+.alert-detail {
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.alert-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 0.85rem;
+  padding: 0 0 0 0.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+
+  &:hover {
+    color: #333;
+  }
+}
+
 .subtitle {
   font-size: 14px;
   color: #666;

@@ -12,6 +12,7 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { EntryService } from '../../core/services/entry.service';
 import { GoalService } from '../../core/services/goal.service';
 import { CategoryService } from '../../core/services/category.service';
+import { AlertService, Alert } from '../../core/services/alert.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { Entry } from '../../core/models/interfaces/entry.interface';
@@ -41,12 +42,15 @@ export class DashboardComponent implements OnInit {
   private readonly entryService = inject(EntryService);
   private readonly goalService = inject(GoalService);
   private readonly categoryService = inject(CategoryService);
+  private readonly alertService = inject(AlertService);
   private readonly logger = inject(LoggingService);
 
   readonly transactions = signal<Transaction[]>([]);
   readonly entries = signal<Entry[]>([]);
   readonly goals = signal<Goal[]>([]);
   readonly categories = signal<Category[]>([]);
+  readonly alerts = signal<Alert[]>([]);
+  readonly dismissedAlertIds = signal<Set<string>>(new Set());
   readonly loading = signal(false);
 
   readonly year = signal(new Date().getFullYear());
@@ -68,6 +72,11 @@ export class DashboardComponent implements OnInit {
 
   readonly balanceRealized = computed(() => this.totalIncome() - this.totalExpensesRealized());
   readonly balanceProjected = computed(() => this.totalIncome() - this.totalExpensesProjected());
+
+  readonly visibleAlerts = computed(() => {
+    const dismissed = this.dismissedAlertIds();
+    return this.alerts().filter((a) => !dismissed.has(a.id));
+  });
 
   readonly goalSummaries = computed<GoalSummary[]>(() => {
     const spentMap: Record<string, number> = {};
@@ -108,7 +117,12 @@ export class DashboardComponent implements OnInit {
   onMonthChanged(event: { year: number; month: number }): void {
     this.year.set(event.year);
     this.month.set(event.month);
+    this.dismissedAlertIds.set(new Set());
     this.loadData();
+  }
+
+  dismissAlert(id: string): void {
+    this.dismissedAlertIds.update((set) => new Set([...set, id]));
   }
 
   private loadData(): void {
@@ -135,6 +149,11 @@ export class DashboardComponent implements OnInit {
         this.logger.error('Failed to load goals', err);
         this.loading.set(false);
       },
+    });
+
+    this.alertService.getAlerts(y, m).subscribe({
+      next: (alerts) => this.alerts.set(alerts),
+      error: (err) => this.logger.error('Failed to load alerts', err),
     });
   }
 }
