@@ -1,3 +1,103 @@
 <div class="page">
-  <h2 class="page-title">Domínios</h2>
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{ 'domains.title' | translate }}</h2>
+      <p class="page-subtitle">{{ 'domains.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="code-tabs">
+    <button
+      class="code-tab"
+      [class.active]="selectedCode() === null"
+      (click)="selectCode(null)"
+    >Todos</button>
+    @for (code of codes(); track code) {
+      <button
+        class="code-tab"
+        [class.active]="selectedCode() === code"
+        (click)="selectCode(code)"
+      >{{ code }}</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'domains.code' | translate }}</th>
+            <th>{{ 'common.name' | translate }}</th>
+            <th>{{ 'domains.value' | translate }}</th>
+            <th>{{ 'domains.isSystem' | translate }}</th>
+            <th>{{ 'common.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredItems(); track item.id) {
+            <tr>
+              <td><code class="code-chip">{{ item.code }}</code></td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.value }}</td>
+              <td>
+                @if (item.isSystem) {
+                  <span class="badge badge-system">{{ 'domains.isSystem' | translate }}</span>
+                }
+              </td>
+              <td>
+                <div class="item-actions">
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(item)">
+                    {{ 'common.edit' | translate }}
+                  </button>
+                  @if (!item.isSystem) {
+                    <button class="btn btn-danger-ghost btn-sm" (click)="delete(item)">
+                      {{ 'common.delete' | translate }}
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal">
+    <h3 class="modal-title">{{ 'domains.edit' | translate }}</h3>
+    @if (editingId()) {
+      <p class="system-hint">{{ 'domains.systemHint' | translate }}</p>
+    }
+    <div class="form-field">
+      <label>{{ 'common.name' | translate }}</label>
+      <input class="input" [(ngModel)]="formName" />
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>{{ 'common.color' | translate }}</label>
+        <input class="input input-color" type="color" [(ngModel)]="formColor" />
+      </div>
+      <div class="form-field">
+        <label>Ordem</label>
+        <input class="input" type="number" [(ngModel)]="formSortOrder" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeForm()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="save()"
+        [disabled]="saving() || !formName.trim()"
+      >
+        {{ 'common.save' | translate }}
+      </button>
+    </div>
+  </div>
+}

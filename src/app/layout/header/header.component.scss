@@ -19,12 +19,45 @@
   color: #1a1a2e;
 }
 
-.header-user {
+.header-right {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.header-email {
   font-size: 14px;
   color: #666;
+}
+
+.lang-switcher {
+  display: flex;
+  gap: 2px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.15s;
+
+  &.active {
+    background: #fff;
+    color: #1a1a2e;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  &:hover:not(.active) {
+    color: #374151;
+  }
 }
 
 .btn-signout {

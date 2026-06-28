@@ -1,7 +1,5 @@
 <nav class="sidebar">
-  <div class="sidebar-brand">
-    <span>FinTrack</span>
-  </div>
+  <div class="sidebar-brand">FinTrack</div>
   <ul class="sidebar-nav">
     @for (item of navItems; track item.path) {
       <li>
@@ -10,7 +8,7 @@
           routerLinkActive="active"
           class="sidebar-link"
         >
-          {{ item.label }}
+          {{ item.labelKey | translate }}
         </a>
       </li>
     }

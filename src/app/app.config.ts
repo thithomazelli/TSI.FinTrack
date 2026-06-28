@@ -1,8 +1,26 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
+import { LanguageService } from './core/services/language.service';
+
+function initializeLanguage(languageService: LanguageService): () => void {
+  return () => languageService.initialize();
+}
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes)]
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(),
+    provideTranslateService(),
+    provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' }),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeLanguage,
+      deps: [LanguageService],
+      multi: true,
+    },
+  ],
 };

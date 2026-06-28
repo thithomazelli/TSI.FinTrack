@@ -1,0 +1,185 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "loading": "Carregando...",
+    "noResults": "Nenhum resultado encontrado",
+    "actions": "Ações",
+    "name": "Nome",
+    "description": "Descrição",
+    "amount": "Valor",
+    "date": "Data",
+    "status": "Status",
+    "type": "Tipo",
+    "category": "Categoria",
+    "account": "Conta",
+    "yes": "Sim",
+    "no": "Não",
+    "active": "Ativo",
+    "archived": "Arquivado",
+    "archive": "Arquivar",
+    "restore": "Restaurar",
+    "color": "Cor",
+    "month": "Mês",
+    "year": "Ano",
+    "total": "Total",
+    "balance": "Saldo",
+    "required": "Campo obrigatório",
+    "deleteConfirm": "Tem certeza que deseja excluir?",
+    "archiveConfirm": "Tem certeza que deseja arquivar?",
+    "success": {
+      "saved": "Salvo com sucesso",
+      "deleted": "Excluído com sucesso",
+      "archived": "Arquivado com sucesso",
+      "restored": "Restaurado com sucesso"
+    },
+    "error": {
+      "generic": "Ocorreu um erro. Tente novamente.",
+      "load": "Erro ao carregar dados",
+      "save": "Erro ao salvar",
+      "delete": "Erro ao excluir"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "entries": "Entradas",
+    "transactions": "Transações",
+    "creditCards": "Cartões",
+    "savings": "Poupança",
+    "goals": "Metas",
+    "reports": "Relatórios",
+    "import": "Importar",
+    "settings": "Configurações"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "signInGoogle": "Entrar com Google",
+    "signInApple": "Entrar com Apple",
+    "subtitle": "Controle financeiro pessoal"
+  },
+  "settings": {
+    "title": "Configurações",
+    "profile": "Perfil",
+    "family": "Família",
+    "accounts": "Contas",
+    "creditCards": "Cartões de Crédito",
+    "categories": "Categorias",
+    "goals": "Metas",
+    "domains": "Domínios"
+  },
+  "categories": {
+    "title": "Categorias",
+    "add": "Nova Categoria",
+    "edit": "Editar Categoria",
+    "name": "Nome da categoria",
+    "color": "Cor",
+    "deleteConfirm": "Excluir a categoria \"{{name}}\"? Esta ação não pode ser desfeita."
+  },
+  "accounts": {
+    "title": "Contas",
+    "add": "Nova Conta",
+    "edit": "Editar Conta",
+    "name": "Nome da conta",
+    "type": "Tipo de conta",
+    "balance": "Saldo inicial",
+    "archiveConfirm": "Arquivar a conta \"{{name}}\"? O histórico será preservado."
+  },
+  "creditCards": {
+    "title": "Cartões de Crédito",
+    "add": "Novo Cartão",
+    "edit": "Editar Cartão",
+    "name": "Nome do cartão",
+    "lastFourDigits": "Últimos 4 dígitos",
+    "creditLimit": "Limite de crédito",
+    "closingDay": "Dia de fechamento",
+    "dueDay": "Dia de vencimento",
+    "archiveConfirm": "Arquivar o cartão \"{{name}}\"? O histórico será preservado."
+  },
+  "domains": {
+    "title": "Domínios",
+    "subtitle": "Gerencie os valores das listas de seleção",
+    "code": "Código",
+    "value": "Valor",
+    "isSystem": "Sistema",
+    "systemHint": "Itens de sistema podem ser renomeados mas não excluídos",
+    "add": "Novo Item",
+    "edit": "Editar Item"
+  },
+  "transactions": {
+    "title": "Transações",
+    "add": "Nova Transação",
+    "edit": "Editar Transação",
+    "projected": "Projetada",
+    "realized": "Realizada",
+    "installment": "Parcela {{current}} de {{total}}",
+    "installments": "Parcelamento",
+    "installmentCount": "Número de parcelas",
+    "recurring": "Recorrente",
+    "creditCard": "Cartão de Crédito",
+    "international": "Internacional",
+    "originalAmount": "Valor original",
+    "currency": "Moeda",
+    "exchangeRate": "Câmbio",
+    "labels": "Participantes"
+  },
+  "entries": {
+    "title": "Entradas",
+    "add": "Nova Entrada",
+    "edit": "Editar Entrada",
+    "type": "Tipo de entrada",
+    "labels": "Participantes"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Resumo financeiro do mês",
+    "totalIncome": "Total de Entradas",
+    "totalExpenses": "Total de Gastos",
+    "balance": "Saldo do Mês",
+    "projected": "Projetado"
+  },
+  "goals": {
+    "title": "Metas",
+    "add": "Nova Meta",
+    "edit": "Editar Meta",
+    "monthlyLimit": "Limite mensal",
+    "spent": "Gasto",
+    "remaining": "Restante",
+    "exceeded": "Ultrapassado"
+  },
+  "savings": {
+    "title": "Poupança",
+    "add": "Novo Movimento",
+    "balance": "Saldo em Poupança",
+    "deposit": "Depósito",
+    "withdrawal": "Resgate"
+  },
+  "reports": {
+    "title": "Relatórios",
+    "period": "Período",
+    "filters": "Filtros"
+  },
+  "import": {
+    "title": "Importar",
+    "upload": "Selecionar arquivo",
+    "preview": "Pré-visualização",
+    "confirm": "Confirmar Importação",
+    "dragDrop": "Arraste o PDF aqui ou clique para selecionar"
+  },
+  "family": {
+    "title": "Família",
+    "invite": "Convidar Membro",
+    "email": "E-mail",
+    "role": "Papel",
+    "viewer": "Visualizador",
+    "editor": "Editor",
+    "revoke": "Revogar acesso",
+    "pending": "Pendente",
+    "revokeConfirm": "Revogar o acesso de \"{{name}}\"?"
+  }
+}

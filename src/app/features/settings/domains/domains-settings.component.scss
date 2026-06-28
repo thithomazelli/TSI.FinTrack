@@ -1,1 +1,56 @@
+.page-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
 
+.code-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.code-tab {
+  padding: 5px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 99px;
+  background: none;
+  font-size: 13px;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.15s;
+
+  &.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: #fff;
+  }
+
+  &:hover:not(.active) {
+    background: #f3f4f6;
+  }
+}
+
+.code-chip {
+  font-family: monospace;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.system-hint {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: #f5f3ff;
+  border-radius: 6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}

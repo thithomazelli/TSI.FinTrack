@@ -1,3 +1,64 @@
 <div class="page">
-  <h2 class="page-title">Categorias</h2>
+  <div class="page-header">
+    <h2 class="page-title">{{ 'categories.title' | translate }}</h2>
+    <button class="btn btn-primary" (click)="openCreate()">
+      + {{ 'categories.add' | translate }}
+    </button>
+  </div>
+
+  @if (loading()) {
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+  } @else if (categories().length === 0) {
+    <p class="state-msg">{{ 'common.noResults' | translate }}</p>
+  } @else {
+    <div class="list">
+      @for (cat of categories(); track cat.id) {
+        <div class="list-item">
+          <div class="item-color" [style.background]="cat.color"></div>
+          <span class="item-name">{{ cat.name }}</span>
+          <div class="item-actions">
+            <button class="btn btn-ghost" (click)="openEdit(cat)">
+              {{ 'common.edit' | translate }}
+            </button>
+            <button class="btn btn-danger-ghost" (click)="delete(cat)">
+              {{ 'common.delete' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal">
+    <h3 class="modal-title">
+      {{ (editingId() ? 'categories.edit' : 'categories.add') | translate }}
+    </h3>
+    <div class="form-field">
+      <label>{{ 'categories.name' | translate }}</label>
+      <input
+        class="input"
+        [(ngModel)]="formName"
+        [placeholder]="'categories.name' | translate"
+      />
+    </div>
+    <div class="form-field">
+      <label>{{ 'common.color' | translate }}</label>
+      <input class="input input-color" type="color" [(ngModel)]="formColor" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeForm()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="save()"
+        [disabled]="saving() || !formName.trim()"
+      >
+        {{ 'common.save' | translate }}
+      </button>
+    </div>
+  </div>
+}

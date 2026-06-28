@@ -1,14 +1,13 @@
 <div class="login-container">
   <div class="login-card">
     <h1 class="login-title">TSI FinTrack</h1>
-    <p class="login-subtitle">Personal Finance Tracker</p>
-
+    <p class="login-subtitle">{{ 'auth.subtitle' | translate }}</p>
     <div class="login-actions">
       <button class="btn btn-google" (click)="signInWithGoogle()">
-        Sign in with Google
+        {{ 'auth.signInGoogle' | translate }}
       </button>
       <button class="btn btn-apple" (click)="signInWithApple()">
-        Sign in with Apple
+        {{ 'auth.signInApple' | translate }}
       </button>
     </div>
   </div>

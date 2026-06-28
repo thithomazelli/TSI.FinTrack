@@ -1,3 +1,85 @@
 <div class="page">
-  <h2 class="page-title">Contas</h2>
+  <div class="page-header">
+    <h2 class="page-title">{{ 'accounts.title' | translate }}</h2>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" (click)="toggleArchived()">
+        {{ (showArchived() ? 'common.active' : 'common.archived') | translate }}
+      </button>
+      <button class="btn btn-primary" (click)="openCreate()">
+        + {{ 'accounts.add' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+  } @else if (accounts().length === 0) {
+    <p class="state-msg">{{ 'common.noResults' | translate }}</p>
+  } @else {
+    <div class="list">
+      @for (acc of accounts(); track acc.id) {
+        <div class="list-item">
+          <div class="item-info">
+            <span class="item-name">{{ acc.name }}</span>
+            <span class="item-meta">{{ typeName(acc.typeId) }}</span>
+          </div>
+          <span class="item-balance">{{ acc.balance | number:'1.2-2' }}</span>
+          @if (acc.isArchived) {
+            <span class="badge badge-system">{{ 'common.archived' | translate }}</span>
+          }
+          <div class="item-actions">
+            @if (!acc.isArchived) {
+              <button class="btn btn-ghost btn-sm" (click)="openEdit(acc)">
+                {{ 'common.edit' | translate }}
+              </button>
+              <button class="btn btn-danger-ghost btn-sm" (click)="archive(acc)">
+                {{ 'common.archive' | translate }}
+              </button>
+            } @else {
+              <button class="btn btn-ghost btn-sm" (click)="restore(acc)">
+                {{ 'common.restore' | translate }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal">
+    <h3 class="modal-title">
+      {{ (editingId() ? 'accounts.edit' : 'accounts.add') | translate }}
+    </h3>
+    <div class="form-field">
+      <label>{{ 'accounts.name' | translate }}</label>
+      <input class="input" [(ngModel)]="formName" />
+    </div>
+    <div class="form-field">
+      <label>{{ 'accounts.type' | translate }}</label>
+      <select class="input" [(ngModel)]="formTypeId">
+        @for (type of accountTypes(); track type.id) {
+          <option [value]="type.id">{{ type.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-field">
+      <label>{{ 'accounts.balance' | translate }}</label>
+      <input class="input" type="number" [(ngModel)]="formBalance" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeForm()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="save()"
+        [disabled]="saving() || !formName.trim()"
+      >
+        {{ 'common.save' | translate }}
+      </button>
+    </div>
+  </div>
+}

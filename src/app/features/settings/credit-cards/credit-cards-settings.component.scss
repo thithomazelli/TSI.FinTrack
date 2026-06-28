@@ -1,1 +1,24 @@
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
 
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.last-four {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}

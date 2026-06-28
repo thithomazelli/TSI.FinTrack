@@ -1,3 +1,100 @@
 <div class="page">
-  <h2 class="page-title">Cartões</h2>
+  <div class="page-header">
+    <h2 class="page-title">{{ 'creditCards.title' | translate }}</h2>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" (click)="toggleArchived()">
+        {{ (showArchived() ? 'common.active' : 'common.archived') | translate }}
+      </button>
+      <button class="btn btn-primary" (click)="openCreate()">
+        + {{ 'creditCards.add' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+  } @else if (cards().length === 0) {
+    <p class="state-msg">{{ 'common.noResults' | translate }}</p>
+  } @else {
+    <div class="list">
+      @for (card of cards(); track card.id) {
+        <div class="list-item">
+          <div class="item-info">
+            <span class="item-name">
+              {{ card.name }}
+              @if (card.lastFourDigits) {
+                <span class="last-four">•••• {{ card.lastFourDigits }}</span>
+              }
+            </span>
+            <span class="item-meta">
+              {{ 'creditCards.closingDay' | translate }}: {{ card.closingDay }} |
+              {{ 'creditCards.dueDay' | translate }}: {{ card.dueDay }}
+            </span>
+          </div>
+          @if (card.isArchived) {
+            <span class="badge badge-system">{{ 'common.archived' | translate }}</span>
+          }
+          <div class="item-actions">
+            @if (!card.isArchived) {
+              <button class="btn btn-ghost btn-sm" (click)="openEdit(card)">
+                {{ 'common.edit' | translate }}
+              </button>
+              <button class="btn btn-danger-ghost btn-sm" (click)="archive(card)">
+                {{ 'common.archive' | translate }}
+              </button>
+            } @else {
+              <button class="btn btn-ghost btn-sm" (click)="restore(card)">
+                {{ 'common.restore' | translate }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal">
+    <h3 class="modal-title">
+      {{ (editingId() ? 'creditCards.edit' : 'creditCards.add') | translate }}
+    </h3>
+    <div class="form-field">
+      <label>{{ 'creditCards.name' | translate }}</label>
+      <input class="input" [(ngModel)]="formName" />
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>{{ 'creditCards.lastFourDigits' | translate }}</label>
+        <input class="input" [(ngModel)]="formLastFour" maxlength="4" />
+      </div>
+      <div class="form-field">
+        <label>{{ 'creditCards.creditLimit' | translate }}</label>
+        <input class="input" type="number" [(ngModel)]="formLimit" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>{{ 'creditCards.closingDay' | translate }}</label>
+        <input class="input" type="number" min="1" max="31" [(ngModel)]="formClosingDay" />
+      </div>
+      <div class="form-field">
+        <label>{{ 'creditCards.dueDay' | translate }}</label>
+        <input class="input" type="number" min="1" max="31" [(ngModel)]="formDueDay" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeForm()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="save()"
+        [disabled]="saving() || !formName.trim()"
+      >
+        {{ 'common.save' | translate }}
+      </button>
+    </div>
+  </div>
+}

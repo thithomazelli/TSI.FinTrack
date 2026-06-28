@@ -1,1 +1,278 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a2e;
+  background: #f9fafb;
+}
+
+// ─── Page layout ─────────────────────────────────────────────────────────────
+
+.page {
+  padding: 0;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.state-msg {
+  color: #9ca3af;
+  text-align: center;
+  padding: 40px 0;
+}
+
+// ─── List ─────────────────────────────────────────────────────────────────────
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.item-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.item-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.item-meta {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &-primary {
+    background: #6366f1;
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: #4f46e5;
+    }
+  }
+
+  &-ghost {
+    background: none;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+
+    &:hover:not(:disabled) {
+      background: #f3f4f6;
+    }
+  }
+
+  &-danger-ghost {
+    background: none;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+
+    &:hover:not(:disabled) {
+      background: #fef2f2;
+    }
+  }
+
+  &-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+// ─── Form fields ─────────────────────────────────────────────────────────────
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+  }
+}
+
+.input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1a1a2e;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: #6366f1;
+  }
+
+  &-color {
+    padding: 4px;
+    height: 38px;
+    cursor: pointer;
+  }
+}
+
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px;
+  width: 100%;
+  max-width: 440px;
+  z-index: 201;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+// ─── Badge ────────────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &-projected {
+    background: #fef9c3;
+    color: #854d0e;
+  }
+
+  &-realized {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &-system {
+    background: #ede9fe;
+    color: #5b21b6;
+  }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+
+.table-wrap {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #fafafa;
+  }
+}

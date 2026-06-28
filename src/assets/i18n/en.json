@@ -1,0 +1,185 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "confirm": "Confirm",
+    "search": "Search",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "actions": "Actions",
+    "name": "Name",
+    "description": "Description",
+    "amount": "Amount",
+    "date": "Date",
+    "status": "Status",
+    "type": "Type",
+    "category": "Category",
+    "account": "Account",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Active",
+    "archived": "Archived",
+    "archive": "Archive",
+    "restore": "Restore",
+    "color": "Color",
+    "month": "Month",
+    "year": "Year",
+    "total": "Total",
+    "balance": "Balance",
+    "required": "Required field",
+    "deleteConfirm": "Are you sure you want to delete?",
+    "archiveConfirm": "Are you sure you want to archive?",
+    "success": {
+      "saved": "Saved successfully",
+      "deleted": "Deleted successfully",
+      "archived": "Archived successfully",
+      "restored": "Restored successfully"
+    },
+    "error": {
+      "generic": "An error occurred. Please try again.",
+      "load": "Error loading data",
+      "save": "Error saving",
+      "delete": "Error deleting"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "entries": "Income",
+    "transactions": "Transactions",
+    "creditCards": "Credit Cards",
+    "savings": "Savings",
+    "goals": "Goals",
+    "reports": "Reports",
+    "import": "Import",
+    "settings": "Settings"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signInGoogle": "Sign in with Google",
+    "signInApple": "Sign in with Apple",
+    "subtitle": "Personal Finance Tracker"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "family": "Family",
+    "accounts": "Accounts",
+    "creditCards": "Credit Cards",
+    "categories": "Categories",
+    "goals": "Goals",
+    "domains": "Domains"
+  },
+  "categories": {
+    "title": "Categories",
+    "add": "New Category",
+    "edit": "Edit Category",
+    "name": "Category name",
+    "color": "Color",
+    "deleteConfirm": "Delete category \"{{name}}\"? This action cannot be undone."
+  },
+  "accounts": {
+    "title": "Accounts",
+    "add": "New Account",
+    "edit": "Edit Account",
+    "name": "Account name",
+    "type": "Account type",
+    "balance": "Initial balance",
+    "archiveConfirm": "Archive account \"{{name}}\"? History will be preserved."
+  },
+  "creditCards": {
+    "title": "Credit Cards",
+    "add": "New Card",
+    "edit": "Edit Card",
+    "name": "Card name",
+    "lastFourDigits": "Last 4 digits",
+    "creditLimit": "Credit limit",
+    "closingDay": "Closing day",
+    "dueDay": "Due day",
+    "archiveConfirm": "Archive card \"{{name}}\"? History will be preserved."
+  },
+  "domains": {
+    "title": "Domains",
+    "subtitle": "Manage dropdown list values",
+    "code": "Code",
+    "value": "Value",
+    "isSystem": "System",
+    "systemHint": "System items can be renamed but not deleted",
+    "add": "New Item",
+    "edit": "Edit Item"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "add": "New Transaction",
+    "edit": "Edit Transaction",
+    "projected": "Projected",
+    "realized": "Realized",
+    "installment": "Installment {{current}} of {{total}}",
+    "installments": "Installments",
+    "installmentCount": "Number of installments",
+    "recurring": "Recurring",
+    "creditCard": "Credit Card",
+    "international": "International",
+    "originalAmount": "Original amount",
+    "currency": "Currency",
+    "exchangeRate": "Exchange rate",
+    "labels": "Participants"
+  },
+  "entries": {
+    "title": "Income",
+    "add": "New Income",
+    "edit": "Edit Income",
+    "type": "Income type",
+    "labels": "Participants"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Monthly financial summary",
+    "totalIncome": "Total Income",
+    "totalExpenses": "Total Expenses",
+    "balance": "Monthly Balance",
+    "projected": "Projected"
+  },
+  "goals": {
+    "title": "Goals",
+    "add": "New Goal",
+    "edit": "Edit Goal",
+    "monthlyLimit": "Monthly limit",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "exceeded": "Exceeded"
+  },
+  "savings": {
+    "title": "Savings",
+    "add": "New Movement",
+    "balance": "Savings Balance",
+    "deposit": "Deposit",
+    "withdrawal": "Withdrawal"
+  },
+  "reports": {
+    "title": "Reports",
+    "period": "Period",
+    "filters": "Filters"
+  },
+  "import": {
+    "title": "Import",
+    "upload": "Select file",
+    "preview": "Preview",
+    "confirm": "Confirm Import",
+    "dragDrop": "Drag PDF here or click to select"
+  },
+  "family": {
+    "title": "Family",
+    "invite": "Invite Member",
+    "email": "Email",
+    "role": "Role",
+    "viewer": "Viewer",
+    "editor": "Editor",
+    "revoke": "Revoke access",
+    "pending": "Pending",
+    "revokeConfirm": "Revoke access for \"{{name}}\"?"
+  }
+}

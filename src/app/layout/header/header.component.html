@@ -1,9 +1,21 @@
 <header class="header">
   <div class="header-title">TSI FinTrack</div>
-  @if (session$ | async; as session) {
-    <div class="header-user">
-      <span>{{ session.user.email }}</span>
-      <button class="btn-signout" (click)="signOut()">Sair</button>
+  <div class="header-right">
+    <div class="lang-switcher">
+      <button
+        class="lang-btn"
+        [class.active]="languageService.currentLanguage === Language.PtBR"
+        (click)="setLanguage(Language.PtBR)"
+      >PT</button>
+      <button
+        class="lang-btn"
+        [class.active]="languageService.currentLanguage === Language.En"
+        (click)="setLanguage(Language.En)"
+      >EN</button>
     </div>
-  }
+    @if (session$ | async; as session) {
+      <span class="header-email">{{ session.user.email }}</span>
+      <button class="btn-signout" (click)="signOut()">{{ 'auth.signOut' | translate }}</button>
+    }
+  </div>
 </header>
