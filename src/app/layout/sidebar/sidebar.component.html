@@ -1,0 +1,18 @@
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span>FinTrack</span>
+  </div>
+  <ul class="sidebar-nav">
+    @for (item of navItems; track item.path) {
+      <li>
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          class="sidebar-link"
+        >
+          {{ item.label }}
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

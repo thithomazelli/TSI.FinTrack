@@ -1,0 +1,11 @@
+@if (session$ | async) {
+  <tsi-sidebar />
+  <div class="main-layout">
+    <tsi-header />
+    <main class="main-content">
+      <router-outlet />
+    </main>
+  </div>
+} @else {
+  <router-outlet />
+}
