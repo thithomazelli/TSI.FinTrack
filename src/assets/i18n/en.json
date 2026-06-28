@@ -43,7 +43,8 @@
       "load": "Error loading data",
       "save": "Error saving",
       "delete": "Error deleting"
-    }
+    },
+    "creditCard": "Credit Card"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -171,11 +172,14 @@
     "filters": "Filters"
   },
   "import": {
-    "title": "Import",
-    "upload": "Select file",
-    "preview": "Preview",
-    "confirm": "Confirm Import",
-    "dragDrop": "Drag PDF here or click to select"
+    "title": "Import PDF",
+    "dropPdf": "Select credit card bill PDF",
+    "itauOnly": "Supported: Itaú (credit card bill)",
+    "selectFile": "Choose PDF file",
+    "parsing": "Processing PDF...",
+    "confirm": "Import",
+    "success": "Import complete!",
+    "importAnother": "Import another PDF"
   },
   "family": {
     "title": "Family",

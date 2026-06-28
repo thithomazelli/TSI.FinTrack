@@ -1,1 +1,153 @@
+.upload-area {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
 
+.upload-card {
+  background: #fff;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.upload-icon {
+  font-size: 3rem;
+}
+
+.upload-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.upload-sub {
+  font-size: 0.875rem;
+  color: #888;
+  margin: 0;
+}
+
+.upload-btn {
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.meta-chip {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  color: #1565c0;
+}
+
+.review-selectors {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.review-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.review-count {
+  font-size: 0.875rem;
+  color: #555;
+  flex: 1;
+}
+
+.review-table {
+  font-size: 0.875rem;
+}
+
+.col-check { width: 36px; text-align: center; }
+.col-date { white-space: nowrap; width: 90px; }
+.col-amount { text-align: right; white-space: nowrap; width: 110px; }
+.col-install { text-align: center; width: 70px; color: #888; }
+.col-cat { width: 160px; }
+.col-status { width: 130px; }
+
+.row-deselected {
+  opacity: 0.45;
+}
+
+.row-future td {
+  background: #fffde7;
+}
+
+.intl-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: #f3e5f5;
+  color: #6a1b9a;
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 4px;
+}
+
+.input-sm {
+  padding: 4px 6px;
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.done-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 3rem;
+}
+
+.done-icon {
+  font-size: 3rem;
+}
+
+.error-text {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.loading-text {
+  color: #888;
+  font-size: 0.9rem;
+}

@@ -43,7 +43,8 @@
       "load": "Erro ao carregar dados",
       "save": "Erro ao salvar",
       "delete": "Erro ao excluir"
-    }
+    },
+    "creditCard": "Cartão de Crédito"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -171,11 +172,14 @@
     "filters": "Filtros"
   },
   "import": {
-    "title": "Importar",
-    "upload": "Selecionar arquivo",
-    "preview": "Pré-visualização",
-    "confirm": "Confirmar Importação",
-    "dragDrop": "Arraste o PDF aqui ou clique para selecionar"
+    "title": "Importar PDF",
+    "dropPdf": "Selecione o PDF da fatura do cartão",
+    "itauOnly": "Suportado: Itaú (fatura de cartão de crédito)",
+    "selectFile": "Escolher arquivo PDF",
+    "parsing": "Processando PDF...",
+    "confirm": "Importar",
+    "success": "Importação concluída!",
+    "importAnother": "Importar outro PDF"
   },
   "family": {
     "title": "Família",

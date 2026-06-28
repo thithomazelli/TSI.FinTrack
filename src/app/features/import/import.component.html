@@ -1,3 +1,157 @@
 <div class="page">
-  <h2 class="page-title">Importar</h2>
+  <div class="page-header">
+    <h2>{{ 'import.title' | translate }}</h2>
+  </div>
+
+  @if (step() === 'upload') {
+    <div class="upload-area">
+      <div class="upload-card">
+        <div class="upload-icon">📄</div>
+        <p class="upload-title">{{ 'import.dropPdf' | translate }}</p>
+        <p class="upload-sub">{{ 'import.itauOnly' | translate }}</p>
+
+        <label class="btn btn-primary upload-btn">
+          {{ 'import.selectFile' | translate }}
+          <input type="file" accept=".pdf" (change)="onFileSelected($event)" hidden />
+        </label>
+
+        @if (parsing()) {
+          <p class="loading-text">{{ 'import.parsing' | translate }}</p>
+        }
+
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (step() === 'review') {
+    <div class="review-header">
+      <div class="bill-meta">
+        @if (parsedBill()?.cardLastFour) {
+          <span class="meta-chip">Cartão final {{ parsedBill()!.cardLastFour }}</span>
+        }
+        @if (parsedBill()?.dueDate) {
+          <span class="meta-chip">Vencimento: {{ parsedBill()!.dueDate! | slice:0:10 }}</span>
+        }
+        @if (parsedBill()?.totalAmount) {
+          <span class="meta-chip">Total: R$ {{ parsedBill()!.totalAmount! | number:'1.2-2' }}</span>
+        }
+      </div>
+
+      <div class="review-selectors">
+        <div class="form-field">
+          <label>{{ 'common.creditCard' | translate }}</label>
+          <select class="input" [value]="selectedCardId()" (change)="selectedCardId.set($any($event.target).value)">
+            @for (card of cards(); track card.id) {
+              <option [value]="card.id">{{ card.name }} (•••• {{ card.lastFourDigits }})</option>
+            }
+          </select>
+        </div>
+        <div class="form-field">
+          <label>{{ 'common.month' | translate }}</label>
+          <select class="input" [value]="selectedMonth()" (change)="selectedMonth.set(+$any($event.target).value)">
+            @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
+              <option [value]="m">{{ monthLabel(m) }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-field">
+          <label>{{ 'common.year' | translate }}</label>
+          <select class="input" [value]="selectedYear()" (change)="selectedYear.set(+$any($event.target).value)">
+            @for (y of [currentYear, currentYear - 1]; track y) {
+              <option [value]="y">{{ y }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-toolbar">
+      <span class="review-count">{{ selectedCount() }} de {{ reviewRows().length }} selecionados — R$ {{ totalSelected() | number:'1.2-2' }}</span>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAll(true)">Selecionar tudo</button>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAll(false)">Limpar seleção</button>
+    </div>
+
+    <table class="list review-table">
+      <thead>
+        <tr>
+          <th class="col-check"></th>
+          <th>{{ 'common.date' | translate }}</th>
+          <th>{{ 'common.description' | translate }}</th>
+          <th>{{ 'common.amount' | translate }}</th>
+          <th>Parcela</th>
+          <th>{{ 'common.category' | translate }}</th>
+          <th>{{ 'common.status' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of reviewRows(); track row.date + row.description; let i = $index) {
+          <tr [class.row-deselected]="!row.selected" [class.row-future]="row.isFuture">
+            <td class="col-check">
+              <input type="checkbox" [checked]="row.selected" (change)="toggleRow(i)" />
+            </td>
+            <td class="col-date">{{ row.date | slice:0:10 }}</td>
+            <td class="col-desc">
+              {{ row.description }}
+              @if (row.originalCurrency) {
+                <span class="intl-badge">{{ row.originalCurrency }} {{ row.originalAmount | number:'1.2-2' }}</span>
+              }
+            </td>
+            <td class="col-amount">R$ {{ row.amount | number:'1.2-2' }}</td>
+            <td class="col-install">
+              @if (row.installmentNumber) {
+                {{ row.installmentNumber }}/{{ row.totalInstallments }}
+              }
+            </td>
+            <td class="col-cat">
+              <select class="input input-sm"
+                [value]="row.categoryId"
+                (change)="setCategory(i, $any($event.target).value)">
+                <option value="">--</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+            </td>
+            <td class="col-status">
+              <select class="input input-sm"
+                [value]="row.status"
+                (change)="setStatus(i, $any($event.target).value)">
+                <option [value]="TransactionStatus.Realized">Realizado</option>
+                <option [value]="TransactionStatus.Projected">Projetado</option>
+              </select>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (error()) {
+      <p class="error-text">{{ error() }}</p>
+    }
+
+    <div class="review-actions">
+      <button class="btn btn-ghost" (click)="reset()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary"
+        [disabled]="importing() || selectedCount() === 0"
+        (click)="confirmImport()">
+        @if (importing()) {
+          {{ 'common.loading' | translate }}
+        } @else {
+          {{ 'import.confirm' | translate }} ({{ selectedCount() }})
+        }
+      </button>
+    </div>
+  }
+
+  @if (step() === 'done') {
+    <div class="done-card">
+      <div class="done-icon">✅</div>
+      <h3>{{ 'import.success' | translate }}</h3>
+      <p>{{ selectedCount() }} transações importadas com sucesso.</p>
+      <button class="btn btn-primary" (click)="reset()">{{ 'import.importAnother' | translate }}</button>
+    </div>
+  }
 </div>
