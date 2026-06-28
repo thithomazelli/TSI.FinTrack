@@ -1,10 +1,132 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/auth/auth.service';
+import { UserProfileService } from '../../../core/services/user-profile.service';
+import { TelegramService, TelegramSubscription } from '../../../core/services/telegram.service';
+import { LoggingService } from '../../../core/services/logging.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'tsi-profile-settings',
   standalone: true,
+  imports: [FormsModule],
   templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfileSettingsComponent {}
+export class ProfileSettingsComponent implements OnInit {
+  private readonly auth = inject(AuthService);
+  private readonly profileService = inject(UserProfileService);
+  private readonly telegramService = inject(TelegramService);
+  private readonly logger = inject(LoggingService);
+
+  readonly loading = signal(false);
+  readonly saving = signal(false);
+  readonly saved = signal(false);
+
+  readonly fullName = signal('');
+  readonly email = signal('');
+
+  readonly telegramSub = signal<TelegramSubscription | null>(null);
+  readonly telegramLoading = signal(false);
+  readonly telegramLinkUrl = signal<string | null>(null);
+  readonly telegramNotifications = signal(true);
+
+  readonly botUsername = (environment as Record<string, unknown>)['telegramBotUsername'] as string | undefined ?? 'TSIFinTrackBot';
+
+  ngOnInit(): void {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    this.email.set(user.email ?? '');
+    this.loading.set(true);
+
+    this.profileService.getById(user.id).subscribe({
+      next: (profile) => {
+        this.fullName.set(profile.fullName ?? '');
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+
+    this.telegramLoading.set(true);
+    this.telegramService.getSubscription(user.id).subscribe({
+      next: (sub) => {
+        this.telegramSub.set(sub);
+        if (sub) this.telegramNotifications.set(sub.notificationsEnabled);
+        this.telegramLoading.set(false);
+      },
+      error: () => this.telegramLoading.set(false),
+    });
+  }
+
+  saveProfile(): void {
+    const user = this.auth.currentUser;
+    if (!user) return;
+    this.saving.set(true);
+    this.profileService.upsert({ id: user.id, fullName: this.fullName() }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.saved.set(true);
+        setTimeout(() => this.saved.set(false), 3000);
+      },
+      error: (err) => {
+        this.logger.error('Failed to save profile', err);
+        this.saving.set(false);
+      },
+    });
+  }
+
+  generateTelegramLink(): void {
+    const user = this.auth.currentUser;
+    if (!user) return;
+    this.telegramLoading.set(true);
+    this.telegramService.generateLinkToken(user.id, this.botUsername).subscribe({
+      next: (url) => {
+        this.telegramLinkUrl.set(url);
+        this.telegramLoading.set(false);
+      },
+      error: (err) => {
+        this.logger.error('Failed to generate Telegram link', err);
+        this.telegramLoading.set(false);
+      },
+    });
+  }
+
+  disconnectTelegram(): void {
+    const user = this.auth.currentUser;
+    if (!user) return;
+    this.telegramLoading.set(true);
+    this.telegramService.disconnect(user.id).subscribe({
+      next: () => {
+        this.telegramSub.set(null);
+        this.telegramLinkUrl.set(null);
+        this.telegramLoading.set(false);
+      },
+      error: (err) => {
+        this.logger.error('Failed to disconnect Telegram', err);
+        this.telegramLoading.set(false);
+      },
+    });
+  }
+
+  toggleNotifications(): void {
+    const user = this.auth.currentUser;
+    const sub = this.telegramSub();
+    if (!user || !sub) return;
+    const newValue = !this.telegramNotifications();
+    this.telegramNotifications.set(newValue);
+    this.telegramService.setNotifications(user.id, newValue).subscribe({
+      error: (err) => {
+        this.logger.error('Failed to update notifications', err);
+        this.telegramNotifications.set(!newValue);
+      },
+    });
+  }
+}
