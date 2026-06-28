@@ -179,7 +179,11 @@
     "parsing": "Processing PDF...",
     "confirm": "Import",
     "success": "Import complete!",
-    "importAnother": "Import another PDF"
+    "importAnother": "Import another PDF",
+    "modeCreditCard": "Credit Card Bill",
+    "modeDebitStatement": "Bank Statement",
+    "dropPdfCredit": "Select Itaú credit card bill PDF",
+    "dropPdfDebit": "Select Itaú bank statement PDF"
   },
   "family": {
     "title": "Family",

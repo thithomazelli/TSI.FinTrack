@@ -179,7 +179,11 @@
     "parsing": "Processando PDF...",
     "confirm": "Importar",
     "success": "Importação concluída!",
-    "importAnother": "Importar outro PDF"
+    "importAnother": "Importar outro PDF",
+    "modeCreditCard": "Fatura de Cartão",
+    "modeDebitStatement": "Extrato de Conta",
+    "dropPdfCredit": "Selecione o PDF da fatura do cartão Itaú",
+    "dropPdfDebit": "Selecione o PDF do extrato de conta Itaú"
   },
   "family": {
     "title": "Família",

@@ -1,7 +1,37 @@
+.mode-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0;
+}
+
+.mode-tab {
+  padding: 0.6rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #666;
+  transition: color 0.2s, border-color 0.2s;
+
+  &.active {
+    color: #1a1a2e;
+    border-bottom-color: #1a1a2e;
+    font-weight: 600;
+  }
+
+  &:hover:not(.active) {
+    color: #333;
+  }
+}
+
 .upload-area {
   display: flex;
   justify-content: center;
-  padding: 3rem 1rem;
+  padding: 2rem 1rem;
 }
 
 .upload-card {
@@ -18,12 +48,10 @@
   gap: 0.75rem;
 }
 
-.upload-icon {
-  font-size: 3rem;
-}
+.upload-icon { font-size: 3rem; }
 
 .upload-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   margin: 0;
 }
@@ -69,6 +97,25 @@
   flex-wrap: wrap;
 }
 
+.debit-summary {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.summary-income {
+  color: #2e7d32;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.summary-expense {
+  color: #c62828;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 .review-toolbar {
   display: flex;
   align-items: center;
@@ -90,18 +137,16 @@
 
 .col-check { width: 36px; text-align: center; }
 .col-date { white-space: nowrap; width: 90px; }
-.col-amount { text-align: right; white-space: nowrap; width: 110px; }
+.col-amount { white-space: nowrap; width: 110px; }
 .col-install { text-align: center; width: 70px; color: #888; }
+.col-type { width: 80px; }
 .col-cat { width: 160px; }
 .col-status { width: 130px; }
+.text-right { text-align: right; }
 
-.row-deselected {
-  opacity: 0.45;
-}
-
-.row-future td {
-  background: #fffde7;
-}
+.row-deselected { opacity: 0.4; }
+.row-future td { background: #fffde7; }
+.row-credit td { background: #f1faf1; }
 
 .intl-badge {
   display: inline-block;
@@ -113,6 +158,24 @@
   margin-left: 4px;
 }
 
+.type-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 2px 7px;
+
+  &.type-credit {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.type-debit {
+    background: #ffebee;
+    color: #c62828;
+  }
+}
+
 .input-sm {
   padding: 4px 6px;
   font-size: 0.8rem;
@@ -122,6 +185,7 @@
 .review-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 1rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
@@ -137,14 +201,11 @@
   padding: 3rem;
 }
 
-.done-icon {
-  font-size: 3rem;
-}
+.done-icon { font-size: 3rem; }
 
 .error-text {
   color: #d32f2f;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .loading-text {

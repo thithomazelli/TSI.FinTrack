@@ -3,11 +3,23 @@
     <h2>{{ 'import.title' | translate }}</h2>
   </div>
 
+  <!-- Mode selector -->
   @if (step() === 'upload') {
+    <div class="mode-tabs">
+      <button class="mode-tab" [class.active]="mode() === 'credit'" (click)="setMode('credit')">
+        💳 {{ 'import.modeCreditCard' | translate }}
+      </button>
+      <button class="mode-tab" [class.active]="mode() === 'debit'" (click)="setMode('debit')">
+        🏦 {{ 'import.modeDebitStatement' | translate }}
+      </button>
+    </div>
+
     <div class="upload-area">
       <div class="upload-card">
         <div class="upload-icon">📄</div>
-        <p class="upload-title">{{ 'import.dropPdf' | translate }}</p>
+        <p class="upload-title">
+          {{ (mode() === 'credit' ? 'import.dropPdfCredit' : 'import.dropPdfDebit') | translate }}
+        </p>
         <p class="upload-sub">{{ 'import.itauOnly' | translate }}</p>
 
         <label class="btn btn-primary upload-btn">
@@ -26,7 +38,8 @@
     </div>
   }
 
-  @if (step() === 'review') {
+  <!-- CREDIT CARD REVIEW -->
+  @if (step() === 'review' && mode() === 'credit') {
     <div class="review-header">
       <div class="bill-meta">
         @if (parsedBill()?.cardLastFour) {
@@ -69,9 +82,9 @@
     </div>
 
     <div class="review-toolbar">
-      <span class="review-count">{{ selectedCount() }} de {{ reviewRows().length }} selecionados — R$ {{ totalSelected() | number:'1.2-2' }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="toggleAll(true)">Selecionar tudo</button>
-      <button class="btn btn-ghost btn-sm" (click)="toggleAll(false)">Limpar seleção</button>
+      <span class="review-count">{{ creditSelectedCount() }} de {{ creditRows().length }} — R$ {{ creditTotal() | number:'1.2-2' }}</span>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllCredit(true)">Selecionar tudo</button>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllCredit(false)">Limpar seleção</button>
     </div>
 
     <table class="list review-table">
@@ -80,17 +93,17 @@
           <th class="col-check"></th>
           <th>{{ 'common.date' | translate }}</th>
           <th>{{ 'common.description' | translate }}</th>
-          <th>{{ 'common.amount' | translate }}</th>
+          <th class="text-right">{{ 'common.amount' | translate }}</th>
           <th>Parcela</th>
           <th>{{ 'common.category' | translate }}</th>
           <th>{{ 'common.status' | translate }}</th>
         </tr>
       </thead>
       <tbody>
-        @for (row of reviewRows(); track row.date + row.description; let i = $index) {
+        @for (row of creditRows(); track row.date + row.description; let i = $index) {
           <tr [class.row-deselected]="!row.selected" [class.row-future]="row.isFuture">
             <td class="col-check">
-              <input type="checkbox" [checked]="row.selected" (change)="toggleRow(i)" />
+              <input type="checkbox" [checked]="row.selected" (change)="toggleCreditRow(i)" />
             </td>
             <td class="col-date">{{ row.date | slice:0:10 }}</td>
             <td class="col-desc">
@@ -99,16 +112,14 @@
                 <span class="intl-badge">{{ row.originalCurrency }} {{ row.originalAmount | number:'1.2-2' }}</span>
               }
             </td>
-            <td class="col-amount">R$ {{ row.amount | number:'1.2-2' }}</td>
+            <td class="col-amount text-right">R$ {{ row.amount | number:'1.2-2' }}</td>
             <td class="col-install">
               @if (row.installmentNumber) {
                 {{ row.installmentNumber }}/{{ row.totalInstallments }}
               }
             </td>
             <td class="col-cat">
-              <select class="input input-sm"
-                [value]="row.categoryId"
-                (change)="setCategory(i, $any($event.target).value)">
+              <select class="input input-sm" [value]="row.categoryId" (change)="setCreditCategory(i, $any($event.target).value)">
                 <option value="">--</option>
                 @for (cat of categories(); track cat.id) {
                   <option [value]="cat.id">{{ cat.name }}</option>
@@ -116,9 +127,7 @@
               </select>
             </td>
             <td class="col-status">
-              <select class="input input-sm"
-                [value]="row.status"
-                (change)="setStatus(i, $any($event.target).value)">
+              <select class="input input-sm" [value]="row.status" (change)="setCreditStatus(i, $any($event.target).value)">
                 <option [value]="TransactionStatus.Realized">Realizado</option>
                 <option [value]="TransactionStatus.Projected">Projetado</option>
               </select>
@@ -128,29 +137,105 @@
       </tbody>
     </table>
 
-    @if (error()) {
-      <p class="error-text">{{ error() }}</p>
-    }
-
     <div class="review-actions">
       <button class="btn btn-ghost" (click)="reset()">{{ 'common.cancel' | translate }}</button>
-      <button class="btn btn-primary"
-        [disabled]="importing() || selectedCount() === 0"
-        (click)="confirmImport()">
-        @if (importing()) {
-          {{ 'common.loading' | translate }}
-        } @else {
-          {{ 'import.confirm' | translate }} ({{ selectedCount() }})
-        }
+      @if (error()) { <span class="error-text">{{ error() }}</span> }
+      <button class="btn btn-primary" [disabled]="importing() || creditSelectedCount() === 0" (click)="confirmImport()">
+        {{ importing() ? ('common.loading' | translate) : (('import.confirm' | translate) + ' (' + creditSelectedCount() + ')') }}
       </button>
     </div>
   }
 
+  <!-- DEBIT STATEMENT REVIEW -->
+  @if (step() === 'review' && mode() === 'debit') {
+    <div class="review-header">
+      <div class="review-selectors">
+        <div class="form-field">
+          <label>{{ 'common.account' | translate }}</label>
+          <select class="input" [value]="selectedAccountId()" (change)="selectedAccountId.set($any($event.target).value)">
+            <option value="">-- Sem conta --</option>
+            @for (acc of accounts(); track acc.id) {
+              <option [value]="acc.id">{{ acc.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="debit-summary">
+        <span class="summary-income">↑ Entradas: R$ {{ debitTotalIncome() | number:'1.2-2' }}</span>
+        <span class="summary-expense">↓ Saídas: R$ {{ debitTotalExpenses() | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="review-toolbar">
+      <span class="review-count">{{ debitSelectedCount() }} de {{ debitRows().length }} selecionados</span>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllDebit(true)">Selecionar tudo</button>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllDebit(false)">Limpar seleção</button>
+    </div>
+
+    <table class="list review-table">
+      <thead>
+        <tr>
+          <th class="col-check"></th>
+          <th>{{ 'common.date' | translate }}</th>
+          <th>{{ 'common.description' | translate }}</th>
+          <th>Tipo</th>
+          <th class="text-right">{{ 'common.amount' | translate }}</th>
+          <th>{{ 'common.category' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of debitRows(); track row.date + row.description; let i = $index) {
+          <tr [class.row-deselected]="!row.selected" [class.row-credit]="row.isCredit">
+            <td class="col-check">
+              <input type="checkbox" [checked]="row.selected" (change)="toggleDebitRow(i)" />
+            </td>
+            <td class="col-date">{{ row.date | slice:0:10 }}</td>
+            <td class="col-desc">{{ row.description }}</td>
+            <td class="col-type">
+              @if (row.isCredit) {
+                <span class="type-badge type-credit">Entrada</span>
+              } @else {
+                <span class="type-badge type-debit">Saída</span>
+              }
+            </td>
+            <td class="col-amount text-right">R$ {{ row.amount | number:'1.2-2' }}</td>
+            <td class="col-cat">
+              @if (row.isCredit) {
+                <select class="input input-sm" [value]="row.entryTypeId" (change)="setDebitEntryType(i, $any($event.target).value)">
+                  <option value="">--</option>
+                  @for (t of entryTypes(); track t.id) {
+                    <option [value]="t.id">{{ t.value }}</option>
+                  }
+                </select>
+              } @else {
+                <select class="input input-sm" [value]="row.categoryId" (change)="setDebitCategory(i, $any($event.target).value)">
+                  <option value="">--</option>
+                  @for (cat of categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="review-actions">
+      <button class="btn btn-ghost" (click)="reset()">{{ 'common.cancel' | translate }}</button>
+      @if (error()) { <span class="error-text">{{ error() }}</span> }
+      <button class="btn btn-primary" [disabled]="importing() || debitSelectedCount() === 0" (click)="confirmImport()">
+        {{ importing() ? ('common.loading' | translate) : (('import.confirm' | translate) + ' (' + debitSelectedCount() + ')') }}
+      </button>
+    </div>
+  }
+
+  <!-- DONE -->
   @if (step() === 'done') {
     <div class="done-card">
       <div class="done-icon">✅</div>
       <h3>{{ 'import.success' | translate }}</h3>
-      <p>{{ selectedCount() }} transações importadas com sucesso.</p>
+      <p>{{ importedCount() }} registros importados com sucesso.</p>
       <button class="btn btn-primary" (click)="reset()">{{ 'import.importAnother' | translate }}</button>
     </div>
   }
