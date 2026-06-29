@@ -67,8 +67,41 @@ const SEED_CATEGORIES = {
   "Transporte Público":"#1e40af","Tênis":"#7e22ce","Uber/99":"#1c1917","Viagem":"#0891b2",
 }
 
+const SEED_DOMAINS = [
+  { code: 'transaction_status', name: 'Realizado', value: 'REALIZED', is_system: true, is_default: true, sort_order: 1 },
+  { code: 'transaction_status', name: 'Projetado', value: 'PROJECTED', is_system: true, is_default: false, sort_order: 2 },
+  { code: 'transaction_type', name: 'Débito', value: 'DEBIT', is_system: true, is_default: true, sort_order: 1 },
+  { code: 'transaction_type', name: 'Crédito', value: 'CREDIT', is_system: true, is_default: false, sort_order: 2 },
+  { code: 'entry_type', name: 'Salário', value: 'SALARY', is_system: false, is_default: true, sort_order: 1 },
+  { code: 'entry_type', name: 'Reembolso', value: 'REIMBURSEMENT', is_system: false, is_default: false, sort_order: 2 },
+  { code: 'entry_type', name: 'Transferência', value: 'TRANSFER', is_system: false, is_default: false, sort_order: 3 },
+  { code: 'entry_type', name: 'Outro', value: 'OTHER', is_system: false, is_default: false, sort_order: 4 },
+  { code: 'account_type', name: 'Conta Corrente', value: 'CHECKING', is_system: true, is_default: true, sort_order: 1 },
+  { code: 'account_type', name: 'Poupança', value: 'SAVINGS', is_system: true, is_default: false, sort_order: 2 },
+  { code: 'savings_movement_type', name: 'Depósito', value: 'DEPOSIT', is_system: true, is_default: true, sort_order: 1 },
+  { code: 'savings_movement_type', name: 'Resgate', value: 'WITHDRAWAL', is_system: true, is_default: false, sort_order: 2 },
+  { code: 'bill_status', name: 'Aberta', value: 'OPEN', is_system: true, is_default: true, sort_order: 1 },
+  { code: 'bill_status', name: 'Fechada', value: 'CLOSED', is_system: true, is_default: false, sort_order: 2 },
+  { code: 'bill_status', name: 'Paga', value: 'PAID', is_system: true, is_default: false, sort_order: 3 },
+]
+
 async function main() {
   console.log('=== TSI.FinTrack — Seed histórico ===\n')
+
+  // 0. Domínios (listas de configuração)
+  const { data: existingDomains } = await supabase
+    .from('domain_lists').select('code, value').eq('owner_id', OWNER_ID)
+  const domainKeys = new Set((existingDomains ?? []).map(d => `${d.code}|${d.value}`))
+  const domainsToCreate = SEED_DOMAINS
+    .filter(d => !domainKeys.has(`${d.code}|${d.value}`))
+    .map(d => ({ owner_id: OWNER_ID, ...d }))
+  if (domainsToCreate.length > 0) {
+    const { error } = await supabase.from('domain_lists').insert(domainsToCreate)
+    if (error) { console.error('Erro ao criar domínios:', error.message); process.exit(1) }
+    console.log(`  ${domainsToCreate.length} domínios criados ✓`)
+  } else {
+    console.log('  Domínios já existem ✓')
+  }
 
   // 1. Criar categorias que não existem ainda
   const { data: existingCats, error: catErr } = await supabase
