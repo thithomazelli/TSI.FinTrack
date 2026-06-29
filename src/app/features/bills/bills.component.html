@@ -1,0 +1,68 @@
+<div class="bills-header">
+  <h2 class="bills-title">Faturas</h2>
+  <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+</div>
+
+@if (loading()) {
+  <p class="state-msg">Carregando...</p>
+} @else {
+  <!-- Resumo por cartão -->
+  <div class="cards-summary">
+    <button class="card-chip" [class.active]="selectedCardId() === 'all'" (click)="selectedCardId.set('all')">
+      <span class="chip-label">Todos</span>
+      <span class="chip-total">R$ {{ total() | number:'1.2-2' }}</span>
+    </button>
+    @for (card of uniqueCards(); track card.id) {
+      <button class="card-chip" [class.active]="selectedCardId() === (card.id ?? 'debit')" (click)="selectedCardId.set(card.id ?? 'debit')">
+        <span class="chip-label">{{ card.name }}</span>
+        <span class="chip-total">R$ {{ card.total | number:'1.2-2' }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Tabela de transações -->
+  @if (filtered().length === 0) {
+    <p class="state-msg">Nenhuma transação encontrada.</p>
+  } @else {
+    <table class="bills-table">
+      <thead>
+        <tr>
+          <th>Data compra</th>
+          <th>Descrição</th>
+          <th>Categoria</th>
+          <th>Cartão</th>
+          <th class="th-right">Valor</th>
+          <th class="th-right">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (tx of filtered(); track tx.id) {
+          <tr>
+            <td class="td-date">{{ tx.date | date:'dd/MM' }}</td>
+            <td class="td-desc">
+              {{ tx.description }}
+              @if (tx.installmentNumber && tx.totalInstallments) {
+                <span class="installment-badge">{{ tx.installmentNumber }}/{{ tx.totalInstallments }}</span>
+              }
+            </td>
+            <td class="td-cat">{{ tx.categoryId ?? '—' }}</td>
+            <td class="td-card">{{ cardName(tx.creditCardId) }}</td>
+            <td class="td-amount">R$ {{ tx.amount | number:'1.2-2' }}</td>
+            <td class="td-status">
+              <span class="status-badge" [class.status-badge--realized]="tx.status === 'REALIZED'" [class.status-badge--projected]="tx.status === 'PROJECTED'">
+                {{ tx.status === 'REALIZED' ? 'Realizado' : 'Projetado' }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" class="tfoot-label">Total</td>
+          <td class="tfoot-total">R$ {{ total() | number:'1.2-2' }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  }
+}

@@ -6,6 +6,8 @@ export interface Transaction {
   description: string;
   amount: number;
   date: string;
+  paymentDate: string | null;
+  paymentMethod: 'PIX' | 'DEBIT' | 'CREDIT' | null;
   categoryId: string;
   accountId: string | null;
   creditCardId: string | null;
