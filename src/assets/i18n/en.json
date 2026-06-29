@@ -394,5 +394,11 @@
     "copied": "Copied!",
     "tokenExpires": "The token expires after first use.",
     "connect": "Connect Telegram"
+  },
+  "login": {
+    "subtitle": "Your personal finance control",
+    "continueGoogle": "Continue with Google",
+    "continueApple": "Continue with Apple",
+    "terms": "By signing in, you agree to our terms of use."
   }
 }
