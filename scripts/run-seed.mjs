@@ -54,15 +54,18 @@ function resolveCardName(rawName) {
   return CARD_RENAME[rawName.toLowerCase()] ?? rawName
 }
 
-const SEED_CATEGORIES = [
-  "Alimentação/Mercado","Assinaturas","Bike","Celular","Combustível",
-  "Convênio Médico","Cuidados Pessoais","Despesas Carro","Despesas Casa",
-  "Despesas Empresa","Despesas Terreno","Diversos","Empréstimo Bancário",
-  "Empréstimo Pessoal","Enxoval","Estudo","Farmácia","Futebol","Games",
-  "Instrumentos","Investimentos","Lazer","Médico","Parcela carro","Pets",
-  "Poupança","Presente","Roupas","TI","Tarifas/Juros","Telefone celular",
-  "Transporte Público","Tênis","Uber/99","Viagem",
-]
+const SEED_CATEGORIES = {
+  "Alimentação/Mercado":"#f59e0b","Assinaturas":"#8b5cf6","Bike":"#10b981",
+  "Celular":"#6366f1","Combustível":"#f97316","Convênio Médico":"#ec4899",
+  "Cuidados Pessoais":"#f43f5e","Despesas Carro":"#78716c","Despesas Casa":"#84cc16",
+  "Despesas Empresa":"#0ea5e9","Despesas Terreno":"#a3e635","Diversos":"#6b7280",
+  "Empréstimo Bancário":"#dc2626","Empréstimo Pessoal":"#b91c1c","Enxoval":"#db2777",
+  "Estudo":"#2563eb","Farmácia":"#16a34a","Futebol":"#15803d","Games":"#7c3aed",
+  "Instrumentos":"#b45309","Investimentos":"#0d9488","Lazer":"#d97706","Médico":"#059669",
+  "Parcela carro":"#475569","Pets":"#92400e","Poupança":"#065f46","Presente":"#be185d",
+  "Roupas":"#9333ea","TI":"#1d4ed8","Tarifas/Juros":"#991b1b","Telefone celular":"#0369a1",
+  "Transporte Público":"#1e40af","Tênis":"#7e22ce","Uber/99":"#1c1917","Viagem":"#0891b2",
+}
 
 async function main() {
   console.log('=== TSI.FinTrack — Seed histórico ===\n')
@@ -73,13 +76,20 @@ async function main() {
   if (catErr) { console.error('Erro ao buscar categorias:', catErr.message); process.exit(1) }
 
   const existingNames = new Set(existingCats.map(c => c.name.toLowerCase()))
-  const toCreate = SEED_CATEGORIES.filter(n => !existingNames.has(n.toLowerCase()))
-    .map(name => ({ owner_id: OWNER_ID, name, color: '#6b7280', icon: null }))
+  const toCreate = Object.entries(SEED_CATEGORIES)
+    .filter(([name]) => !existingNames.has(name.toLowerCase()))
+    .map(([name, color]) => ({ owner_id: OWNER_ID, name, color, icon: null }))
 
   if (toCreate.length > 0) {
     const { error: insErr } = await supabase.from('categories').insert(toCreate)
     if (insErr) { console.error('Erro ao criar categorias:', insErr.message); process.exit(1) }
     console.log(`  ${toCreate.length} categorias criadas ✓`)
+  }
+
+  // Atualiza as cores das categorias que já existem (caso tenham sido criadas em cinza)
+  for (const [name, color] of Object.entries(SEED_CATEGORIES)) {
+    await supabase.from('categories').update({ color })
+      .eq('owner_id', OWNER_ID).ilike('name', name)
   }
 
   const { data: cats, error: catSelErr } = await supabase

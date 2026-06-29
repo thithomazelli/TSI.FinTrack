@@ -55,10 +55,15 @@
 }
 
 /* Table */
+.bills-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .bills-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  min-width: 640px;
 
   th {
     text-align: left;

@@ -24,6 +24,7 @@
   @if (filtered().length === 0) {
     <p class="state-msg">Nenhuma transação encontrada.</p>
   } @else {
+    <div class="bills-table-wrap">
     <table class="bills-table">
       <thead>
         <tr>
@@ -64,5 +65,6 @@
         </tr>
       </tfoot>
     </table>
+    </div>
   }
 }
