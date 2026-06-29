@@ -10,6 +10,7 @@ import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EntryService, CreateEntryPayload } from '../../core/services/entry.service';
 import { TransactionService, CreateTransactionPayload } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -52,7 +53,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 @Component({
   selector: 'tsi-movimentos',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective],
+  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe],
   templateUrl: './movimentos.component.html',
   styleUrls: ['./movimentos.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,6 +70,11 @@ export class MovimentosComponent implements OnInit {
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
   readonly themeService = inject(ThemeService);
+  private readonly t = inject(TranslateService);
+
+  private tr(key: string): string {
+    return this.t.instant(key);
+  }
 
   readonly TransactionStatus = TransactionStatus;
 
@@ -292,7 +298,7 @@ export class MovimentosComponent implements OnInit {
       }) as Transaction));
     } catch (err) {
       this.logger.error('Failed to load movimentos', err);
-      this.toast.error('Erro ao carregar movimentos.');
+      this.toast.error(this.tr('movimentos.toast.loadError'));
     } finally {
       this.loading.set(false);
     }
@@ -414,7 +420,7 @@ export class MovimentosComponent implements OnInit {
 
     op$.subscribe({
       next: () => {
-        this.toast.success(id ? 'Entrada atualizada!' : 'Entrada adicionada!');
+        this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
         this.saving.set(false);
         this.closeModal();
         this.load();
@@ -422,7 +428,7 @@ export class MovimentosComponent implements OnInit {
       error: err => {
         this.logger.error('Failed to save entry', err);
         this.saving.set(false);
-        this.toast.error('Erro ao salvar entrada.');
+        this.toast.error(this.tr('movimentos.toast.entrySaveError'));
       },
     });
   }
@@ -452,7 +458,7 @@ export class MovimentosComponent implements OnInit {
     if (id) {
       this.transactionService.update(id, payload).subscribe({
         next: () => {
-          this.toast.success('Transação atualizada!');
+          this.toast.success(this.tr('movimentos.toast.txUpdated'));
           this.saving.set(false);
           this.closeModal();
           this.load();
@@ -460,13 +466,13 @@ export class MovimentosComponent implements OnInit {
         error: err => {
           this.logger.error('Failed to update transaction', err);
           this.saving.set(false);
-          this.toast.error('Erro ao atualizar transação.');
+          this.toast.error(this.tr('movimentos.toast.txUpdateError'));
         },
       });
     } else {
       this.transactionService.create(payload).subscribe({
         next: () => {
-          this.toast.success('Transação adicionada!');
+          this.toast.success(this.tr('movimentos.toast.txAdded'));
           this.saving.set(false);
           this.closeModal();
           this.load();
@@ -474,7 +480,7 @@ export class MovimentosComponent implements OnInit {
         error: err => {
           this.logger.error('Failed to create transaction', err);
           this.saving.set(false);
-          this.toast.error('Erro ao criar transação.');
+          this.toast.error(this.tr('movimentos.toast.txCreateError'));
         },
       });
     }
@@ -492,11 +498,11 @@ export class MovimentosComponent implements OnInit {
         } else {
           this.allTransactions.update(list => list.filter(t => t.id !== item.id));
         }
-        this.toast.success('Registro excluído.');
+        this.toast.success(this.tr('movimentos.toast.deleted'));
       },
       error: err => {
         this.logger.error('Failed to delete', err);
-        this.toast.error('Erro ao excluir.');
+        this.toast.error(this.tr('movimentos.toast.deleteError'));
       },
     });
   }
