@@ -32,15 +32,38 @@ async function batchInsert(table, rows, label) {
   console.log(' ✓')
 }
 
+const SEED_CATEGORIES = [
+  "Alimentação/Mercado","Assinaturas","Bike","Celular","Combustível",
+  "Convênio Médico","Cuidados Pessoais","Despesas Carro","Despesas Casa",
+  "Despesas Empresa","Despesas Terreno","Diversos","Empréstimo Bancário",
+  "Empréstimo Pessoal","Enxoval","Estudo","Farmácia","Futebol","Games",
+  "Instrumentos","Investimentos","Lazer","Médico","Parcela carro","Pets",
+  "Poupança","Presente","Roupas","TI","Tarifas/Juros","Telefone celular",
+  "Transporte Público","Tênis","Uber/99","Viagem",
+]
+
 async function main() {
   console.log('=== TSI.FinTrack — Seed histórico ===\n')
 
-  // 1. Buscar categorias
-  const { data: cats, error: catErr } = await supabase
+  // 1. Criar categorias que não existem ainda
+  const { data: existingCats, error: catErr } = await supabase
     .from('categories').select('id, name').eq('owner_id', OWNER_ID)
   if (catErr) { console.error('Erro ao buscar categorias:', catErr.message); process.exit(1) }
+
+  const existingNames = new Set(existingCats.map(c => c.name.toLowerCase()))
+  const toCreate = SEED_CATEGORIES.filter(n => !existingNames.has(n.toLowerCase()))
+    .map(name => ({ owner_id: OWNER_ID, name, color: '#6b7280', icon: null }))
+
+  if (toCreate.length > 0) {
+    const { error: insErr } = await supabase.from('categories').insert(toCreate)
+    if (insErr) { console.error('Erro ao criar categorias:', insErr.message); process.exit(1) }
+    console.log(`  ${toCreate.length} categorias criadas ✓`)
+  }
+
+  const { data: cats } = await supabase
+    .from('categories').select('id, name').eq('owner_id', OWNER_ID)
   const catMap = Object.fromEntries(cats.map(c => [c.name.toLowerCase(), c.id]))
-  console.log(`  ${cats.length} categorias encontradas ✓`)
+  console.log(`  ${cats.length} categorias disponíveis ✓`)
 
   // 2. Buscar cartões
   const { data: cards, error: cardErr } = await supabase
