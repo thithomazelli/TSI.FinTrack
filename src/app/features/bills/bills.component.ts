@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AccountService } from '../../core/services/account.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
@@ -14,7 +15,7 @@ import { Category } from '../../core/models/interfaces/category.interface';
 @Component({
   selector: 'tsi-bills',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, MonthPickerComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, MonthPickerComponent, TranslatePipe],
   templateUrl: './bills.component.html',
   styleUrls: ['./bills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

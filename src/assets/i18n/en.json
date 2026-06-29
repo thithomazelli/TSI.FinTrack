@@ -252,5 +252,12 @@
       "deleted": "Record deleted.",
       "deleteError": "Failed to delete."
     }
+  },
+  "bills": {
+    "title": "Bills",
+    "all": "All",
+    "empty": "No transactions found.",
+    "colPurchaseDate": "Purchase date",
+    "colCard": "Card"
   }
 }

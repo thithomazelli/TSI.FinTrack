@@ -252,5 +252,12 @@
       "deleted": "Registro excluído.",
       "deleteError": "Erro ao excluir."
     }
+  },
+  "bills": {
+    "title": "Faturas",
+    "all": "Todos",
+    "empty": "Nenhuma transação encontrada.",
+    "colPurchaseDate": "Data compra",
+    "colCard": "Cartão"
   }
 }

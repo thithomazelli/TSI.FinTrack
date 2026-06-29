@@ -1,16 +1,16 @@
 <div class="page">
   <div class="page-header">
-    <h2 class="page-title">Faturas</h2>
+    <h2 class="page-title">{{ 'bills.title' | translate }}</h2>
     <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
   </div>
 
 @if (loading()) {
-  <p class="state-msg">Carregando...</p>
+  <p class="state-msg">{{ 'common.loading' | translate }}</p>
 } @else {
   <!-- Resumo por cartão -->
   <div class="cards-summary">
     <button class="card-chip" [class.active]="selectedCardId() === 'all'" (click)="selectedCardId.set('all')">
-      <span class="chip-label">Todos</span>
+      <span class="chip-label">{{ 'bills.all' | translate }}</span>
       <span class="chip-total">R$ {{ total() | number:'1.2-2' }}</span>
     </button>
     @for (card of uniqueCards(); track card.id) {
@@ -23,18 +23,18 @@
 
   <!-- Tabela de transações -->
   @if (filtered().length === 0) {
-    <p class="state-msg">Nenhuma transação encontrada.</p>
+    <p class="state-msg">{{ 'bills.empty' | translate }}</p>
   } @else {
     <div class="bills-table-wrap">
     <table class="bills-table">
       <thead>
         <tr>
-          <th>Data compra</th>
-          <th>Descrição</th>
-          <th>Categoria</th>
-          <th>Cartão</th>
-          <th class="th-right">Valor</th>
-          <th class="th-right">Status</th>
+          <th>{{ 'bills.colPurchaseDate' | translate }}</th>
+          <th>{{ 'common.description' | translate }}</th>
+          <th>{{ 'common.category' | translate }}</th>
+          <th>{{ 'bills.colCard' | translate }}</th>
+          <th class="th-right">{{ 'common.amount' | translate }}</th>
+          <th class="th-right">{{ 'common.status' | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -57,7 +57,7 @@
             <td class="td-amount">R$ {{ tx.amount | number:'1.2-2' }}</td>
             <td class="td-status">
               <span class="status-badge" [class.status-badge--realized]="tx.status === 'REALIZED'" [class.status-badge--projected]="tx.status === 'PROJECTED'">
-                {{ tx.status === 'REALIZED' ? 'Realizado' : 'Projetado' }}
+                {{ (tx.status === 'REALIZED' ? 'movimentos.realized' : 'movimentos.projected') | translate }}
               </span>
             </td>
           </tr>
@@ -65,7 +65,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="4" class="tfoot-label">Total</td>
+          <td colspan="4" class="tfoot-label">{{ 'common.total' | translate }}</td>
           <td class="tfoot-total">R$ {{ total() | number:'1.2-2' }}</td>
           <td></td>
         </tr>
