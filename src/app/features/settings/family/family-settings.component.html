@@ -1,21 +1,21 @@
 <div class="page">
   <div class="page-header">
-    <button class="btn btn-primary" (click)="openForm()">+ Convidar Membro</button>
+    <button class="btn btn-primary" (click)="openForm()">+ {{ 'settings.inviteMember' | translate }}</button>
   </div>
 
   @if (loading()) {
-    <p class="loading-text">Carregando...</p>
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
   } @else {
     @if (members().length > 0) {
       <section class="family-section">
-        <h3 class="section-title">Membros ativos</h3>
+        <h3 class="section-title">{{ 'settings.activeMembers' | translate }}</h3>
         <table class="settings-table">
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>E-mail</th>
-              <th>Papel</th>
-              <th class="th-right td-actions">Ações</th>
+              <th>{{ 'common.name' | translate }}</th>
+              <th>{{ 'common.email' | translate }}</th>
+              <th>{{ 'settings.role' | translate }}</th>
+              <th class="th-right td-actions">{{ 'common.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -27,14 +27,14 @@
                   <select class="input input-sm"
                     [value]="member.role"
                     (change)="updateRole(member, $any($event.target).value)">
-                    <option [value]="FamilyRole.Viewer">Visualizador</option>
-                    <option [value]="FamilyRole.Editor">Editor</option>
+                    <option [value]="FamilyRole.Viewer">{{ 'settings.viewer' | translate }}</option>
+                    <option [value]="FamilyRole.Editor">{{ 'settings.editor' | translate }}</option>
                   </select>
                 </td>
                 <td class="td-actions">
                   <button class="btn-action btn-action--danger" (click)="confirmDelete(member)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                    Remover
+                    {{ 'settings.remove' | translate }}
                   </button>
                 </td>
               </tr>
@@ -46,13 +46,13 @@
 
     @if (invites().length > 0) {
       <section class="family-section">
-        <h3 class="section-title">Convites pendentes</h3>
+        <h3 class="section-title">{{ 'settings.pendingInvites' | translate }}</h3>
         <table class="settings-table">
           <thead>
             <tr>
-              <th>E-mail</th>
-              <th>Papel</th>
-              <th class="th-right td-actions">Ações</th>
+              <th>{{ 'common.email' | translate }}</th>
+              <th>{{ 'settings.role' | translate }}</th>
+              <th class="th-right td-actions">{{ 'common.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -62,7 +62,7 @@
                 <td>{{ invite.role }}</td>
                 <td class="td-actions">
                   <button class="btn-action btn-action--danger" (click)="cancelInvite(invite)">
-                    Cancelar
+                    {{ 'common.cancel' | translate }}
                   </button>
                 </td>
               </tr>
@@ -73,7 +73,7 @@
     }
 
     @if (members().length === 0 && invites().length === 0) {
-      <p class="no-results">Nenhum membro ou convite encontrado.</p>
+      <p class="no-results">{{ 'settings.noMembers' | translate }}</p>
     }
   }
 </div>
@@ -81,29 +81,29 @@
 @if (showForm()) {
   <div class="backdrop" (click)="closeForm()"></div>
   <div class="modal" (click)="$event.stopPropagation()">
-    <h3 class="modal-title">Convidar Membro</h3>
+    <h3 class="modal-title">{{ 'settings.inviteMember' | translate }}</h3>
 
     <div class="form-field">
-      <label>E-mail</label>
+      <label>{{ 'common.email' | translate }}</label>
       <input class="input" type="email" autocomplete="email"
         [value]="formEmail()"
         (input)="formEmail.set($any($event.target).value)" />
     </div>
 
     <div class="form-field">
-      <label>Papel</label>
+      <label>{{ 'settings.role' | translate }}</label>
       <select class="input" [value]="formRole()" (change)="formRole.set($any($event.target).value)">
-        <option [value]="FamilyRole.Viewer">Visualizador</option>
-        <option [value]="FamilyRole.Editor">Editor</option>
+        <option [value]="FamilyRole.Viewer">{{ 'settings.viewer' | translate }}</option>
+        <option [value]="FamilyRole.Editor">{{ 'settings.editor' | translate }}</option>
       </select>
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+      <button class="btn btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary"
         [disabled]="saving() || !formEmail()"
         (click)="sendInvite()">
-        {{ saving() ? 'Enviando...' : 'Convidar' }}
+        {{ (saving() ? 'settings.sending' : 'settings.invite') | translate }}
       </button>
     </div>
   </div>
@@ -112,13 +112,13 @@
 @if (deletingItem()) {
   <div class="backdrop" (click)="cancelDelete()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">Remover membro</h3>
+    <h3 class="modal-title">{{ 'settings.removeMember' | translate }}</h3>
     <p class="confirm-msg">
-      Tem certeza que deseja remover <strong>{{ deletingItem()!.memberProfile?.fullName ?? deletingItem()!.memberProfile?.email }}</strong>?
+      {{ 'settings.removeConfirm' | translate }} <strong>{{ deletingItem()!.memberProfile?.fullName ?? deletingItem()!.memberProfile?.email }}</strong>?
     </p>
     <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
-      <button class="btn-danger" (click)="revoke()" [disabled]="saving()">Remover</button>
+      <button class="btn btn-secondary" (click)="cancelDelete()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn-danger" (click)="revoke()" [disabled]="saving()">{{ 'settings.remove' | translate }}</button>
     </div>
   </div>
 }

@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AccountService } from '../../../core/services/account.service';
 import { DomainListService } from '../../../core/services/domain-list.service';
 import { LoggingService } from '../../../core/services/logging.service';
@@ -17,7 +18,7 @@ import { DomainList } from '../../../core/models/interfaces/domain-list.interfac
 @Component({
   selector: 'tsi-accounts-settings',
   standalone: true,
-  imports: [DecimalPipe, FormsModule],
+  imports: [TranslatePipe, DecimalPipe, FormsModule],
   templateUrl: './accounts-settings.component.html',
   styleUrls: ['./accounts-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

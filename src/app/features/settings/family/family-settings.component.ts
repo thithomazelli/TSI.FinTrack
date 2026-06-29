@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { FamilyService, FamilyInvite } from '../../../core/services/family.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -15,7 +16,7 @@ import { FamilyRole } from '../../../core/models/enums/family-role.enum';
 @Component({
   selector: 'tsi-family-settings',
   standalone: true,
-  imports: [FormsModule],
+  imports: [TranslatePipe, FormsModule],
   templateUrl: './family-settings.component.html',
   styleUrls: ['./family-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

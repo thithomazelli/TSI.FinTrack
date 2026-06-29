@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CreditCardService } from '../../../core/services/credit-card.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -14,7 +15,7 @@ import { CreditCard } from '../../../core/models/interfaces/credit-card.interfac
 @Component({
   selector: 'tsi-credit-cards-settings',
   standalone: true,
-  imports: [FormsModule],
+  imports: [TranslatePipe, FormsModule],
   templateUrl: './credit-cards-settings.component.html',
   styleUrls: ['./credit-cards-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

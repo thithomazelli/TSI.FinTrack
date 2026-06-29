@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CategoryService } from '../../../core/services/category.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -16,7 +17,7 @@ const DEFAULT_COLOR = '#6366f1';
 @Component({
   selector: 'tsi-categories-settings',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './categories-settings.component.html',
   styleUrls: ['./categories-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
