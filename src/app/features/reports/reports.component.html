@@ -3,12 +3,12 @@
   <!-- Filters bar -->
   <div class="page-header">
     <div>
-      <h2>Relatórios</h2>
-      <p class="subtitle">Análise financeira completa</p>
+      <h2>{{ 'reports.title' | translate }}</h2>
+      <p class="subtitle">{{ 'reports.subtitle' | translate }}</p>
     </div>
     <div class="filters">
       <div class="filter-group">
-        <label class="filter-label">Ano</label>
+        <label class="filter-label">{{ 'reports.year' | translate }}</label>
         <select class="form-select filter-select" [value]="filterYear()"
           (change)="filterYear.set(+$any($event.target).value); onYearChange()">
           @for (y of availableYears; track y) {
@@ -17,16 +17,16 @@
         </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Mês</label>
+        <label class="filter-label">{{ 'reports.month' | translate }}</label>
         <select class="form-select filter-select" [value]="filterMonth()"
           (change)="filterMonth.set(+$any($event.target).value); onMonthChange()">
           @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m; let i = $index) {
-            <option [value]="m">{{ ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][i] }}</option>
+            <option [value]="m">{{ monthAbbr(m) }}</option>
           }
         </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Meta renda</label>
+        <label class="filter-label">{{ 'reports.incomeTarget' | translate }}</label>
         <div class="target-wrap">
           <input type="number" class="form-input filter-input" [value]="incomeTarget()"
             (input)="incomeTarget.set(+$any($event.target).value)" min="10" max="100" />
@@ -49,13 +49,13 @@
 
     <!-- ── Seção 1: Visão Geral ── -->
     <div class="reports-section">
-      <h3 class="section-title">Visão Geral — {{ filterYear() }}</h3>
+      <h3 class="section-title">{{ 'reports.overview' | translate }} — {{ filterYear() }}</h3>
       <div class="charts-grid">
 
         <!-- Chart 3: Evolução mensal entradas × gastos × saldo -->
         <div class="chart-card chart-wide animate-fade-up stagger-1">
           <div class="chart-header">
-            <span class="chart-title">Evolução mensal — Entradas × Gastos × Saldo</span>
+            <span class="chart-title">{{ 'reports.monthlyEvolution' | translate }}</span>
           </div>
           <div class="chart-wrap">
             <canvas baseChart [data]="evolutionChartData()" [options]="lineOptions()" type="line"></canvas>
@@ -65,8 +65,8 @@
         <!-- Chart 1: % renda gasta por mês -->
         <div class="chart-card animate-fade-up stagger-2">
           <div class="chart-header">
-            <span class="chart-title">% da renda gasta por mês</span>
-            <span class="chart-hint">Meta: {{ incomeTarget() }}% · vermelho = acima da meta</span>
+            <span class="chart-title">{{ 'reports.pctIncomeSpent' | translate }}</span>
+            <span class="chart-hint">{{ 'reports.target' | translate }}: {{ incomeTarget() }}% · {{ 'reports.aboveTarget' | translate }}</span>
           </div>
           <div class="chart-wrap">
             <canvas baseChart [data]="incomeRatioChartData()" [options]="incomeRatioOptions()" type="bar"></canvas>
@@ -76,8 +76,8 @@
         <!-- Chart 5: Fluxo de caixa acumulado -->
         <div class="chart-card animate-fade-up stagger-3">
           <div class="chart-header">
-            <span class="chart-title">Fluxo de caixa acumulado</span>
-            <span class="chart-hint">Saldo líquido mês a mês</span>
+            <span class="chart-title">{{ 'reports.cashFlow' | translate }}</span>
+            <span class="chart-hint">{{ 'reports.netBalanceMonthly' | translate }}</span>
           </div>
           <div class="chart-wrap">
             <canvas baseChart [data]="cashFlowChartData()" [options]="lineOptions()" type="line"></canvas>
@@ -89,43 +89,41 @@
 
     <!-- ── Seção 2: Categorias ── -->
     <div class="reports-section">
-      <h3 class="section-title">Categorias</h3>
+      <h3 class="section-title">{{ 'reports.categories' | translate }}</h3>
       <div class="charts-grid">
 
         <!-- Chart 4: Ranking anual -->
         <div class="chart-card animate-fade-up stagger-1">
           <div class="chart-header">
-            <span class="chart-title">Ranking de gastos — {{ filterYear() }}</span>
+            <span class="chart-title">{{ 'reports.spendRanking' | translate }} — {{ filterYear() }}</span>
           </div>
           @if (categorySpend().length > 0) {
             <div class="chart-wrap">
               <canvas baseChart [data]="rankingBarData()" [options]="hBarOptions()" type="bar"></canvas>
             </div>
           } @else {
-            <p class="chart-empty">Sem dados para o ano selecionado.</p>
+            <p class="chart-empty">{{ 'reports.noDataYear' | translate }}</p>
           }
         </div>
 
         <!-- Chart 9: Média mensal por categoria -->
         <div class="chart-card animate-fade-up stagger-2">
           <div class="chart-header">
-            <span class="chart-title">Média mensal por categoria</span>
+            <span class="chart-title">{{ 'reports.avgMonthlyByCat' | translate }}</span>
           </div>
           @if (categorySpend().length > 0) {
             <div class="chart-wrap">
               <canvas baseChart [data]="avgMonthlyBarData()" [options]="hBarOptions()" type="bar"></canvas>
             </div>
           } @else {
-            <p class="chart-empty">Sem dados para o ano selecionado.</p>
+            <p class="chart-empty">{{ 'reports.noDataYear' | translate }}</p>
           }
         </div>
 
         <!-- Chart 2: Gastos por categoria no mês selecionado -->
         <div class="chart-card animate-fade-up stagger-3">
           <div class="chart-header">
-            <span class="chart-title">Gastos por categoria —
-              {{ ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][filterMonth()-1] }}/{{ filterYear() }}
-            </span>
+            <span class="chart-title">{{ 'reports.spendByCat' | translate }} — {{ monthAbbr(filterMonth()) }}/{{ filterYear() }}</span>
           </div>
           @if (monthCategorySpend().length > 0) {
             <div class="chart-wrap chart-wrap-sm">
@@ -141,14 +139,14 @@
               }
             </div>
           } @else {
-            <p class="chart-empty">Sem gastos registrados neste mês.</p>
+            <p class="chart-empty">{{ 'reports.noSpendMonth' | translate }}</p>
           }
         </div>
 
         <!-- Chart 8: Despesa por forma de pagamento -->
         <div class="chart-card animate-fade-up stagger-4">
           <div class="chart-header">
-            <span class="chart-title">Forma de pagamento — {{ filterYear() }}</span>
+            <span class="chart-title">{{ 'reports.paymentMethod' | translate }} — {{ filterYear() }}</span>
           </div>
           @if (paymentTypeSpend().length > 0) {
             <div class="chart-wrap chart-wrap-sm">
@@ -164,7 +162,7 @@
               }
             </div>
           } @else {
-            <p class="chart-empty">Sem dados para o ano selecionado.</p>
+            <p class="chart-empty">{{ 'reports.noDataYear' | translate }}</p>
           }
         </div>
 
@@ -173,13 +171,13 @@
 
     <!-- ── Seção 3: Comparativos ── -->
     <div class="reports-section">
-      <h3 class="section-title">Comparativos</h3>
+      <h3 class="section-title">{{ 'reports.comparisons' | translate }}</h3>
       <div class="charts-grid">
 
         <!-- Chart 6: Ano a ano por categoria -->
         <div class="chart-card chart-wide animate-fade-up stagger-1">
           <div class="chart-header">
-            <span class="chart-title">Comparativo ano a ano — top categorias</span>
+            <span class="chart-title">{{ 'reports.yoyTopCats' | translate }}</span>
             <span class="chart-hint">{{ filterYear() - 1 }} vs {{ filterYear() }}</span>
           </div>
           @if (categorySpend().length > 0) {
@@ -187,20 +185,20 @@
               <canvas baseChart [data]="yoyChartData()" [options]="yoyOptions()" type="bar"></canvas>
             </div>
           } @else {
-            <p class="chart-empty">Sem dados suficientes para comparação.</p>
+            <p class="chart-empty">{{ 'reports.noDataCompare' | translate }}</p>
           }
         </div>
 
         <!-- Chart 7: Evolução de categoria específica (24 meses) -->
         <div class="chart-card chart-wide animate-fade-up stagger-2">
           <div class="chart-header">
-            <span class="chart-title">Evolução por categoria — últimos 24 meses</span>
+            <span class="chart-title">{{ 'reports.catEvolution' | translate }}</span>
           </div>
           <div class="chart-filter-inline">
-            <label class="filter-label">Categoria</label>
+            <label class="filter-label">{{ 'common.category' | translate }}</label>
             <select class="form-select filter-select" [value]="filterCategoryId()"
               (change)="filterCategoryId.set($any($event.target).value); onCategoryChange()">
-              <option value="">Selecione uma categoria...</option>
+              <option value="">{{ 'reports.selectCategory' | translate }}</option>
               @for (cat of categories(); track cat.id) {
                 <option [value]="cat.id">{{ cat.name }}</option>
               }
@@ -213,7 +211,7 @@
               <canvas baseChart [data]="catEvolChartData()" [options]="lineOptions()" type="line"></canvas>
             </div>
           } @else {
-            <p class="chart-empty">Selecione uma categoria para ver a evolução nos últimos 24 meses.</p>
+            <p class="chart-empty">{{ 'reports.selectCatHint' | translate }}</p>
           }
         </div>
 
@@ -223,12 +221,12 @@
     <!-- ── Seção 4: Poupança ── -->
     @if (savingsMovements().length > 0) {
       <div class="reports-section">
-        <h3 class="section-title">Poupança</h3>
+        <h3 class="section-title">{{ 'reports.savings' | translate }}</h3>
         <div class="charts-grid">
           <!-- Chart 11: Evolução saldo poupança -->
           <div class="chart-card chart-wide animate-fade-up stagger-1">
             <div class="chart-header">
-              <span class="chart-title">Evolução do saldo em poupança</span>
+              <span class="chart-title">{{ 'reports.savingsEvolution' | translate }}</span>
             </div>
             <div class="chart-wrap">
               <canvas baseChart [data]="savingsChartData()" [options]="lineOptions()" type="line"></canvas>
@@ -240,18 +238,18 @@
 
     <!-- ── Seção 5: Resumo numérico ── -->
     <div class="reports-section">
-      <h3 class="section-title">Resumo — {{ filterYear() }}</h3>
+      <h3 class="section-title">{{ 'reports.summary' | translate }} — {{ filterYear() }}</h3>
       <div class="summary-row animate-fade-up stagger-1">
         <div class="summary-stat">
-          <span class="stat-label">Total entradas</span>
+          <span class="stat-label">{{ 'reports.totalIncome' | translate }}</span>
           <span class="stat-value income">{{ formatCurrency(monthlyPoints().reduce(toIncome, 0)) }}</span>
         </div>
         <div class="summary-stat">
-          <span class="stat-label">Total gastos</span>
+          <span class="stat-label">{{ 'reports.totalExpenses' | translate }}</span>
           <span class="stat-value expense">{{ formatCurrency(monthlyPoints().reduce(toExpense, 0)) }}</span>
         </div>
         <div class="summary-stat">
-          <span class="stat-label">Saldo líquido</span>
+          <span class="stat-label">{{ 'reports.netBalance' | translate }}</span>
           <span class="stat-value"
             [class.income]="monthlyPoints().reduce(toBalance, 0) >= 0"
             [class.expense]="monthlyPoints().reduce(toBalance, 0) < 0">
@@ -260,7 +258,7 @@
         </div>
         @if (categorySpend().length > 0) {
           <div class="summary-stat">
-            <span class="stat-label">Maior gasto</span>
+            <span class="stat-label">{{ 'reports.topExpense' | translate }}</span>
             <span class="stat-value">{{ categorySpend()[0].name }}</span>
             <span class="stat-sub">{{ formatCurrency(categorySpend()[0].amount) }}</span>
           </div>

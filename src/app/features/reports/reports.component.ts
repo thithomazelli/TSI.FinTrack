@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
+import { LanguageService } from '../../core/services/language.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
@@ -56,7 +58,7 @@ interface CalendarEvent {
 @Component({
   selector: 'tsi-reports',
   standalone: true,
-  imports: [FormsModule, BaseChartDirective],
+  imports: [FormsModule, BaseChartDirective, TranslatePipe],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,7 +70,16 @@ export class ReportsComponent implements OnInit {
   private readonly savingsService = inject(SavingsService);
   private readonly logger = inject(LoggingService);
   readonly themeService = inject(ThemeService);
+  private readonly language = inject(LanguageService);
   private readonly destroyRef = inject(DestroyRef);
+
+  /** Abreviação do mês (1-12) no idioma atual. */
+  monthAbbr(month: number): string {
+    const d = new Date(2020, month - 1, 1);
+    return d.toLocaleDateString(this.language.current(), { month: 'short' })
+      .replace('.', '')
+      .replace(/^\w/, c => c.toUpperCase());
+  }
 
   readonly loading = signal(true);
   readonly loadingCatEvol = signal(false);
