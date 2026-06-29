@@ -8,6 +8,8 @@ import {
 } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { EntryService, CreateEntryPayload } from '../../core/services/entry.service';
 import { TransactionService, CreateTransactionPayload } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -26,6 +28,10 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
+import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
+import { ThemeService } from '../../core/services/theme.service';
+
+Chart.register(...registerables);
 
 export interface MovimentoItem {
   kind: 'entry' | 'transaction';
@@ -46,7 +52,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 @Component({
   selector: 'tsi-movimentos',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective],
   templateUrl: './movimentos.component.html',
   styleUrls: ['./movimentos.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +68,7 @@ export class MovimentosComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
+  readonly themeService = inject(ThemeService);
 
   readonly TransactionStatus = TransactionStatus;
 
@@ -80,6 +87,11 @@ export class MovimentosComponent implements OnInit {
   readonly filterTipo = signal<'all' | 'entry' | 'transaction'>('all');
   readonly filterStatus = signal<'all' | 'REALIZED' | 'PROJECTED'>('all');
   readonly filterCategoryId = signal<string>('');
+
+  // Período: 'month' = mês único, 'range' = intervalo personalizado
+  readonly periodMode = signal<'month' | 'range'>('month');
+  readonly year = signal<number>(new Date().getFullYear());
+  readonly month = signal<number>(new Date().getMonth() + 1);
 
   private defaultFrom(): string {
     const now = new Date();
@@ -177,6 +189,53 @@ export class MovimentosComponent implements OnInit {
 
   readonly saldo = computed(() => this.totalEntradas() - this.totalSaidas());
 
+  // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
+  readonly categorySpend = computed(() => {
+    const map = new Map<string, number>();
+    for (const item of this.filteredItems()) {
+      if (item.kind !== 'transaction') continue;
+      const key = item.categoryId || '__sem__';
+      map.set(key, (map.get(key) ?? 0) + item.amount);
+    }
+    return [...map.entries()]
+      .map(([categoryId, amount]) => ({
+        categoryId,
+        name: categoryId === '__sem__' ? 'Sem categoria' : this.categoryName(categoryId) || 'Sem categoria',
+        color: categoryId === '__sem__' ? '#9ca3af' : this.categoryColor(categoryId),
+        amount,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  });
+
+  readonly categoryPieData = computed<ChartData<'doughnut'>>(() => ({
+    labels: this.categorySpend().map(c => c.name),
+    datasets: [{
+      data: this.categorySpend().map(c => c.amount),
+      backgroundColor: this.categorySpend().map(c => c.color),
+      borderWidth: 2,
+      borderColor: this.themeService.isDark() ? '#1a1d27' : '#ffffff',
+    }],
+  }));
+
+  readonly doughnutOptions = computed<ChartConfiguration<'doughnut'>['options']>(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => {
+            const v = ctx.parsed as number;
+            const total = this.categorySpend().reduce((s, c) => s + c.amount, 0) || 1;
+            const pct = ((v / total) * 100).toFixed(1);
+            return ` ${ctx.label}: R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${pct}%)`;
+          },
+        },
+      },
+    },
+  } as ChartConfiguration<'doughnut'>['options']));
+
   ngOnInit(): void {
     this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
     this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
@@ -240,6 +299,28 @@ export class MovimentosComponent implements OnInit {
   }
 
   onDateChange(): void {
+    this.load();
+  }
+
+  setPeriodMode(mode: 'month' | 'range'): void {
+    this.periodMode.set(mode);
+    if (mode === 'month') {
+      this.applyMonth(this.year(), this.month());
+    }
+  }
+
+  onMonthChanged(e: { year: number; month: number }): void {
+    this.year.set(e.year);
+    this.month.set(e.month);
+    this.applyMonth(e.year, e.month);
+  }
+
+  private applyMonth(year: number, month: number): void {
+    const from = `${year}-${String(month).padStart(2, '0')}-01`;
+    const last = new Date(year, month, 0).getDate();
+    const to = `${year}-${String(month).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+    this.dateFrom.set(from);
+    this.dateTo.set(to);
     this.load();
   }
 

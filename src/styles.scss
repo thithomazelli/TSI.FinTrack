@@ -310,11 +310,13 @@ body {
 .modal {
   position: fixed;
   top: 50%;
-  left: calc(230px + (100vw - 230px) / 2);
-  transform: translate(-50%, -50%);
+  left: 230px;
+  right: 0;
+  margin-inline: auto;
+  transform: translateY(-50%);
 
   @media (max-width: 768px) {
-    left: 50%;
+    left: 0;
   }
   z-index: 201;
   width: min(560px, calc(100vw - 2rem));
@@ -325,7 +327,7 @@ body {
   border-radius: var(--radius-lg);
   padding: 1.75rem;
   box-shadow: var(--shadow-lg);
-  animation: scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: modalIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
   transition: background var(--transition), border-color var(--transition);
 
   &.modal-lg {
@@ -343,6 +345,11 @@ body {
     max-height: 92vh;
     animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(-50%) scale(0.96); }
+  to   { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
 @keyframes slideUpMobile {

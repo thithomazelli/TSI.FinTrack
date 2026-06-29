@@ -105,8 +105,10 @@
 .modal {
   position: fixed;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  left: 230px;
+  right: 0;
+  margin-inline: auto;
+  transform: translateY(-50%);
   z-index: 401;
   width: min(480px, calc(100vw - 2rem));
   background: var(--color-surface);
@@ -116,6 +118,8 @@
   animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   &--sm { width: min(380px, calc(100vw - 2rem)); }
+
+  @media (max-width: 768px) { left: 0; }
 
   @media (max-width: 480px) {
     top: auto;
@@ -210,5 +214,5 @@
 }
 
 @keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
-@keyframes scaleIn { from { opacity: 0; transform: translate(-50%, -48%) scale(0.96) } to { opacity: 1; transform: translate(-50%, -50%) scale(1) } }
+@keyframes scaleIn { from { opacity: 0; transform: translateY(-50%) scale(0.96) } to { opacity: 1; transform: translateY(-50%) scale(1) } }
 @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }

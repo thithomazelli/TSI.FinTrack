@@ -20,38 +20,56 @@
 
   <!-- Filters -->
   <div class="filter-bar">
-    <div class="filter-group">
-      <label class="filter-label">De</label>
-      <input class="input input-sm" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); onDateChange()" />
+    <!-- Período -->
+    <div class="filter-section filter-section--period">
+      <div class="period-toggle">
+        <button type="button" class="period-tab" [class.is-active]="periodMode() === 'month'" (click)="setPeriodMode('month')">Mês</button>
+        <button type="button" class="period-tab" [class.is-active]="periodMode() === 'range'" (click)="setPeriodMode('range')">Intervalo</button>
+      </div>
+
+      @if (periodMode() === 'month') {
+        <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+      } @else {
+        <div class="range-fields">
+          <div class="filter-group">
+            <label class="filter-label">De</label>
+            <input class="input input-sm" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); onDateChange()" />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Até</label>
+            <input class="input input-sm" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); onDateChange()" />
+          </div>
+        </div>
+      }
     </div>
-    <div class="filter-group">
-      <label class="filter-label">Até</label>
-      <input class="input input-sm" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); onDateChange()" />
-    </div>
-    <div class="filter-group">
-      <label class="filter-label">Tipo</label>
-      <select class="input input-sm" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
-        <option value="all">Todos</option>
-        <option value="entry">Entradas</option>
-        <option value="transaction">Saídas</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label">Status</label>
-      <select class="input input-sm" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
-        <option value="all">Todos</option>
-        <option value="REALIZED">Realizado</option>
-        <option value="PROJECTED">Projetado</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label">Categoria</label>
-      <select class="input input-sm" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
-        <option value="">Todas</option>
-        @for (cat of categories(); track cat.id) {
-          <option [value]="cat.id">{{ cat.name }}</option>
-        }
-      </select>
+
+    <!-- Refinos -->
+    <div class="filter-section filter-section--refine">
+      <div class="filter-group">
+        <label class="filter-label">Tipo</label>
+        <select class="input input-sm" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
+          <option value="all">Todos</option>
+          <option value="entry">Entradas</option>
+          <option value="transaction">Saídas</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select class="input input-sm" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+          <option value="all">Todos</option>
+          <option value="REALIZED">Realizado</option>
+          <option value="PROJECTED">Projetado</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Categoria</label>
+        <select class="input input-sm" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
+          <option value="">Todas</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
     </div>
   </div>
 
@@ -70,6 +88,30 @@
       <span class="summary-value">R$ {{ saldo() | number:'1.2-2' }}</span>
     </div>
   </div>
+
+  <!-- Gráfico de pizza por categoria -->
+  @if (!loading() && categorySpend().length > 0) {
+    <div class="pie-card">
+      <div class="pie-header">
+        <h3 class="pie-title">Saídas por categoria</h3>
+        <span class="pie-total">Total: R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+      </div>
+      <div class="pie-body">
+        <div class="pie-chart-wrap">
+          <canvas baseChart [data]="categoryPieData()" [options]="doughnutOptions()" type="doughnut"></canvas>
+        </div>
+        <div class="pie-legend">
+          @for (cat of categorySpend(); track cat.categoryId) {
+            <div class="pie-legend-row">
+              <span class="pie-dot" [style.background]="cat.color"></span>
+              <span class="pie-legend-name">{{ cat.name }}</span>
+              <span class="pie-legend-val">R$ {{ cat.amount | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Table -->
   @if (loading()) {
