@@ -62,7 +62,7 @@
   <div class="backdrop" (click)="closeForm()"></div>
   <div class="modal">
     <h3 class="modal-title">{{ editingId() ? 'Editar Cartão' : 'Novo Cartão' }}</h3>
-    <div class="form-field">
+    <div class="form-field" style="margin-bottom:1rem">
       <label>Nome</label>
       <input class="input" [(ngModel)]="formName" />
     </div>
