@@ -1,7 +1,8 @@
-<div class="bills-header">
-  <h2 class="bills-title">Faturas</h2>
-  <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
-</div>
+<div class="page">
+  <div class="page-header">
+    <h2 class="page-title">Faturas</h2>
+    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+  </div>
 
 @if (loading()) {
   <p class="state-msg">Carregando...</p>
@@ -73,3 +74,4 @@
     </div>
   }
 }
+</div>
