@@ -1,0 +1,17 @@
+<div class="lang-switcher" [class.lang-switcher--full]="variant() === 'full'">
+  @for (opt of lang.languages; track opt.code) {
+    <button
+      type="button"
+      class="lang-btn"
+      [class.active]="lang.current() === opt.code"
+      (click)="select(opt.code)"
+      [title]="opt.label"
+      [attr.aria-label]="opt.label"
+    >
+      <span class="lang-flag">{{ opt.flag }}</span>
+      @if (variant() === 'full') {
+        <span class="lang-label">{{ opt.label }}</span>
+      }
+    </button>
+  }
+</div>

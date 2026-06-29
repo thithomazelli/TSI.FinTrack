@@ -55,7 +55,10 @@
     "goals": "Metas",
     "reports": "Relatórios",
     "import": "Importar",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "movements": "Movimentos",
+    "bills": "Faturas",
+    "recurring": "Recorrentes"
   },
   "auth": {
     "signIn": "Entrar",
@@ -195,5 +198,13 @@
     "revoke": "Revogar acesso",
     "pending": "Pendente",
     "revokeConfirm": "Revogar o acesso de \"{{name}}\"?"
+  },
+  "theme": {
+    "light": "Modo claro",
+    "dark": "Modo escuro"
+  },
+  "language": {
+    "title": "Idioma",
+    "select": "Selecionar idioma"
   }
 }

@@ -6,6 +6,8 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
+import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher/language-switcher.component';
 import { AuthService } from '../../../core/auth/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { TelegramService, TelegramSubscription } from '../../../core/services/telegram.service';
@@ -16,7 +18,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'tsi-profile-settings',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe, LanguageSwitcherComponent],
   templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

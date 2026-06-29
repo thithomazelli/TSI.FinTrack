@@ -5,12 +5,13 @@
         <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
-    <span class="breadcrumb">{{ pageTitle }}</span>
+    <span class="breadcrumb">{{ pageTitleKey ? (pageTitleKey | translate) : 'TSI FinTrack' }}</span>
   </div>
 
   @if (session$ | async; as session) {
     <div class="header-right">
-      <button class="btn-theme" (click)="themeService.toggle()" [title]="themeService.isDark() ? 'Modo claro' : 'Modo escuro'">
+      <tsi-language-switcher variant="compact" />
+      <button class="btn-theme" (click)="themeService.toggle()" [title]="(themeService.isDark() ? 'theme.light' : 'theme.dark') | translate">
         @if (themeService.isDark()) {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>

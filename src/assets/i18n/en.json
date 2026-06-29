@@ -55,7 +55,10 @@
     "goals": "Goals",
     "reports": "Reports",
     "import": "Import",
-    "settings": "Settings"
+    "settings": "Settings",
+    "movements": "Movements",
+    "bills": "Bills",
+    "recurring": "Recurring"
   },
   "auth": {
     "signIn": "Sign In",
@@ -195,5 +198,13 @@
     "revoke": "Revoke access",
     "pending": "Pending",
     "revokeConfirm": "Revoke access for \"{{name}}\"?"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode"
+  },
+  "language": {
+    "title": "Language",
+    "select": "Select language"
   }
 }

@@ -2,6 +2,12 @@
   @if (loading()) {
     <p class="loading-text">Carregando...</p>
   } @else {
+    <!-- Language section -->
+    <section class="settings-section">
+      <h3 class="section-title">{{ 'language.title' | translate }}</h3>
+      <tsi-language-switcher variant="full" />
+    </section>
+
     <!-- Profile form -->
     <section class="settings-section">
       <h3 class="section-title">Dados pessoais</h3>

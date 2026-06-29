@@ -1,0 +1,52 @@
+.lang-switcher {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+
+  &--full {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.5;
+  filter: grayscale(0.4);
+  transition: opacity 0.15s, border-color 0.15s, background 0.15s, filter 0.15s;
+
+  &:hover { opacity: 0.85; filter: grayscale(0); }
+
+  &.active {
+    opacity: 1;
+    filter: grayscale(0);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+}
+
+.lang-flag { font-size: 1.15rem; }
+
+.lang-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Variante full: botões maiores em coluna/linha */
+.lang-switcher--full .lang-btn {
+  padding: 8px 14px;
+  border: 1.5px solid var(--color-border);
+}
+.lang-switcher--full .lang-btn.active {
+  border-color: var(--color-accent);
+}
