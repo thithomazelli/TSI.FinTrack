@@ -1,6 +1,6 @@
 <div class="page">
   <div class="page-header">
-    <h2 class="page-title">{{ 'transactions.title' | translate }}</h2>
+    <h2 class="page-title">Transações</h2>
     <div class="header-right">
       <tsi-month-picker
         [year]="year()"
@@ -8,38 +8,38 @@
         (monthChanged)="onMonthChanged($event)"
       />
       <button class="btn btn-primary" (click)="openCreate()">
-        + {{ 'transactions.add' | translate }}
+        + Nova Transação
       </button>
     </div>
   </div>
 
   <div class="summary-bar">
     <div class="summary-item summary-item--realized">
-      <span class="summary-label">{{ 'transactions.realized' | translate }}</span>
+      <span class="summary-label">Realizado</span>
       <span class="summary-value">{{ totalRealized() | number:'1.2-2' }}</span>
     </div>
     <div class="summary-item summary-item--projected">
-      <span class="summary-label">{{ 'transactions.projected' | translate }}</span>
+      <span class="summary-label">Projetado</span>
       <span class="summary-value">{{ totalProjected() | number:'1.2-2' }}</span>
     </div>
   </div>
 
   @if (loading()) {
-    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+    <p class="state-msg">Carregando...</p>
   } @else if (transactions().length === 0) {
-    <p class="state-msg">{{ 'common.noResults' | translate }}</p>
+    <p class="state-msg">Nenhum resultado encontrado.</p>
   } @else {
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>{{ 'common.date' | translate }}</th>
-            <th>{{ 'common.description' | translate }}</th>
-            <th>{{ 'common.category' | translate }}</th>
-            <th>{{ 'common.account' | translate }}</th>
-            <th class="text-right">{{ 'common.amount' | translate }}</th>
-            <th>{{ 'common.status' | translate }}</th>
-            <th>{{ 'common.actions' | translate }}</th>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Conta</th>
+            <th class="text-right">Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -82,17 +82,13 @@
                   [class.badge-realized]="tx.status === TransactionStatus.Realized"
                   [class.badge-projected]="tx.status === TransactionStatus.Projected"
                 >
-                  {{ (tx.status === TransactionStatus.Realized ? 'transactions.realized' : 'transactions.projected') | translate }}
+                  {{ tx.status === TransactionStatus.Realized ? 'Realizado' : 'Projetado' }}
                 </span>
               </td>
               <td>
                 <div class="item-actions">
-                  <button class="btn btn-ghost btn-sm" (click)="openEdit(tx)">
-                    {{ 'common.edit' | translate }}
-                  </button>
-                  <button class="btn btn-danger-ghost btn-sm" (click)="delete(tx)">
-                    {{ 'common.delete' | translate }}
-                  </button>
+                  <button class="btn btn-ghost btn-sm" (click)="openEdit(tx)">Editar</button>
+                  <button class="btn btn-danger-ghost btn-sm" (click)="delete(tx)">Excluir</button>
                 </div>
               </td>
             </tr>
@@ -107,36 +103,36 @@
   <div class="modal-backdrop" (click)="closeForm()"></div>
   <div class="modal modal-lg">
     <h3 class="modal-title">
-      {{ (editingId() ? 'transactions.edit' : 'transactions.add') | translate }}
+      {{ editingId() ? 'Editar Transação' : 'Nova Transação' }}
     </h3>
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.description' | translate }}</label>
+        <label>Descrição</label>
         <input class="input" [(ngModel)]="formDescription" />
       </div>
       <div class="form-field form-field--sm">
-        <label>{{ 'common.amount' | translate }}</label>
+        <label>Valor</label>
         <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formAmount" />
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.date' | translate }}</label>
+        <label>Data</label>
         <input class="input" type="date" [(ngModel)]="formDate" />
       </div>
       <div class="form-field">
-        <label>{{ 'common.status' | translate }}</label>
+        <label>Status</label>
         <select class="input" [(ngModel)]="formStatus">
-          <option [value]="TransactionStatus.Realized">{{ 'transactions.realized' | translate }}</option>
-          <option [value]="TransactionStatus.Projected">{{ 'transactions.projected' | translate }}</option>
+          <option [value]="TransactionStatus.Realized">Realizado</option>
+          <option [value]="TransactionStatus.Projected">Projetado</option>
         </select>
       </div>
     </div>
 
     <div class="form-field">
-      <label>{{ 'common.category' | translate }}</label>
+      <label>Categoria</label>
       <select class="input" [(ngModel)]="formCategoryId">
         <option value="">—</option>
         @for (cat of categories(); track cat.id) {
@@ -147,7 +143,7 @@
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.account' | translate }}</label>
+        <label>Conta</label>
         <select class="input" [(ngModel)]="formAccountId" [disabled]="!!formCreditCardId">
           <option value="">—</option>
           @for (acc of accounts(); track acc.id) {
@@ -156,7 +152,7 @@
         </select>
       </div>
       <div class="form-field">
-        <label>{{ 'transactions.creditCard' | translate }}</label>
+        <label>Cartão de Crédito</label>
         <select class="input" [(ngModel)]="formCreditCardId">
           <option value="">—</option>
           @for (card of cards(); track card.id) {
@@ -169,17 +165,17 @@
     <div class="form-toggles">
       <label class="toggle-label">
         <input type="checkbox" [(ngModel)]="formIsInstallment" />
-        {{ 'transactions.installments' | translate }}
+        Parcelado
       </label>
       <label class="toggle-label">
         <input type="checkbox" [(ngModel)]="formIsInternational" />
-        {{ 'transactions.international' | translate }}
+        Internacional
       </label>
     </div>
 
     @if (formIsInstallment) {
       <div class="form-field">
-        <label>{{ 'transactions.installmentCount' | translate }}</label>
+        <label>Número de Parcelas</label>
         <input class="input" type="number" min="2" max="48" [(ngModel)]="formInstallments" />
       </div>
     }
@@ -187,33 +183,33 @@
     @if (formIsInternational) {
       <div class="form-row">
         <div class="form-field">
-          <label>{{ 'transactions.currency' | translate }}</label>
+          <label>Moeda</label>
           <input class="input" [(ngModel)]="formOriginalCurrency" maxlength="3" />
         </div>
         <div class="form-field">
-          <label>{{ 'transactions.originalAmount' | translate }}</label>
+          <label>Valor Original</label>
           <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formOriginalAmount" />
         </div>
         <div class="form-field">
-          <label>{{ 'transactions.exchangeRate' | translate }}</label>
+          <label>Taxa de Câmbio</label>
           <input class="input" type="number" min="0" step="0.0001" [(ngModel)]="formExchangeRate" />
         </div>
       </div>
     }
 
     <div class="form-field">
-      <label>{{ 'transactions.labels' | translate }}</label>
+      <label>Etiquetas</label>
       <tsi-labels-input [(labels)]="formLabels" />
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-ghost" (click)="closeForm()">Cancelar</button>
       <button
         class="btn btn-primary"
         (click)="save()"
         [disabled]="saving() || !formDescription.trim() || formAmount <= 0"
       >
-        {{ 'common.save' | translate }}
+        Salvar
       </button>
     </div>
   </div>

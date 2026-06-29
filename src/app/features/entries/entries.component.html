@@ -1,6 +1,6 @@
 <div class="page">
   <div class="page-header">
-    <h2 class="page-title">{{ 'entries.title' | translate }}</h2>
+    <h2 class="page-title">Entradas</h2>
     <div class="header-right">
       <tsi-month-picker
         [year]="year()"
@@ -8,7 +8,7 @@
         (monthChanged)="onMonthChanged($event)"
       />
       <button class="btn btn-primary" (click)="openCreate()">
-        + {{ 'entries.add' | translate }}
+        + Nova Entrada
       </button>
     </div>
   </div>
@@ -19,20 +19,20 @@
   </div>
 
   @if (loading()) {
-    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+    <p class="state-msg">Carregando...</p>
   } @else if (entries().length === 0) {
-    <p class="state-msg">{{ 'common.noResults' | translate }}</p>
+    <p class="state-msg">Nenhum resultado encontrado.</p>
   } @else {
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>{{ 'common.date' | translate }}</th>
-            <th>{{ 'common.description' | translate }}</th>
-            <th>{{ 'entries.type' | translate }}</th>
-            <th>{{ 'common.account' | translate }}</th>
-            <th class="text-right">{{ 'common.amount' | translate }}</th>
-            <th>{{ 'common.actions' | translate }}</th>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th>Conta</th>
+            <th class="text-right">Valor</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -58,10 +58,10 @@
               <td>
                 <div class="item-actions">
                   <button class="btn btn-ghost btn-sm" (click)="openEdit(entry)">
-                    {{ 'common.edit' | translate }}
+                    Editar
                   </button>
                   <button class="btn btn-danger-ghost btn-sm" (click)="delete(entry)">
-                    {{ 'common.delete' | translate }}
+                    Excluir
                   </button>
                 </div>
               </td>
@@ -77,21 +77,21 @@
   <div class="modal-backdrop" (click)="closeForm()"></div>
   <div class="modal">
     <h3 class="modal-title">
-      {{ (editingId() ? 'entries.edit' : 'entries.add') | translate }}
+      {{ editingId() ? 'Editar Entrada' : 'Nova Entrada' }}
     </h3>
 
     <div class="form-field">
-      <label>{{ 'common.description' | translate }}</label>
+      <label>Descrição</label>
       <input class="input" [(ngModel)]="formDescription" />
     </div>
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.amount' | translate }}</label>
+        <label>Valor</label>
         <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formAmount" />
       </div>
       <div class="form-field">
-        <label>{{ 'common.date' | translate }}</label>
+        <label>Data</label>
         <input class="input" type="date" [(ngModel)]="formDate" />
       </div>
     </div>
@@ -105,7 +105,7 @@
         </select>
       </div>
       <div class="form-field">
-        <label>{{ 'entries.type' | translate }}</label>
+        <label>Tipo</label>
         <select class="input" [(ngModel)]="formTypeId">
           <option value="">—</option>
           @for (type of entryTypes(); track type.id) {
@@ -114,7 +114,7 @@
         </select>
       </div>
       <div class="form-field">
-        <label>{{ 'common.account' | translate }}</label>
+        <label>Conta</label>
         <select class="input" [(ngModel)]="formAccountId">
           <option value="">—</option>
           @for (acc of accounts(); track acc.id) {
@@ -125,18 +125,18 @@
     </div>
 
     <div class="form-field">
-      <label>{{ 'entries.labels' | translate }}</label>
+      <label>Etiquetas</label>
       <tsi-labels-input [(labels)]="formLabels" />
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-ghost" (click)="closeForm()">Cancelar</button>
       <button
         class="btn btn-primary"
         (click)="save()"
         [disabled]="saving() || !formDescription.trim() || formAmount <= 0"
       >
-        {{ 'common.save' | translate }}
+        Salvar
       </button>
     </div>
   </div>

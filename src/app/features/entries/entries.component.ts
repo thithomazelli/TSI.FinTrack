@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { EntryService, CreateEntryPayload } from '../../core/services/entry.service';
 import { AccountService } from '../../core/services/account.service';
 import { DomainListService } from '../../core/services/domain-list.service';
@@ -23,7 +22,7 @@ import { LabelsInputComponent } from '../../shared/components/labels-input/label
 @Component({
   selector: 'tsi-entries',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, TranslatePipe, MonthPickerComponent, LabelsInputComponent],
+  imports: [DecimalPipe, FormsModule, MonthPickerComponent, LabelsInputComponent],
   templateUrl: './entries.component.html',
   styleUrls: ['./entries.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,327 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <h2 class="page-title">Movimentos</h2>
+    <div class="header-actions">
+      <button class="btn-nova btn-nova--entrada" (click)="openCreateEntry()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nova Entrada
+      </button>
+      <button class="btn-nova btn-nova--saida" (click)="openCreateTransaction()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nova Transação
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">De</label>
+      <input class="input input-sm" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); onDateChange()" />
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Até</label>
+      <input class="input input-sm" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); onDateChange()" />
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Tipo</label>
+      <select class="input input-sm" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
+        <option value="all">Todos</option>
+        <option value="entry">Entradas</option>
+        <option value="transaction">Saídas</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Status</label>
+      <select class="input input-sm" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+        <option value="all">Todos</option>
+        <option value="REALIZED">Realizado</option>
+        <option value="PROJECTED">Projetado</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Categoria</label>
+      <select class="input input-sm" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
+        <option value="">Todas</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="summary-bar">
+    <div class="summary-card summary-card--entrada">
+      <span class="summary-label">Total Entradas</span>
+      <span class="summary-value">R$ {{ totalEntradas() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card summary-card--saida">
+      <span class="summary-label">Total Saídas</span>
+      <span class="summary-value">R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card" [class.summary-card--positivo]="saldo() >= 0" [class.summary-card--negativo]="saldo() < 0">
+      <span class="summary-label">Saldo</span>
+      <span class="summary-value">R$ {{ saldo() | number:'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  @if (loading()) {
+    <p class="state-msg">Carregando...</p>
+  } @else if (filteredItems().length === 0) {
+    <p class="state-msg">Nenhum movimento encontrado.</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Cartão/Conta</th>
+            <th class="text-right">Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredItems(); track item.id) {
+            <tr>
+              <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
+                  {{ item.kind === 'entry' ? 'Entrada' : 'Saída' }}
+                </span>
+              </td>
+              <td>
+                <div class="desc-cell">
+                  <span>{{ item.description }}</span>
+                  @if (item.kind === 'transaction' && $any(item.raw).totalInstallments > 1) {
+                    <span class="sub-badge">{{ $any(item.raw).installmentNumber }}/{{ $any(item.raw).totalInstallments }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                @if (item.kind === 'transaction') {
+                  <div class="cat-cell">
+                    <span class="cat-dot" [style.background]="categoryColor(item.categoryId)"></span>
+                    {{ categoryName(item.categoryId) }}
+                  </div>
+                } @else {
+                  <span class="col-muted">{{ typeName(item.typeId) }}</span>
+                }
+              </td>
+              <td class="col-muted">{{ payerName(item) }}</td>
+              <td class="col-amount text-right" [class.amount-entrada]="item.kind === 'entry'" [class.amount-saida]="item.kind === 'transaction'">
+                R$ {{ item.amount | number:'1.2-2' }}
+              </td>
+              <td>
+                <span class="status-pill" [class.status-pill--realized]="item.status === 'REALIZED'" [class.status-pill--projected]="item.status === 'PROJECTED'">
+                  {{ item.status === 'REALIZED' ? 'Realizado' : 'Projetado' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-btns">
+                  <button class="action-btn action-btn--edit" (click)="openEdit(item)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                    </svg>
+                    Editar
+                  </button>
+                  <button class="action-btn action-btn--delete" (click)="delete(item)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    Excluir
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Entry Modal -->
+@if (modalMode() === 'entry') {
+  <div class="modal-backdrop" (click)="closeModal()"></div>
+  <div class="modal">
+    <h3 class="modal-title">{{ editingId() ? 'Editar Entrada' : 'Nova Entrada' }}</h3>
+
+    <div class="form-field">
+      <label>Descrição</label>
+      <input class="input" [(ngModel)]="formEntryDescription" placeholder="Descrição" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Valor</label>
+        <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formEntryAmount" />
+      </div>
+      <div class="form-field">
+        <label>Data</label>
+        <input class="input" type="date" [(ngModel)]="formEntryDate" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Status</label>
+        <select class="input" [(ngModel)]="formEntryStatus">
+          <option value="REALIZED">Realizado</option>
+          <option value="PROJECTED">Projetado</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Tipo</label>
+        <select class="input" [(ngModel)]="formEntryTypeId">
+          <option value="">—</option>
+          @for (type of entryTypes(); track type.id) {
+            <option [value]="type.id">{{ type.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Conta</label>
+        <select class="input" [(ngModel)]="formEntryAccountId">
+          <option value="">—</option>
+          @for (acc of accounts(); track acc.id) {
+            <option [value]="acc.id">{{ acc.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Etiquetas</label>
+      <tsi-labels-input [(labels)]="formEntryLabels" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveEntry()" [disabled]="saving() || !formEntryDescription.trim() || formEntryAmount <= 0">
+        Salvar
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Transaction Modal -->
+@if (modalMode() === 'transaction') {
+  <div class="modal-backdrop" (click)="closeModal()"></div>
+  <div class="modal modal-lg">
+    <h3 class="modal-title">{{ editingId() ? 'Editar Transação' : 'Nova Transação' }}</h3>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Descrição</label>
+        <input class="input" [(ngModel)]="formTxDescription" placeholder="Descrição" />
+      </div>
+      <div class="form-field form-field--sm">
+        <label>Valor</label>
+        <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formTxAmount" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Data</label>
+        <input class="input" type="date" [(ngModel)]="formTxDate" />
+      </div>
+      <div class="form-field">
+        <label>Status</label>
+        <select class="input" [(ngModel)]="formTxStatus">
+          <option [value]="TransactionStatus.Realized">Realizado</option>
+          <option [value]="TransactionStatus.Projected">Projetado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Categoria</label>
+      <select class="input" [(ngModel)]="formTxCategoryId">
+        <option value="">—</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Conta</label>
+        <select class="input" [(ngModel)]="formTxAccountId" [disabled]="!!formTxCreditCardId">
+          <option value="">—</option>
+          @for (acc of accounts(); track acc.id) {
+            <option [value]="acc.id">{{ acc.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Cartão de Crédito</label>
+        <select class="input" [(ngModel)]="formTxCreditCardId">
+          <option value="">—</option>
+          @for (card of cards(); track card.id) {
+            <option [value]="card.id">{{ card.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-toggles">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="formTxIsInstallment" />
+        Parcelado
+      </label>
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="formTxIsInternational" />
+        Internacional
+      </label>
+    </div>
+
+    @if (formTxIsInstallment) {
+      <div class="form-field">
+        <label>Número de Parcelas</label>
+        <input class="input" type="number" min="2" max="48" [(ngModel)]="formTxInstallments" />
+      </div>
+    }
+
+    @if (formTxIsInternational) {
+      <div class="form-row">
+        <div class="form-field">
+          <label>Moeda</label>
+          <input class="input" [(ngModel)]="formTxOriginalCurrency" maxlength="3" />
+        </div>
+        <div class="form-field">
+          <label>Valor Original</label>
+          <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formTxOriginalAmount" />
+        </div>
+        <div class="form-field">
+          <label>Taxa de Câmbio</label>
+          <input class="input" type="number" min="0" step="0.0001" [(ngModel)]="formTxExchangeRate" />
+        </div>
+      </div>
+    }
+
+    <div class="form-field">
+      <label>Etiquetas</label>
+      <tsi-labels-input [(labels)]="formTxLabels" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveTransaction()" [disabled]="saving() || !formTxDescription.trim() || formTxAmount <= 0">
+        Salvar
+      </button>
+    </div>
+  </div>
+}

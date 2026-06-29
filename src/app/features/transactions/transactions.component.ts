@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionService, CreateTransactionPayload } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
 import { AccountService } from '../../core/services/account.service';
@@ -26,7 +25,7 @@ import { LabelsInputComponent } from '../../shared/components/labels-input/label
 @Component({
   selector: 'tsi-transactions',
   standalone: true,
-  imports: [DecimalPipe, FormsModule, TranslatePipe, MonthPickerComponent, LabelsInputComponent],
+  imports: [DecimalPipe, FormsModule, MonthPickerComponent, LabelsInputComponent],
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
