@@ -70,24 +70,26 @@ async function main() {
   console.log(`  ${cats.length} categorias disponíveis ✓`)
 
   // 2. Criar cartões que não existem ainda
-  const { data: existingCards, error: cardErr } = await supabase
+  const { data: existingCards, error: cardSelErr1 } = await supabase
     .from('credit_cards').select('id, name').eq('owner_id', OWNER_ID)
-  if (cardErr) { console.error('Erro ao buscar cartões:', cardErr.message); process.exit(1) }
+  if (cardSelErr1) { console.error('Erro ao buscar cartões (1):', JSON.stringify(cardSelErr1)); process.exit(1) }
+  console.log(`  Cartões existentes (${existingCards.length}):`, existingCards.map(c => c.name).join(', ') || 'nenhum')
 
   const existingCardNames = new Set(existingCards.map(c => c.name.toLowerCase()))
-  const cardsToCreate = SEED_CARDS.filter(n => !existingCardNames.has(n.toLowerCase()))
-    .map(name => ({ owner_id: OWNER_ID, name, last_four_digits: '0000', credit_limit: 0, closing_day: 1, due_day: 10 }))
-
-  if (cardsToCreate.length > 0) {
-    const { error: cardInsErr } = await supabase.from('credit_cards').insert(cardsToCreate)
-    if (cardInsErr) { console.error('Erro ao criar cartões:', cardInsErr.message); process.exit(1) }
-    console.log(`  ${cardsToCreate.length} cartões criados ✓`)
+  for (const name of SEED_CARDS) {
+    if (existingCardNames.has(name.toLowerCase())) continue
+    const { error: insErr } = await supabase.from('credit_cards').insert({
+      owner_id: OWNER_ID, name, last_four_digits: '0000', credit_limit: 0, closing_day: 1, due_day: 10,
+    })
+    if (insErr) { console.error(`Erro ao criar cartão "${name}":`, JSON.stringify(insErr)); process.exit(1) }
+    console.log(`  Cartão criado: ${name} ✓`)
   }
 
-  const { data: cards } = await supabase
+  const { data: cards, error: cardSelErr2 } = await supabase
     .from('credit_cards').select('id, name').eq('owner_id', OWNER_ID)
+  if (cardSelErr2) { console.error('Erro ao buscar cartões (2):', JSON.stringify(cardSelErr2)); process.exit(1) }
+  console.log(`  ${cards.length} cartões disponíveis:`, cards.map(c => c.name).join(', '), '✓')
   const cardMap = Object.fromEntries(cards.map(c => [c.name.toLowerCase(), c.id]))
-  console.log(`  ${cards.length} cartões disponíveis ✓`)
 
   // 3. Entradas de renda
   console.log('\nInserindo entradas de renda...')
