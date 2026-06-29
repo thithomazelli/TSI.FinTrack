@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { TransactionService } from '../../core/services/transaction.service';
 import { AccountService } from '../../core/services/account.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
+import { CategoryService } from '../../core/services/category.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
+import { Category } from '../../core/models/interfaces/category.interface';
 
 @Component({
   selector: 'tsi-bills',
@@ -20,10 +22,12 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 export class BillsComponent implements OnInit {
   private readonly txService = inject(TransactionService);
   private readonly cardService = inject(CreditCardService);
+  private readonly categoryService = inject(CategoryService);
   private readonly logger = inject(LoggingService);
 
   readonly transactions = signal<Transaction[]>([]);
   readonly cards = signal<CreditCard[]>([]);
+  readonly categories = signal<Category[]>([]);
   readonly loading = signal(false);
   readonly selectedCardId = signal<string | 'all'>('all');
   readonly year = signal(new Date().getFullYear());
@@ -41,7 +45,18 @@ export class BillsComponent implements OnInit {
 
   ngOnInit(): void {
     this.cardService.getAll().subscribe({ next: c => this.cards.set(c) });
+    this.categoryService.getAll().subscribe({ next: c => this.categories.set(c) });
     this.load();
+  }
+
+  categoryName(id: string | null): string {
+    if (!id) return '—';
+    return this.categories().find(c => c.id === id)?.name ?? '—';
+  }
+
+  categoryColor(id: string | null): string {
+    if (!id) return '#9ca3af';
+    return this.categories().find(c => c.id === id)?.color ?? '#9ca3af';
   }
 
   load(): void {

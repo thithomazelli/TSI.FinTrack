@@ -46,7 +46,12 @@
                 <span class="installment-badge">{{ tx.installmentNumber }}/{{ tx.totalInstallments }}</span>
               }
             </td>
-            <td class="td-cat">{{ tx.categoryId ?? '—' }}</td>
+            <td class="td-cat">
+              <span class="cat-cell">
+                <span class="cat-dot" [style.background]="categoryColor(tx.categoryId)"></span>
+                {{ categoryName(tx.categoryId) }}
+              </span>
+            </td>
             <td class="td-card">{{ cardName(tx.creditCardId) }}</td>
             <td class="td-amount">R$ {{ tx.amount | number:'1.2-2' }}</td>
             <td class="td-status">
