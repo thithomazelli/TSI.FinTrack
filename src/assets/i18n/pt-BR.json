@@ -339,5 +339,26 @@
     "noneM": "— Nenhum —",
     "creditCard": "Cartão de crédito",
     "saving": "Salvando..."
+  },
+  "profile": {
+    "personalData": "Dados pessoais",
+    "displayName": "Nome de exibição",
+    "yourName": "Seu nome",
+    "saved": "Salvo!",
+    "telegram": "Telegram",
+    "connected": "Conectado",
+    "linkedInfo": "Seu Telegram está vinculado. Você receberá notificações de faturas, metas e resumos mensais.",
+    "notifications": "Notificações",
+    "enabled": "Ativadas",
+    "disabled": "Desativadas",
+    "disconnect": "Desconectar Telegram",
+    "connectInfo": "Conecte seu Telegram para receber alertas de vencimentos, metas ultrapassadas e resumos mensais diretamente no seu celular.",
+    "option1": "Clique para abrir direto no Telegram:",
+    "openBot": "Abrir",
+    "option2": "Se o link não enviar o token automaticamente, copie o comando abaixo e envie manualmente no bot:",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "tokenExpires": "O token expira após o primeiro uso.",
+    "connect": "Conectar Telegram"
   }
 }

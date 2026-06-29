@@ -339,5 +339,26 @@
     "noneM": "— None —",
     "creditCard": "Credit card",
     "saving": "Saving..."
+  },
+  "profile": {
+    "personalData": "Personal data",
+    "displayName": "Display name",
+    "yourName": "Your name",
+    "saved": "Saved!",
+    "telegram": "Telegram",
+    "connected": "Connected",
+    "linkedInfo": "Your Telegram is linked. You will receive notifications for bills, goals and monthly summaries.",
+    "notifications": "Notifications",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "disconnect": "Disconnect Telegram",
+    "connectInfo": "Connect your Telegram to receive alerts for due dates, exceeded goals and monthly summaries directly on your phone.",
+    "option1": "Click to open directly in Telegram:",
+    "openBot": "Open",
+    "option2": "If the link does not send the token automatically, copy the command below and send it manually to the bot:",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "tokenExpires": "The token expires after first use.",
+    "connect": "Connect Telegram"
   }
 }
