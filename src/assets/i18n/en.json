@@ -265,5 +265,26 @@
     "empty": "No transactions found.",
     "colPurchaseDate": "Purchase date",
     "colCard": "Card"
+  },
+  "recurring": {
+    "title": "Recurring",
+    "new": "New Recurrence",
+    "emptyTitle": "No recurring expense or income registered.",
+    "createFirst": "Create first recurrence",
+    "colDay": "Day",
+    "day": "Day",
+    "expense": "Expense",
+    "income": "Income",
+    "active": "Active",
+    "paused": "Paused",
+    "pause": "Pause",
+    "activate": "Activate",
+    "edit": "Edit Recurrence",
+    "descPlaceholder": "e.g. Netflix, Rent...",
+    "dayOfMonth": "Day of month",
+    "none": "— None —",
+    "noneM": "— None —",
+    "creditCard": "Credit card",
+    "saving": "Saving..."
   }
 }

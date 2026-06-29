@@ -265,5 +265,26 @@
     "empty": "Nenhuma transação encontrada.",
     "colPurchaseDate": "Data compra",
     "colCard": "Cartão"
+  },
+  "recurring": {
+    "title": "Recorrentes",
+    "new": "Nova Recorrência",
+    "emptyTitle": "Nenhuma despesa ou entrada recorrente cadastrada.",
+    "createFirst": "Criar primeira recorrência",
+    "colDay": "Dia",
+    "day": "Dia",
+    "expense": "Despesa",
+    "income": "Entrada",
+    "active": "Ativo",
+    "paused": "Pausado",
+    "pause": "Pausar",
+    "activate": "Ativar",
+    "edit": "Editar Recorrência",
+    "descPlaceholder": "Ex: Netflix, Aluguel...",
+    "dayOfMonth": "Dia do mês",
+    "none": "— Nenhuma —",
+    "noneM": "— Nenhum —",
+    "creditCard": "Cartão de crédito",
+    "saving": "Salvando..."
   }
 }

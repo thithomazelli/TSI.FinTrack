@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { RecurringTemplateService } from '../../core/services/recurring-template.service';
 import { CategoryService } from '../../core/services/category.service';
 import { AccountService } from '../../core/services/account.service';
@@ -15,7 +16,7 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 @Component({
   selector: 'tsi-recurring',
   standalone: true,
-  imports: [DecimalPipe, FormsModule],
+  imports: [DecimalPipe, FormsModule, TranslatePipe],
   templateUrl: './recurring.component.html',
   styleUrls: ['./recurring.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
