@@ -66,7 +66,7 @@ export class TransactionService {
     return from(
       query.then(({ data, error }) => {
         if (error) throw error;
-        return (data ?? []) as Transaction[];
+        return (data ?? []).map((r: any) => this.toModel(r));
       })
     );
   }
@@ -86,7 +86,7 @@ export class TransactionService {
         .select()
         .then(({ data, error }) => {
           if (error) throw error;
-          return (data ?? []) as Transaction[];
+          return (data ?? []).map((r: any) => this.toModel(r));
         })
     );
   }
@@ -122,7 +122,7 @@ export class TransactionService {
         .select()
         .then(({ data, error }) => {
           if (error) throw error;
-          return (data ?? []) as Transaction[];
+          return (data ?? []).map((r: any) => this.toModel(r));
         })
     );
   }
@@ -152,7 +152,7 @@ export class TransactionService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as Transaction;
+          return this.toModel(data);
         })
     );
   }
@@ -169,6 +169,21 @@ export class TransactionService {
           if (error) throw error;
         })
     );
+  }
+
+  private toModel(r: any): Transaction {
+    return {
+      id: r.id, ownerId: r.owner_id, description: r.description,
+      amount: r.amount, date: r.date, status: r.status,
+      categoryId: r.category_id, accountId: r.account_id,
+      creditCardId: r.credit_card_id, creditCardBillId: r.credit_card_bill_id,
+      installmentNumber: r.installment_number, totalInstallments: r.total_installments,
+      installmentGroupId: r.installment_group_id, recurringTemplateId: r.recurring_template_id,
+      originalCurrency: r.original_currency, originalAmount: r.original_amount,
+      exchangeRate: r.exchange_rate, paymentDate: r.payment_date,
+      paymentMethod: r.payment_method, labels: r.labels ?? [],
+      createdAt: r.created_at, updatedAt: r.updated_at,
+    };
   }
 
   private toRow(

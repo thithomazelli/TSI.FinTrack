@@ -212,8 +212,25 @@ export class MovimentosComponent implements OnInit {
       if (entriesRes.error) throw entriesRes.error;
       if (txsRes.error) throw txsRes.error;
 
-      this.allEntries.set((entriesRes.data ?? []) as Entry[]);
-      this.allTransactions.set((txsRes.data ?? []) as Transaction[]);
+      this.allEntries.set((entriesRes.data ?? []).map((r: any) => ({
+        id: r.id, ownerId: r.owner_id, description: r.description,
+        amount: r.amount, date: r.date, status: r.status,
+        typeId: r.type_id, accountId: r.account_id,
+        labels: r.labels ?? [], createdAt: r.created_at, updatedAt: r.updated_at,
+      }) as Entry));
+
+      this.allTransactions.set((txsRes.data ?? []).map((r: any) => ({
+        id: r.id, ownerId: r.owner_id, description: r.description,
+        amount: r.amount, date: r.date, status: r.status,
+        categoryId: r.category_id, accountId: r.account_id,
+        creditCardId: r.credit_card_id, creditCardBillId: r.credit_card_bill_id,
+        installmentNumber: r.installment_number, totalInstallments: r.total_installments,
+        installmentGroupId: r.installment_group_id, recurringTemplateId: r.recurring_template_id,
+        originalCurrency: r.original_currency, originalAmount: r.original_amount,
+        exchangeRate: r.exchange_rate, paymentDate: r.payment_date,
+        paymentMethod: r.payment_method, labels: r.labels ?? [],
+        createdAt: r.created_at, updatedAt: r.updated_at,
+      }) as Transaction));
     } catch (err) {
       this.logger.error('Failed to load movimentos', err);
       this.toast.error('Erro ao carregar movimentos.');

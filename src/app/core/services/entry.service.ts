@@ -55,7 +55,7 @@ export class EntryService {
     return from(
       query.then(({ data, error }) => {
         if (error) throw error;
-        return (data ?? []) as Entry[];
+        return (data ?? []).map((r: any) => this.toModel(r));
       })
     );
   }
@@ -79,7 +79,7 @@ export class EntryService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as Entry;
+          return this.toModel(data);
         })
     );
   }
@@ -105,9 +105,19 @@ export class EntryService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as Entry;
+          return this.toModel(data);
         })
     );
+  }
+
+  private toModel(r: any): Entry {
+    return {
+      id: r.id, ownerId: r.owner_id, description: r.description,
+      amount: r.amount, date: r.date, status: r.status,
+      typeId: r.type_id, accountId: r.account_id,
+      recurringTemplateId: r.recurring_template_id,
+      labels: r.labels ?? [], createdAt: r.created_at, updatedAt: r.updated_at,
+    };
   }
 
   delete(id: string): Observable<void> {
