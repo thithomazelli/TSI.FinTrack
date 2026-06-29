@@ -109,7 +109,12 @@
     "closeBill": "Fechar Fatura",
     "markPaid": "Marcar como Pago",
     "reopen": "Reabrir",
-    "addBillHint": "Abrir fatura para cartão:"
+    "addBillHint": "Abrir fatura para cartão:",
+    "status": {
+      "OPEN": "Aberta",
+      "CLOSED": "Fechada",
+      "PAID": "Paga"
+    }
   },
   "domains": {
     "title": "Domínios",

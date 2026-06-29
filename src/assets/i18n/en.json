@@ -109,7 +109,12 @@
     "closeBill": "Close Bill",
     "markPaid": "Mark as Paid",
     "reopen": "Reopen",
-    "addBillHint": "Open bill for card:"
+    "addBillHint": "Open bill for card:",
+    "status": {
+      "OPEN": "Open",
+      "CLOSED": "Closed",
+      "PAID": "Paid"
+    }
   },
   "domains": {
     "title": "Domains",

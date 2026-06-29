@@ -18,7 +18,7 @@
               }
             </div>
             <span class="bill-status-badge" [class]="statusClass(bill.status)">
-              {{ bill.status }}
+              {{ 'creditCards.status.' + bill.status | translate }}
             </span>
           </div>
 
