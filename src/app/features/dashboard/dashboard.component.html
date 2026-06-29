@@ -26,7 +26,7 @@
                 <span class="alert-detail">{{ alert.detail }}</span>
               </div>
             </div>
-            <button class="alert-dismiss" (click)="dismissAlert(alert.id)" title="Dispensar">✕</button>
+            <button class="alert-dismiss" (click)="dismissAlert(alert.id)" [title]="'common.dismiss' | translate">✕</button>
           </div>
         }
       </div>

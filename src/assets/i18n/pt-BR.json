@@ -44,7 +44,8 @@
       "save": "Erro ao salvar",
       "delete": "Erro ao excluir"
     },
-    "creditCard": "Cartão de Crédito"
+    "creditCard": "Cartão de Crédito",
+    "dismiss": "Dispensar"
   },
   "nav": {
     "dashboard": "Dashboard",
