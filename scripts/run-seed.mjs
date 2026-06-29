@@ -64,10 +64,17 @@ async function main() {
     console.log(`  ${toCreate.length} categorias criadas ✓`)
   }
 
-  const { data: cats } = await supabase
+  const { data: cats, error: catSelErr } = await supabase
     .from('categories').select('id, name').eq('owner_id', OWNER_ID)
+  if (catSelErr) { console.error('Erro ao buscar categorias (2):', catSelErr.message); process.exit(1) }
   const catMap = Object.fromEntries(cats.map(c => [c.name.toLowerCase(), c.id]))
-  console.log(`  ${cats.length} categorias disponíveis ✓`)
+  console.log(`  ${cats.length} categorias no mapa:`, cats.map(c => c.name).slice(0,5).join(', '), '...')
+
+  // debug: mostrar quais nomes do seed não encontram match
+  const seedCatNames = [...new Set(data.transactions.map(t => t.category_name).filter(Boolean))]
+  const unmatchedCats = seedCatNames.filter(n => !catMap[n.toLowerCase()])
+  if (unmatchedCats.length) console.warn('  ⚠ Categorias sem match:', unmatchedCats)
+  else console.log('  Todas as categorias do seed têm match ✓')
 
   // 2. Criar cartões que não existem ainda
   const { data: existingCards, error: cardSelErr1 } = await supabase
@@ -90,6 +97,12 @@ async function main() {
   if (cardSelErr2) { console.error('Erro ao buscar cartões (2):', JSON.stringify(cardSelErr2)); process.exit(1) }
   console.log(`  ${cards.length} cartões disponíveis:`, cards.map(c => c.name).join(', '), '✓')
   const cardMap = Object.fromEntries(cards.map(c => [c.name.toLowerCase(), c.id]))
+
+  // debug: mostrar quais nomes do seed não encontram match
+  const seedCardNames = [...new Set(data.transactions.map(t => t.credit_card_name).filter(Boolean))]
+  const unmatchedCards = seedCardNames.filter(n => !cardMap[n.toLowerCase()])
+  if (unmatchedCards.length) console.warn('  ⚠ Cartões sem match:', unmatchedCards)
+  else console.log('  Todos os cartões do seed têm match ✓')
 
   // 3. Entradas de renda
   console.log('\nInserindo entradas de renda...')
