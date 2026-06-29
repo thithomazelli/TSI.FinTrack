@@ -12,10 +12,8 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
 const OWNER_ID = '69f852bc-af5a-4f11-b293-37bf2f809018'
 
 if (!SERVICE_KEY) {
-  console.error('\nERRO: defina a variável de ambiente SUPABASE_SERVICE_KEY\n')
-  console.error('Windows PowerShell:')
-  console.error('  $env:SUPABASE_SERVICE_KEY="sua_chave_aqui"')
-  console.error('  node scripts/run-seed.mjs\n')
+  console.error('\nERRO: defina a variável SUPABASE_SERVICE_KEY\n')
+  console.error('  SUPABASE_SERVICE_KEY="sua_chave" node scripts/run-seed.mjs\n')
   process.exit(1)
 }
 
@@ -27,10 +25,7 @@ async function batchInsert(table, rows, label) {
   for (let i = 0; i < rows.length; i += BATCH) {
     const chunk = rows.slice(i, i + BATCH)
     const { error } = await supabase.from(table).insert(chunk)
-    if (error) {
-      console.error(`\nErro em ${label} (offset ${i}):`, error.message)
-      process.exit(1)
-    }
+    if (error) { console.error(`\nErro em ${label} (offset ${i}):`, error.message); process.exit(1) }
     done += chunk.length
     process.stdout.write(`\r  ${label}: ${done}/${rows.length}`)
   }
@@ -40,40 +35,38 @@ async function batchInsert(table, rows, label) {
 async function main() {
   console.log('=== TSI.FinTrack — Seed histórico ===\n')
 
-  // 1. Buscar categorias do usuário
-  console.log('Buscando categorias...')
+  // 1. Buscar categorias
   const { data: cats, error: catErr } = await supabase
-    .from('categories')
-    .select('id, name')
-    .eq('owner_id', OWNER_ID)
+    .from('categories').select('id, name').eq('owner_id', OWNER_ID)
   if (catErr) { console.error('Erro ao buscar categorias:', catErr.message); process.exit(1) }
   const catMap = Object.fromEntries(cats.map(c => [c.name.toLowerCase(), c.id]))
   console.log(`  ${cats.length} categorias encontradas ✓`)
 
-  // 2. Inserir entradas (renda)
+  // 2. Buscar cartões
+  const { data: cards, error: cardErr } = await supabase
+    .from('credit_cards').select('id, name').eq('owner_id', OWNER_ID)
+  if (cardErr) { console.error('Erro ao buscar cartões:', cardErr.message); process.exit(1) }
+  const cardMap = Object.fromEntries(cards.map(c => [c.name.toLowerCase(), c.id]))
+  console.log(`  ${cards.length} cartões encontrados ✓`)
+
+  // 3. Entradas de renda
   console.log('\nInserindo entradas de renda...')
   const entries = data.entries.map(e => ({
-    owner_id: e.owner_id,
-    description: e.description,
-    amount: e.amount,
-    date: e.date,
-    labels: e.labels,
-    status: e.status
+    owner_id: e.owner_id, description: e.description,
+    amount: e.amount, date: e.date, labels: e.labels, status: e.status
   }))
   await batchInsert('entries', entries, 'Entradas')
 
-  // 3. Inserir transações (despesas)
+  // 4. Transações de despesa
   console.log('\nInserindo transações de despesa...')
   const transactions = data.transactions.map(t => ({
-    owner_id: t.owner_id,
-    description: t.description,
-    amount: t.amount,
-    date: t.date,
-    category_id: catMap[t._cat_name?.toLowerCase()] ?? null,
+    owner_id: t.owner_id, description: t.description,
+    amount: t.amount, date: t.date, labels: t.labels, status: t.status,
+    category_id: catMap[t.category_name?.toLowerCase()] ?? null,
+    credit_card_id: cardMap[t.credit_card_name?.toLowerCase()] ?? null,
     account_id: null,
-    credit_card_id: null,
-    status: t.status,
-    labels: t.labels
+    installment_number: t.installment_number ?? null,
+    total_installments: t.total_installments ?? null,
   }))
   await batchInsert('transactions', transactions, 'Transações')
 
