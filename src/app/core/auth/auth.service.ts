@@ -14,17 +14,25 @@ export class AuthService {
   private readonly sessionSubject = new BehaviorSubject<Session | null>(null);
   readonly session$ = this.sessionSubject.asObservable();
 
+  /** Emite true assim que a sessão inicial foi determinada (getSession resolveu). */
+  private readonly readySubject = new BehaviorSubject<boolean>(false);
+  readonly ready$ = this.readySubject.asObservable();
+
   constructor() {
     this.supabase.client.auth.getSession().then(({ data }) => {
       this.sessionSubject.next(data.session);
+      this.readySubject.next(true);
     });
 
     this.supabase.client.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         this.logger.info('Auth state changed', event);
         this.sessionSubject.next(session);
+        this.readySubject.next(true);
 
-        if (event === 'SIGNED_IN') {
+        // Só redireciona em login real (usuário na tela de login).
+        // Em restauração de sessão / refresh de token, mantém a rota atual.
+        if (event === 'SIGNED_IN' && this.router.url.startsWith('/auth')) {
           this.router.navigate(['/dashboard']);
         } else if (event === 'SIGNED_OUT') {
           this.router.navigate(['/auth/login']);
