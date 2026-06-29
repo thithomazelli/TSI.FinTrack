@@ -28,16 +28,8 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/movimentos/movimentos.component').then(m => m.MovimentosComponent),
       },
-      {
-        path: 'entries',
-        loadComponent: () =>
-          import('./features/entries/entries.component').then(m => m.EntriesComponent),
-      },
-      {
-        path: 'transactions',
-        loadComponent: () =>
-          import('./features/transactions/transactions.component').then(m => m.TransactionsComponent),
-      },
+      { path: 'entries', redirectTo: 'movimentos', pathMatch: 'full' },
+      { path: 'transactions', redirectTo: 'movimentos', pathMatch: 'full' },
       {
         path: 'credit-cards',
         loadComponent: () =>
@@ -83,7 +75,6 @@ export const routes: Routes = [
           { path: 'accounts', loadComponent: () => import('./features/settings/accounts/accounts-settings.component').then(m => m.AccountsSettingsComponent) },
           { path: 'credit-cards', loadComponent: () => import('./features/settings/credit-cards/credit-cards-settings.component').then(m => m.CreditCardsSettingsComponent) },
           { path: 'categories', loadComponent: () => import('./features/settings/categories/categories-settings.component').then(m => m.CategoriesSettingsComponent) },
-          { path: 'goals', loadComponent: () => import('./features/settings/goals/goals-settings.component').then(m => m.GoalsSettingsComponent) },
           { path: 'domains', loadComponent: () => import('./features/settings/domains/domains-settings.component').then(m => m.DomainsSettingsComponent) },
           { path: '', redirectTo: 'profile', pathMatch: 'full' },
         ],
