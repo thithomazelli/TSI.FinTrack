@@ -33,8 +33,26 @@ async function batchInsert(table, rows, label) {
 }
 
 const SEED_CARDS = [
-  "Nubank", "Latam Pass", "Itaú Multi Pontos", "Mastercard", "Visa",
+  "Crédito Nubank", "Crédito Latam Pass", "Crédito Itaú Multi Pontos",
+  "Crédito Mastercard", "Crédito Visa", "Débito Itaú",
 ]
+
+// Mapeia o nome original do seed para o nome novo do cartão
+const CARD_RENAME = {
+  "nubank": "Crédito Nubank",
+  "latam pass": "Crédito Latam Pass",
+  "itaú multi pontos": "Crédito Itaú Multi Pontos",
+  "mastercard": "Crédito Mastercard",
+  "visa": "Crédito Visa",
+}
+
+// Transações sem cartão recebem este cartão de débito
+const DEFAULT_DEBIT_CARD = "Débito Itaú"
+
+function resolveCardName(rawName) {
+  if (!rawName) return DEFAULT_DEBIT_CARD
+  return CARD_RENAME[rawName.toLowerCase()] ?? rawName
+}
 
 const SEED_CATEGORIES = [
   "Alimentação/Mercado","Assinaturas","Bike","Celular","Combustível",
@@ -98,8 +116,8 @@ async function main() {
   console.log(`  ${cards.length} cartões disponíveis:`, cards.map(c => c.name).join(', '), '✓')
   const cardMap = Object.fromEntries(cards.map(c => [c.name.toLowerCase(), c.id]))
 
-  // debug: mostrar quais nomes do seed não encontram match
-  const seedCardNames = [...new Set(data.transactions.map(t => t.credit_card_name).filter(Boolean))]
+  // debug: mostrar quais nomes do seed (já resolvidos) não encontram match
+  const seedCardNames = [...new Set(data.transactions.map(t => resolveCardName(t.credit_card_name)))]
   const unmatchedCards = seedCardNames.filter(n => !cardMap[n.toLowerCase()])
   if (unmatchedCards.length) console.warn('  ⚠ Cartões sem match:', unmatchedCards)
   else console.log('  Todos os cartões do seed têm match ✓')
@@ -118,7 +136,7 @@ async function main() {
     owner_id: t.owner_id, description: t.description,
     amount: t.amount, date: t.date, labels: t.labels, status: t.status,
     category_id: catMap[t.category_name?.toLowerCase()] ?? null,
-    credit_card_id: cardMap[t.credit_card_name?.toLowerCase()] ?? null,
+    credit_card_id: cardMap[resolveCardName(t.credit_card_name).toLowerCase()] ?? null,
     account_id: null,
     installment_number: t.installment_number ?? null,
     total_installments: t.total_installments ?? null,
