@@ -43,13 +43,13 @@
     <div class="review-header">
       <div class="bill-meta">
         @if (parsedBill()?.cardLastFour) {
-          <span class="meta-chip">Cartão final {{ parsedBill()!.cardLastFour }}</span>
+          <span class="meta-chip">{{ 'import.cardEnding' | translate }} {{ parsedBill()!.cardLastFour }}</span>
         }
         @if (parsedBill()?.dueDate) {
-          <span class="meta-chip">Vencimento: {{ parsedBill()!.dueDate! | slice:0:10 }}</span>
+          <span class="meta-chip">{{ 'import.dueDate' | translate }}: {{ parsedBill()!.dueDate! | slice:0:10 }}</span>
         }
         @if (parsedBill()?.totalAmount) {
-          <span class="meta-chip">Total: R$ {{ parsedBill()!.totalAmount! | number:'1.2-2' }}</span>
+          <span class="meta-chip">{{ 'common.total' | translate }}: R$ {{ parsedBill()!.totalAmount! | number:'1.2-2' }}</span>
         }
       </div>
 
@@ -83,8 +83,8 @@
 
     <div class="review-toolbar">
       <span class="review-count">{{ creditSelectedCount() }} de {{ creditRows().length }} — R$ {{ creditTotal() | number:'1.2-2' }}</span>
-      <button class="btn btn-ghost btn-sm" (click)="toggleAllCredit(true)">Selecionar tudo</button>
-      <button class="btn btn-ghost btn-sm" (click)="toggleAllCredit(false)">Limpar seleção</button>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllCredit(true)">{{ 'import.selectAll' | translate }}</button>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllCredit(false)">{{ 'import.clearSelection' | translate }}</button>
     </div>
 
     <table class="list review-table">
@@ -94,7 +94,7 @@
           <th>{{ 'common.date' | translate }}</th>
           <th>{{ 'common.description' | translate }}</th>
           <th class="text-right">{{ 'common.amount' | translate }}</th>
-          <th>Parcela</th>
+          <th>{{ 'import.installment' | translate }}</th>
           <th>{{ 'common.category' | translate }}</th>
           <th>{{ 'common.status' | translate }}</th>
         </tr>
@@ -128,8 +128,8 @@
             </td>
             <td class="col-status">
               <select class="input input-sm" [value]="row.status" (change)="setCreditStatus(i, $any($event.target).value)">
-                <option [value]="TransactionStatus.Realized">Realizado</option>
-                <option [value]="TransactionStatus.Projected">Projetado</option>
+                <option [value]="TransactionStatus.Realized">{{ 'movimentos.realized' | translate }}</option>
+                <option [value]="TransactionStatus.Projected">{{ 'movimentos.projected' | translate }}</option>
               </select>
             </td>
           </tr>
@@ -168,8 +168,8 @@
 
     <div class="review-toolbar">
       <span class="review-count">{{ debitSelectedCount() }} de {{ debitRows().length }} selecionados</span>
-      <button class="btn btn-ghost btn-sm" (click)="toggleAllDebit(true)">Selecionar tudo</button>
-      <button class="btn btn-ghost btn-sm" (click)="toggleAllDebit(false)">Limpar seleção</button>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllDebit(true)">{{ 'import.selectAll' | translate }}</button>
+      <button class="btn btn-ghost btn-sm" (click)="toggleAllDebit(false)">{{ 'import.clearSelection' | translate }}</button>
     </div>
 
     <table class="list review-table">
@@ -178,7 +178,7 @@
           <th class="col-check"></th>
           <th>{{ 'common.date' | translate }}</th>
           <th>{{ 'common.description' | translate }}</th>
-          <th>Tipo</th>
+          <th>{{ 'common.type' | translate }}</th>
           <th class="text-right">{{ 'common.amount' | translate }}</th>
           <th>{{ 'common.category' | translate }}</th>
         </tr>
@@ -193,9 +193,9 @@
             <td class="col-desc">{{ row.description }}</td>
             <td class="col-type">
               @if (row.isCredit) {
-                <span class="type-badge type-credit">Entrada</span>
+                <span class="type-badge type-credit">{{ 'movimentos.typeEntry' | translate }}</span>
               } @else {
-                <span class="type-badge type-debit">Saída</span>
+                <span class="type-badge type-debit">{{ 'movimentos.typeExit' | translate }}</span>
               }
             </td>
             <td class="col-amount text-right">R$ {{ row.amount | number:'1.2-2' }}</td>

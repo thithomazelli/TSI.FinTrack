@@ -245,7 +245,12 @@
     "modeCreditCard": "Credit Card Bill",
     "modeDebitStatement": "Bank Statement",
     "dropPdfCredit": "Select Itaú credit card bill PDF",
-    "dropPdfDebit": "Select Itaú bank statement PDF"
+    "dropPdfDebit": "Select Itaú bank statement PDF",
+    "cardEnding": "Card ending",
+    "dueDate": "Due date",
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection",
+    "installment": "Installment"
   },
   "family": {
     "title": "Family",
