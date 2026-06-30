@@ -98,6 +98,39 @@ tr:hover td { background: var(--color-surface-2); }
 .cat-cell { display: flex; align-items: center; gap: 0.5rem; }
 .cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
+/* Multi-seleção */
+.col-check { width: 36px; padding: 0 0 0 0.75rem !important; }
+.row-check { width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-accent); }
+.row-selected td { background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface)) !important; }
+
+/* Bulk bar */
+.bulk-bar {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;
+  background: var(--color-accent); border-radius: var(--radius-md);
+  padding: .6rem 1rem; margin-bottom: .75rem; color: #fff;
+}
+.bulk-count { font-size: .875rem; font-weight: 700; }
+.bulk-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.bulk-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .3rem .7rem; border-radius: var(--radius-sm);
+  font-size: .78rem; font-weight: 600; border: 1.5px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.15); color: #fff; cursor: pointer;
+  transition: background .15s;
+  &:hover { background: rgba(255,255,255,.28); }
+  &--delete { border-color: rgba(255,100,100,.5); background: rgba(239,68,68,.25); }
+  &--clear { border: none; background: transparent; opacity: .7; font-size: 1rem; padding: .2rem .5rem; }
+}
+
+.modal--sm { max-width: 400px !important; }
+.modal-text { font-size: .9rem; color: var(--color-text-2); margin: 0 0 1rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.25rem; }
+.btn-danger {
+  background: var(--color-danger, #ef4444); color: #fff; border: none;
+  padding: .5rem 1.25rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600;
+  &:hover { opacity: .85; } &:disabled { opacity: .5; cursor: default; }
+}
+
 .action-btns { display: flex; gap: 0.5rem; align-items: center; }
 .action-btn {
   display: inline-flex; align-items: center; gap: 0.35rem;

@@ -8,80 +8,177 @@
     <span class="breadcrumb">{{ pageTitleKey ? (pageTitleKey | translate) : 'TSI FinTrack' }}</span>
   </div>
 
-  @if (session$ | async; as session) {
-    <div class="header-right">
-      <tsi-language-switcher variant="compact" />
-      <button class="btn-theme" (click)="themeService.toggle()" [title]="(themeService.isDark() ? 'theme.light' : 'theme.dark') | translate">
-        @if (themeService.isDark()) {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-        } @else {
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
-          </svg>
-        }
-      </button>
-
-      <!-- Notification bell -->
-      <div class="bell-wrap">
-        <button class="btn-bell" (click)="toggleBell()" [title]="'notifications.title' | translate" [class.has-alerts]="alertCount() > 0">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
-          </svg>
-          @if (alertCount() > 0) {
-            <span class="bell-badge">{{ alertCount() > 9 ? '9+' : alertCount() }}</span>
-          }
-        </button>
-
-        @if (bellOpen()) {
-          <div class="bell-backdrop" (click)="closeBell()"></div>
-          <div class="bell-dropdown">
-            <div class="bell-header">
-              <span class="bell-title">{{ 'notifications.title' | translate }}</span>
-              <span class="bell-count">{{ alertCount() }} {{ 'notifications.alerts' | translate }}</span>
-            </div>
-            @if (previewAlerts().length === 0) {
-              <div class="bell-empty">{{ 'notifications.empty' | translate }}</div>
-            } @else {
-              <div class="bell-list">
-                @for (alert of previewAlerts(); track alert.id) {
-                  <div class="bell-item" [class]="'bell-item--' + alert.level">
-                    <span class="bell-item-icon">
-                      @if (alert.level === 'danger') { ⚠️ }
-                      @else if (alert.level === 'warning') { 🔔 }
-                      @else { ℹ️ }
-                    </span>
-                    <div class="bell-item-text">
-                      <strong>{{ alert.title }}</strong>
-                      <span>{{ alert.detail }}</span>
-                    </div>
-                  </div>
-                }
-              </div>
-              <a class="bell-see-all" routerLink="/notifications" (click)="closeBell()">
-                {{ 'notifications.seeAll' | translate }} ({{ alertCount() }})
-              </a>
-            }
-          </div>
-        }
-      </div>
-
-      <div class="user-info">
-        <div class="user-avatar">
-          {{ session.user.email?.[0]?.toUpperCase() ?? '?' }}
-        </div>
-        <span class="user-email">{{ session.user.email }}</span>
-      </div>
-      <button class="btn-signout" (click)="signOut()" title="Sair">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+  <div class="header-right">
+    <!-- Dark mode toggle -->
+    <button class="btn-icon" (click)="themeService.toggle()" [title]="(themeService.isDark() ? 'theme.light' : 'theme.dark') | translate">
+      @if (themeService.isDark()) {
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
-        <span class="signout-label">Sair</span>
+      } @else {
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+      }
+    </button>
+
+    <!-- Notification bell -->
+    <div class="popover-wrap">
+      <button class="btn-icon" (click)="toggleBell()" [title]="'notifications.title' | translate" [class.has-alerts]="alertCount() > 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        @if (alertCount() > 0) {
+          <span class="badge">{{ alertCount() > 9 ? '9+' : alertCount() }}</span>
+        }
       </button>
+
+      @if (bellOpen()) {
+        <div class="backdrop" (click)="closeBell()"></div>
+        <div class="popover popover--bell">
+          <div class="popover-header">
+            <span class="popover-title">{{ 'notifications.title' | translate }}</span>
+            <span class="popover-sub">{{ alertCount() }} {{ 'notifications.alerts' | translate }}</span>
+          </div>
+          @if (previewAlerts().length === 0) {
+            <div class="popover-empty">{{ 'notifications.empty' | translate }}</div>
+          } @else {
+            <div class="bell-list">
+              @for (alert of previewAlerts(); track alert.id) {
+                <div class="bell-item" [class]="'bell-item--' + alert.level">
+                  <span class="bell-icon">
+                    @if (alert.level === 'danger') { ⚠️ }
+                    @else if (alert.level === 'warning') { 🔔 }
+                    @else { ℹ️ }
+                  </span>
+                  <div class="bell-text">
+                    <strong>{{ alert.title }}</strong>
+                    <span>{{ alert.detail }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+            <a class="bell-see-all" routerLink="/notifications" (click)="closeBell()">
+              {{ 'notifications.seeAll' | translate }} ({{ alertCount() }})
+            </a>
+          }
+        </div>
+      }
     </div>
-  }
+
+    <!-- User avatar / menu -->
+    <div class="popover-wrap">
+      <button class="user-btn" (click)="toggleUserMenu()" [title]="userEmail()">
+        @if (avatarUrl()) {
+          <img class="user-avatar" [src]="avatarUrl()!" alt="avatar" />
+        } @else {
+          <div class="user-avatar user-avatar--initial">{{ avatarInitial }}</div>
+        }
+      </button>
+
+      @if (userMenuOpen()) {
+        <div class="backdrop" (click)="closeUserMenu()"></div>
+        <div class="popover popover--user">
+          <!-- Avatar + upload -->
+          <div class="um-avatar-row">
+            <div class="um-avatar-wrap">
+              @if (avatarUrl()) {
+                <img class="um-avatar" [src]="avatarUrl()!" alt="avatar" />
+              } @else {
+                <div class="um-avatar um-avatar--initial">{{ avatarInitial }}</div>
+              }
+              @if (avatarUploading()) {
+                <div class="um-avatar-overlay">
+                  <svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                </div>
+              }
+            </div>
+            <div class="um-photo-btns">
+              <button class="um-photo-btn" (click)="pickFile()" [disabled]="avatarUploading()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                {{ 'profile.uploadFile' | translate }}
+              </button>
+              <button class="um-photo-btn" (click)="pickCamera()" [disabled]="avatarUploading()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                {{ 'profile.useCamera' | translate }}
+              </button>
+            </div>
+          </div>
+
+          <!-- User info -->
+          <div class="um-info">
+            @if (fullName()) {
+              <span class="um-name">{{ fullName() }}</span>
+            }
+            <span class="um-email">{{ userEmail() }}</span>
+          </div>
+
+          <div class="um-divider"></div>
+
+          <!-- Language -->
+          <div class="um-section-label">{{ 'language.select' | translate }}</div>
+          <div class="um-lang-row">
+            <button class="um-lang-btn" [class.active]="lang.current() === 'pt-BR'" (click)="setLang(Language.PtBR)">
+              <svg width="20" height="14" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg">
+                <rect width="20" height="14" fill="#009C3B"/>
+                <polygon points="10,1 19,7 10,13 1,7" fill="#FFDF00"/>
+                <circle cx="10" cy="7" r="3.2" fill="#002776"/>
+                <path d="M6.9,5.8 Q10,4.5 13.1,5.8" stroke="white" stroke-width="0.6" fill="none"/>
+              </svg>
+              PT
+            </button>
+            <button class="um-lang-btn" [class.active]="lang.current() === 'en'" (click)="setLang(Language.En)">
+              <svg width="20" height="14" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg">
+                <rect width="20" height="14" fill="#B22234"/>
+                <rect y="1.08" width="20" height="1.08" fill="white"/>
+                <rect y="3.23" width="20" height="1.08" fill="white"/>
+                <rect y="5.38" width="20" height="1.08" fill="white"/>
+                <rect y="7.54" width="20" height="1.08" fill="white"/>
+                <rect y="9.69" width="20" height="1.08" fill="white"/>
+                <rect y="11.85" width="20" height="1.08" fill="white"/>
+                <rect width="8" height="7.54" fill="#3C3B6E"/>
+                <circle cx="1.3" cy="1.3" r="0.55" fill="white"/>
+                <circle cx="2.65" cy="1.3" r="0.55" fill="white"/>
+                <circle cx="4" cy="1.3" r="0.55" fill="white"/>
+                <circle cx="5.35" cy="1.3" r="0.55" fill="white"/>
+                <circle cx="6.7" cy="1.3" r="0.55" fill="white"/>
+                <circle cx="1.97" cy="2.5" r="0.55" fill="white"/>
+                <circle cx="3.32" cy="2.5" r="0.55" fill="white"/>
+                <circle cx="4.67" cy="2.5" r="0.55" fill="white"/>
+                <circle cx="6.02" cy="2.5" r="0.55" fill="white"/>
+                <circle cx="1.3" cy="3.7" r="0.55" fill="white"/>
+                <circle cx="2.65" cy="3.7" r="0.55" fill="white"/>
+                <circle cx="4" cy="3.7" r="0.55" fill="white"/>
+                <circle cx="5.35" cy="3.7" r="0.55" fill="white"/>
+                <circle cx="6.7" cy="3.7" r="0.55" fill="white"/>
+                <circle cx="1.97" cy="4.9" r="0.55" fill="white"/>
+                <circle cx="3.32" cy="4.9" r="0.55" fill="white"/>
+                <circle cx="4.67" cy="4.9" r="0.55" fill="white"/>
+                <circle cx="6.02" cy="4.9" r="0.55" fill="white"/>
+                <circle cx="1.3" cy="6.1" r="0.55" fill="white"/>
+                <circle cx="2.65" cy="6.1" r="0.55" fill="white"/>
+                <circle cx="4" cy="6.1" r="0.55" fill="white"/>
+                <circle cx="5.35" cy="6.1" r="0.55" fill="white"/>
+                <circle cx="6.7" cy="6.1" r="0.55" fill="white"/>
+              </svg>
+              EN
+            </button>
+          </div>
+
+          <div class="um-divider"></div>
+
+          <!-- Sign out -->
+          <button class="um-signout" (click)="signOut()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+            {{ 'auth.signOut' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
 </header>

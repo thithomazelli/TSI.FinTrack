@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BalanceService, BalanceSummary } from '../../core/services/balance.service';
+import { LanguageService } from '../../core/services/language.service';
 
 @Component({
   selector: 'tsi-balance-widget',
@@ -13,6 +14,7 @@ import { BalanceService, BalanceSummary } from '../../core/services/balance.serv
 })
 export class BalanceWidgetComponent implements OnInit {
   private readonly balanceService = inject(BalanceService);
+  private readonly lang = inject(LanguageService);
 
   readonly summary = signal<BalanceSummary | null>(null);
   readonly available = signal<number | null>(null);
@@ -22,6 +24,14 @@ export class BalanceWidgetComponent implements OnInit {
   readonly now = new Date();
   readonly year = this.now.getFullYear();
   readonly month = this.now.getMonth() + 1;
+
+  readonly monthLabel = computed(() => {
+    const locale = this.lang.current() === 'pt-BR' ? 'pt-BR' : 'en-US';
+    const date = new Date(this.year, this.month - 1, 1);
+    const mon = date.toLocaleString(locale, { month: 'short' });
+    const capitalized = mon.charAt(0).toUpperCase() + mon.slice(1).replace('.', '');
+    return `${capitalized}/${this.year}`;
+  });
 
   ngOnInit(): void {
     this.balanceService.getSummary(this.year, this.month).subscribe({

@@ -200,6 +200,21 @@ export class MovimentosComponent implements OnInit {
   /** Saldo atual disponível (acumulado, todo o histórico) — independe do período. */
   readonly availableBalance = signal<number | null>(null);
 
+  // Multi-seleção
+  readonly selectedIds = signal<Set<string>>(new Set());
+  readonly allSelected = computed(() =>
+    this.filteredItems().length > 0 &&
+    this.filteredItems().every(i => this.selectedIds().has(i.id))
+  );
+  readonly selectionCount = computed(() => this.selectedIds().size);
+
+  // Bulk actions
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | null>(null);
+  bulkNewAmount = 0;
+  bulkTargetYear = new Date().getFullYear();
+  bulkTargetMonth = new Date().getMonth() + 1;
+  readonly bulkSaving = signal(false);
+
   // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
   readonly categorySpend = computed(() => {
     const map = new Map<string, number>();
@@ -518,6 +533,113 @@ export class MovimentosComponent implements OnInit {
         this.toast.error(this.tr('movimentos.toast.deleteError'));
       },
     });
+  }
+
+  // ── Seleção ──────────────────────────────────────────────────────────────
+  toggleAll(): void {
+    if (this.allSelected()) {
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectedIds.set(new Set(this.filteredItems().map(i => i.id)));
+    }
+  }
+
+  toggleItem(id: string): void {
+    this.selectedIds.update(s => {
+      const next = new Set(s);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+    this.bulkActionOpen.set(null);
+  }
+
+  openBulkAction(action: 'delete' | 'amount' | 'move'): void {
+    this.bulkNewAmount = 0;
+    this.bulkTargetYear = new Date().getFullYear();
+    this.bulkTargetMonth = new Date().getMonth() + 1;
+    this.bulkActionOpen.set(action);
+  }
+
+  // ── Bulk delete ───────────────────────────────────────────────────────────
+  async bulkDelete(): Promise<void> {
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    this.bulkSaving.set(true);
+    try {
+      for (const item of items) {
+        if (item.kind === 'entry') await this.entryService.delete(item.id).toPromise();
+        else await this.transactionService.delete(item.id).toPromise();
+      }
+      this.clearSelection();
+      this.toast.success(`${items.length} ${this.tr('movimentos.bulk.deleted')}`);
+      this.load();
+    } catch (err) {
+      this.logger.error('Bulk delete failed', err);
+      this.toast.error(this.tr('movimentos.toast.deleteError'));
+    } finally {
+      this.bulkSaving.set(false);
+    }
+  }
+
+  // ── Bulk edit amount ───────────────────────────────────────────────────────
+  async bulkEditAmount(): Promise<void> {
+    if (this.bulkNewAmount <= 0) return;
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    this.bulkSaving.set(true);
+    try {
+      for (const item of items) {
+        if (item.kind === 'entry') {
+          await this.entryService.update(item.id, { amount: this.bulkNewAmount } as any).toPromise();
+        } else {
+          await this.transactionService.update(item.id, { amount: this.bulkNewAmount } as any).toPromise();
+        }
+      }
+      this.clearSelection();
+      this.toast.success(`${items.length} ${this.tr('movimentos.bulk.amountUpdated')}`);
+      this.load();
+    } catch (err) {
+      this.logger.error('Bulk amount update failed', err);
+      this.toast.error(this.tr('movimentos.toast.txUpdateError'));
+    } finally {
+      this.bulkSaving.set(false);
+    }
+  }
+
+  // ── Bulk move month ────────────────────────────────────────────────────────
+  async bulkMoveMonth(): Promise<void> {
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const y = this.bulkTargetYear;
+    const m = String(this.bulkTargetMonth).padStart(2, '0');
+    this.bulkSaving.set(true);
+    try {
+      for (const item of items) {
+        const origDay = item.date.split('-')[2];
+        const newDate = `${y}-${m}-${origDay}`;
+        if (item.kind === 'entry') {
+          await this.entryService.update(item.id, { date: newDate } as any).toPromise();
+        } else {
+          await this.transactionService.update(item.id, { date: newDate } as any).toPromise();
+        }
+      }
+      this.clearSelection();
+      this.toast.success(`${items.length} ${this.tr('movimentos.bulk.moved')}`);
+      this.load();
+    } catch (err) {
+      this.logger.error('Bulk move failed', err);
+      this.toast.error(this.tr('movimentos.toast.txUpdateError'));
+    } finally {
+      this.bulkSaving.set(false);
+    }
   }
 
   categoryName(id?: string): string {

@@ -66,6 +66,11 @@ export const routes: Routes = [
           import('./features/import/import.component').then(m => m.ImportComponent),
       },
       {
+        path: 'simulations',
+        loadComponent: () =>
+          import('./features/simulations/simulations.component').then(m => m.SimulationsComponent),
+      },
+      {
         path: 'notifications',
         loadComponent: () =>
           import('./features/notifications/notifications.component').then(m => m.NotificationsComponent),

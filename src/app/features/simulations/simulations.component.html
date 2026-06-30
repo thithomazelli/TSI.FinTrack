@@ -1,0 +1,188 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{ 'simulations.title' | translate }}</h2>
+      <p class="subtitle">{{ 'simulations.subtitle' | translate }}</p>
+    </div>
+    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+  </div>
+
+  <!-- Simulation banner -->
+  <div class="sim-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+    {{ 'simulations.banner' | translate }}
+  </div>
+
+  <!-- Diff panel (changes summary) -->
+  @if (hasChanges()) {
+    <div class="diff-panel">
+      <div class="diff-header">
+        <span class="diff-title">{{ 'simulations.changesTitle' | translate }} ({{ diff().length }})</span>
+        <div class="diff-actions">
+          <button class="btn btn-ghost" (click)="resetSim()">{{ 'simulations.reset' | translate }}</button>
+          <button class="btn btn-primary btn-apply" (click)="applySimulation()" [disabled]="applying()">
+            @if (applying()) { {{ 'common.saving' | translate }} }
+            @else { {{ 'simulations.apply' | translate }} ({{ diff().length }}) }
+          </button>
+        </div>
+      </div>
+
+      <div class="diff-list">
+        @for (d of diff(); track d.item.id + d.type) {
+          <div class="diff-row" [class.diff-row--deleted]="d.type === 'deleted'">
+            <span class="diff-kind" [class.kind-entry]="d.item.kind === 'entry'" [class.kind-tx]="d.item.kind === 'transaction'">
+              {{ d.item.kind === 'entry' ? '↑' : '↓' }}
+            </span>
+            <span class="diff-desc">{{ d.item.description }}</span>
+            <span class="diff-change">
+              @if (d.type === 'deleted') {
+                <span class="diff-tag diff-tag--deleted">{{ 'simulations.diffDeleted' | translate }}</span>
+              } @else if (d.type === 'amount') {
+                <span class="diff-old">{{ d.originalValue }}</span>
+                <span class="diff-arrow">→</span>
+                <span class="diff-new">{{ d.newValue }}</span>
+              } @else {
+                <span class="diff-old">{{ d.originalValue | date:'dd/MM/yy' }}</span>
+                <span class="diff-arrow">→</span>
+                <span class="diff-new">{{ d.newValue | date:'dd/MM/yy' }}</span>
+              }
+            </span>
+            <button class="diff-undo" (click)="removeDiff(d)" [title]="'simulations.undoChange' | translate">↺</button>
+          </div>
+        }
+      </div>
+
+      <!-- Comparison: real vs simulated -->
+      <div class="diff-comparison">
+        <div class="cmp-col">
+          <span class="cmp-label">{{ 'simulations.real' | translate }}</span>
+          <span class="cmp-row"><span>{{ 'movimentos.totalIncome' | translate }}</span><span class="cmp-val pos">R$ {{ realEntradas() | number:'1.2-2' }}</span></span>
+          <span class="cmp-row"><span>{{ 'movimentos.totalExpenses' | translate }}</span><span class="cmp-val neg">R$ {{ realSaidas() | number:'1.2-2' }}</span></span>
+          <span class="cmp-row cmp-row--bold"><span>{{ 'movimentos.balance' | translate }}</span><span class="cmp-val" [class.pos]="realSaldo() >= 0" [class.neg]="realSaldo() < 0">R$ {{ realSaldo() | number:'1.2-2' }}</span></span>
+        </div>
+        <div class="cmp-sep">→</div>
+        <div class="cmp-col">
+          <span class="cmp-label">{{ 'simulations.simulated' | translate }}</span>
+          <span class="cmp-row"><span>{{ 'movimentos.totalIncome' | translate }}</span><span class="cmp-val pos">R$ {{ simEntradas() | number:'1.2-2' }}</span></span>
+          <span class="cmp-row"><span>{{ 'movimentos.totalExpenses' | translate }}</span><span class="cmp-val neg">R$ {{ simSaidas() | number:'1.2-2' }}</span></span>
+          <span class="cmp-row cmp-row--bold"><span>{{ 'movimentos.balance' | translate }}</span><span class="cmp-val" [class.pos]="simSaldo() >= 0" [class.neg]="simSaldo() < 0">R$ {{ simSaldo() | number:'1.2-2' }}</span></span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Summary bar -->
+  <div class="summary-bar">
+    <div class="summary-card summary-card--entrada">
+      <span class="summary-label">{{ 'movimentos.totalIncome' | translate }}</span>
+      <span class="summary-value">R$ {{ simEntradas() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card summary-card--saida">
+      <span class="summary-label">{{ 'movimentos.totalExpenses' | translate }}</span>
+      <span class="summary-value">R$ {{ simSaidas() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card" [class.summary-card--positivo]="simSaldo() >= 0" [class.summary-card--negativo]="simSaldo() < 0">
+      <span class="summary-label">{{ 'movimentos.balance' | translate }}</span>
+      <span class="summary-value">R$ {{ simSaldo() | number:'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  @if (loading()) {
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+  } @else if (simulatedItems().length === 0) {
+    <p class="state-msg">{{ 'simulations.empty' | translate }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'common.date' | translate }}</th>
+            <th>{{ 'movimentos.colType' | translate }}</th>
+            <th>{{ 'common.description' | translate }}</th>
+            <th>{{ 'common.category' | translate }}</th>
+            <th>{{ 'movimentos.colCardAccount' | translate }}</th>
+            <th class="text-right">{{ 'common.amount' | translate }}</th>
+            <th>{{ 'common.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of simulatedItems(); track item.id) {
+            <tr [class.row-modified]="isModified(item.id)">
+              @if (isEditing(item.id)) {
+                <!-- Inline edit row -->
+                <td><input class="input input-inline" type="date" [(ngModel)]="editDate" /></td>
+                <td colspan="3">
+                  <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
+                    {{ item.description }}
+                  </span>
+                </td>
+                <td></td>
+                <td class="text-right">
+                  <input class="input input-inline input-amount" type="number" min="0.01" step="0.01" [(ngModel)]="editAmount" />
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <button class="action-btn action-btn--edit" (click)="applyEdit(item)">✓</button>
+                    <button class="action-btn action-btn--delete" (click)="cancelEdit()">✕</button>
+                  </div>
+                </td>
+              } @else {
+                <!-- Normal row -->
+                <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
+                    {{ (item.kind === 'entry' ? 'movimentos.typeEntry' : 'movimentos.typeExit') | translate }}
+                  </span>
+                </td>
+                <td>
+                  <div class="desc-cell">
+                    <span>{{ item.description }}</span>
+                    @if (isModified(item.id)) { <span class="mod-badge">{{ 'simulations.modified' | translate }}</span> }
+                  </div>
+                </td>
+                <td>
+                  @if (item.kind === 'transaction') {
+                    <div class="cat-cell">
+                      <span class="cat-dot" [style.background]="categoryColor(item.categoryId)"></span>
+                      {{ categoryName(item.categoryId) }}
+                    </div>
+                  }
+                </td>
+                <td class="col-muted">{{ payerName(item) }}</td>
+                <td class="col-amount text-right" [class.amount-entrada]="item.kind === 'entry'" [class.amount-saida]="item.kind === 'transaction'">
+                  R$ {{ item.amount | number:'1.2-2' }}
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <button class="action-btn action-btn--edit" (click)="startEdit(item)" [title]="'simulations.editHint' | translate">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                    </button>
+                    <button class="action-btn action-btn--delete" (click)="deleteItem(item)" [title]="'simulations.deleteHint' | translate">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                    </button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Deleted items list -->
+    @if (deletedItems().length > 0) {
+      <div class="deleted-section">
+        <h4 class="deleted-title">{{ 'simulations.deletedItems' | translate }} ({{ deletedItems().length }})</h4>
+        @for (item of deletedItems(); track item.id) {
+          <div class="deleted-row">
+            <span class="deleted-desc">{{ item.description }}</span>
+            <span class="deleted-amount">R$ {{ item.amount | number:'1.2-2' }}</span>
+            <button class="btn-restore" (click)="restoreItem(item.id)">{{ 'simulations.restore' | translate }}</button>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
