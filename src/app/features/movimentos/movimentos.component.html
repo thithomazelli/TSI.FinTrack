@@ -73,7 +73,18 @@
     </div>
   </div>
 
-  <!-- Summary bar -->
+  <!-- Saldo atual (fixo, independe do período) -->
+  @if (availableBalance() !== null) {
+    <div class="current-balance-card" [class.is-negative]="availableBalance()! < 0">
+      <div class="cb-info">
+        <span class="cb-label">{{ 'movimentos.currentBalance' | translate }}</span>
+        <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
+      </div>
+      <span class="cb-value">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
+    </div>
+  }
+
+  <!-- Summary bar (período selecionado) -->
   <div class="summary-bar">
     <div class="summary-card summary-card--entrada">
       <span class="summary-label">{{ 'movimentos.totalIncome' | translate }}</span>

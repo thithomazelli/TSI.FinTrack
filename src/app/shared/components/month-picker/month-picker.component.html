@@ -1,5 +1,23 @@
 <div class="month-picker">
-  <button class="nav-btn" (click)="prev()">‹</button>
-  <span class="label">{{ label }}</span>
-  <button class="nav-btn" (click)="next()">›</button>
+  <button class="nav-btn" (click)="prev()" aria-label="Anterior">‹</button>
+  <button class="label" (click)="togglePanel()" [class.is-open]="open()">{{ label }}</button>
+  <button class="nav-btn" (click)="next()" aria-label="Próximo">›</button>
+
+  @if (open()) {
+    <div class="mp-backdrop" (click)="closePanel()"></div>
+    <div class="mp-panel">
+      <div class="mp-panel-header">
+        <button class="nav-btn" (click)="panelPrevYear()" aria-label="Ano anterior">‹</button>
+        <span class="mp-year">{{ panelYear() }}</span>
+        <button class="nav-btn" (click)="panelNextYear()" aria-label="Próximo ano">›</button>
+      </div>
+      <div class="mp-grid">
+        @for (m of months; track m) {
+          <button class="mp-month" [class.selected]="isSelected(m)" (click)="selectMonth(m)">
+            {{ monthShort(m) }}
+          </button>
+        }
+      </div>
+    </div>
+  }
 </div>

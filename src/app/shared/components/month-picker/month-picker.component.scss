@@ -1,4 +1,5 @@
 .month-picker {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -16,6 +17,64 @@
   text-align: center;
   text-transform: capitalize;
   color: var(--color-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background var(--transition);
+
+  &:hover, &.is-open { background: var(--color-surface-2); }
+}
+
+/* Popup de calendário */
+.mp-backdrop { position: fixed; inset: 0; z-index: 50; }
+
+.mp-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 51;
+  width: 240px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 10px;
+  animation: mpFade 0.15s ease both;
+}
+
+@keyframes mpFade {
+  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.mp-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mp-year { font-weight: 700; font-size: 0.95rem; color: var(--color-text); }
+
+.mp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+.mp-month {
+  padding: 8px 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: all var(--transition);
+
+  &:hover { border-color: var(--color-accent); }
+  &.selected { background: var(--color-accent); color: #fff; }
 }
 
 .nav-btn {

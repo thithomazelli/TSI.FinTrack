@@ -344,7 +344,9 @@
       "txCreateError": "Failed to create expense.",
       "deleted": "Record deleted.",
       "deleteError": "Failed to delete."
-    }
+    },
+    "currentBalance": "Current Balance",
+    "currentBalanceHint": "cumulative, all months"
   },
   "bills": {
     "title": "Bills",

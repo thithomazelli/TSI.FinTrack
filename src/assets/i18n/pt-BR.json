@@ -344,7 +344,9 @@
       "txCreateError": "Erro ao criar transação.",
       "deleted": "Registro excluído.",
       "deleteError": "Erro ao excluir."
-    }
+    },
+    "currentBalance": "Saldo Atual",
+    "currentBalanceHint": "acumulado, todos os meses"
   },
   "bills": {
     "title": "Faturas",

@@ -20,6 +20,7 @@ import { DomainListService } from '../../core/services/domain-list.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
+import { BalanceService } from '../../core/services/balance.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { Entry } from '../../core/models/interfaces/entry.interface';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
@@ -68,6 +69,7 @@ export class MovimentosComponent implements OnInit {
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
   private readonly supabase = inject(SupabaseService);
+  private readonly balanceService = inject(BalanceService);
   private readonly auth = inject(AuthService);
   readonly themeService = inject(ThemeService);
   private readonly t = inject(TranslateService);
@@ -195,6 +197,9 @@ export class MovimentosComponent implements OnInit {
 
   readonly saldo = computed(() => this.totalEntradas() - this.totalSaidas());
 
+  /** Saldo atual disponível (acumulado, todo o histórico) — independe do período. */
+  readonly availableBalance = signal<number | null>(null);
+
   // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
   readonly categorySpend = computed(() => {
     const map = new Map<string, number>();
@@ -247,11 +252,18 @@ export class MovimentosComponent implements OnInit {
     this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
     this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
     this.domainListService.getByCode('entry_type').subscribe({ next: d => this.entryTypes.set(d) });
+    this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v) });
     this.load();
+  }
+
+  /** Recarrega o saldo atual (ex.: após criar/editar/excluir um lançamento). */
+  private refreshAvailable(): void {
+    this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v) });
   }
 
   async load(): Promise<void> {
     this.loading.set(true);
+    this.refreshAvailable();
     const uid = this.auth.currentUser!.id;
     const from = this.dateFrom();
     const to = this.dateTo();
@@ -498,6 +510,7 @@ export class MovimentosComponent implements OnInit {
         } else {
           this.allTransactions.update(list => list.filter(t => t.id !== item.id));
         }
+        this.refreshAvailable();
         this.toast.success(this.tr('movimentos.toast.deleted'));
       },
       error: err => {
