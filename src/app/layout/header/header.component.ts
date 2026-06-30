@@ -1,9 +1,10 @@
 import {
-  ChangeDetectionStrategy, Component, OnInit,
+  ChangeDetectionStrategy, Component, OnInit, OnDestroy,
   inject, output, signal, computed,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -38,7 +39,8 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
+  private readonly routeSub = new Subscription();
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly alertService = inject(AlertService);
@@ -74,12 +76,23 @@ export class HeaderComponent implements OnInit {
   readonly userEmail = signal('');
   readonly avatarUploading = signal(false);
 
-  get pageTitleKey(): string {
-    const url = this.router.url.split('?')[0];
-    return ROUTE_TITLE_KEYS[url] ?? '';
+  readonly pageTitleKey = signal(this.resolveTitle(this.router.url));
+
+  private resolveTitle(url: string): string {
+    const path = url.split('?')[0].split('#')[0];
+    // match longest prefix
+    const key = Object.keys(ROUTE_TITLE_KEYS)
+      .filter(k => path === k || path.startsWith(k + '/'))
+      .sort((a, b) => b.length - a.length)[0];
+    return key ? ROUTE_TITLE_KEYS[key] : '';
   }
 
   ngOnInit(): void {
+    this.routeSub.add(
+      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(e => {
+        this.pageTitleKey.set(this.resolveTitle((e as NavigationEnd).urlAfterRedirects));
+      })
+    );
     const now = new Date();
     this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v), error: () => {} });
     this.balanceService.getSummary(now.getFullYear(), now.getMonth() + 1).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} });
@@ -99,6 +112,8 @@ export class HeaderComponent implements OnInit {
       });
     }
   }
+
+  ngOnDestroy(): void { this.routeSub.unsubscribe(); }
 
   toggleBell(): void { this.bellOpen.update(v => !v); this.userMenuOpen.set(false); this.balanceOpen.set(false); }
   closeBell(): void { this.bellOpen.set(false); }

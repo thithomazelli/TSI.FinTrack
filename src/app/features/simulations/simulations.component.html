@@ -5,7 +5,6 @@
       <h2 class="page-title">{{ 'simulations.title' | translate }}</h2>
       <p class="subtitle">{{ 'simulations.subtitle' | translate }}</p>
     </div>
-    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
   </div>
 
   <!-- Simulation banner -->
@@ -16,30 +15,38 @@
 
   <!-- Filters -->
   <div class="filter-bar">
-    <div class="filter-group">
-      <label class="filter-label">{{ 'common.type' | translate }}</label>
-      <select class="input input-sm" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
-        <option value="all">{{ 'movimentos.allM' | translate }}</option>
-        <option value="entry">{{ 'movimentos.income' | translate }}</option>
-        <option value="transaction">{{ 'movimentos.expenses' | translate }}</option>
-      </select>
+    <!-- Período -->
+    <div class="filter-section filter-section--period">
+      <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
     </div>
-    <div class="filter-group">
-      <label class="filter-label">{{ 'common.status' | translate }}</label>
-      <select class="input input-sm" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
-        <option value="all">{{ 'movimentos.allM' | translate }}</option>
-        <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
-        <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label">{{ 'common.category' | translate }}</label>
-      <select class="input input-sm" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
-        <option value="">{{ 'movimentos.allF' | translate }}</option>
-        @for (cat of categories(); track cat.id) {
-          <option [value]="cat.id">{{ cat.name }}</option>
-        }
-      </select>
+
+    <!-- Refinos -->
+    <div class="filter-section filter-section--refine">
+      <div class="filter-group">
+        <label class="filter-label">{{ 'common.type' | translate }}</label>
+        <select class="input input-sm" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
+          <option value="all">{{ 'movimentos.allM' | translate }}</option>
+          <option value="entry">{{ 'movimentos.income' | translate }}</option>
+          <option value="transaction">{{ 'movimentos.expenses' | translate }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">{{ 'common.status' | translate }}</label>
+        <select class="input input-sm" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+          <option value="all">{{ 'movimentos.allM' | translate }}</option>
+          <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
+          <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">{{ 'common.category' | translate }}</label>
+        <select class="input input-sm" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
+          <option value="">{{ 'movimentos.allF' | translate }}</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
     </div>
   </div>
 
