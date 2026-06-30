@@ -150,7 +150,11 @@ async function sendDailyDigest(today: Date) {
     const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
     const spentRealized = realized.reduce((s, t) => s + t.amount, 0);
     const spentProjected = projected.reduce((s, t) => s + t.amount, 0);
-    const balance = totalIncome - spentRealized;
+    const monthBalance = totalIncome - spentRealized;
+
+    // Saldo realmente disponível (acumulado, todo o histórico)
+    const { data: availData } = await supabase.rpc('available_balance', { uid: sub.user_id });
+    const available = typeof availData === 'number' ? availData : Number(availData ?? 0);
 
     // Faturas em aberto vencidas ou a vencer (contagem rápida)
     const soon7 = new Date(today);
@@ -177,9 +181,12 @@ async function sendDailyDigest(today: Date) {
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
-    msg += `💰 Receitas no mês: ${fmt(totalIncome)}\n`;
+    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
+    msg += `<i>(acumulado, considerando todos os meses)</i>\n\n`;
+    msg += `<b>Este mês:</b>\n`;
+    msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
     msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
-    msg += `${balance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(balance)}\n`;
+    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo do mês: ${fmt(monthBalance)}\n`;
     if (spentProjected > 0) {
       msg += `📉 Gastos projetados: ${fmt(spentProjected)}\n`;
     }
@@ -298,6 +305,152 @@ async function sendMonthlyAnalysis(today: Date) {
   }
 }
 
+// Coleta gasto realizado por categoria + metas do mês corrente.
+async function getCurrentMonthGoalData(userId: string, today: Date) {
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const monthStr = String(month).padStart(2, '0');
+
+  const { data: goals } = await supabase
+    .from('goals')
+    .select('category_id, monthly_limit')
+    .eq('owner_id', userId)
+    .eq('year', year)
+    .eq('month', month);
+
+  const { data: txs } = await supabase
+    .from('transactions')
+    .select('category_id, amount')
+    .eq('owner_id', userId)
+    .eq('status', 'REALIZED')
+    .gte('date', `${year}-${monthStr}-01`)
+    .lte('date', `${year}-${monthStr}-31`);
+
+  const spentMap: Record<string, number> = {};
+  for (const t of txs ?? []) {
+    if (t.category_id) spentMap[t.category_id] = (spentMap[t.category_id] ?? 0) + t.amount;
+  }
+  return { goals: goals ?? [], spentMap };
+}
+
+// Notificação de meio de mês: saúde financeira com base no ritmo vs metas.
+async function sendMidMonthHealth(today: Date) {
+  const subs = await getAllSubscriptions();
+  const dayOfMonth = today.getDate();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const monthProgress = dayOfMonth / daysInMonth; // fração do mês decorrida
+
+  for (const sub of subs) {
+    const { goals, spentMap } = await getCurrentMonthGoalData(sub.user_id, today);
+    if (!goals.length) continue;
+
+    const catIds = goals.map((g) => g.category_id);
+    const { data: cats } = await supabase.from('categories').select('id, name').in('id', catIds);
+    const catMap = Object.fromEntries((cats ?? []).map((c) => [c.id, c.name]));
+
+    let onTrack = 0;
+    const alerts: string[] = [];
+    for (const g of goals) {
+      const spent = spentMap[g.category_id] ?? 0;
+      const usedPct = g.monthly_limit > 0 ? spent / g.monthly_limit : 0;
+      // "saudável" se o ritmo de gasto acompanha o avanço do mês (margem de 10%)
+      if (usedPct <= monthProgress + 0.1) {
+        onTrack++;
+      } else {
+        const pct = Math.round(usedPct * 100);
+        alerts.push(`  • ${catMap[g.category_id] ?? g.category_id}: ${fmt(spent)} / ${fmt(g.monthly_limit)} (${pct}%)`);
+      }
+    }
+
+    const healthScore = goals.length ? onTrack / goals.length : 1;
+    const status =
+      healthScore >= 0.8 ? '🟢 <b>Saúde financeira: BOA</b>' :
+      healthScore >= 0.5 ? '🟡 <b>Saúde financeira: ATENÇÃO</b>' :
+                           '🔴 <b>Saúde financeira: RUIM</b>';
+
+    let msg = `🩺 <b>Balanço de meio de mês</b>\n\n${status}\n`;
+    msg += `${onTrack} de ${goals.length} metas dentro do ritmo esperado.\n`;
+    if (alerts.length) {
+      msg += `\n<b>Acelerando demais:</b>\n${alerts.join('\n')}\n`;
+      msg += `\nDá tempo de ajustar até o fim do mês 💪`;
+    } else {
+      msg += `\nMandando bem — siga assim! 🎯`;
+    }
+    await sendMessage(sub.chat_id, msg.trim());
+  }
+}
+
+// Notificação do último dia: resumo final do mês corrente.
+async function sendMonthEndSummary(today: Date) {
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const monthStr = String(month).padStart(2, '0');
+  const monthName = today.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+  const subs = await getAllSubscriptions();
+
+  for (const sub of subs) {
+    const { data: txs } = await supabase
+      .from('transactions')
+      .select('amount, category_id, status')
+      .eq('owner_id', sub.user_id)
+      .gte('date', `${year}-${monthStr}-01`)
+      .lte('date', `${year}-${monthStr}-31`);
+
+    const { data: entries } = await supabase
+      .from('entries')
+      .select('amount')
+      .eq('owner_id', sub.user_id)
+      .gte('date', `${year}-${monthStr}-01`)
+      .lte('date', `${year}-${monthStr}-31`);
+
+    const realized = (txs ?? []).filter((t) => t.status === 'REALIZED');
+    const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
+    const totalExpenses = realized.reduce((s, t) => s + t.amount, 0);
+    const balance = totalIncome - totalExpenses;
+    const savedPct = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0;
+
+    const spentMap: Record<string, number> = {};
+    for (const t of realized) {
+      if (t.category_id) spentMap[t.category_id] = (spentMap[t.category_id] ?? 0) + t.amount;
+    }
+
+    // Destaques por meta: quem mais economizou (abaixo da meta) e quem mais estourou
+    const { goals } = await getCurrentMonthGoalData(sub.user_id, today);
+    const allCatIds = [...new Set([...goals.map((g) => g.category_id), ...Object.keys(spentMap)])];
+    const { data: cats } = await supabase.from('categories').select('id, name').in('id', allCatIds);
+    const catMap = Object.fromEntries((cats ?? []).map((c) => [c.id, c.name]));
+
+    let bestSaver: { name: string; diff: number } | null = null;
+    let worstSpender: { name: string; diff: number } | null = null;
+    for (const g of goals) {
+      const spent = spentMap[g.category_id] ?? 0;
+      const diff = g.monthly_limit - spent; // positivo = economizou
+      const name = catMap[g.category_id] ?? g.category_id;
+      if (diff > 0 && (!bestSaver || diff > bestSaver.diff)) bestSaver = { name, diff };
+      if (diff < 0 && (!worstSpender || diff < worstSpender.diff)) worstSpender = { name, diff };
+    }
+
+    let msg = `🏁 <b>Fechamento de ${monthName}</b>\n\n`;
+    msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
+    msg += `💸 Gastos: ${fmt(totalExpenses)}\n`;
+    msg += `${balance >= 0 ? '✅' : '❌'} Saldo do mês: ${fmt(balance)}\n`;
+    if (balance > 0) {
+      msg += `\n🎉 Você economizou ${fmt(balance)} (${savedPct}% da renda)!`;
+    } else if (balance < 0) {
+      msg += `\n⚠️ O mês fechou no negativo. Vamos ajustar no próximo!`;
+    } else {
+      msg += `\nMês equilibrado — sem sobra nem falta.`;
+    }
+    if (bestSaver) {
+      msg += `\n\n🟢 <b>Destaque de economia:</b> ${bestSaver.name} (${fmt(bestSaver.diff)} abaixo da meta)`;
+    }
+    if (worstSpender) {
+      msg += `\n🔴 <b>Custo excessivo:</b> ${worstSpender.name} (${fmt(Math.abs(worstSpender.diff))} acima da meta)`;
+    }
+    await sendMessage(sub.chat_id, msg.trim());
+  }
+}
+
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 Deno.serve(async (req) => {
@@ -307,7 +460,34 @@ Deno.serve(async (req) => {
   const type: string = body.type ?? '';
   const today = new Date();
 
-  if (type === 'bills_due') {
+  const day = today.getDate();
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const isLastDay = day === lastDay;
+
+  // Conjunto DIÁRIO (cron 1 — todo dia às 9h)
+  async function runDaily() {
+    await sendDailyDigest(today);
+    await notifyBills(today);
+    await notifyPendingDebits(today);
+    await notifyGoalsExceeded(today);
+  }
+
+  // Conjunto MENSAL (cron 2 — 3x no mês: início, meio e fim)
+  async function runMonthly() {
+    if (day === 1) {
+      await sendMonthlyAnalysis(today);   // dia 1: fechamento do mês anterior
+    } else if (day === 16) {
+      await sendMidMonthHealth(today);    // pós-meio: saúde financeira vs metas
+    } else if (isLastDay) {
+      await sendMonthEndSummary(today);   // último dia: resumo final + destaques
+    }
+  }
+
+  if (type === 'daily') {
+    await runDaily();
+  } else if (type === 'monthly') {
+    await runMonthly();
+  } else if (type === 'bills_due') {
     await notifyBills(today);
   } else if (type === 'pending_debits') {
     await notifyPendingDebits(today);
@@ -315,17 +495,15 @@ Deno.serve(async (req) => {
     await notifyGoalsExceeded(today);
   } else if (type === 'monthly_analysis') {
     await sendMonthlyAnalysis(today);
+  } else if (type === 'mid_month_health') {
+    await sendMidMonthHealth(today);
+  } else if (type === 'month_end_summary') {
+    await sendMonthEndSummary(today);
   } else if (type === 'daily_digest') {
     await sendDailyDigest(today);
   } else {
-    // Sem tipo explícito (cron diário): roda o conjunto diário.
-    await sendDailyDigest(today);
-    await notifyBills(today);
-    await notifyPendingDebits(today);
-    await notifyGoalsExceeded(today);
-    if (today.getDate() === 1) {
-      await sendMonthlyAnalysis(today);
-    }
+    // Sem tipo explícito: roda o diário (compatibilidade).
+    await runDaily();
   }
 
   return new Response(JSON.stringify({ ok: true }), {
