@@ -165,6 +165,21 @@ async function main() {
   if (unmatchedCards.length) console.warn('  ⚠ Cartões sem match:', unmatchedCards)
   else console.log('  Todos os cartões do seed têm match ✓')
 
+  // 2.5 Conta Corrente com saldo de abertura (reconciliação histórica)
+  const opening = data.meta?.opening_balance ?? 0
+  const { data: existingAccts } = await supabase
+    .from('accounts').select('id, name').eq('owner_id', OWNER_ID)
+  const acct = (existingAccts ?? []).find(a => a.name === 'Conta Corrente')
+  if (!acct) {
+    const { error } = await supabase.from('accounts')
+      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', balance: opening })
+    if (error) { console.error('Erro ao criar conta:', error.message); process.exit(1) }
+    console.log(`  Conta Corrente criada (saldo abertura ${opening}) ✓`)
+  } else {
+    await supabase.from('accounts').update({ balance: opening }).eq('id', acct.id)
+    console.log(`  Conta Corrente saldo abertura atualizado p/ ${opening} ✓`)
+  }
+
   // 3. Entradas de renda
   console.log('\nInserindo entradas de renda...')
   const entries = data.entries.map(e => ({
@@ -179,7 +194,7 @@ async function main() {
     owner_id: t.owner_id, description: t.description,
     amount: t.amount, date: t.date, labels: t.labels, status: t.status,
     category_id: catMap[t.category_name?.toLowerCase()] ?? null,
-    credit_card_id: cardMap[resolveCardName(t.credit_card_name).toLowerCase()] ?? null,
+    credit_card_id: cardMap[(t.credit_card_name ?? 'Débito Itaú').toLowerCase()] ?? null,
     account_id: null,
     installment_number: t.installment_number ?? null,
     total_installments: t.total_installments ?? null,
