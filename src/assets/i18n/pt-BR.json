@@ -400,5 +400,13 @@
     "continueGoogle": "Continuar com Google",
     "continueApple": "Continuar com Apple",
     "terms": "Ao entrar, você concorda com os nossos termos de uso."
+  },
+  "widget": {
+    "available": "Disponível",
+    "income": "Entradas",
+    "expenses": "Saídas",
+    "balance": "Saldo",
+    "showValues": "Mostrar valores",
+    "hideValues": "Ocultar valores"
   }
 }

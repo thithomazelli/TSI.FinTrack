@@ -1,7 +1,7 @@
 <div class="widget">
   <div class="widget-header">
     <span class="widget-title">{{ month }}/{{ year }}</span>
-    <button class="toggle-btn" (click)="toggle()" [title]="hidden() ? 'Mostrar valores' : 'Ocultar valores'">
+    <button class="toggle-btn" (click)="toggle()" [title]="(hidden() ? 'widget.showValues' : 'widget.hideValues') | translate">
       @if (hidden()) {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
       } @else {
@@ -13,21 +13,30 @@
   @if (loading()) {
     <div class="widget-loading">...</div>
   } @else if (summary()) {
+    @if (available() !== null) {
+      <div class="widget-row widget-row--available">
+        <span class="widget-label widget-label--bold">{{ 'widget.available' | translate }}</span>
+        <span class="widget-value widget-value--bold" [class.widget-value--positive]="available()! >= 0" [class.widget-value--negative]="available()! < 0">
+          {{ hidden() ? '***' : ('R$ ' + (available()! | number:'1.2-2')) }}
+        </span>
+      </div>
+      <div class="widget-divider"></div>
+    }
     <div class="widget-row">
-      <span class="widget-label">Entradas</span>
+      <span class="widget-label">{{ 'widget.income' | translate }}</span>
       <span class="widget-value widget-value--income">
         {{ hidden() ? '***' : ('R$ ' + (summary()!.totalIncome | number:'1.2-2')) }}
       </span>
     </div>
     <div class="widget-row">
-      <span class="widget-label">Saídas</span>
+      <span class="widget-label">{{ 'widget.expenses' | translate }}</span>
       <span class="widget-value widget-value--expense">
         {{ hidden() ? '***' : ('R$ ' + (summary()!.totalExpenses | number:'1.2-2')) }}
       </span>
     </div>
     <div class="widget-divider"></div>
     <div class="widget-row">
-      <span class="widget-label widget-label--bold">Saldo</span>
+      <span class="widget-label widget-label--bold">{{ 'widget.balance' | translate }}</span>
       <span class="widget-value widget-value--bold" [class.widget-value--positive]="summary()!.balance >= 0" [class.widget-value--negative]="summary()!.balance < 0">
         {{ hidden() ? '***' : ('R$ ' + (summary()!.balance | number:'1.2-2')) }}
       </span>

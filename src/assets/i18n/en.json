@@ -400,5 +400,13 @@
     "continueGoogle": "Continue with Google",
     "continueApple": "Continue with Apple",
     "terms": "By signing in, you agree to our terms of use."
+  },
+  "widget": {
+    "available": "Available",
+    "income": "Income",
+    "expenses": "Expenses",
+    "balance": "Balance",
+    "showValues": "Show values",
+    "hideValues": "Hide values"
   }
 }

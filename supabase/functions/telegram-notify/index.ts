@@ -152,9 +152,13 @@ async function sendDailyDigest(today: Date) {
     const spentProjected = projected.reduce((s, t) => s + t.amount, 0);
     const monthBalance = totalIncome - spentRealized;
 
-    // Saldo realmente disponível (acumulado, todo o histórico)
-    const { data: availData } = await supabase.rpc('available_balance', { uid: sub.user_id });
-    const available = typeof availData === 'number' ? availData : Number(availData ?? 0);
+    // Saldo realmente disponível (acumulado, todo o histórico) — via view
+    const { data: balRow } = await supabase
+      .from('v_available_balance')
+      .select('available')
+      .eq('owner_id', sub.user_id)
+      .maybeSingle();
+    const available = Number(balRow?.available ?? 0);
 
     // Faturas em aberto vencidas ou a vencer (contagem rápida)
     const soon7 = new Date(today);

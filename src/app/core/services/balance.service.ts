@@ -17,6 +17,17 @@ export class BalanceService {
 
   private get ownerId(): string { return this.auth.currentUser!.id; }
 
+  /** Saldo realmente disponível (acumulado, todo o histórico) via view. */
+  getAvailableBalance(): Observable<number> {
+    return from(
+      this.supabase.client
+        .from('v_available_balance')
+        .select('available')
+        .eq('owner_id', this.ownerId)
+        .maybeSingle()
+    ).pipe(map(res => Number((res.data as { available: number } | null)?.available ?? 0)));
+  }
+
   getSummary(year: number, month: number): Observable<BalanceSummary> {
     const start = `${year}-${String(month).padStart(2,'0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];
