@@ -33,6 +33,8 @@ export class ProfileSettingsComponent implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly saved = signal(false);
+  readonly avatarUrl = signal<string | null>(null);
+  readonly avatarUploading = signal(false);
 
   readonly fullName = signal('');
   readonly email = signal('');
@@ -57,6 +59,7 @@ export class ProfileSettingsComponent implements OnInit {
     this.profileService.getById(user.id).subscribe({
       next: (profile) => {
         this.fullName.set(profile.fullName ?? '');
+        this.avatarUrl.set(profile.avatarUrl ?? null);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
@@ -70,6 +73,32 @@ export class ProfileSettingsComponent implements OnInit {
         this.telegramLoading.set(false);
       },
       error: () => this.telegramLoading.set(false),
+    });
+  }
+
+  onAvatarFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const user = this.auth.currentUser;
+    if (!user) return;
+    this.avatarUploading.set(true);
+    this.profileService.uploadAvatar(user.id, file).subscribe({
+      next: (url) => {
+        this.avatarUrl.set(url);
+        this.profileService.upsert({ id: user.id, avatarUrl: url }).subscribe({
+          next: () => {
+            this.avatarUploading.set(false);
+            this.toast.success('Foto atualizada!');
+          },
+          error: () => { this.avatarUploading.set(false); this.toast.error('Erro ao salvar avatar.'); },
+        });
+      },
+      error: (err) => {
+        this.logger.error('Avatar upload failed', err);
+        this.avatarUploading.set(false);
+        this.toast.error('Erro ao fazer upload da foto.');
+      },
     });
   }
 

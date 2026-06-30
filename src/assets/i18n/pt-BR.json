@@ -61,7 +61,8 @@
     "settings": "Configurações",
     "movements": "Movimentos",
     "bills": "Faturas",
-    "recurring": "Recorrentes"
+    "recurring": "Recorrentes",
+    "notifications": "Notificações"
   },
   "auth": {
     "signIn": "Entrar",
@@ -210,7 +211,8 @@
     "totalExpenses": "Total de Gastos",
     "balance": "Saldo do Mês",
     "projected": "Projetado",
-    "topCategories": "Top Categorias"
+    "topCategories": "Top Categorias",
+    "seeAllAlerts": "Ver todos os alertas"
   },
   "goals": {
     "title": "Metas",
@@ -395,7 +397,8 @@
     "copy": "Copiar",
     "copied": "Copiado!",
     "tokenExpires": "O token expira após o primeiro uso.",
-    "connect": "Conectar Telegram"
+    "connect": "Conectar Telegram",
+    "changePhoto": "Alterar foto de perfil"
   },
   "login": {
     "subtitle": "Seu controle financeiro pessoal",
@@ -409,6 +412,14 @@
     "expenses": "Saídas",
     "balance": "Saldo",
     "showValues": "Mostrar valores",
-    "hideValues": "Ocultar valores"
+    "hideValues": "Ocultar valores",
+    "currentMonth": "mês atual"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "subtitle": "Alertas e avisos do mês",
+    "alerts": "alertas",
+    "seeAll": "Ver todas as notificações",
+    "empty": "Nenhuma notificação no momento."
   }
 }

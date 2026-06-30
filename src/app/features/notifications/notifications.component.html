@@ -1,0 +1,37 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{ 'notifications.title' | translate }}</h2>
+      <p class="subtitle">{{ 'notifications.subtitle' | translate }}</p>
+    </div>
+    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+  </div>
+
+  @if (loading()) {
+    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else if (visibleAlerts().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">✅</span>
+      <p>{{ 'notifications.empty' | translate }}</p>
+    </div>
+  } @else {
+    <div class="alerts-list">
+      @for (alert of visibleAlerts(); track alert.id) {
+        <div class="alert-item" [class]="'alert-' + alert.level">
+          <div class="alert-body">
+            <span class="alert-icon">
+              @if (alert.level === 'danger') { ⚠️ }
+              @else if (alert.level === 'warning') { 🔔 }
+              @else { ℹ️ }
+            </span>
+            <div class="alert-text">
+              <strong>{{ alert.title }}</strong>
+              <span class="alert-detail">{{ alert.detail }}</span>
+            </div>
+          </div>
+          <button class="alert-dismiss" (click)="dismiss(alert.id)" [title]="'common.dismiss' | translate">✕</button>
+        </div>
+      }
+    </div>
+  }
+</div>

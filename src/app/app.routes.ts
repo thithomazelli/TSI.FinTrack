@@ -66,6 +66,11 @@ export const routes: Routes = [
           import('./features/import/import.component').then(m => m.ImportComponent),
       },
       {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./features/notifications/notifications.component').then(m => m.NotificationsComponent),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings-shell.component').then(m => m.SettingsShellComponent),

@@ -10,25 +10,55 @@
   @if (loading()) {
     <p class="loading-text">{{ 'common.loading' | translate }}</p>
   } @else {
-    <!-- Alerts -->
+
+    <!-- Cumulative balance card -->
+    @if (availableBalance() !== null) {
+      <div class="current-balance-card" [class.is-negative]="availableBalance()! < 0">
+        <div class="cb-info">
+          <span class="cb-label">{{ 'movimentos.currentBalance' | translate }}</span>
+          <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
+        </div>
+        <span class="cb-value">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
+      </div>
+    }
+
+    <!-- Alerts carousel -->
     @if (visibleAlerts().length > 0) {
-      <div class="alerts-section">
-        @for (alert of visibleAlerts(); track alert.id) {
-          <div class="alert-item" [class]="'alert-' + alert.level">
-            <div class="alert-body">
-              <span class="alert-icon">
-                @if (alert.level === 'danger') { ⚠️ }
-                @else if (alert.level === 'warning') { 🔔 }
-                @else { ℹ️ }
-              </span>
-              <div class="alert-text">
-                <strong>{{ alert.title }}</strong>
-                <span class="alert-detail">{{ alert.detail }}</span>
+      <div class="carousel-wrap">
+        <button class="carousel-btn" (click)="carouselPrev()" [disabled]="visibleAlerts().length <= 1" aria-label="Anterior">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="carousel-track">
+          @for (alert of visibleAlerts(); track alert.id; let i = $index) {
+            <div class="alert-item" [class]="'alert-' + alert.level" [class.is-visible]="i === carouselIndex()">
+              <div class="alert-body">
+                <span class="alert-icon">
+                  @if (alert.level === 'danger') { ⚠️ }
+                  @else if (alert.level === 'warning') { 🔔 }
+                  @else { ℹ️ }
+                </span>
+                <div class="alert-text">
+                  <strong>{{ alert.title }}</strong>
+                  <span class="alert-detail">{{ alert.detail }}</span>
+                </div>
               </div>
+              <button class="alert-dismiss" (click)="dismissAlert(alert.id)" [title]="'common.dismiss' | translate">✕</button>
             </div>
-            <button class="alert-dismiss" (click)="dismissAlert(alert.id)" [title]="'common.dismiss' | translate">✕</button>
+          }
+        </div>
+        <button class="carousel-btn" (click)="carouselNext()" [disabled]="visibleAlerts().length <= 1" aria-label="Próximo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carousel-footer">
+          <div class="carousel-dots">
+            @for (alert of visibleAlerts(); track alert.id; let i = $index) {
+              <span class="carousel-dot" [class.active]="i === carouselIndex()" (click)="carouselIndex.set(i)"></span>
+            }
           </div>
-        }
+          <a class="carousel-see-all" routerLink="/notifications">
+            {{ 'dashboard.seeAllAlerts' | translate }} ({{ visibleAlerts().length }})
+          </a>
+        </div>
       </div>
     }
 

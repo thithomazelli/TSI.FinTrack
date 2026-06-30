@@ -25,6 +25,51 @@
           </svg>
         }
       </button>
+
+      <!-- Notification bell -->
+      <div class="bell-wrap">
+        <button class="btn-bell" (click)="toggleBell()" [title]="'notifications.title' | translate" [class.has-alerts]="alertCount() > 0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          @if (alertCount() > 0) {
+            <span class="bell-badge">{{ alertCount() > 9 ? '9+' : alertCount() }}</span>
+          }
+        </button>
+
+        @if (bellOpen()) {
+          <div class="bell-backdrop" (click)="closeBell()"></div>
+          <div class="bell-dropdown">
+            <div class="bell-header">
+              <span class="bell-title">{{ 'notifications.title' | translate }}</span>
+              <span class="bell-count">{{ alertCount() }} {{ 'notifications.alerts' | translate }}</span>
+            </div>
+            @if (previewAlerts().length === 0) {
+              <div class="bell-empty">{{ 'notifications.empty' | translate }}</div>
+            } @else {
+              <div class="bell-list">
+                @for (alert of previewAlerts(); track alert.id) {
+                  <div class="bell-item" [class]="'bell-item--' + alert.level">
+                    <span class="bell-item-icon">
+                      @if (alert.level === 'danger') { ⚠️ }
+                      @else if (alert.level === 'warning') { 🔔 }
+                      @else { ℹ️ }
+                    </span>
+                    <div class="bell-item-text">
+                      <strong>{{ alert.title }}</strong>
+                      <span>{{ alert.detail }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+              <a class="bell-see-all" routerLink="/notifications" (click)="closeBell()">
+                {{ 'notifications.seeAll' | translate }} ({{ alertCount() }})
+              </a>
+            }
+          </div>
+        }
+      </div>
+
       <div class="user-info">
         <div class="user-avatar">
           {{ session.user.email?.[0]?.toUpperCase() ?? '?' }}

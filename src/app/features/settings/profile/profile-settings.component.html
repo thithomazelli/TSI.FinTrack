@@ -11,6 +11,32 @@
     <!-- Profile form -->
     <section class="settings-section">
       <h3 class="section-title">{{ 'profile.personalData' | translate }}</h3>
+
+      <!-- Avatar -->
+      <div class="avatar-section">
+        <label class="avatar-label" for="avatar-input" [title]="'profile.changePhoto' | translate">
+          @if (avatarUrl()) {
+            <img class="avatar-img" [src]="avatarUrl()!" alt="Avatar" />
+          } @else {
+            <div class="avatar-placeholder">{{ email()?.[0]?.toUpperCase() ?? '?' }}</div>
+          }
+          <span class="avatar-overlay">
+            @if (avatarUploading()) {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="spin">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            } @else {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            }
+          </span>
+        </label>
+        <input id="avatar-input" type="file" accept="image/*" capture="user" class="avatar-file-input" (change)="onAvatarFileChange($event)" />
+        <div class="avatar-hint">{{ 'profile.changePhoto' | translate }}</div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">{{ 'common.email' | translate }}</label>
         <input class="form-input" type="email" [value]="email()" disabled />

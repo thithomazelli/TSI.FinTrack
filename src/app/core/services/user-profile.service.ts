@@ -34,6 +34,20 @@ export class UserProfileService {
     );
   }
 
+  uploadAvatar(userId: string, file: File): Observable<string> {
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `${userId}/avatar.${ext}`;
+    return from(
+      this.supabase.client.storage.from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type })
+        .then(({ data, error }) => {
+          if (error) throw error;
+          const { data: urlData } = this.supabase.client.storage.from('avatars').getPublicUrl(data.path);
+          return urlData.publicUrl;
+        })
+    );
+  }
+
   upsert(profile: Partial<UserProfile> & { id: string }): Observable<UserProfile> {
     this.logger.info('Upserting user profile', profile.id);
     const row: Record<string, unknown> = { id: profile.id };

@@ -1,18 +1,21 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   OnInit,
   inject,
   signal,
   computed,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionService } from '../../core/services/transaction.service';
 import { EntryService } from '../../core/services/entry.service';
 import { GoalService } from '../../core/services/goal.service';
 import { CategoryService } from '../../core/services/category.service';
 import { AlertService, Alert } from '../../core/services/alert.service';
+import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { Entry } from '../../core/models/interfaces/entry.interface';
@@ -32,17 +35,18 @@ interface GoalSummary {
 @Component({
   selector: 'tsi-dashboard',
   standalone: true,
-  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent],
+  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly transactionService = inject(TransactionService);
   private readonly entryService = inject(EntryService);
   private readonly goalService = inject(GoalService);
   private readonly categoryService = inject(CategoryService);
   private readonly alertService = inject(AlertService);
+  private readonly balanceService = inject(BalanceService);
   private readonly logger = inject(LoggingService);
 
   readonly transactions = signal<Transaction[]>([]);
@@ -52,6 +56,10 @@ export class DashboardComponent implements OnInit {
   readonly alerts = signal<Alert[]>([]);
   readonly dismissedAlertIds = signal<Set<string>>(new Set());
   readonly loading = signal(false);
+  readonly availableBalance = signal<number | null>(null);
+
+  readonly carouselIndex = signal(0);
+  private carouselTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
@@ -111,7 +119,15 @@ export class DashboardComponent implements OnInit {
       next: (cats) => this.categories.set(cats),
       error: (err) => this.logger.error('Failed to load categories', err),
     });
+    this.balanceService.getAvailableBalance().subscribe({
+      next: (v) => this.availableBalance.set(v),
+      error: () => {},
+    });
     this.loadData();
+  }
+
+  ngOnDestroy(): void {
+    if (this.carouselTimer) clearInterval(this.carouselTimer);
   }
 
   onMonthChanged(event: { year: number; month: number }): void {
@@ -123,6 +139,32 @@ export class DashboardComponent implements OnInit {
 
   dismissAlert(id: string): void {
     this.dismissedAlertIds.update((set) => new Set([...set, id]));
+  }
+
+  carouselPrev(): void {
+    const len = this.visibleAlerts().length;
+    if (!len) return;
+    this.carouselIndex.update((i) => (i - 1 + len) % len);
+    this.resetCarouselTimer();
+  }
+
+  carouselNext(): void {
+    const len = this.visibleAlerts().length;
+    if (!len) return;
+    this.carouselIndex.update((i) => (i + 1) % len);
+    this.resetCarouselTimer();
+  }
+
+  private startCarouselTimer(): void {
+    this.carouselTimer = setInterval(() => {
+      const len = this.visibleAlerts().length;
+      if (len > 1) this.carouselIndex.update((i) => (i + 1) % len);
+    }, 5000);
+  }
+
+  private resetCarouselTimer(): void {
+    if (this.carouselTimer) clearInterval(this.carouselTimer);
+    this.startCarouselTimer();
   }
 
   private loadData(): void {
@@ -152,7 +194,12 @@ export class DashboardComponent implements OnInit {
     });
 
     this.alertService.getAlerts(y, m).subscribe({
-      next: (alerts) => this.alerts.set(alerts),
+      next: (alerts) => {
+        this.alerts.set(alerts);
+        this.carouselIndex.set(0);
+        if (this.carouselTimer) clearInterval(this.carouselTimer);
+        if (alerts.length > 1) this.startCarouselTimer();
+      },
       error: (err) => this.logger.error('Failed to load alerts', err),
     });
   }

@@ -34,7 +34,11 @@
   }
 }
 
-.lang-flag { font-size: 1.15rem; }
+.lang-flag {
+  display: flex;
+  align-items: center;
+  svg { display: block; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,0.15); }
+}
 
 .lang-label {
   font-size: 0.85rem;

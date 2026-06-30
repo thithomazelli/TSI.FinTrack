@@ -61,7 +61,8 @@
     "settings": "Settings",
     "movements": "Movements",
     "bills": "Bills",
-    "recurring": "Recurring"
+    "recurring": "Recurring",
+    "notifications": "Notifications"
   },
   "auth": {
     "signIn": "Sign In",
@@ -210,7 +211,8 @@
     "totalExpenses": "Total Expenses",
     "balance": "Monthly Balance",
     "projected": "Projected",
-    "topCategories": "Top Categories"
+    "topCategories": "Top Categories",
+    "seeAllAlerts": "See all alerts"
   },
   "goals": {
     "title": "Goals",
@@ -395,7 +397,8 @@
     "copy": "Copy",
     "copied": "Copied!",
     "tokenExpires": "The token expires after first use.",
-    "connect": "Connect Telegram"
+    "connect": "Connect Telegram",
+    "changePhoto": "Change profile photo"
   },
   "login": {
     "subtitle": "Your personal finance control",
@@ -409,6 +412,14 @@
     "expenses": "Expenses",
     "balance": "Balance",
     "showValues": "Show values",
-    "hideValues": "Hide values"
-  }
+    "hideValues": "Hide values",
+    "currentMonth": "current month"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Alerts and notices for the month",
+    "alerts": "alerts",
+    "seeAll": "See all notifications",
+    "empty": "No notifications at the moment."
+  },
 }

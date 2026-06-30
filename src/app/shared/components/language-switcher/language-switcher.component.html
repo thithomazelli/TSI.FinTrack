@@ -8,7 +8,37 @@
       [title]="opt.label"
       [attr.aria-label]="opt.label"
     >
-      <span class="lang-flag">{{ opt.flag }}</span>
+      <span class="lang-flag">
+        @if (opt.code === 'pt-BR') {
+          <svg width="22" height="15" viewBox="0 0 22 15" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="22" height="15" fill="#009C3B"/>
+            <polygon points="11,1.2 20.5,7.5 11,13.8 1.5,7.5" fill="#FFDF00"/>
+            <circle cx="11" cy="7.5" r="3.8" fill="#002776"/>
+            <path d="M7.2,8.2 A3.8,3.8 0 0,1 14.8,8.2" stroke="white" stroke-width="0.75" fill="none"/>
+          </svg>
+        } @else if (opt.code === 'en') {
+          <svg width="22" height="15" viewBox="0 0 22 15" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="22" height="15" fill="#B22234"/>
+            <rect y="1.15" width="22" height="1.15" fill="white"/>
+            <rect y="3.46" width="22" height="1.15" fill="white"/>
+            <rect y="5.77" width="22" height="1.15" fill="white"/>
+            <rect y="8.08" width="22" height="1.15" fill="white"/>
+            <rect y="10.38" width="22" height="1.15" fill="white"/>
+            <rect y="12.69" width="22" height="1.15" fill="white"/>
+            <rect width="8.8" height="8.08" fill="#3C3B6E"/>
+            <g fill="white" font-size="1.4">
+              <circle cx="1.1" cy="0.9" r="0.5"/><circle cx="3.3" cy="0.9" r="0.5"/><circle cx="5.5" cy="0.9" r="0.5"/><circle cx="7.7" cy="0.9" r="0.5"/>
+              <circle cx="2.2" cy="2.1" r="0.5"/><circle cx="4.4" cy="2.1" r="0.5"/><circle cx="6.6" cy="2.1" r="0.5"/>
+              <circle cx="1.1" cy="3.3" r="0.5"/><circle cx="3.3" cy="3.3" r="0.5"/><circle cx="5.5" cy="3.3" r="0.5"/><circle cx="7.7" cy="3.3" r="0.5"/>
+              <circle cx="2.2" cy="4.5" r="0.5"/><circle cx="4.4" cy="4.5" r="0.5"/><circle cx="6.6" cy="4.5" r="0.5"/>
+              <circle cx="1.1" cy="5.7" r="0.5"/><circle cx="3.3" cy="5.7" r="0.5"/><circle cx="5.5" cy="5.7" r="0.5"/><circle cx="7.7" cy="5.7" r="0.5"/>
+              <circle cx="2.2" cy="6.9" r="0.5"/><circle cx="4.4" cy="6.9" r="0.5"/><circle cx="6.6" cy="6.9" r="0.5"/>
+            </g>
+          </svg>
+        } @else {
+          <span>{{ opt.flag }}</span>
+        }
+      </span>
       @if (variant() === 'full') {
         <span class="lang-label">{{ opt.label }}</span>
       }

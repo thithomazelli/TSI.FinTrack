@@ -1,3 +1,57 @@
+/* Current balance card (same as movimentos) */
+.current-balance-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-left: 4px solid #22c55e;
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem;
+  &.is-negative { border-left-color: #ef4444; }
+}
+.cb-info { display: flex; flex-direction: column; gap: 2px; }
+.cb-label { font-size: .8rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
+.cb-hint { font-size: .72rem; color: var(--color-text-3, var(--color-text-2)); font-style: italic; }
+.cb-value { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #22c55e; }
+.current-balance-card.is-negative .cb-value { color: #ef4444; }
+
+/* Carousel */
+.carousel-wrap {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  grid-template-rows: auto auto;
+  gap: 0 4px;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+.carousel-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  color: var(--color-text-2); cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  &:hover:not(:disabled) { background: var(--color-surface-2); color: var(--color-text); }
+  &:disabled { opacity: 0.35; cursor: default; }
+  align-self: center;
+}
+.carousel-track {
+  position: relative; overflow: hidden; min-height: 56px;
+}
+.carousel-footer {
+  grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 2px 0;
+}
+.carousel-dots {
+  display: flex; gap: 5px; align-items: center;
+}
+.carousel-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-border); cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  &.active { background: var(--color-accent); transform: scale(1.3); }
+}
+.carousel-see-all {
+  font-size: 0.78rem; color: var(--color-accent); text-decoration: none; font-weight: 600;
+  &:hover { text-decoration: underline; }
+}
+
 .alerts-section {
   display: flex;
   flex-direction: column;
@@ -6,12 +60,14 @@
 }
 
 .alert-item {
-  display: flex;
+  display: none;
   justify-content: space-between;
   align-items: flex-start;
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   border-left: 4px solid transparent;
+
+  &.is-visible { display: flex; }
 
   &.alert-danger {
     background: rgba(239, 68, 68, 0.08);
