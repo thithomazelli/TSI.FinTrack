@@ -414,7 +414,9 @@
     "copied": "Copied!",
     "tokenExpires": "The token expires after first use.",
     "connect": "Connect Telegram",
-    "changePhoto": "Change profile photo"
+    "changePhoto": "Change profile photo",
+    "uploadFile": "Upload file",
+    "useCamera": "Take photo"
   },
   "login": {
     "subtitle": "Your personal finance control",
