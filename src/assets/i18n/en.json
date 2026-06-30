@@ -62,7 +62,8 @@
     "movements": "Movements",
     "bills": "Bills",
     "recurring": "Recurring",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "simulations": "Simulations"
   },
   "auth": {
     "signIn": "Sign In",
@@ -348,7 +349,22 @@
       "deleteError": "Failed to delete."
     },
     "currentBalance": "Current Balance",
-    "currentBalanceHint": "cumulative, all months"
+    "currentBalanceHint": "cumulative, all months",
+    "bulk": {
+      "selected": "selected",
+      "delete": "Delete",
+      "editAmount": "Edit amount",
+      "move": "Move to month",
+      "deleted": "record(s) deleted",
+      "amountUpdated": "record(s) updated",
+      "moved": "record(s) moved",
+      "confirmDelete": "Confirm bulk delete",
+      "confirmDeleteMsg": "Permanently delete {{count}} record(s)?",
+      "editAmountTitle": "Bulk edit amount",
+      "editAmountMsg": "Apply new amount to {{count}} record(s):",
+      "moveTitle": "Move to another month",
+      "moveMsg": "Move {{count}} record(s) to:"
+    }
   },
   "bills": {
     "title": "Bills",
@@ -422,4 +438,24 @@
     "seeAll": "See all notifications",
     "empty": "No notifications at the moment."
   },
+  "simulations": {
+    "title": "Simulations",
+    "subtitle": "Try out scenarios without changing your real data",
+    "banner": "Simulation mode — changes below will not be saved until you click Apply",
+    "changesTitle": "Simulated changes",
+    "reset": "Reset all",
+    "apply": "Apply",
+    "applied": "{{count}} change(s) applied successfully!",
+    "applyError": "Error applying simulation.",
+    "real": "Real",
+    "simulated": "Simulated",
+    "diffDeleted": "Removed",
+    "undoChange": "Undo this change",
+    "modified": "simulated",
+    "editHint": "Edit value or date in this simulation",
+    "deleteHint": "Remove from simulation",
+    "deletedItems": "Items removed in simulation",
+    "restore": "Restore",
+    "empty": "No records in this period."
+  }
 }

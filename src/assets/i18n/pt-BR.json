@@ -62,7 +62,8 @@
     "movements": "Movimentos",
     "bills": "Faturas",
     "recurring": "Recorrentes",
-    "notifications": "Notificações"
+    "notifications": "Notificações",
+    "simulations": "Simulações"
   },
   "auth": {
     "signIn": "Entrar",
@@ -348,7 +349,22 @@
       "deleteError": "Erro ao excluir."
     },
     "currentBalance": "Saldo Atual",
-    "currentBalanceHint": "acumulado, todos os meses"
+    "currentBalanceHint": "acumulado, todos os meses",
+    "bulk": {
+      "selected": "selecionado(s)",
+      "delete": "Excluir",
+      "editAmount": "Editar valor",
+      "move": "Mover para mês",
+      "deleted": "registro(s) excluído(s)",
+      "amountUpdated": "registro(s) atualizado(s)",
+      "moved": "registro(s) movido(s)",
+      "confirmDelete": "Confirmar exclusão em massa",
+      "confirmDeleteMsg": "Excluir {{count}} registro(s) permanentemente?",
+      "editAmountTitle": "Editar valor em massa",
+      "editAmountMsg": "Aplicar novo valor em {{count}} registro(s):",
+      "moveTitle": "Mover para outro mês",
+      "moveMsg": "Mover {{count}} registro(s) para:"
+    }
   },
   "bills": {
     "title": "Faturas",
@@ -421,5 +437,25 @@
     "alerts": "alertas",
     "seeAll": "Ver todas as notificações",
     "empty": "Nenhuma notificação no momento."
+  },
+  "simulations": {
+    "title": "Simulações",
+    "subtitle": "Experimente cenários sem alterar seus dados reais",
+    "banner": "Modo simulação — as alterações abaixo não serão salvas até você clicar em Concretizar",
+    "changesTitle": "Alterações simuladas",
+    "reset": "Resetar tudo",
+    "apply": "Concretizar",
+    "applied": "{{count}} alteração(ões) aplicada(s) com sucesso!",
+    "applyError": "Erro ao concretizar a simulação.",
+    "real": "Real",
+    "simulated": "Simulado",
+    "diffDeleted": "Removido",
+    "undoChange": "Desfazer esta alteração",
+    "modified": "simulado",
+    "editHint": "Editar valor ou data nesta simulação",
+    "deleteHint": "Remover da simulação",
+    "deletedItems": "Itens removidos na simulação",
+    "restore": "Restaurar",
+    "empty": "Nenhum lançamento neste período."
   }
 }
