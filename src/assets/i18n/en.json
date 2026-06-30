@@ -458,6 +458,7 @@
     "deleteHint": "Remove from simulation",
     "deletedItems": "Items removed in simulation",
     "restore": "Restore",
-    "empty": "No records in this period."
+    "empty": "No records in this period.",
+    "bulkDeleteMsg": "Remove {{count}} item(s) from simulation?"
   }
 }

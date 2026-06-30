@@ -21,6 +21,8 @@
   color: rgba(255,255,255,0.45);
 }
 
+.widget-btns { display: flex; align-items: center; gap: 2px; }
+
 .toggle-btn {
   background: none;
   border: none;

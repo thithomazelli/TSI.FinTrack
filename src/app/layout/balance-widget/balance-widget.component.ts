@@ -44,5 +44,7 @@ export class BalanceWidgetComponent implements OnInit {
     });
   }
 
+  readonly collapsed = signal(false);
   toggle(): void { this.hidden.update(v => !v); }
+  toggleCollapse(): void { this.collapsed.update(v => !v); }
 }

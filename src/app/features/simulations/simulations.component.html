@@ -14,6 +14,46 @@
     {{ 'simulations.banner' | translate }}
   </div>
 
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">{{ 'common.type' | translate }}</label>
+      <select class="input input-sm" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
+        <option value="all">{{ 'movimentos.allM' | translate }}</option>
+        <option value="entry">{{ 'movimentos.income' | translate }}</option>
+        <option value="transaction">{{ 'movimentos.expenses' | translate }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">{{ 'common.status' | translate }}</label>
+      <select class="input input-sm" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+        <option value="all">{{ 'movimentos.allM' | translate }}</option>
+        <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
+        <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">{{ 'common.category' | translate }}</label>
+      <select class="input input-sm" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
+        <option value="">{{ 'movimentos.allF' | translate }}</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Current balance -->
+  @if (availableBalance() !== null) {
+    <div class="current-balance-card" [class.is-negative]="availableBalance()! < 0">
+      <div class="cb-info">
+        <span class="cb-label">{{ 'movimentos.currentBalance' | translate }}</span>
+        <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
+      </div>
+      <span class="cb-value">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
+    </div>
+  }
+
   <!-- Diff panel (changes summary) -->
   @if (hasChanges()) {
     <div class="diff-panel">
@@ -94,10 +134,26 @@
   } @else if (simulatedItems().length === 0) {
     <p class="state-msg">{{ 'simulations.empty' | translate }}</p>
   } @else {
+    <!-- Bulk action bar -->
+    @if (selectionCount() > 0) {
+      <div class="bulk-bar">
+        <span class="bulk-count">{{ selectionCount() }} {{ 'movimentos.bulk.selected' | translate }}</span>
+        <div class="bulk-actions">
+          <button class="bulk-btn" (click)="openBulkAction('move')">{{ 'movimentos.bulk.move' | translate }}</button>
+          <button class="bulk-btn" (click)="openBulkAction('amount')">{{ 'movimentos.bulk.editAmount' | translate }}</button>
+          <button class="bulk-btn bulk-btn--danger" (click)="openBulkAction('delete')">{{ 'movimentos.bulk.delete' | translate }}</button>
+          <button class="bulk-btn" (click)="clearSelection()">✕</button>
+        </div>
+      </div>
+    }
+
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
+            <th class="col-check">
+              <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" />
+            </th>
             <th>{{ 'common.date' | translate }}</th>
             <th>{{ 'movimentos.colType' | translate }}</th>
             <th>{{ 'common.description' | translate }}</th>
@@ -108,10 +164,10 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of simulatedItems(); track item.id) {
-            <tr [class.row-modified]="isModified(item.id)">
+          @for (item of filteredItems(); track item.id) {
+            <tr [class.row-modified]="isModified(item.id)" [class.row-selected]="isSelected(item.id)">
               @if (isEditing(item.id)) {
-                <!-- Inline edit row -->
+                <td class="col-check"></td>
                 <td><input class="input input-inline" type="date" [(ngModel)]="editDate" /></td>
                 <td colspan="3">
                   <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
@@ -129,7 +185,9 @@
                   </div>
                 </td>
               } @else {
-                <!-- Normal row -->
+                <td class="col-check row-check">
+                  <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" />
+                </td>
                 <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
                 <td>
                   <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
@@ -186,3 +244,49 @@
     }
   }
 </div>
+
+<!-- Bulk modals -->
+@if (bulkActionOpen() === 'delete') {
+  <div class="modal-backdrop" (click)="clearSelection()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'movimentos.bulk.confirmDelete' | translate }}</h3>
+    <p class="modal-text">{{ 'simulations.bulkDeleteMsg' | translate: { count: selectionCount() } }}</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-danger" (click)="bulkSimDelete()">{{ 'movimentos.bulk.delete' | translate }}</button>
+    </div>
+  </div>
+}
+
+@if (bulkActionOpen() === 'amount') {
+  <div class="modal-backdrop" (click)="clearSelection()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'movimentos.bulk.editAmountTitle' | translate }}</h3>
+    <p class="modal-text">{{ 'movimentos.bulk.editAmountMsg' | translate: { count: selectionCount() } }}</p>
+    <input class="input" type="number" min="0.01" step="0.01" [(ngModel)]="bulkNewAmount" />
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="bulkSimAmount()" [disabled]="bulkNewAmount <= 0">{{ 'common.confirm' | translate }}</button>
+    </div>
+  </div>
+}
+
+@if (bulkActionOpen() === 'move') {
+  <div class="modal-backdrop" (click)="clearSelection()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'movimentos.bulk.moveTitle' | translate }}</h3>
+    <p class="modal-text">{{ 'movimentos.bulk.moveMsg' | translate: { count: selectionCount() } }}</p>
+    <div class="move-fields">
+      <select class="input" [(ngModel)]="bulkTargetMonth">
+        @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
+          <option [value]="m">{{ m }}</option>
+        }
+      </select>
+      <input class="input" type="number" [(ngModel)]="bulkTargetYear" min="2000" max="2100" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="bulkSimMove()">{{ 'common.confirm' | translate }}</button>
+    </div>
+  </div>
+}
