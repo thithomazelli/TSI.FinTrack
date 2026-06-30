@@ -9,6 +9,7 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { AccountService } from '../../core/services/account.service';
+import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -18,7 +19,6 @@ import { Transaction } from '../../core/models/interfaces/transaction.interface'
 import { Category } from '../../core/models/interfaces/category.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
-import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 
 export interface SimItem {
@@ -61,32 +61,35 @@ export class SimulationsComponent implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly cardService = inject(CreditCardService);
   private readonly accountService = inject(AccountService);
+  private readonly balanceService = inject(BalanceService);
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
   private readonly t = inject(TranslateService);
 
-  private tr(key: string, params?: object): string {
-    return this.t.instant(key, params);
-  }
+  private tr(key: string, params?: object): string { return this.t.instant(key, params); }
 
-  readonly TransactionStatus = TransactionStatus;
-
-  // Dados reais carregados do banco
-  readonly realEntries = signal<Entry[]>([]);
-  readonly realTransactions = signal<Transaction[]>([]);
+  // Reference lists
   readonly categories = signal<Category[]>([]);
   readonly cards = signal<CreditCard[]>([]);
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(false);
   readonly applying = signal(false);
 
-  // Período
+  // Period
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
 
-  // Overrides locais: id → {amount?, date?, deleted?}
+  // Filters
+  readonly filterTipo = signal<'all' | 'entry' | 'transaction'>('all');
+  readonly filterStatus = signal<'all' | 'REALIZED' | 'PROJECTED'>('all');
+  readonly filterCategoryId = signal<string>('');
+
+  // Current balance (accumulated, all history)
+  readonly availableBalance = signal<number | null>(null);
+
+  // Overrides: id → {amount?, date?, deleted?}
   readonly overrides = signal<Map<string, SimOverride>>(new Map());
 
   // Inline edit state
@@ -94,7 +97,18 @@ export class SimulationsComponent implements OnInit {
   editAmount = 0;
   editDate = '';
 
-  // Items reais unificados
+  // Multi-select
+  readonly selectedIds = signal<Set<string>>(new Set());
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | null>(null);
+  bulkNewAmount = 0;
+  bulkTargetYear = new Date().getFullYear();
+  bulkTargetMonth = new Date().getMonth() + 1;
+  readonly bulkSaving = signal(false);
+
+  // Raw real items loaded from DB
+  readonly realEntries = signal<Entry[]>([]);
+  readonly realTransactions = signal<Transaction[]>([]);
+
   readonly realItems = computed<SimItem[]>(() => {
     const entries: SimItem[] = this.realEntries().map(e => ({
       kind: 'entry', id: e.id, date: e.date, description: e.description,
@@ -109,7 +123,7 @@ export class SimulationsComponent implements OnInit {
     return [...entries, ...txs].sort((a, b) => b.date.localeCompare(a.date));
   });
 
-  // Items simulados: aplica overrides
+  // Apply overrides (no filters yet)
   readonly simulatedItems = computed<SimItem[]>(() => {
     const ovr = this.overrides();
     return this.realItems()
@@ -122,7 +136,16 @@ export class SimulationsComponent implements OnInit {
       .sort((a, b) => b.date.localeCompare(a.date));
   });
 
-  // Diff: lista de mudanças em relação aos dados reais
+  // Apply filters on top of simulated items
+  readonly filteredItems = computed<SimItem[]>(() =>
+    this.simulatedItems().filter(item => {
+      if (this.filterTipo() !== 'all' && item.kind !== this.filterTipo()) return false;
+      if (this.filterStatus() !== 'all' && item.status !== this.filterStatus()) return false;
+      if (this.filterCategoryId() && item.categoryId !== this.filterCategoryId()) return false;
+      return true;
+    })
+  );
+
   readonly diff = computed<DiffEntry[]>(() => {
     const result: DiffEntry[] = [];
     const ovr = this.overrides();
@@ -132,50 +155,45 @@ export class SimulationsComponent implements OnInit {
       if (o.deleted) {
         result.push({ item, type: 'deleted', originalValue: `R$ ${item.amount.toFixed(2)}`, newValue: '—' });
       } else {
-        if (o.amount !== undefined && o.amount !== item.amount) {
-          result.push({ item, type: 'amount',
-            originalValue: `R$ ${item.amount.toFixed(2)}`,
-            newValue: `R$ ${o.amount.toFixed(2)}` });
-        }
-        if (o.date !== undefined && o.date !== item.date) {
-          result.push({ item, type: 'date',
-            originalValue: item.date, newValue: o.date });
-        }
+        if (o.amount !== undefined && o.amount !== item.amount)
+          result.push({ item, type: 'amount', originalValue: `R$ ${item.amount.toFixed(2)}`, newValue: `R$ ${o.amount.toFixed(2)}` });
+        if (o.date !== undefined && o.date !== item.date)
+          result.push({ item, type: 'date', originalValue: item.date, newValue: o.date });
       }
     }
     return result;
   });
 
-  // Totais simulados
   readonly simEntradas = computed(() =>
-    this.simulatedItems().filter(i => i.kind === 'entry').reduce((s, i) => s + i.amount, 0)
-  );
+    this.simulatedItems().filter(i => i.kind === 'entry').reduce((s, i) => s + i.amount, 0));
   readonly simSaidas = computed(() =>
-    this.simulatedItems().filter(i => i.kind === 'transaction').reduce((s, i) => s + i.amount, 0)
-  );
+    this.simulatedItems().filter(i => i.kind === 'transaction').reduce((s, i) => s + i.amount, 0));
   readonly simSaldo = computed(() => this.simEntradas() - this.simSaidas());
 
-  // Totais reais (para comparação)
   readonly realEntradas = computed(() =>
-    this.realItems().filter(i => i.kind === 'entry').reduce((s, i) => s + i.amount, 0)
-  );
+    this.realItems().filter(i => i.kind === 'entry').reduce((s, i) => s + i.amount, 0));
   readonly realSaidas = computed(() =>
-    this.realItems().filter(i => i.kind === 'transaction').reduce((s, i) => s + i.amount, 0)
-  );
+    this.realItems().filter(i => i.kind === 'transaction').reduce((s, i) => s + i.amount, 0));
   readonly realSaldo = computed(() => this.realEntradas() - this.realSaidas());
 
   readonly hasChanges = computed(() => this.overrides().size > 0);
   readonly deletedItems = computed(() =>
-    this.realItems().filter(i => this.overrides().get(i.id)?.deleted)
-  );
+    this.realItems().filter(i => this.overrides().get(i.id)?.deleted));
+
+  readonly allSelected = computed(() =>
+    this.filteredItems().length > 0 &&
+    this.filteredItems().every(i => this.selectedIds().has(i.id)));
+  readonly selectionCount = computed(() => this.selectedIds().size);
 
   isEditing(id: string): boolean { return this.editingId() === id; }
   isModified(id: string): boolean { return this.overrides().has(id) && !this.overrides().get(id)?.deleted; }
+  isSelected(id: string): boolean { return this.selectedIds().has(id); }
 
   ngOnInit(): void {
     this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
     this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
     this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
+    this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v) });
     this.load();
   }
 
@@ -193,7 +211,6 @@ export class SimulationsComponent implements OnInit {
     const from = `${y}-${String(m).padStart(2, '0')}-01`;
     const last = new Date(y, m, 0).getDate();
     const to = `${y}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
-
     try {
       const [eRes, tRes] = await Promise.all([
         this.supabase.client.from('entries').select('*').eq('owner_id', uid).gte('date', from).lte('date', to).order('date', { ascending: false }),
@@ -220,7 +237,7 @@ export class SimulationsComponent implements OnInit {
     }
   }
 
-  // ── Edição inline ─────────────────────────────────────────────────────────
+  // ── Inline edit ─────────────────────────────────────────────────────────────
   startEdit(item: SimItem): void {
     this.editingId.set(item.id);
     const ovr = this.overrides().get(item.id);
@@ -235,8 +252,7 @@ export class SimulationsComponent implements OnInit {
     if (!changed) { this.cancelEdit(); return; }
     this.overrides.update(m => {
       const next = new Map(m);
-      const existing = next.get(item.id) ?? {};
-      const o: SimOverride = { ...existing };
+      const o: SimOverride = { ...(next.get(item.id) ?? {}) };
       if (this.editAmount !== item.amount) o.amount = this.editAmount;
       if (this.editDate !== item.date) o.date = this.editDate;
       next.set(item.id, o);
@@ -251,6 +267,7 @@ export class SimulationsComponent implements OnInit {
       next.set(item.id, { ...(next.get(item.id) ?? {}), deleted: true });
       return next;
     });
+    this.selectedIds.update(s => { const n = new Set(s); n.delete(item.id); return n; });
   }
 
   restoreItem(id: string): void {
@@ -269,7 +286,7 @@ export class SimulationsComponent implements OnInit {
       const next = new Map(m);
       const o = { ...(next.get(d.item.id) ?? {}) };
       if (d.type === 'amount') delete o.amount;
-      if (d.type === 'date')   delete o.date;
+      if (d.type === 'date') delete o.date;
       if (d.type === 'deleted') delete o.deleted;
       if (Object.keys(o).length === 0) next.delete(d.item.id);
       else next.set(d.item.id, o);
@@ -277,9 +294,83 @@ export class SimulationsComponent implements OnInit {
     });
   }
 
-  resetSim(): void { this.overrides.set(new Map()); this.editingId.set(null); }
+  resetSim(): void { this.overrides.set(new Map()); this.editingId.set(null); this.clearSelection(); }
 
-  // ── Concretizar ───────────────────────────────────────────────────────────
+  // ── Multi-select ─────────────────────────────────────────────────────────────
+  toggleAll(): void {
+    if (this.allSelected()) {
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectedIds.set(new Set(this.filteredItems().map(i => i.id)));
+    }
+  }
+
+  toggleItem(id: string): void {
+    this.selectedIds.update(s => {
+      const next = new Set(s);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+    this.bulkActionOpen.set(null);
+  }
+
+  openBulkAction(action: 'delete' | 'amount' | 'move'): void {
+    this.bulkNewAmount = 0;
+    this.bulkTargetYear = new Date().getFullYear();
+    this.bulkTargetMonth = new Date().getMonth() + 1;
+    this.bulkActionOpen.set(action);
+  }
+
+  bulkSimDelete(): void {
+    const ids = [...this.selectedIds()];
+    this.overrides.update(m => {
+      const next = new Map(m);
+      for (const id of ids) next.set(id, { ...(next.get(id) ?? {}), deleted: true });
+      return next;
+    });
+    const count = ids.length;
+    this.clearSelection();
+    this.toast.success(`${count} ${this.tr('movimentos.bulk.deleted')}`);
+  }
+
+  bulkSimAmount(): void {
+    if (this.bulkNewAmount <= 0) return;
+    const ids = [...this.selectedIds()];
+    this.overrides.update(m => {
+      const next = new Map(m);
+      for (const id of ids) next.set(id, { ...(next.get(id) ?? {}), amount: this.bulkNewAmount });
+      return next;
+    });
+    const count = ids.length;
+    this.clearSelection();
+    this.toast.success(`${count} ${this.tr('movimentos.bulk.amountUpdated')}`);
+  }
+
+  bulkSimMove(): void {
+    const ids = [...this.selectedIds()];
+    const y = String(this.bulkTargetYear).padStart(4, '0');
+    const mo = String(this.bulkTargetMonth).padStart(2, '0');
+    this.overrides.update(m => {
+      const next = new Map(m);
+      for (const id of ids) {
+        const item = this.realItems().find(i => i.id === id);
+        const day = item ? item.date.split('-')[2] : '01';
+        const lastDay = new Date(this.bulkTargetYear, this.bulkTargetMonth, 0).getDate();
+        const clampedDay = String(Math.min(Number(day), lastDay)).padStart(2, '0');
+        next.set(id, { ...(next.get(id) ?? {}), date: `${y}-${mo}-${clampedDay}` });
+      }
+      return next;
+    });
+    const count = ids.length;
+    this.clearSelection();
+    this.toast.success(`${count} ${this.tr('movimentos.bulk.moved')}`);
+  }
+
+  // ── Apply to DB ─────────────────────────────────────────────────────────────
   async applySimulation(): Promise<void> {
     const changes = this.diff();
     if (!changes.length) return;

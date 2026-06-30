@@ -1,13 +1,15 @@
 import {
-  ChangeDetectionStrategy, Component, ElementRef, OnInit,
-  inject, output, signal, computed, ViewChild,
+  ChangeDetectionStrategy, Component, OnInit,
+  inject, output, signal, computed,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AlertService, Alert } from '../../core/services/alert.service';
 import { UserProfileService } from '../../core/services/user-profile.service';
+import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { LanguageService } from '../../core/services/language.service';
@@ -31,7 +33,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
 @Component({
   selector: 'tsi-header',
   standalone: true,
-  imports: [TranslatePipe, RouterLink],
+  imports: [DecimalPipe, TranslatePipe, RouterLink],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +42,7 @@ export class HeaderComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly alertService = inject(AlertService);
+  private readonly balanceService = inject(BalanceService);
   private readonly profileService = inject(UserProfileService);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
@@ -57,6 +60,14 @@ export class HeaderComponent implements OnInit {
   readonly alertCount = computed(() => this.alerts().length);
   readonly previewAlerts = computed(() => this.alerts().slice(0, 5));
 
+  // Balance popover
+  readonly balanceOpen = signal(false);
+  readonly availableBalance = signal<number | null>(null);
+  readonly balanceSummary = signal<{ totalIncome: number; totalExpenses: number; balance: number } | null>(null);
+
+  toggleBalance(): void { this.balanceOpen.update(v => !v); this.bellOpen.set(false); this.userMenuOpen.set(false); }
+  closeBalance(): void { this.balanceOpen.set(false); }
+
   // User profile
   readonly avatarUrl = signal<string | null>(null);
   readonly fullName = signal('');
@@ -70,6 +81,8 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     const now = new Date();
+    this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v), error: () => {} });
+    this.balanceService.getSummary(now.getFullYear(), now.getMonth() + 1).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} });
     this.alertService.getAlerts(now.getFullYear(), now.getMonth() + 1).subscribe({
       next: alerts => this.alerts.set(alerts),
       error: () => {},
@@ -87,10 +100,10 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  toggleBell(): void { this.bellOpen.update(v => !v); this.userMenuOpen.set(false); }
+  toggleBell(): void { this.bellOpen.update(v => !v); this.userMenuOpen.set(false); this.balanceOpen.set(false); }
   closeBell(): void { this.bellOpen.set(false); }
 
-  toggleUserMenu(): void { this.userMenuOpen.update(v => !v); this.bellOpen.set(false); }
+  toggleUserMenu(): void { this.userMenuOpen.update(v => !v); this.bellOpen.set(false); this.balanceOpen.set(false); }
   closeUserMenu(): void { this.userMenuOpen.set(false); }
 
   signOut(): void {

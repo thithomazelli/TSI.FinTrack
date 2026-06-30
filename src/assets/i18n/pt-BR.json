@@ -458,6 +458,7 @@
     "deleteHint": "Remover da simulação",
     "deletedItems": "Itens removidos na simulação",
     "restore": "Restaurar",
-    "empty": "Nenhum lançamento neste período."
+    "empty": "Nenhum lançamento neste período.",
+    "bulkDeleteMsg": "Remover {{count}} item(s) da simulação?"
   }
 }

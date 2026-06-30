@@ -9,6 +9,42 @@
   </div>
 
   <div class="header-right">
+    <!-- Balance chip -->
+    @if (availableBalance() !== null) {
+      <div class="popover-wrap">
+        <button class="balance-chip" (click)="toggleBalance()" [class.balance-chip--neg]="availableBalance()! < 0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          R$ {{ availableBalance()! | number:'1.2-2' }}
+        </button>
+        @if (balanceOpen()) {
+          <div class="backdrop" (click)="closeBalance()"></div>
+          <div class="popover popover--balance">
+            <div class="popover-header">
+              <span class="popover-title">{{ 'widget.available' | translate }}</span>
+              <span class="popover-sub" [class.pos]="availableBalance()! >= 0" [class.neg]="availableBalance()! < 0">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
+            </div>
+            @if (balanceSummary()) {
+              <div class="bal-detail">
+                <div class="bal-row">
+                  <span>{{ 'widget.income' | translate }} ({{ 'widget.currentMonth' | translate }})</span>
+                  <span class="pos">R$ {{ balanceSummary()!.totalIncome | number:'1.2-2' }}</span>
+                </div>
+                <div class="bal-row">
+                  <span>{{ 'widget.expenses' | translate }} ({{ 'widget.currentMonth' | translate }})</span>
+                  <span class="neg">R$ {{ balanceSummary()!.totalExpenses | number:'1.2-2' }}</span>
+                </div>
+                <div class="bal-divider"></div>
+                <div class="bal-row bal-row--bold">
+                  <span>{{ 'widget.balance' | translate }}</span>
+                  <span [class.pos]="balanceSummary()!.balance >= 0" [class.neg]="balanceSummary()!.balance < 0">R$ {{ balanceSummary()!.balance | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
     <!-- Dark mode toggle -->
     <button class="btn-icon" (click)="themeService.toggle()" [title]="(themeService.isDark() ? 'theme.light' : 'theme.dark') | translate">
       @if (themeService.isDark()) {
