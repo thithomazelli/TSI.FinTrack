@@ -61,6 +61,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly carouselIndex = signal(0);
   private carouselTimer: ReturnType<typeof setInterval> | null = null;
 
+  // Touch / drag swipe
+  private dragStartX = 0;
+  private isDragging = false;
+
+  onDragStart(e: MouseEvent | TouchEvent): void {
+    this.dragStartX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    this.isDragging = true;
+    if (this.carouselTimer) clearInterval(this.carouselTimer);
+  }
+
+  onDragEnd(e: MouseEvent | TouchEvent): void {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+    const endX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
+    const delta = this.dragStartX - endX;
+    if (Math.abs(delta) > 40) {
+      delta > 0 ? this.carouselNext() : this.carouselPrev();
+    } else {
+      this.startCarouselTimer();
+    }
+  }
+
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
 
