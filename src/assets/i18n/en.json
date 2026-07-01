@@ -326,6 +326,7 @@
     "totalExpenses": "Total Expenses",
     "balance": "Balance",
     "expensesByCategory": "Expenses by category",
+    "search": "Search movements...",
     "empty": "No movements found.",
     "colType": "Type",
     "colCardAccount": "Card/Account",
@@ -469,6 +470,7 @@
     "deleteHint": "Remove from simulation",
     "deletedItems": "Items removed in simulation",
     "restore": "Restore",
+    "search": "Search simulations...",
     "empty": "No records in this period.",
     "bulkDeleteMsg": "Remove {{count}} item(s) from simulation?"
   }

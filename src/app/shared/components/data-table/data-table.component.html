@@ -1,0 +1,94 @@
+<div class="dt-toolbar">
+  <div class="dt-search-wrap">
+    <svg class="dt-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input
+      class="dt-search"
+      type="search"
+      [placeholder]="searchPlaceholder()"
+      [ngModel]="query()"
+      (ngModelChange)="onSearch($event)"
+    />
+    @if (query()) {
+      <button class="dt-clear" (click)="onSearch('')" aria-label="Limpar busca">✕</button>
+    }
+  </div>
+
+  <div class="dt-toolbar-right">
+    <span class="dt-count">
+      {{ pageDisplay().total }} {{ pageDisplay().total === 1 ? 'item' : 'itens' }}
+    </span>
+    <select class="dt-pagesize" [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange(+$event)">
+      @for (ps of pageSizeOptions; track ps) {
+        <option [value]="ps">{{ ps }} / pág.</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="dt-table-wrap">
+  @if (pageItems().length === 0) {
+    <p class="dt-empty">{{ query() ? ('common.noResults' | translate) : emptyMsg() }}</p>
+  } @else {
+    <table class="dt-table">
+      <thead>
+        <tr>
+          @if (extraThTpl) {
+            <ng-container [ngTemplateOutlet]="extraThTpl" />
+          }
+          @for (col of columns(); track col.key) {
+            <th
+              [class]="col.headerClass ?? ''"
+              [class.sortable]="col.sortable"
+              [class.sort-asc]="sortKey() === col.key && sortDir() === 'asc'"
+              [class.sort-desc]="sortKey() === col.key && sortDir() === 'desc'"
+              [class.text-right]="col.numeric"
+              (click)="col.sortable ? toggleSort(col.key) : null"
+            >
+              {{ col.label }}
+              @if (col.sortable) {
+                <span class="sort-icon">
+                  @if (sortKey() === col.key && sortDir() === 'asc') { ↑ }
+                  @else if (sortKey() === col.key && sortDir() === 'desc') { ↓ }
+                  @else { ⇅ }
+                </span>
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of pageItems(); track item.id) {
+          <tr [class]="rowClass(item)">
+            <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ $implicit: item }" />
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+@if (totalPages() > 1) {
+  <div class="dt-pagination">
+    <span class="dt-page-info">
+      {{ pageDisplay().start }}–{{ pageDisplay().end }} de {{ pageDisplay().total }}
+    </span>
+
+    <div class="dt-page-btns">
+      <button class="dt-page-btn" [disabled]="safePage() === 0" (click)="setPage(safePage() - 1)">‹</button>
+
+      @for (p of pages(); track $index) {
+        @if (p.ellipsis) {
+          <span class="dt-ellipsis">…</span>
+        } @else {
+          <button
+            class="dt-page-btn"
+            [class.active]="safePage() === p.n"
+            (click)="setPage(p.n)"
+          >{{ p.n + 1 }}</button>
+        }
+      }
+
+      <button class="dt-page-btn" [disabled]="safePage() === totalPages() - 1" (click)="setPage(safePage() + 1)">›</button>
+    </div>
+  </div>
+}

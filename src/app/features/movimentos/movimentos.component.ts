@@ -32,6 +32,7 @@ import { TransactionStatus } from '../../core/models/enums/transaction-status.en
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
+import { DataTableComponent, TableColumn, SearchFn, CompareFn, RowClassFn } from '../../shared/components/data-table/data-table.component';
 import { ThemeService } from '../../core/services/theme.service';
 
 Chart.register(...registerables);
@@ -55,7 +56,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 @Component({
   selector: 'tsi-movimentos',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, BalanceCardComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, BalanceCardComponent, DataTableComponent],
   templateUrl: './movimentos.component.html',
   styleUrls: ['./movimentos.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -206,6 +207,33 @@ export class MovimentosComponent implements OnInit {
     this.filteredItems().every(i => this.selectedIds().has(i.id))
   );
   readonly selectionCount = computed(() => this.selectedIds().size);
+
+  // DataTable config
+  readonly tableColumns: TableColumn[] = [
+    { key: 'date',        label: 'common.date',               sortable: true },
+    { key: 'kind',        label: 'movimentos.colType',        sortable: false },
+    { key: 'description', label: 'common.description',        sortable: true },
+    { key: 'categoryId',  label: 'common.category',           sortable: false },
+    { key: '_card',       label: 'movimentos.colCardAccount',  sortable: false },
+    { key: 'amount',      label: 'common.amount',             sortable: true, numeric: true },
+    { key: 'status',      label: 'common.status',             sortable: true },
+    { key: '_actions',    label: 'common.actions',            sortable: false },
+  ];
+
+  readonly tableSearchFn: SearchFn<MovimentoItem> = (item, q) =>
+    item.description.toLowerCase().includes(q) ||
+    this.categoryName(item.categoryId).toLowerCase().includes(q) ||
+    this.payerName(item).toLowerCase().includes(q);
+
+  readonly tableSortComparators: Record<string, CompareFn<MovimentoItem>> = {
+    date:        (a, b) => a.date.localeCompare(b.date),
+    description: (a, b) => a.description.localeCompare(b.description, 'pt-BR'),
+    amount:      (a, b) => a.amount - b.amount,
+    status:      (a, b) => a.status.localeCompare(b.status),
+  };
+
+  readonly tableRowClassFn: RowClassFn<MovimentoItem> = (item) =>
+    this.isSelected(item.id) ? 'row-selected' : '';
 
   // Bulk actions
   readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | null>(null);

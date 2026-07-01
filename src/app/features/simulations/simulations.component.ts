@@ -20,6 +20,7 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
+import { DataTableComponent, TableColumn, SearchFn, CompareFn, RowClassFn } from '../../shared/components/data-table/data-table.component';
 
 export interface SimItem {
   kind: 'entry' | 'transaction';
@@ -50,7 +51,7 @@ interface DiffEntry {
 @Component({
   selector: 'tsi-simulations',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent, DataTableComponent],
   templateUrl: './simulations.component.html',
   styleUrls: ['./simulations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -180,6 +181,35 @@ export class SimulationsComponent implements OnInit {
     this.filteredItems().length > 0 &&
     this.filteredItems().every(i => this.selectedIds().has(i.id)));
   readonly selectionCount = computed(() => this.selectedIds().size);
+
+  // DataTable config
+  readonly tableColumns: TableColumn[] = [
+    { key: 'date',        label: 'common.date',              sortable: true },
+    { key: 'kind',        label: 'movimentos.colType',       sortable: false },
+    { key: 'description', label: 'common.description',       sortable: true },
+    { key: 'categoryId',  label: 'common.category',          sortable: false },
+    { key: '_card',       label: 'movimentos.colCardAccount', sortable: false },
+    { key: 'amount',      label: 'common.amount',            sortable: true, numeric: true },
+    { key: '_actions',    label: 'common.actions',           sortable: false },
+  ];
+
+  readonly tableSearchFn: SearchFn<SimItem> = (item, q) =>
+    item.description.toLowerCase().includes(q) ||
+    this.categoryName(item.categoryId).toLowerCase().includes(q) ||
+    this.payerName(item).toLowerCase().includes(q);
+
+  readonly tableSortComparators: Record<string, CompareFn<SimItem>> = {
+    date:        (a, b) => a.date.localeCompare(b.date),
+    description: (a, b) => a.description.localeCompare(b.description, 'pt-BR'),
+    amount:      (a, b) => a.amount - b.amount,
+  };
+
+  readonly tableRowClassFn: RowClassFn<SimItem> = (item) => {
+    const parts: string[] = [];
+    if (this.isSelected(item.id)) parts.push('row-selected');
+    if (this.isModified(item.id)) parts.push('row-modified');
+    return parts.join(' ');
+  };
 
   isEditing(id: string): boolean { return this.editingId() === id; }
   isModified(id: string): boolean { return this.overrides().has(id) && !this.overrides().get(id)?.deleted; }
