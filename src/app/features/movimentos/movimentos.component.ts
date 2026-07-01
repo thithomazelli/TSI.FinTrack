@@ -271,7 +271,6 @@ export class MovimentosComponent implements OnInit {
 
   async load(): Promise<void> {
     this.loading.set(true);
-    this.refreshAvailable();
     const uid = this.auth.currentUser!.id;
     const from = this.dateFrom();
     const to = this.dateTo();
@@ -518,7 +517,6 @@ export class MovimentosComponent implements OnInit {
         } else {
           this.allTransactions.update(list => list.filter(t => t.id !== item.id));
         }
-        this.refreshAvailable();
         this.toast.success(this.tr('movimentos.toast.deleted'));
       },
       error: err => {
