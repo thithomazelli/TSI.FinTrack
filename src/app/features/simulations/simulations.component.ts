@@ -20,6 +20,7 @@ import { Category } from '../../core/models/interfaces/category.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
+import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
 
 export interface SimItem {
   kind: 'entry' | 'transaction';
@@ -50,7 +51,7 @@ interface DiffEntry {
 @Component({
   selector: 'tsi-simulations',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent],
   templateUrl: './simulations.component.html',
   styleUrls: ['./simulations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

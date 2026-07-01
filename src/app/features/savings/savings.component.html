@@ -29,23 +29,7 @@
     </div>
   </div>
 
-  <!-- Saldo acumulado (realizado + projetado) -->
-  <div class="current-balance-card">
-    <div class="cb-info">
-      <span class="cb-label">{{ 'widget.balance' | translate }}</span>
-      <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
-    </div>
-    <div class="cb-values">
-      <div class="cb-value-row">
-        <span class="cb-value-label">{{ 'widget.balanceRealized' | translate }}</span>
-        <span class="cb-value" [class.is-negative]="(availableBalance() ?? 0) < 0">R$ {{ (availableBalance() ?? 0) | number:'1.2-2' }}</span>
-      </div>
-      <div class="cb-value-row">
-        <span class="cb-value-label">{{ 'widget.balanceProjected' | translate }}</span>
-        <span class="cb-value cb-value--projected" [class.is-negative]="(projectedBalance() ?? 0) < 0">R$ {{ (projectedBalance() ?? 0) | number:'1.2-2' }}</span>
-      </div>
-    </div>
-  </div>
+  <tsi-balance-card />
 
   <!-- Saldo poupança acumulado -->
   <div class="savings-balance-card" [class.is-negative]="cumulativeBalance() < 0">

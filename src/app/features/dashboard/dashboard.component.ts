@@ -23,6 +23,7 @@ import { Goal } from '../../core/models/interfaces/goal.interface';
 import { Category } from '../../core/models/interfaces/category.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
+import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
 
 interface GoalSummary {
   goal: Goal;
@@ -35,7 +36,7 @@ interface GoalSummary {
 @Component({
   selector: 'tsi-dashboard',
   standalone: true,
-  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, RouterLink],
+  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, RouterLink, BalanceCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

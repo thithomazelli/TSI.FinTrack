@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, Component, OnInit, OnDestroy,
-  inject, output, signal, computed,
+  inject, output, signal, computed, HostListener, ElementRef,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
@@ -41,6 +41,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   private readonly routeSub = new Subscription();
+  private readonly el = inject(ElementRef);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly alertService = inject(AlertService);
@@ -86,6 +87,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .filter(k => path === k || path.startsWith(k + '/'))
       .sort((a, b) => b.length - a.length)[0];
     return key ? ROUTE_TITLE_KEYS[key] : '';
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.el.nativeElement.contains(event.target)) {
+      this.bellOpen.set(false);
+      this.userMenuOpen.set(false);
+      this.balanceOpen.set(false);
+    }
   }
 
   ngOnInit(): void {

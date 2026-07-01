@@ -50,16 +50,7 @@
     </div>
   </div>
 
-  <!-- Current balance -->
-  @if (availableBalance() !== null) {
-    <div class="current-balance-card" [class.is-negative]="availableBalance()! < 0">
-      <div class="cb-info">
-        <span class="cb-label">{{ 'movimentos.currentBalance' | translate }}</span>
-        <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
-      </div>
-      <span class="cb-value">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
-    </div>
-  }
+  <tsi-balance-card />
 
   <!-- Diff panel (changes summary) -->
   @if (hasChanges()) {

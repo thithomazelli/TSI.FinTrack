@@ -31,6 +31,7 @@ import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
+import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
 import { ThemeService } from '../../core/services/theme.service';
 
 Chart.register(...registerables);
@@ -54,7 +55,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 @Component({
   selector: 'tsi-movimentos',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe],
+  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, BalanceCardComponent],
   templateUrl: './movimentos.component.html',
   styleUrls: ['./movimentos.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

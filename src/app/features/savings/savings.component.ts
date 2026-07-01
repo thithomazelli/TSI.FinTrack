@@ -19,11 +19,12 @@ import { SavingsMovement } from '../../core/models/interfaces/savings-movement.i
 import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
+import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
 
 @Component({
   selector: 'tsi-savings',
   standalone: true,
-  imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe, MonthPickerComponent],
+  imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent],
   templateUrl: './savings.component.html',
   styleUrls: ['./savings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
