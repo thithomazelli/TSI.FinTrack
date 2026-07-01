@@ -435,6 +435,9 @@
     "income": "Income",
     "expenses": "Expenses",
     "balance": "Balance",
+    "balanceRealized": "Current balance",
+    "balanceProjected": "Projected balance",
+    "cumulative": "Cumulative",
     "showValues": "Show values",
     "hideValues": "Hide values",
     "currentMonth": "current month"

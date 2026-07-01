@@ -18,6 +18,7 @@ export class BalanceWidgetComponent implements OnInit {
 
   readonly summary = signal<BalanceSummary | null>(null);
   readonly available = signal<number | null>(null);
+  readonly projected = signal<number | null>(null);
   readonly hidden = signal(false);
   readonly loading = signal(true);
 
@@ -40,6 +41,10 @@ export class BalanceWidgetComponent implements OnInit {
     });
     this.balanceService.getAvailableBalance().subscribe({
       next: v => this.available.set(v),
+      error: () => {},
+    });
+    this.balanceService.getProjectedBalance().subscribe({
+      next: v => this.projected.set(v),
       error: () => {},
     });
   }

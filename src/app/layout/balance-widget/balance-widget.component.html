@@ -26,10 +26,17 @@
       <div class="widget-loading">...</div>
     } @else if (summary()) {
       @if (available() !== null) {
+        <div class="widget-section-label">{{ 'widget.cumulative' | translate }}</div>
         <div class="widget-row widget-row--available">
-          <span class="widget-label widget-label--bold">{{ 'widget.available' | translate }}</span>
+          <span class="widget-label widget-label--bold">{{ 'widget.balanceRealized' | translate }}</span>
           <span class="widget-value widget-value--bold" [class.widget-value--positive]="available()! >= 0" [class.widget-value--negative]="available()! < 0">
             {{ hidden() ? '***' : ('R$ ' + (available()! | number:'1.2-2')) }}
+          </span>
+        </div>
+        <div class="widget-row">
+          <span class="widget-label">{{ 'widget.balanceProjected' | translate }}</span>
+          <span class="widget-value" [class.widget-value--positive]="(projected() ?? 0) >= 0" [class.widget-value--negative]="(projected() ?? 0) < 0">
+            {{ hidden() ? '***' : ('R$ ' + ((projected() ?? 0) | number:'1.2-2')) }}
           </span>
         </div>
         <div class="widget-divider"></div>

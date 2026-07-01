@@ -17,7 +17,7 @@ export class BalanceService {
 
   private get ownerId(): string { return this.auth.currentUser!.id; }
 
-  /** Saldo realmente disponível (acumulado, todo o histórico) via view. */
+  /** Saldo realizado acumulado (todo o histórico). */
   getAvailableBalance(): Observable<number> {
     return from(
       this.supabase.client
@@ -26,6 +26,17 @@ export class BalanceService {
         .eq('owner_id', this.ownerId)
         .maybeSingle()
     ).pipe(map(res => Number((res.data as { available: number } | null)?.available ?? 0)));
+  }
+
+  /** Saldo projetado acumulado (realizado + projetado, todo o histórico). */
+  getProjectedBalance(): Observable<number> {
+    return from(
+      this.supabase.client
+        .from('v_projected_balance')
+        .select('projected')
+        .eq('owner_id', this.ownerId)
+        .maybeSingle()
+    ).pipe(map(res => Number((res.data as { projected: number } | null)?.projected ?? 0)));
   }
 
   getSummary(year: number, month: number): Observable<BalanceSummary> {

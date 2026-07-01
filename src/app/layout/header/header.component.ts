@@ -65,6 +65,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // Balance popover
   readonly balanceOpen = signal(false);
   readonly availableBalance = signal<number | null>(null);
+  readonly projectedBalance = signal<number | null>(null);
   readonly balanceSummary = signal<{ totalIncome: number; totalExpenses: number; balance: number } | null>(null);
 
   toggleBalance(): void { this.balanceOpen.update(v => !v); this.bellOpen.set(false); this.userMenuOpen.set(false); }
@@ -95,6 +96,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     );
     const now = new Date();
     this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v), error: () => {} });
+    this.balanceService.getProjectedBalance().subscribe({ next: v => this.projectedBalance.set(v), error: () => {} });
     this.balanceService.getSummary(now.getFullYear(), now.getMonth() + 1).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} });
     this.alertService.getAlerts(now.getFullYear(), now.getMonth() + 1).subscribe({
       next: alerts => this.alerts.set(alerts),
