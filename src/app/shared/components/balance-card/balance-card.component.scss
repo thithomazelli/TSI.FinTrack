@@ -17,7 +17,7 @@
 
 .bc-values { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
 .bc-row { display: flex; align-items: center; gap: .6rem; }
-.bc-sublabel { font-size: .72rem; color: var(--color-text-2); }
+.bc-sublabel { font-size: .72rem; color: var(--color-text-2); white-space: nowrap; }
 
 .bc-value {
   font-size: .72rem;
