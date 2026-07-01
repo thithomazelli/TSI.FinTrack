@@ -13,7 +13,7 @@
   display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: flex-end;
   justify-content: space-between;
   background: var(--color-surface); border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 0;
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.25rem;
 }
 .filter-section { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
 .filter-group { display: flex; flex-direction: column; gap: .35rem; }

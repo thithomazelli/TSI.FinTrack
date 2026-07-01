@@ -9,17 +9,22 @@
   border-radius: var(--radius-lg);
   padding: .75rem 1.25rem;
   margin-bottom: 1rem;
+  margin-left: auto;
+  width: 100%;
+  max-width: 360px;
+
+  @media (max-width: 600px) { max-width: 100%; }
 }
 
 .bc-info { display: flex; flex-direction: column; }
-.bc-label { font-size: .75rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
+.bc-label { font-size: .7rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
 
-.bc-values { display: flex; gap: 1.5rem; align-items: center; }
+.bc-values { display: flex; gap: 1.25rem; align-items: center; }
 .bc-row { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
-.bc-sublabel { font-size: .65rem; color: var(--color-text-2); white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
+.bc-sublabel { font-size: .6rem; color: var(--color-text-2); white-space: nowrap; text-transform: uppercase; letter-spacing: .04em; }
 
 .bc-value {
-  font-size: .8rem;
+  font-size: .88rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   &.bc-pos { color: #22c55e; }

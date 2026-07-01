@@ -1,21 +1,30 @@
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 .dt-toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
+  flex-direction: column;
+  gap: .5rem;
   margin-bottom: .75rem;
-  flex-wrap: wrap;
+}
 
-  @media (max-width: 600px) { flex-direction: column; align-items: stretch; }
+.dt-toolbar-top {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+
+  @media (max-width: 600px) { flex-wrap: wrap; }
+}
+
+.dt-toolbar-filters {
+  display: flex;
+  align-items: center;
 }
 
 .dt-search-wrap {
   position: relative;
   flex: 1;
   min-width: 160px;
-  max-width: 340px;
-  @media (max-width: 600px) { max-width: 100%; }
+  max-width: 320px;
+  @media (max-width: 600px) { max-width: 100%; flex: 1 1 100%; }
 }
 
 .dt-search-icon {
@@ -29,7 +38,7 @@
 
 .dt-search {
   width: 100%;
-  padding: .35rem .75rem .35rem 1.9rem;
+  padding: .32rem .75rem .32rem 1.9rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -58,22 +67,24 @@
 .dt-toolbar-right {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: .4rem;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .dt-count {
-  font-size: .78rem;
+  font-size: .76rem;
   color: var(--color-text-2);
   white-space: nowrap;
 }
 
 .dt-pagesize {
-  padding: .3rem .5rem;
+  padding: .28rem .4rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: .78rem;
+  font-size: .76rem;
   cursor: pointer;
   transition: border-color var(--transition), background var(--transition);
   &:focus { outline: none; border-color: var(--color-accent); }
