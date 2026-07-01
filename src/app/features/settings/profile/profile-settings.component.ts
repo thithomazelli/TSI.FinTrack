@@ -86,7 +86,7 @@ export class ProfileSettingsComponent implements OnInit {
     this.profileService.uploadAvatar(user.id, file).subscribe({
       next: (url) => {
         this.avatarUrl.set(url);
-        this.profileService.upsert({ id: user.id, avatarUrl: url }).subscribe({
+        this.profileService.upsert({ id: user.id, avatarUrl: url, email: this.email(), fullName: this.fullName() }).subscribe({
           next: () => {
             this.avatarUploading.set(false);
             this.toast.success('Foto atualizada!');

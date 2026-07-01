@@ -158,7 +158,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.avatarUploading.set(true);
     this.profileService.uploadAvatar(user.id, file).subscribe({
       next: (url) => {
-        this.profileService.upsert({ id: user.id, avatarUrl: url }).subscribe({
+        this.profileService.upsert({ id: user.id, avatarUrl: url, email: this.userEmail(), fullName: this.fullName() }).subscribe({
           next: () => {
             this.avatarUrl.set(url);
             this.avatarUploading.set(false);
