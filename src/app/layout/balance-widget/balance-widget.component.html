@@ -37,7 +37,7 @@
             </div>
             <div class="widget-balance-row">
               <span class="widget-balance-sublabel">{{ 'widget.balanceProjected' | translate }}</span>
-              <span class="widget-value widget-value--projected" [class.widget-value--positive]="(projected() ?? 0) >= 0" [class.widget-value--negative]="(projected() ?? 0) < 0">
+              <span class="widget-value widget-value--bold" [class.widget-value--positive]="(projected() ?? 0) >= 0" [class.widget-value--negative]="(projected() ?? 0) < 0">
                 {{ hidden() ? '***' : ('R$ ' + ((projected() ?? 0) | number:'1.2-2')) }}
               </span>
             </div>

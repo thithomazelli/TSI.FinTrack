@@ -4,14 +4,18 @@
   flex-direction: column;
   gap: .5rem;
   margin-bottom: .75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: .65rem .9rem;
+  transition: background var(--transition), border-color var(--transition);
 }
 
 .dt-toolbar-top {
   display: flex;
   align-items: center;
   gap: .5rem;
-
-  @media (max-width: 600px) { flex-wrap: wrap; }
+  flex-wrap: wrap;
 }
 
 .dt-toolbar-filters {
