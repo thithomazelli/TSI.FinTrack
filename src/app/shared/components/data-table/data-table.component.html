@@ -13,6 +13,10 @@
     }
   </div>
 
+  @if (filterBtnTpl) {
+    <ng-container [ngTemplateOutlet]="filterBtnTpl" />
+  }
+
   <div class="dt-toolbar-right">
     <span class="dt-count">
       {{ pageDisplay().total }} {{ pageDisplay().total === 1 ? 'item' : 'itens' }}
@@ -24,6 +28,10 @@
     </select>
   </div>
 </div>
+
+@if (filterPanelTpl) {
+  <ng-container [ngTemplateOutlet]="filterPanelTpl" />
+}
 
 <div class="dt-table-wrap">
   @if (pageItems().length === 0) {
