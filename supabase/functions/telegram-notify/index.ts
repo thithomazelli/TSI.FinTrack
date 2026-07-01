@@ -286,6 +286,8 @@ async function sendMonthlyAnalysis(today: Date) {
     const totalExpenses = realized.reduce((s, t) => s + t.amount, 0);
     const balance = totalIncome - totalExpenses;
 
+    if (totalIncome === 0 && totalExpenses === 0) continue;
+
     const spentMap: Record<string, number> = {};
     for (const t of realized) {
       if (t.category_id) spentMap[t.category_id] = (spentMap[t.category_id] ?? 0) + t.amount;
@@ -415,6 +417,9 @@ async function sendMonthEndSummary(today: Date) {
     const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
     const totalExpenses = realized.reduce((s, t) => s + t.amount, 0);
     const balance = totalIncome - totalExpenses;
+
+    if (totalIncome === 0 && totalExpenses === 0) continue;
+
     const savedPct = totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0;
 
     const spentMap: Record<string, number> = {};
