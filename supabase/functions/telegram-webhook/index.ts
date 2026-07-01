@@ -210,26 +210,34 @@ async function askCard(chatId: number, userId: string, data: SessionData) {
   );
 }
 
-async function askPeople(chatId: number, userId: string, data: SessionData) {
-  await setSession(chatId, 'awaiting_people', { ...data, people: [] });
+async function buildPeopleKeyboard(userId: string, selected: string[]): Promise<{ text: string }[][]> {
   const { data: people } = await supabase
     .from('people')
     .select('name')
     .eq('owner_id', userId)
     .order('name');
 
-  const rows: { text: string }[][] = [];
   const items = (people ?? []) as { name: string }[];
+  const rows: { text: string }[][] = [];
   for (let i = 0; i < items.length; i += 2) {
-    rows.push(items.slice(i, i + 2).map(p => ({ text: p.name })));
+    rows.push(items.slice(i, i + 2).map(p => ({
+      text: selected.includes(p.name) ? `✅ ${p.name}` : p.name,
+    })));
   }
   rows.push([{ text: '✅ Confirmar pessoas' }]);
   rows.push([{ text: '➡️ Pular' }]);
+  return rows;
+}
 
+async function askPeople(chatId: number, userId: string, data: SessionData) {
+  const people: string[] = [];
+  await setSession(chatId, 'awaiting_people', { ...data, people });
+
+  const rows = await buildPeopleKeyboard(userId, people);
   const cardLabel = data.creditCardName ? `💳 ${data.creditCardName}` : '💳 Sem cartão';
   await send(chatId,
     `✅ ${cardLabel}\n\n👥 Selecione as <b>pessoas</b> envolvidas (pode escolher várias):\n\n` +
-    '<i>Toque nos nomes desejados e depois em "Confirmar pessoas"</i>',
+    '<i>Toque nos nomes ou <b>digite um nome</b> e envie. Depois toque em "Confirmar pessoas".</i>',
     { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: false } }
   );
 }
@@ -367,7 +375,7 @@ async function handleSessionMessage(
           .from('credit_cards').select('id, name, last_four_digits').eq('owner_id', userId);
         const matched = (cards ?? [] as { id: string; name: string; last_four_digits: string }[]).find(
           (c: { name: string; last_four_digits: string }) =>
-            text.includes(c.name) || text.includes(c.last_four_digits)
+            text === `${c.name} ****${c.last_four_digits}`
         );
         if (matched) { creditCardId = matched.id; creditCardName = `${matched.name} ****${matched.last_four_digits}`; }
       }
@@ -380,17 +388,26 @@ async function handleSessionMessage(
         await askConfirm(chatId, data);
         return;
       }
-      // Toggle person in/out of list
+      // Strip leading checkmark if user tapped a selected name button (e.g. "✅ João")
+      const personName = text.trim().replace(/^✅\s*/, '');
       const people = [...(data.people ?? [])];
-      const idx = people.indexOf(text.trim());
+      const idx = people.indexOf(personName);
+      let msg: string;
       if (idx >= 0) {
         people.splice(idx, 1);
-        await send(chatId, `➖ <b>${text.trim()}</b> removido(a).\n\nToque em "Confirmar pessoas" quando terminar.`);
+        msg = `➖ <b>${personName}</b> removido(a).`;
       } else {
-        people.push(text.trim());
-        await send(chatId, `➕ <b>${text.trim()}</b> adicionado(a).\n\nToque em "Confirmar pessoas" quando terminar.`);
+        people.push(personName);
+        msg = `➕ <b>${personName}</b> adicionado(a).`;
       }
-      await setSession(chatId, 'awaiting_people', { ...data, people });
+      const newData = { ...data, people };
+      await setSession(chatId, 'awaiting_people', newData);
+      // Re-send keyboard so "Confirmar pessoas" stays visible
+      const selectedLabel = people.length ? `\n👥 Selecionados: <b>${people.join(', ')}</b>` : '';
+      const rows = await buildPeopleKeyboard(userId, people);
+      await send(chatId, `${msg}${selectedLabel}`,
+        { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: false } }
+      );
       break;
     }
 
