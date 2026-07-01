@@ -7,24 +7,21 @@
   border: 1px solid var(--color-border);
   border-left: 4px solid #22c55e;
   border-radius: var(--radius-lg);
-  padding: 1rem 1.25rem;
+  padding: .75rem 1.25rem;
   margin-bottom: 1rem;
 }
 
-.bc-info { display: flex; flex-direction: column; gap: 2px; }
-.bc-label { font-size: .8rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
-.bc-hint { font-size: .72rem; color: var(--color-text-3, var(--color-text-2)); font-style: italic; }
+.bc-info { display: flex; flex-direction: column; }
+.bc-label { font-size: .75rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
 
-.bc-values { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
-.bc-row { display: flex; align-items: center; gap: .6rem; }
-.bc-sublabel { font-size: .72rem; color: var(--color-text-2); white-space: nowrap; }
+.bc-values { display: flex; gap: 1.5rem; align-items: center; }
+.bc-row { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.bc-sublabel { font-size: .65rem; color: var(--color-text-2); white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
 
 .bc-value {
-  font-size: .72rem;
-  font-weight: 800;
+  font-size: .8rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #22c55e;
-  &--negative { color: #ef4444; }
-  &--projected { color: #3b82f6; }
-  &--projected#{&}--negative { color: #ef4444; }
+  &.bc-pos { color: #22c55e; }
+  &.bc-neg { color: #ef4444; }
 }

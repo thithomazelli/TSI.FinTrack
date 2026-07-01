@@ -2,16 +2,15 @@
   <div class="balance-card">
     <div class="bc-info">
       <span class="bc-label">{{ 'widget.balance' | translate }}</span>
-      <span class="bc-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
     </div>
     <div class="bc-values">
       <div class="bc-row">
         <span class="bc-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
-        <span class="bc-value" [class.bc-value--negative]="available()! < 0">R$ {{ available()! | number:'1.2-2' }}</span>
+        <span class="bc-value" [class.bc-pos]="available()! >= 0" [class.bc-neg]="available()! < 0">R$ {{ available()! | number:'1.2-2' }}</span>
       </div>
       <div class="bc-row">
         <span class="bc-sublabel">{{ 'widget.balanceProjectedShort' | translate }}</span>
-        <span class="bc-value bc-value--projected" [class.bc-value--negative]="(projected() ?? 0) < 0">R$ {{ (projected() ?? 0) | number:'1.2-2' }}</span>
+        <span class="bc-value" [class.bc-pos]="(projected() ?? 0) >= 0" [class.bc-neg]="(projected() ?? 0) < 0">R$ {{ (projected() ?? 0) | number:'1.2-2' }}</span>
       </div>
     </div>
   </div>

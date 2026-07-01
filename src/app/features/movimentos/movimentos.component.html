@@ -41,97 +41,6 @@
       }
     </div>
 
-    <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-      </svg>
-      {{ 'movimentos.filters' | translate }}
-      @if (activeFilterCount() > 0) {
-        <span class="filter-badge">{{ activeFilterCount() }}</span>
-      }
-      <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <polyline points="6 9 12 15 18 9"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Painel de filtros (animado) -->
-  <div class="filter-panel" [class.is-open]="filterPanelOpen()">
-    <div class="filter-panel-inner">
-      <div class="filter-panel-content">
-
-        <div class="fp-group">
-          <span class="fp-label">{{ 'common.type' | translate }}</span>
-          <div class="fp-checks">
-            <label class="fp-check">
-              <input type="checkbox" [checked]="filterTipos().has('entry')" (change)="toggleFilterTipo('entry')" />
-              <span class="fp-check-box"></span>
-              {{ 'movimentos.income' | translate }}
-            </label>
-            <label class="fp-check">
-              <input type="checkbox" [checked]="filterTipos().has('transaction')" (change)="toggleFilterTipo('transaction')" />
-              <span class="fp-check-box"></span>
-              {{ 'movimentos.expenses' | translate }}
-            </label>
-          </div>
-        </div>
-
-        <div class="fp-divider"></div>
-
-        <div class="fp-group">
-          <span class="fp-label">{{ 'common.status' | translate }}</span>
-          <div class="fp-checks">
-            <label class="fp-check">
-              <input type="checkbox" [checked]="filterStatuses().has('REALIZED')" (change)="toggleFilterStatus('REALIZED')" />
-              <span class="fp-check-box"></span>
-              {{ 'movimentos.realized' | translate }}
-            </label>
-            <label class="fp-check">
-              <input type="checkbox" [checked]="filterStatuses().has('PROJECTED')" (change)="toggleFilterStatus('PROJECTED')" />
-              <span class="fp-check-box"></span>
-              {{ 'movimentos.projected' | translate }}
-            </label>
-          </div>
-        </div>
-
-        <div class="fp-divider"></div>
-
-        <div class="fp-group">
-          <span class="fp-label">{{ 'common.category' | translate }}</span>
-          <select class="input input-sm fp-select" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
-            <option value="">{{ 'movimentos.allF' | translate }}</option>
-            @for (cat of categories(); track cat.id) {
-              <option [value]="cat.id">{{ cat.name }}</option>
-            }
-          </select>
-        </div>
-
-        @if (cards().length > 0) {
-          <div class="fp-divider"></div>
-          <div class="fp-group">
-            <span class="fp-label">{{ 'movimentos.creditCard' | translate }}</span>
-            <div class="fp-checks">
-              @for (card of cards(); track card.id) {
-                <label class="fp-check">
-                  <input type="checkbox" [checked]="filterCardIds().has(card.id)" (change)="toggleFilterCard(card.id)" />
-                  <span class="fp-check-box"></span>
-                  {{ card.name }}
-                </label>
-              }
-            </div>
-          </div>
-        }
-
-        @if (activeFilterCount() > 0) {
-          <div class="fp-divider"></div>
-          <button class="fp-clear" (click)="clearFilters()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            {{ 'movimentos.clearFilters' | translate }}
-          </button>
-        }
-
-      </div>
-    </div>
   </div>
 
   <tsi-balance-card />
@@ -214,6 +123,93 @@
       [initialSortDir]="'desc'"
       [emptyMsg]="'movimentos.empty' | translate"
     >
+      <ng-template #filterBtn>
+        <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          {{ 'movimentos.filters' | translate }}
+          @if (activeFilterCount() > 0) {
+            <span class="filter-badge">{{ activeFilterCount() }}</span>
+          }
+          <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </ng-template>
+
+      <ng-template #filterPanel>
+        <div class="filter-panel" [class.is-open]="filterPanelOpen()">
+          <div class="filter-panel-inner">
+            <div class="filter-panel-content">
+              <div class="fp-group">
+                <span class="fp-label">{{ 'common.type' | translate }}</span>
+                <div class="fp-checks">
+                  <label class="fp-check">
+                    <input type="checkbox" [checked]="filterTipos().has('entry')" (change)="toggleFilterTipo('entry')" />
+                    <span class="fp-check-box"></span>
+                    {{ 'movimentos.income' | translate }}
+                  </label>
+                  <label class="fp-check">
+                    <input type="checkbox" [checked]="filterTipos().has('transaction')" (change)="toggleFilterTipo('transaction')" />
+                    <span class="fp-check-box"></span>
+                    {{ 'movimentos.expenses' | translate }}
+                  </label>
+                </div>
+              </div>
+              <div class="fp-divider"></div>
+              <div class="fp-group">
+                <span class="fp-label">{{ 'common.status' | translate }}</span>
+                <div class="fp-checks">
+                  <label class="fp-check">
+                    <input type="checkbox" [checked]="filterStatuses().has('REALIZED')" (change)="toggleFilterStatus('REALIZED')" />
+                    <span class="fp-check-box"></span>
+                    {{ 'movimentos.realized' | translate }}
+                  </label>
+                  <label class="fp-check">
+                    <input type="checkbox" [checked]="filterStatuses().has('PROJECTED')" (change)="toggleFilterStatus('PROJECTED')" />
+                    <span class="fp-check-box"></span>
+                    {{ 'movimentos.projected' | translate }}
+                  </label>
+                </div>
+              </div>
+              <div class="fp-divider"></div>
+              <div class="fp-group">
+                <span class="fp-label">{{ 'common.category' | translate }}</span>
+                <select class="input input-sm fp-select" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
+                  <option value="">{{ 'movimentos.allF' | translate }}</option>
+                  @for (cat of categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+              </div>
+              @if (cards().length > 0) {
+                <div class="fp-divider"></div>
+                <div class="fp-group">
+                  <span class="fp-label">{{ 'movimentos.creditCard' | translate }}</span>
+                  <div class="fp-checks">
+                    @for (card of cards(); track card.id) {
+                      <label class="fp-check">
+                        <input type="checkbox" [checked]="filterCardIds().has(card.id)" (change)="toggleFilterCard(card.id)" />
+                        <span class="fp-check-box"></span>
+                        {{ card.name }}
+                      </label>
+                    }
+                  </div>
+                </div>
+              }
+              @if (activeFilterCount() > 0) {
+                <div class="fp-divider"></div>
+                <button class="fp-clear" (click)="clearFilters()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  {{ 'movimentos.clearFilters' | translate }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
       <ng-template #extraTh>
         <th class="col-check">
           <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" class="row-check" />
