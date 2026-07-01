@@ -326,6 +326,7 @@
     "totalExpenses": "Total Saídas",
     "balance": "Saldo",
     "expensesByCategory": "Saídas por categoria",
+    "search": "Buscar movimentos...",
     "empty": "Nenhum movimento encontrado.",
     "colType": "Tipo",
     "colCardAccount": "Cartão/Conta",
@@ -469,6 +470,7 @@
     "deleteHint": "Remover da simulação",
     "deletedItems": "Itens removidos na simulação",
     "restore": "Restaurar",
+    "search": "Buscar simulações...",
     "empty": "Nenhum lançamento neste período.",
     "bulkDeleteMsg": "Remover {{count}} item(s) da simulação?"
   }

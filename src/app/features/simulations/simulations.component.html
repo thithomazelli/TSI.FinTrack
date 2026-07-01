@@ -129,8 +129,6 @@
   <!-- Table -->
   @if (loading()) {
     <p class="state-msg">{{ 'common.loading' | translate }}</p>
-  } @else if (simulatedItems().length === 0) {
-    <p class="state-msg">{{ 'simulations.empty' | translate }}</p>
   } @else {
     <!-- Bulk action bar -->
     @if (selectionCount() > 0) {
@@ -145,87 +143,83 @@
       </div>
     }
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th class="col-check">
-              <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" />
-            </th>
-            <th>{{ 'common.date' | translate }}</th>
-            <th>{{ 'movimentos.colType' | translate }}</th>
-            <th>{{ 'common.description' | translate }}</th>
-            <th>{{ 'common.category' | translate }}</th>
-            <th>{{ 'movimentos.colCardAccount' | translate }}</th>
-            <th class="text-right">{{ 'common.amount' | translate }}</th>
-            <th>{{ 'common.actions' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of filteredItems(); track item.id) {
-            <tr [class.row-modified]="isModified(item.id)" [class.row-selected]="isSelected(item.id)">
-              @if (isEditing(item.id)) {
-                <td class="col-check"></td>
-                <td><input class="input input-inline" type="date" [(ngModel)]="editDate" /></td>
-                <td colspan="3">
-                  <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
-                    {{ item.description }}
-                  </span>
-                </td>
-                <td></td>
-                <td class="text-right">
-                  <input class="input input-inline input-amount" type="number" min="0.01" step="0.01" [(ngModel)]="editAmount" />
-                </td>
-                <td>
-                  <div class="action-btns">
-                    <button class="action-btn action-btn--edit" (click)="applyEdit(item)">✓</button>
-                    <button class="action-btn action-btn--delete" (click)="cancelEdit()">✕</button>
-                  </div>
-                </td>
-              } @else {
-                <td class="col-check row-check">
-                  <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" />
-                </td>
-                <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
-                <td>
-                  <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
-                    {{ (item.kind === 'entry' ? 'movimentos.typeEntry' : 'movimentos.typeExit') | translate }}
-                  </span>
-                </td>
-                <td>
-                  <div class="desc-cell">
-                    <span>{{ item.description }}</span>
-                    @if (isModified(item.id)) { <span class="mod-badge">{{ 'simulations.modified' | translate }}</span> }
-                  </div>
-                </td>
-                <td>
-                  @if (item.kind === 'transaction') {
-                    <div class="cat-cell">
-                      <span class="cat-dot" [style.background]="categoryColor(item.categoryId)"></span>
-                      {{ categoryName(item.categoryId) }}
-                    </div>
-                  }
-                </td>
-                <td class="col-muted">{{ payerName(item) }}</td>
-                <td class="col-amount text-right" [class.amount-entrada]="item.kind === 'entry'" [class.amount-saida]="item.kind === 'transaction'">
-                  R$ {{ item.amount | number:'1.2-2' }}
-                </td>
-                <td>
-                  <div class="action-btns">
-                    <button class="action-btn action-btn--edit" (click)="startEdit(item)" [title]="'simulations.editHint' | translate">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-                    </button>
-                    <button class="action-btn action-btn--delete" (click)="deleteItem(item)" [title]="'simulations.deleteHint' | translate">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                    </button>
-                  </div>
-                </td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <tsi-data-table
+      [items]="filteredItems()"
+      [columns]="tableColumns"
+      [searchFn]="tableSearchFn"
+      [searchPlaceholder]="'simulations.search' | translate"
+      [sortComparators]="tableSortComparators"
+      [rowClassFn]="tableRowClassFn"
+      [initialSortKey]="'date'"
+      [initialSortDir]="'desc'"
+      [emptyMsg]="'simulations.empty' | translate"
+    >
+      <ng-template #extraTh>
+        <th class="col-check">
+          <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" />
+        </th>
+      </ng-template>
+
+      <ng-template #row let-item>
+        @if (isEditing(item.id)) {
+          <td class="col-check"></td>
+          <td><input class="input input-inline" type="date" [(ngModel)]="editDate" /></td>
+          <td colspan="3">
+            <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
+              {{ item.description }}
+            </span>
+          </td>
+          <td></td>
+          <td class="text-right">
+            <input class="input input-inline input-amount" type="number" min="0.01" step="0.01" [(ngModel)]="editAmount" />
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="action-btn action-btn--edit" (click)="applyEdit(item)">✓</button>
+              <button class="action-btn action-btn--delete" (click)="cancelEdit()">✕</button>
+            </div>
+          </td>
+        } @else {
+          <td class="col-check row-check">
+            <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" />
+          </td>
+          <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
+              {{ (item.kind === 'entry' ? 'movimentos.typeEntry' : 'movimentos.typeExit') | translate }}
+            </span>
+          </td>
+          <td>
+            <div class="desc-cell">
+              <span>{{ item.description }}</span>
+              @if (isModified(item.id)) { <span class="mod-badge">{{ 'simulations.modified' | translate }}</span> }
+            </div>
+          </td>
+          <td>
+            @if (item.kind === 'transaction') {
+              <div class="cat-cell">
+                <span class="cat-dot" [style.background]="categoryColor(item.categoryId)"></span>
+                {{ categoryName(item.categoryId) }}
+              </div>
+            }
+          </td>
+          <td class="col-muted">{{ payerName(item) }}</td>
+          <td class="col-amount text-right" [class.amount-entrada]="item.kind === 'entry'" [class.amount-saida]="item.kind === 'transaction'">
+            R$ {{ item.amount | number:'1.2-2' }}
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="action-btn action-btn--edit" (click)="startEdit(item)" [title]="'simulations.editHint' | translate">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+              </button>
+              <button class="action-btn action-btn--delete" (click)="deleteItem(item)" [title]="'simulations.deleteHint' | translate">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+              </button>
+            </div>
+          </td>
+        }
+      </ng-template>
+    </tsi-data-table>
 
     <!-- Deleted items list -->
     @if (deletedItems().length > 0) {
