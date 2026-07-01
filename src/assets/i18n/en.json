@@ -437,6 +437,8 @@
     "balance": "Balance",
     "balanceRealized": "Current balance",
     "balanceProjected": "Projected balance",
+    "balanceRealizedShort": "Current",
+    "balanceProjectedShort": "Projected",
     "cumulative": "Cumulative",
     "showValues": "Show values",
     "hideValues": "Hide values",

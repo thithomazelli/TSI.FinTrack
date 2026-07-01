@@ -437,6 +437,8 @@
     "balance": "Saldo",
     "balanceRealized": "Saldo atual",
     "balanceProjected": "Saldo projetado",
+    "balanceRealizedShort": "Atual",
+    "balanceProjectedShort": "Projetado",
     "cumulative": "Acumulado",
     "showValues": "Mostrar valores",
     "hideValues": "Ocultar valores",
