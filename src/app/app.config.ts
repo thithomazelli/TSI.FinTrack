@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withHashLocation()),
     provideHttpClient(),
     provideTranslateService(),
-    provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' }),
+    provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: `.json?v=${Date.now()}` }),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeLanguage,
