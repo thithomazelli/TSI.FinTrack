@@ -22,7 +22,7 @@
 .carousel-track {
   position: relative;
   overflow: hidden;
-  min-height: 56px;
+  height: 76px;
   cursor: grab;
   &:active { cursor: grabbing; }
   user-select: none;
@@ -68,14 +68,16 @@
 }
 
 .alert-item {
-  display: none;
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   border-left: 4px solid transparent;
-
-  &.is-visible { display: flex; }
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 
   &.alert-danger {
     background: rgba(239, 68, 68, 0.08);

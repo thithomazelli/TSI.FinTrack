@@ -33,7 +33,8 @@
              (touchend)="onDragEnd($event)">
 
           @for (alert of visibleAlerts(); track alert.id; let i = $index) {
-            <div class="alert-item" [class]="'alert-' + alert.level" [class.is-visible]="i === carouselIndex()">
+            <div class="alert-item" [class]="'alert-' + alert.level"
+                 [style.transform]="'translateX(' + (i - carouselIndex()) * 100 + '%)'">
               <div class="alert-body">
                 <span class="alert-icon">
                   @if (alert.level === 'danger') { ⚠️ }
