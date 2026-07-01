@@ -44,6 +44,7 @@ export class SavingsComponent implements OnInit {
   readonly types = signal<DomainList[]>([]);
   readonly accounts = signal<Account[]>([]);
   readonly availableBalance = signal<number | null>(null);
+  readonly projectedBalance = signal<number | null>(null);
 
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -100,6 +101,10 @@ export class SavingsComponent implements OnInit {
     });
     this.balanceService.getAvailableBalance().subscribe({
       next: (v) => this.availableBalance.set(v),
+      error: () => {},
+    });
+    this.balanceService.getProjectedBalance().subscribe({
+      next: (v) => this.projectedBalance.set(v),
       error: () => {},
     });
     this.loadAll();

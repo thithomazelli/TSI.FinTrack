@@ -47,12 +47,18 @@
   &.is-active { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); }
 }
 
+.balance-cards-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
 .current-balance-card {
+  flex: 1; min-width: 220px;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   background: var(--color-surface); border: 1px solid var(--color-border);
   border-left: 4px solid #22c55e;
-  border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem;
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem;
   &.is-negative { border-left-color: #ef4444; }
+  &--projected { border-left-color: #3b82f6; }
+  &--projected.is-negative { border-left-color: #ef4444; }
+  &--projected .cb-value { color: #3b82f6; }
+  &--projected.is-negative .cb-value { color: #ef4444; }
 }
 .cb-info { display: flex; flex-direction: column; gap: 2px; }
 .cb-label { font-size: .8rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }

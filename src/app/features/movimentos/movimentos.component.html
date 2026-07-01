@@ -73,16 +73,27 @@
     </div>
   </div>
 
-  <!-- Saldo atual (fixo, independe do período) -->
-  @if (availableBalance() !== null) {
-    <div class="current-balance-card" [class.is-negative]="availableBalance()! < 0">
-      <div class="cb-info">
-        <span class="cb-label">{{ 'movimentos.currentBalance' | translate }}</span>
-        <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
+  <!-- Saldo atual e projetado (fixo, independe do período) -->
+  <div class="balance-cards-row">
+    @if (availableBalance() !== null) {
+      <div class="current-balance-card" [class.is-negative]="availableBalance()! < 0">
+        <div class="cb-info">
+          <span class="cb-label">{{ 'widget.balanceRealized' | translate }}</span>
+          <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
+        </div>
+        <span class="cb-value">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
       </div>
-      <span class="cb-value">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
-    </div>
-  }
+    }
+    @if (projectedBalance() !== null) {
+      <div class="current-balance-card current-balance-card--projected" [class.is-negative]="projectedBalance()! < 0">
+        <div class="cb-info">
+          <span class="cb-label">{{ 'widget.balanceProjected' | translate }}</span>
+          <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
+        </div>
+        <span class="cb-value">R$ {{ projectedBalance()! | number:'1.2-2' }}</span>
+      </div>
+    }
+  </div>
 
   <!-- Summary bar (período selecionado) -->
   <div class="summary-bar">

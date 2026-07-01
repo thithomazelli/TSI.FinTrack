@@ -199,6 +199,7 @@ export class MovimentosComponent implements OnInit {
 
   /** Saldo atual disponível (acumulado, todo o histórico) — independe do período. */
   readonly availableBalance = signal<number | null>(null);
+  readonly projectedBalance = signal<number | null>(null);
 
   // Multi-seleção
   readonly selectedIds = signal<Set<string>>(new Set());
@@ -268,12 +269,14 @@ export class MovimentosComponent implements OnInit {
     this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
     this.domainListService.getByCode('entry_type').subscribe({ next: d => this.entryTypes.set(d) });
     this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v) });
+    this.balanceService.getProjectedBalance().subscribe({ next: v => this.projectedBalance.set(v) });
     this.load();
   }
 
   /** Recarrega o saldo atual (ex.: após criar/editar/excluir um lançamento). */
   private refreshAvailable(): void {
     this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v) });
+    this.balanceService.getProjectedBalance().subscribe({ next: v => this.projectedBalance.set(v) });
   }
 
   async load(): Promise<void> {
