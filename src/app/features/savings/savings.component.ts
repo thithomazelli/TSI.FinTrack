@@ -92,7 +92,7 @@ export class SavingsComponent implements OnInit {
       next: (accounts) => this.accounts.set(accounts),
       error: (err) => this.logger.error('Failed to load accounts', err),
     });
-    this.domainService.getByCode('savings_type').subscribe({
+    this.domainService.getByCode('savings_movement_type').subscribe({
       next: (types) => {
         this.types.set(types);
         if (types.length > 0) this.formTypeId.set(types[0].id);
