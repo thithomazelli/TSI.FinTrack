@@ -47,24 +47,20 @@
   &.is-active { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); }
 }
 
-.balance-cards-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
 .current-balance-card {
-  flex: 1; min-width: 220px;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   background: var(--color-surface); border: 1px solid var(--color-border);
   border-left: 4px solid #22c55e;
-  border-radius: var(--radius-lg); padding: 1rem 1.25rem;
-  &.is-negative { border-left-color: #ef4444; }
-  &--projected { border-left-color: #3b82f6; }
-  &--projected.is-negative { border-left-color: #ef4444; }
-  &--projected .cb-value { color: #3b82f6; }
-  &--projected.is-negative .cb-value { color: #ef4444; }
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem;
 }
 .cb-info { display: flex; flex-direction: column; gap: 2px; }
 .cb-label { font-size: .8rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
 .cb-hint { font-size: .72rem; color: var(--color-text-3, var(--color-text-2)); font-style: italic; }
-.cb-value { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #22c55e; }
-.current-balance-card.is-negative .cb-value { color: #ef4444; }
+.cb-values { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.cb-value-row { display: flex; align-items: center; gap: .6rem; }
+.cb-value-label { font-size: .72rem; color: var(--color-text-2); }
+.cb-value { font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #22c55e; &.is-negative { color: #ef4444; } }
+.cb-value--projected { color: #3b82f6; &.is-negative { color: #ef4444; } }
 
 .summary-bar { display: flex; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
 .summary-card {

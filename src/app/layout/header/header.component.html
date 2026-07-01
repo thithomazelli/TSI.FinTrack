@@ -20,16 +20,16 @@
           <div class="backdrop" (click)="closeBalance()"></div>
           <div class="popover popover--balance">
             <div class="popover-header">
-              <span class="popover-title">{{ 'widget.cumulative' | translate }}</span>
+              <span class="popover-title">{{ 'widget.balance' | translate }}</span>
             </div>
             <div class="bal-detail">
-              <div class="bal-row bal-row--bold">
-                <span>{{ 'widget.balanceRealized' | translate }}</span>
-                <span [class.pos]="availableBalance()! >= 0" [class.neg]="availableBalance()! < 0">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
+              <div class="bal-row">
+                <span class="bal-sublabel">{{ 'widget.balanceRealized' | translate }}</span>
+                <span class="bal-row--bold" [class.pos]="availableBalance()! >= 0" [class.neg]="availableBalance()! < 0">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
               </div>
               <div class="bal-row">
-                <span>{{ 'widget.balanceProjected' | translate }}</span>
-                <span [class.pos]="(projectedBalance() ?? 0) >= 0" [class.neg]="(projectedBalance() ?? 0) < 0">R$ {{ (projectedBalance() ?? 0) | number:'1.2-2' }}</span>
+                <span class="bal-sublabel">{{ 'widget.balanceProjected' | translate }}</span>
+                <span class="bal-projected" [class.pos]="(projectedBalance() ?? 0) >= 0" [class.neg]="(projectedBalance() ?? 0) < 0">R$ {{ (projectedBalance() ?? 0) | number:'1.2-2' }}</span>
               </div>
               @if (balanceSummary()) {
                 <div class="bal-divider"></div>
