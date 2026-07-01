@@ -190,10 +190,12 @@ async function sendDailyDigest(today: Date) {
     msg += `<b>Este mês:</b>\n`;
     msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
     msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
-    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo do mês: ${fmt(monthBalance)}\n`;
-    if (spentProjected > 0) {
-      msg += `📉 Gastos projetados: ${fmt(spentProjected)}\n`;
+    msg += `📋 Gastos projetados: ${fmt(spentProjected)}\n`;
+    const pending = spentProjected - spentRealized;
+    if (pending > 0) {
+      msg += `⏳ Pendente a pagar: ${fmt(pending)}\n`;
     }
+    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo do mês: ${fmt(monthBalance)}\n`;
     if (overdueCount || dueSoonCount) {
       msg += `\n<b>Faturas:</b>\n`;
       if (overdueCount) msg += `  🚨 ${overdueCount} vencida(s)\n`;
