@@ -17,11 +17,11 @@ async function send(chatId: number, text: string, extra: Record<string, unknown>
   });
 }
 
-async function answerCallback(callbackQueryId: string, text?: string) {
+async function answerCallback(id: string, text?: string) {
   await fetch(`${API}/answerCallbackQuery`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ callback_query_id: callbackQueryId, text }),
+    body: JSON.stringify({ callback_query_id: id, text }),
   });
 }
 
@@ -55,14 +55,16 @@ function monthDateRange(year: number, month: number) {
   return { start, end };
 }
 
-// ─── Session helpers (guided /lancamento flow) ───────────────────────────────
+// ─── Session ─────────────────────────────────────────────────────────────────
 
 type SessionStep =
   | 'awaiting_description'
   | 'awaiting_amount'
   | 'awaiting_date'
   | 'awaiting_category'
-  | 'awaiting_status';
+  | 'awaiting_card'
+  | 'awaiting_people'
+  | 'awaiting_confirm';
 
 interface SessionData {
   description?: string;
@@ -70,6 +72,9 @@ interface SessionData {
   date?: string;
   categoryId?: string | null;
   categoryName?: string;
+  creditCardId?: string | null;
+  creditCardName?: string;
+  people?: string[];           // selected label names
 }
 
 async function getSession(chatId: number): Promise<{ step: SessionStep; data: SessionData } | null> {
@@ -93,6 +98,38 @@ async function clearSession(chatId: number) {
   await supabase.from('telegram_sessions').delete().eq('chat_id', chatId);
 }
 
+// ─── Date helpers ─────────────────────────────────────────────────────────────
+
+function todayStr()     { return new Date().toISOString().split('T')[0]; }
+function yesterdayStr() { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0]; }
+function tomorrowStr()  { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; }
+
+function parseDate(text: string): string | null {
+  const t = text.trim().toLowerCase();
+  if (t === 'hoje'    || t.startsWith('hoje '))    return todayStr();
+  if (t === 'ontem'   || t.startsWith('ontem '))   return yesterdayStr();
+  if (t === 'amanhã'  || t.startsWith('amanhã '))  return tomorrowStr();
+  // strip "(YYYY-MM-DD)" suffix from keyboard buttons
+  const stripped = t.replace(/\s*\(\d{4}-\d{2}-\d{2}\)\s*$/, '').trim();
+  if (stripped === 'hoje')   return todayStr();
+  if (stripped === 'ontem')  return yesterdayStr();
+  if (stripped === 'amanhã') return tomorrowStr();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+  const m = t.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/);
+  if (!m) return null;
+  const year = m[3] ? parseInt(m[3]) : new Date().getFullYear();
+  const month = String(m[2]).padStart(2, '0');
+  const day   = String(m[1]).padStart(2, '0');
+  const d = new Date(`${year}-${month}-${day}`);
+  if (isNaN(d.getTime())) return null;
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateBR(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 // ─── Guided flow steps ────────────────────────────────────────────────────────
 
 async function askDescription(chatId: number) {
@@ -100,8 +137,7 @@ async function askDescription(chatId: number) {
   await send(chatId,
     '📝 <b>Novo lançamento</b>\n\n' +
     'Qual a <b>descrição</b> do gasto?\n\n' +
-    '<i>Dica: você também pode enviar tudo de uma vez:\n' +
-    '<code>/lancamento ifood 45,90 alimentação</code></i>',
+    '<i>Dica: envie tudo de uma vez:\n<code>/add ifood 45,90 alimentação</code></i>',
     removeKeyboard()
   );
 }
@@ -109,23 +145,21 @@ async function askDescription(chatId: number) {
 async function askAmount(chatId: number, data: SessionData) {
   await setSession(chatId, 'awaiting_amount', data);
   await send(chatId,
-    `✅ Descrição: <b>${data.description}</b>\n\n` +
-    '💰 Qual o <b>valor</b>? (ex: <code>45,90</code>)\n\n' +
-    '/cancelar para desistir',
+    `✅ <b>${data.description}</b>\n\n💰 Qual o <b>valor</b>? (ex: <code>45,90</code>)\n/cancelar para desistir`,
     removeKeyboard()
   );
 }
 
 async function askDate(chatId: number, data: SessionData) {
   await setSession(chatId, 'awaiting_date', data);
-  const today = new Date().toISOString().split('T')[0];
   await send(chatId,
-    `✅ Valor: <b>${fmt(data.amount!)}</b>\n\n` +
-    '📅 Qual a <b>data</b>? Envie no formato <code>DD/MM</code> ou <code>DD/MM/AAAA</code>, ' +
-    'ou toque em <b>Hoje</b> para usar a data de hoje.',
+    `✅ Valor: <b>${fmt(data.amount!)}</b>\n\n📅 Qual a <b>data</b>?`,
     {
       reply_markup: {
-        keyboard: [[{ text: `Hoje (${today})` }]],
+        keyboard: [
+          [{ text: `Hoje (${todayStr()})` }, { text: `Ontem (${yesterdayStr()})` }],
+          [{ text: `Amanhã (${tomorrowStr()})` }, { text: 'Outra (DD/MM)' }],
+        ],
         resize_keyboard: true,
         one_time_keyboard: true,
       },
@@ -141,34 +175,86 @@ async function askCategory(chatId: number, userId: string, data: SessionData) {
     .eq('owner_id', userId)
     .order('name');
 
-  const keyboard = (cats ?? [])
-    .map((c: { name: string }) => [{ text: c.name }]);
-  keyboard.push([{ text: '➡️ Pular categoria' }]);
+  const rows: { text: string }[][] = [];
+  const items = (cats ?? []) as { id: string; name: string }[];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2).map(c => ({ text: c.name })));
+  }
+  rows.push([{ text: '➡️ Pular categoria' }]);
 
   await send(chatId,
-    `✅ Data: <b>${data.date}</b>\n\n` +
-    '📁 Qual a <b>categoria</b>? Toque em uma ou envie o nome.',
-    {
-      reply_markup: {
-        keyboard,
-        resize_keyboard: true,
-        one_time_keyboard: true,
-      },
-    }
+    `✅ Data: <b>${formatDateBR(data.date!)}</b>\n\n📁 Qual a <b>categoria</b>?`,
+    { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: true } }
   );
 }
 
-async function askStatus(chatId: number, data: SessionData) {
-  await setSession(chatId, 'awaiting_status', data);
-  const catLabel = data.categoryName ? `📁 Categoria: <b>${data.categoryName}</b>\n` : '';
+async function askCard(chatId: number, userId: string, data: SessionData) {
+  await setSession(chatId, 'awaiting_card', data);
+  const { data: cards } = await supabase
+    .from('credit_cards')
+    .select('id, name, last_four_digits')
+    .eq('owner_id', userId)
+    .order('name');
+
+  const rows: { text: string }[][] = [];
+  const items = (cards ?? []) as { id: string; name: string; last_four_digits: string }[];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2).map(c => ({ text: `${c.name} ****${c.last_four_digits}` })));
+  }
+  rows.push([{ text: '➡️ Sem cartão' }]);
+
+  const catLabel = data.categoryName ? `📁 ${data.categoryName}` : '📁 Sem categoria';
   await send(chatId,
-    `✅ ${catLabel ? catLabel : '<i>Sem categoria</i>\n'}` +
-    '\n💳 O gasto já foi <b>realizado</b> ou ainda é <b>projetado</b>?',
+    `✅ ${catLabel}\n\n💳 Em qual <b>cartão</b>?`,
+    { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: true } }
+  );
+}
+
+async function askPeople(chatId: number, userId: string, data: SessionData) {
+  await setSession(chatId, 'awaiting_people', { ...data, people: [] });
+  const { data: people } = await supabase
+    .from('people')
+    .select('name')
+    .eq('owner_id', userId)
+    .order('name');
+
+  const rows: { text: string }[][] = [];
+  const items = (people ?? []) as { name: string }[];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2).map(p => ({ text: p.name })));
+  }
+  rows.push([{ text: '✅ Confirmar pessoas' }]);
+  rows.push([{ text: '➡️ Pular' }]);
+
+  const cardLabel = data.creditCardName ? `💳 ${data.creditCardName}` : '💳 Sem cartão';
+  await send(chatId,
+    `✅ ${cardLabel}\n\n👥 Selecione as <b>pessoas</b> envolvidas (pode escolher várias):\n\n` +
+    '<i>Toque nos nomes desejados e depois em "Confirmar pessoas"</i>',
+    { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: false } }
+  );
+}
+
+async function askConfirm(chatId: number, data: SessionData) {
+  await setSession(chatId, 'awaiting_confirm', data);
+
+  const peopleLabel = data.people?.length ? data.people.join(', ') : '—';
+  const cardLabel   = data.creditCardName ?? '—';
+  const catLabel    = data.categoryName   ?? '—';
+
+  await send(chatId,
+    `📋 <b>Confirmar lançamento?</b>\n\n` +
+    `📌 <b>${data.description}</b>\n` +
+    `💰 ${fmt(data.amount!)}\n` +
+    `📅 ${formatDateBR(data.date!)}\n` +
+    `📁 ${catLabel}\n` +
+    `💳 ${cardLabel}\n` +
+    `👥 ${peopleLabel}`,
     {
       reply_markup: {
         inline_keyboard: [[
           { text: '✅ Realizado', callback_data: 'flow_status:REALIZED' },
           { text: '📋 Projetado', callback_data: 'flow_status:PROJECTED' },
+          { text: '❌ Cancelar',  callback_data: 'flow_cancel' },
         ]],
       },
     }
@@ -177,115 +263,142 @@ async function askStatus(chatId: number, data: SessionData) {
 
 async function finishFlow(chatId: number, userId: string, data: SessionData, status: string) {
   await clearSession(chatId);
-  const today = new Date().toISOString().split('T')[0];
 
-  const { data: inserted, error } = await supabase
+  const { error } = await supabase
     .from('transactions')
     .insert({
-      owner_id: userId,
-      description: data.description,
-      amount: data.amount,
-      date: data.date ?? today,
-      category_id: data.categoryId ?? null,
-      account_id: null,
-      credit_card_id: null,
+      owner_id:           userId,
+      description:        data.description,
+      amount:             data.amount,
+      date:               data.date ?? todayStr(),
+      category_id:        data.categoryId ?? null,
+      credit_card_id:     data.creditCardId ?? null,
+      account_id:         null,
       status,
-      labels: [],
-    })
-    .select('id')
-    .single();
+      labels:             data.people ?? [],
+    });
 
-  if (error || !inserted) {
+  if (error) {
     await send(chatId, '❌ Erro ao salvar lançamento. Tente novamente.', removeKeyboard());
     return;
   }
 
   const statusLabel = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
+  const peopleLabel = data.people?.length ? `\n👥 ${data.people.join(', ')}` : '';
+  const cardLabel   = data.creditCardName ? `\n💳 ${data.creditCardName}` : '';
   await send(chatId,
     `🎉 <b>Lançamento salvo!</b>\n\n` +
     `📌 ${data.description}\n` +
     `💰 ${fmt(data.amount!)}\n` +
-    `📅 ${data.date ?? today}\n` +
-    (data.categoryName ? `📁 ${data.categoryName}\n` : '') +
+    `📅 ${formatDateBR(data.date ?? todayStr())}\n` +
+    `📁 ${data.categoryName ?? 'Sem categoria'}` +
+    `${cardLabel}${peopleLabel}\n` +
     `📊 ${statusLabel}`,
     removeKeyboard()
   );
 }
 
-// Tenta interpretar data no formato DD/MM ou DD/MM/AAAA
-function parseDate(text: string): string | null {
-  const clean = text.replace(/^Hoje \((.+)\)$/, '$1');
-  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
-  const m2 = clean.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/);
-  if (!m2) return null;
-  const year = m2[3] ? parseInt(m2[3]) : new Date().getFullYear();
-  const month = String(m2[2]).padStart(2, '0');
-  const day = String(m2[1]).padStart(2, '0');
-  const d = new Date(`${year}-${month}-${day}`);
-  if (isNaN(d.getTime())) return null;
-  return `${year}-${month}-${day}`;
-}
+// ─── Session message router ───────────────────────────────────────────────────
 
-// ─── Session message handler ──────────────────────────────────────────────────
-
-async function handleSessionMessage(chatId: number, userId: string, text: string, session: { step: SessionStep; data: SessionData }) {
+async function handleSessionMessage(
+  chatId: number, userId: string, text: string,
+  session: { step: SessionStep; data: SessionData }
+) {
   const { step, data } = session;
 
-  if (text === '/cancelar') {
+  if (text === '/cancelar' || text === '/cancel') {
     await clearSession(chatId);
     await send(chatId, '🗑️ Lançamento cancelado.', removeKeyboard());
     return;
   }
 
-  if (step === 'awaiting_description') {
-    const description = text.trim();
-    if (!description) {
-      await send(chatId, '❌ Descrição não pode ser vazia. Tente novamente.');
-      return;
+  switch (step) {
+    case 'awaiting_description': {
+      const description = text.trim();
+      if (!description) { await send(chatId, '❌ Descrição não pode ser vazia.'); return; }
+      await askAmount(chatId, { ...data, description });
+      break;
     }
-    await askAmount(chatId, { ...data, description });
 
-  } else if (step === 'awaiting_amount') {
-    const amount = parseFloat(text.trim().replace(',', '.'));
-    if (isNaN(amount) || amount <= 0) {
-      await send(chatId, '❌ Valor inválido. Informe um número, ex: <code>45,90</code>');
-      return;
-    }
-    await askDate(chatId, { ...data, amount });
-
-  } else if (step === 'awaiting_date') {
-    const date = parseDate(text.trim());
-    if (!date) {
-      await send(chatId, '❌ Data inválida. Use o formato <code>DD/MM</code> ou <code>DD/MM/AAAA</code>.');
-      return;
-    }
-    await askCategory(chatId, userId, { ...data, date });
-
-  } else if (step === 'awaiting_category') {
-    let categoryId: string | null = null;
-    let categoryName: string | undefined;
-    if (text !== '➡️ Pular categoria') {
-      const { data: cats } = await supabase.from('categories').select('id, name').eq('owner_id', userId);
-      const matched = (cats ?? []).find((c: { name: string }) =>
-        c.name.toLowerCase() === text.trim().toLowerCase() ||
-        c.name.toLowerCase().includes(text.trim().toLowerCase())
-      );
-      if (matched) {
-        categoryId = matched.id;
-        categoryName = matched.name;
+    case 'awaiting_amount': {
+      const amount = parseFloat(text.trim().replace(',', '.'));
+      if (isNaN(amount) || amount <= 0) {
+        await send(chatId, '❌ Valor inválido. Ex: <code>45,90</code>');
+        return;
       }
+      await askDate(chatId, { ...data, amount });
+      break;
     }
-    await askStatus(chatId, { ...data, categoryId, categoryName });
 
-  } else if (step === 'awaiting_status') {
-    // Only reachable if user types instead of tapping button
-    const lower = text.trim().toLowerCase();
-    const status = lower.includes('realiz') ? 'REALIZED' : lower.includes('projet') ? 'PROJECTED' : null;
-    if (!status) {
-      await send(chatId, '❌ Responda "Realizado" ou "Projetado", ou use os botões acima.');
-      return;
+    case 'awaiting_date': {
+      if (text === 'Outra (DD/MM)') {
+        await send(chatId, '📅 Digite a data no formato <code>DD/MM</code> ou <code>DD/MM/AAAA</code>:',
+          removeKeyboard());
+        return;
+      }
+      const date = parseDate(text);
+      if (!date) {
+        await send(chatId, '❌ Data inválida. Use <code>DD/MM</code> ou <code>DD/MM/AAAA</code>.');
+        return;
+      }
+      await askCategory(chatId, userId, { ...data, date });
+      break;
     }
-    await finishFlow(chatId, userId, data, status);
+
+    case 'awaiting_category': {
+      let categoryId: string | null = null;
+      let categoryName: string | undefined;
+      if (text !== '➡️ Pular categoria') {
+        const { data: cats } = await supabase.from('categories').select('id, name').eq('owner_id', userId);
+        const matched = (cats ?? [] as { id: string; name: string }[]).find(
+          (c: { name: string }) => c.name.toLowerCase() === text.trim().toLowerCase()
+        );
+        if (matched) { categoryId = matched.id; categoryName = matched.name; }
+      }
+      await askCard(chatId, userId, { ...data, categoryId, categoryName });
+      break;
+    }
+
+    case 'awaiting_card': {
+      let creditCardId: string | null = null;
+      let creditCardName: string | undefined;
+      if (text !== '➡️ Sem cartão') {
+        const { data: cards } = await supabase
+          .from('credit_cards').select('id, name, last_four_digits').eq('owner_id', userId);
+        const matched = (cards ?? [] as { id: string; name: string; last_four_digits: string }[]).find(
+          (c: { name: string; last_four_digits: string }) =>
+            text.includes(c.name) || text.includes(c.last_four_digits)
+        );
+        if (matched) { creditCardId = matched.id; creditCardName = `${matched.name} ****${matched.last_four_digits}`; }
+      }
+      await askPeople(chatId, userId, { ...data, creditCardId, creditCardName });
+      break;
+    }
+
+    case 'awaiting_people': {
+      if (text === '➡️ Pular' || text === '✅ Confirmar pessoas') {
+        await askConfirm(chatId, data);
+        return;
+      }
+      // Toggle person in/out of list
+      const people = [...(data.people ?? [])];
+      const idx = people.indexOf(text.trim());
+      if (idx >= 0) {
+        people.splice(idx, 1);
+        await send(chatId, `➖ <b>${text.trim()}</b> removido(a).\n\nToque em "Confirmar pessoas" quando terminar.`);
+      } else {
+        people.push(text.trim());
+        await send(chatId, `➕ <b>${text.trim()}</b> adicionado(a).\n\nToque em "Confirmar pessoas" quando terminar.`);
+      }
+      await setSession(chatId, 'awaiting_people', { ...data, people });
+      break;
+    }
+
+    case 'awaiting_confirm': {
+      // Only reachable if user types instead of tapping inline button
+      await send(chatId, '⚠️ Use os botões acima para confirmar ou cancelar o lançamento.');
+      break;
+    }
   }
 }
 
@@ -303,71 +416,47 @@ async function handleStart(chatId: number, args: string) {
   }
 
   const { data: link, error } = await supabase
-    .from('telegram_links')
-    .select('user_id, used')
-    .eq('token', token)
-    .single();
+    .from('telegram_links').select('user_id, used').eq('token', token).single();
 
-  if (error || !link) {
-    await send(chatId, '❌ Token inválido ou expirado. Gere um novo link no app.');
-    return;
-  }
-  if (link.used) {
-    await send(chatId, '⚠️ Este token já foi utilizado. Gere um novo link no app.');
-    return;
-  }
+  if (error || !link) { await send(chatId, '❌ Token inválido ou expirado. Gere um novo link no app.'); return; }
+  if (link.used)      { await send(chatId, '⚠️ Este token já foi utilizado. Gere um novo link no app.'); return; }
 
   await supabase.from('telegram_links').update({ used: true }).eq('token', token);
   await supabase.from('telegram_subscriptions').upsert(
     { user_id: link.user_id, chat_id: chatId, notifications_enabled: true },
     { onConflict: 'user_id' }
   );
-
-  await send(chatId,
-    '✅ <b>Conta vinculada com sucesso!</b>\n\n' +
-    'Use /ajuda para ver tudo que posso fazer por você.'
-  );
+  await send(chatId, '✅ <b>Conta vinculada com sucesso!</b>\n\nUse /ajuda para ver tudo que posso fazer por você.');
 }
 
 async function handleAjuda(chatId: number) {
   await send(chatId,
     '📖 <b>Comandos disponíveis</b>\n\n' +
-    '💰 <b>/saldo</b>\n' +
-    '   Mostra receitas, gastos e saldo do mês atual\n\n' +
-    '🏦 <b>/poupanca</b>\n' +
-    '   Saldo acumulado da poupança\n\n' +
-    '💳 <b>/faturas</b>\n' +
-    '   Faturas de cartão do mês atual\n\n' +
-    '🎯 <b>/metas</b>\n' +
-    '   Progresso das metas de gasto do mês\n\n' +
-    '📊 <b>/resumo</b>\n' +
-    '   Resumo completo (saldo + metas + faturas)\n\n' +
-    '➕ <b>/lancamento</b>\n' +
-    '   Registra um gasto — o bot vai te guiar passo a passo\n' +
-    '   Ou envie tudo de uma vez:\n' +
-    '   <code>/lancamento ifood 45,90 alimentação</code>\n\n' +
-    '🗑️ <b>/cancelar</b>\n' +
-    '   Cancela um lançamento em andamento\n\n' +
-    '❓ <b>/ajuda</b>\n' +
-    '   Mostra esta mensagem'
+    '💰 /saldo — saldo do mês atual\n\n' +
+    '🏦 /poupanca — saldo da poupança\n\n' +
+    '💳 /faturas — faturas de cartão do mês\n\n' +
+    '🎯 /metas — progresso das metas de gasto\n\n' +
+    '📊 /resumo — resumo completo (saldo + metas + faturas)\n\n' +
+    '➕ /add — registrar um gasto\n' +
+    '   • Sem argumentos: fluxo guiado passo a passo\n' +
+    '   • Com argumentos: <code>/add ifood 45,90 alimentação</code>\n\n' +
+    '🗑️ /cancelar — cancela um lançamento em andamento\n\n' +
+    '❓ /ajuda — mostra esta mensagem'
   );
 }
 
 async function handleSaldo(chatId: number, userId: string) {
   const { year, month } = currentYearMonth();
   const { start, end } = monthDateRange(year, month);
-
   const [{ data: txs }, { data: entries }] = await Promise.all([
     supabase.from('transactions').select('amount, status').eq('owner_id', userId).gte('date', start).lte('date', end),
     supabase.from('entries').select('amount').eq('owner_id', userId).gte('date', start).lte('date', end),
   ]);
-
   const totalIncome = (entries ?? []).reduce((s: number, e: { amount: number }) => s + e.amount, 0);
-  const realized = (txs ?? []).filter((t: { status: string }) => t.status === 'REALIZED').reduce((s: number, t: { amount: number }) => s + t.amount, 0);
-  const projected = (txs ?? []).reduce((s: number, t: { amount: number }) => s + t.amount, 0);
-
+  const realized    = (txs ?? []).filter((t: { status: string }) => t.status === 'REALIZED').reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+  const projected   = (txs ?? []).reduce((s: number, t: { amount: number }) => s + t.amount, 0);
   await send(chatId,
-    `📊 <b>Saldo — ${String(month).padStart(2, '0')}/${year}</b>\n\n` +
+    `📊 <b>Saldo — ${String(month).padStart(2,'0')}/${year}</b>\n\n` +
     `💰 Entradas: <b>${fmt(totalIncome)}</b>\n` +
     `💸 Gastos realizados: <b>${fmt(realized)}</b>\n` +
     `📋 Gastos projetados: <b>${fmt(projected)}</b>\n` +
@@ -378,92 +467,52 @@ async function handleSaldo(chatId: number, userId: string) {
 }
 
 async function handlePoupanca(chatId: number, userId: string) {
-  const { data: movements } = await supabase
-    .from('savings_movements')
-    .select('amount, type_id')
-    .eq('owner_id', userId);
-
-  if (!movements?.length) {
-    await send(chatId, '🏦 Nenhum movimento de poupança encontrado.');
-    return;
-  }
-
-  const { data: types } = await supabase
-    .from('domain_lists')
-    .select('id, code')
-    .eq('owner_id', userId)
-    .eq('list_code', 'savings_movement_type');
-
-  const withdrawalIds = new Set(
-    (types ?? []).filter((t: { code: string }) => t.code === 'WITHDRAWAL').map((t: { id: string }) => t.id)
-  );
-
+  const { data: movements } = await supabase.from('savings_movements').select('amount, type_id').eq('owner_id', userId);
+  if (!movements?.length) { await send(chatId, '🏦 Nenhum movimento de poupança encontrado.'); return; }
+  const { data: types } = await supabase.from('domain_lists').select('id, code').eq('owner_id', userId).eq('list_code', 'savings_movement_type');
+  const withdrawalIds = new Set((types ?? []).filter((t: { code: string }) => t.code === 'WITHDRAWAL').map((t: { id: string }) => t.id));
   const balance = movements.reduce((s: number, m: { amount: number; type_id: string }) =>
-    withdrawalIds.has(m.type_id) ? s - m.amount : s + m.amount, 0
-  );
-
-  await send(chatId,
-    `🏦 <b>Saldo da Poupança</b>\n\n` +
-    `💰 Saldo atual: <b>${fmt(balance)}</b>\n` +
-    `📝 ${movements.length} movimentos registrados`
-  );
+    withdrawalIds.has(m.type_id) ? s - m.amount : s + m.amount, 0);
+  await send(chatId, `🏦 <b>Saldo da Poupança</b>\n\n💰 Saldo atual: <b>${fmt(balance)}</b>\n📝 ${movements.length} movimentos registrados`);
 }
 
 async function handleFaturas(chatId: number, userId: string) {
   const { year, month } = currentYearMonth();
-
   const { data: bills } = await supabase
-    .from('credit_card_bills')
-    .select('*, credit_cards(name, last_four_digits)')
-    .eq('owner_id', userId)
-    .eq('year', year)
-    .eq('month', month);
-
-  if (!bills?.length) {
-    await send(chatId, `💳 Nenhuma fatura em ${String(month).padStart(2, '0')}/${year}.`);
-    return;
-  }
-
+    .from('credit_card_bills').select('*, credit_cards(name, last_four_digits)')
+    .eq('owner_id', userId).eq('year', year).eq('month', month);
+  if (!bills?.length) { await send(chatId, `💳 Nenhuma fatura em ${String(month).padStart(2,'0')}/${year}.`); return; }
   const lines = bills.map((b: { credit_cards?: { name: string; last_four_digits: string }; total_amount: number; status: string; due_date?: string }) => {
-    const card = b.credit_cards;
-    const status = { OPEN: '🟡 Aberta', CLOSED: '🟠 Fechada', PAID: '🟢 Paga' }[b.status] ?? b.status;
-    const due = b.due_date ? ` | venc. ${b.due_date.slice(0, 10)}` : '';
-    return `• ${card?.name ?? 'Cartão'} (${card?.last_four_digits ?? '????'}): <b>${fmt(b.total_amount ?? 0)}</b> — ${status}${due}`;
+    const card   = b.credit_cards;
+    const status = ({ OPEN: '🟡 Aberta', CLOSED: '🟠 Fechada', PAID: '🟢 Paga' } as Record<string,string>)[b.status] ?? b.status;
+    const due    = b.due_date ? ` | venc. ${b.due_date.slice(0, 10)}` : '';
+    return `• ${card?.name ?? 'Cartão'} (****${card?.last_four_digits ?? '????'}): <b>${fmt(b.total_amount ?? 0)}</b> — ${status}${due}`;
   }).join('\n');
-
-  await send(chatId, `💳 <b>Faturas — ${String(month).padStart(2, '0')}/${year}</b>\n\n${lines}`);
+  await send(chatId, `💳 <b>Faturas — ${String(month).padStart(2,'0')}/${year}</b>\n\n${lines}`);
 }
 
 async function handleMetas(chatId: number, userId: string) {
   const { year, month } = currentYearMonth();
   const { start, end } = monthDateRange(year, month);
-
   const [{ data: goals }, { data: txs }, { data: cats }] = await Promise.all([
     supabase.from('goals').select('*').eq('owner_id', userId).eq('year', year).eq('month', month),
     supabase.from('transactions').select('amount, category_id').eq('owner_id', userId).eq('status', 'REALIZED').gte('date', start).lte('date', end),
     supabase.from('categories').select('id, name').eq('owner_id', userId),
   ]);
-
-  if (!goals?.length) {
-    await send(chatId, '🎯 Nenhuma meta definida para este mês.');
-    return;
-  }
-
+  if (!goals?.length) { await send(chatId, '🎯 Nenhuma meta definida para este mês.'); return; }
   const spentMap: Record<string, number> = {};
   for (const t of (txs ?? [])) {
     if (t.category_id) spentMap[t.category_id] = (spentMap[t.category_id] ?? 0) + t.amount;
   }
-
   const lines = goals.map((g: { category_id: string; monthly_limit: number }) => {
-    const cat = (cats ?? []).find((c: { id: string; name: string }) => c.id === g.category_id);
+    const cat  = (cats ?? []).find((c: { id: string }) => c.id === g.category_id) as { name: string } | undefined;
     const spent = spentMap[g.category_id] ?? 0;
-    const pct = g.monthly_limit > 0 ? (spent / g.monthly_limit) * 100 : 0;
-    const bar = '█'.repeat(Math.round(pct / 10)).padEnd(10, '░');
-    const icon = spent > g.monthly_limit ? '🔴' : pct >= 80 ? '🟡' : '🟢';
+    const pct   = g.monthly_limit > 0 ? (spent / g.monthly_limit) * 100 : 0;
+    const bar   = '█'.repeat(Math.round(pct / 10)).padEnd(10, '░');
+    const icon  = spent > g.monthly_limit ? '🔴' : pct >= 80 ? '🟡' : '🟢';
     return `${icon} <b>${cat?.name ?? g.category_id}</b>\n   ${bar} ${pct.toFixed(0)}% — ${fmt(spent)} / ${fmt(g.monthly_limit)}`;
   }).join('\n\n');
-
-  await send(chatId, `🎯 <b>Metas — ${String(month).padStart(2, '0')}/${year}</b>\n\n${lines}`);
+  await send(chatId, `🎯 <b>Metas — ${String(month).padStart(2,'0')}/${year}</b>\n\n${lines}`);
 }
 
 async function handleResumo(chatId: number, userId: string) {
@@ -472,98 +521,73 @@ async function handleResumo(chatId: number, userId: string) {
   await handleFaturas(chatId, userId);
 }
 
-// One-shot: /lancamento descrição valor [categoria]
-async function handleLancamentoOneShot(chatId: number, userId: string, args: string) {
+// One-shot: /add descrição valor [categoria]
+async function handleAddOneShot(chatId: number, userId: string, args: string) {
   const parts = args.trim().split(/\s+/);
   const amountStr = parts.find((p) => /^\d+([.,]\d{1,2})?$/.test(p));
   if (!amountStr) {
-    await send(chatId, '❌ Não encontrei o valor. Ex: <code>/lancamento ifood 45,90 alimentação</code>');
+    await send(chatId, '❌ Não encontrei o valor. Ex: <code>/add ifood 45,90 alimentação</code>');
     return;
   }
-
-  const amount = parseFloat(amountStr.replace(',', '.'));
+  const amount    = parseFloat(amountStr.replace(',', '.'));
   const amountIdx = parts.indexOf(amountStr);
-  const description = parts.slice(0, amountIdx).join(' ') || 'Lançamento rápido';
+  const description  = parts.slice(0, amountIdx).join(' ') || 'Lançamento rápido';
   const categoryHint = parts.slice(amountIdx + 1).join(' ').toLowerCase();
 
   let categoryId: string | null = null;
   let categoryName = '';
   if (categoryHint) {
     const { data: cats } = await supabase.from('categories').select('id, name').eq('owner_id', userId);
-    const matched = (cats ?? []).find((c: { name: string }) =>
-      c.name.toLowerCase().includes(categoryHint) || categoryHint.includes(c.name.toLowerCase())
+    const matched = (cats ?? [] as { id: string; name: string }[]).find(
+      (c: { name: string }) => c.name.toLowerCase().includes(categoryHint) || categoryHint.includes(c.name.toLowerCase())
     );
     if (matched) { categoryId = matched.id; categoryName = matched.name; }
   }
 
-  const today = new Date().toISOString().split('T')[0];
-
-  const { data: inserted } = await supabase
-    .from('transactions')
-    .insert({
-      owner_id: userId,
-      description,
-      amount,
-      date: today,
-      category_id: categoryId,
-      account_id: null,
-      credit_card_id: null,
-      status: 'PROJECTED',
-      labels: [],
-    })
-    .select('id')
-    .single();
-
-  if (!inserted) {
-    await send(chatId, '❌ Erro ao criar lançamento. Tente novamente.');
-    return;
-  }
-
-  await send(chatId,
-    `📝 <b>Confirmar lançamento?</b>\n\n` +
-    `📌 Descrição: <b>${description}</b>\n` +
-    `💰 Valor: <b>${fmt(amount)}</b>\n` +
-    `📁 Categoria: <b>${categoryName || '(sem categoria)'}</b>\n` +
-    `📅 Data: <b>${today}</b>`,
-    {
-      reply_markup: {
-        inline_keyboard: [[
-          { text: '✅ Realizado', callback_data: `confirm_tx:${inserted.id}:REALIZED` },
-          { text: '📋 Projetado', callback_data: `confirm_tx:${inserted.id}:PROJECTED` },
-          { text: '❌ Cancelar', callback_data: `cancel_tx:${inserted.id}` },
-        ]],
-      },
-    }
-  );
+  const date = todayStr();
+  // Store in session and show confirmation
+  const sessionData: SessionData = { description, amount, date, categoryId, categoryName, creditCardId: null, people: [] };
+  await askConfirm(chatId, sessionData);
 }
 
 async function handleCallback(cq: { id: string; data: string; message: { chat: { id: number } } }) {
   const chatId = cq.message.chat.id;
-  const data = cq.data;
+  const cbData = cq.data;
 
-  if (data.startsWith('confirm_tx:')) {
-    const [, txId, status] = data.split(':');
-    await supabase.from('transactions').update({ status, updated_at: new Date().toISOString() }).eq('id', txId);
-    const label = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
-    await answerCallback(cq.id, `Marcado como ${label}`);
-    await send(chatId, `✅ Lançamento salvo como <b>${label}</b>.`);
-  } else if (data.startsWith('cancel_tx:')) {
-    const [, txId] = data.split(':');
-    await supabase.from('transactions').delete().eq('id', txId);
+  if (cbData === 'flow_cancel') {
+    await clearSession(chatId);
     await answerCallback(cq.id, 'Cancelado');
-    await send(chatId, '🗑️ Lançamento cancelado.');
-  } else if (data.startsWith('flow_status:')) {
-    const status = data.split(':')[1];
+    await send(chatId, '🗑️ Lançamento cancelado.', removeKeyboard());
+    return;
+  }
+
+  if (cbData.startsWith('flow_status:')) {
+    const status = cbData.split(':')[1];
     const userId = await getUserIdFromChat(chatId);
-    if (!userId) return;
+    if (!userId) { await answerCallback(cq.id, 'Conta não vinculada'); return; }
     const session = await getSession(chatId);
     if (!session) {
       await answerCallback(cq.id, 'Sessão expirada');
-      await send(chatId, '⚠️ Sessão expirada. Use /lancamento para começar novamente.');
+      await send(chatId, '⚠️ Sessão expirada. Use /add para começar novamente.');
       return;
     }
     await answerCallback(cq.id);
     await finishFlow(chatId, userId, session.data, status);
+    return;
+  }
+
+  // Legacy one-shot confirm/cancel
+  if (cbData.startsWith('confirm_tx:')) {
+    const [, txId, status] = cbData.split(':');
+    await supabase.from('transactions').update({ status, updated_at: new Date().toISOString() }).eq('id', txId);
+    const label = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
+    await answerCallback(cq.id, `Marcado como ${label}`);
+    await send(chatId, `✅ Lançamento salvo como <b>${label}</b>.`);
+  } else if (cbData.startsWith('cancel_tx:')) {
+    const [, txId] = cbData.split(':');
+    await supabase.from('transactions').delete().eq('id', txId);
+    await answerCallback(cq.id, 'Cancelado');
+    await send(chatId, '🗑️ Lançamento cancelado.');
   }
 }
 
@@ -585,9 +609,9 @@ Deno.serve(async (req) => {
   if (!message?.text) return new Response('OK');
 
   const chatId = message.chat.id;
-  const text = message.text.trim();
+  const text   = message.text.trim();
   const [rawCmd, ...argParts] = text.split(/\s+/);
-  const cmd = rawCmd.toLowerCase().replace(/@\w+$/, '');
+  const cmd  = rawCmd.toLowerCase().replace(/@\w+$/, '');
   const args = argParts.join(' ');
 
   if (cmd === '/start') { await handleStart(chatId, args); return new Response('OK'); }
@@ -598,13 +622,10 @@ Deno.serve(async (req) => {
     return new Response('OK');
   }
 
-  // Check for active guided flow (any non-command message continues it)
-  const session = await getSession(chatId);
-
-  // /lancamento: one-shot if args given, guided if not
-  if (cmd === '/lancamento') {
+  // /add and /lancamento (alias)
+  if (cmd === '/add' || cmd === '/lancamento') {
     if (args.trim()) {
-      await handleLancamentoOneShot(chatId, userId, args);
+      await handleAddOneShot(chatId, userId, args);
     } else {
       await askDescription(chatId);
     }
@@ -612,7 +633,8 @@ Deno.serve(async (req) => {
   }
 
   // /cancelar clears active session
-  if (cmd === '/cancelar') {
+  if (cmd === '/cancelar' || cmd === '/cancel') {
+    const session = await getSession(chatId);
     if (session) {
       await clearSession(chatId);
       await send(chatId, '🗑️ Lançamento cancelado.', removeKeyboard());
@@ -622,7 +644,8 @@ Deno.serve(async (req) => {
     return new Response('OK');
   }
 
-  // If there's an active session, route free-text to the flow
+  // Active session: route free-text
+  const session = await getSession(chatId);
   if (session && !text.startsWith('/')) {
     await handleSessionMessage(chatId, userId, text, session);
     return new Response('OK');
@@ -630,23 +653,17 @@ Deno.serve(async (req) => {
 
   switch (cmd) {
     case '/ajuda':
-    case '/help':      await handleAjuda(chatId); break;
-    case '/saldo':     await handleSaldo(chatId, userId); break;
-    case '/poupanca':  await handlePoupanca(chatId, userId); break;
-    case '/faturas':   await handleFaturas(chatId, userId); break;
-    case '/metas':     await handleMetas(chatId, userId); break;
-    case '/resumo':    await handleResumo(chatId, userId); break;
+    case '/help':     await handleAjuda(chatId);            break;
+    case '/saldo':    await handleSaldo(chatId, userId);     break;
+    case '/poupanca': await handlePoupanca(chatId, userId);  break;
+    case '/faturas':  await handleFaturas(chatId, userId);   break;
+    case '/metas':    await handleMetas(chatId, userId);     break;
+    case '/resumo':   await handleResumo(chatId, userId);    break;
     default:
       if (session) {
-        // User sent a command mid-flow — ask if wants to cancel
-        await send(chatId,
-          '⚠️ Você tem um lançamento em andamento.\n\n' +
-          'Use /cancelar para desistir, ou continue respondendo as perguntas.'
-        );
+        await send(chatId, '⚠️ Você tem um lançamento em andamento.\nUse /cancelar para desistir, ou continue respondendo as perguntas.');
       } else {
-        await send(chatId,
-          '❓ Comando não reconhecido. Use /ajuda para ver os comandos disponíveis.'
-        );
+        await send(chatId, '❓ Comando não reconhecido. Use /ajuda para ver os comandos disponíveis.');
       }
   }
 
