@@ -9,7 +9,6 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { AccountService } from '../../core/services/account.service';
-import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -62,7 +61,6 @@ export class SimulationsComponent implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly cardService = inject(CreditCardService);
   private readonly accountService = inject(AccountService);
-  private readonly balanceService = inject(BalanceService);
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
   private readonly logger = inject(LoggingService);
@@ -86,9 +84,6 @@ export class SimulationsComponent implements OnInit {
   readonly filterTipo = signal<'all' | 'entry' | 'transaction'>('all');
   readonly filterStatus = signal<'all' | 'REALIZED' | 'PROJECTED'>('all');
   readonly filterCategoryId = signal<string>('');
-
-  // Current balance (accumulated, all history)
-  readonly availableBalance = signal<number | null>(null);
 
   // Overrides: id → {amount?, date?, deleted?}
   readonly overrides = signal<Map<string, SimOverride>>(new Map());
@@ -194,7 +189,6 @@ export class SimulationsComponent implements OnInit {
     this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
     this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
     this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
-    this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v) });
     this.load();
   }
 

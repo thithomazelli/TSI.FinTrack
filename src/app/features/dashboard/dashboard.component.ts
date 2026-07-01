@@ -15,7 +15,6 @@ import { EntryService } from '../../core/services/entry.service';
 import { GoalService } from '../../core/services/goal.service';
 import { CategoryService } from '../../core/services/category.service';
 import { AlertService, Alert } from '../../core/services/alert.service';
-import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { Entry } from '../../core/models/interfaces/entry.interface';
@@ -47,7 +46,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly goalService = inject(GoalService);
   private readonly categoryService = inject(CategoryService);
   private readonly alertService = inject(AlertService);
-  private readonly balanceService = inject(BalanceService);
   private readonly logger = inject(LoggingService);
 
   readonly transactions = signal<Transaction[]>([]);
@@ -57,8 +55,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly alerts = signal<Alert[]>([]);
   readonly dismissedAlertIds = signal<Set<string>>(new Set());
   readonly loading = signal(false);
-  readonly availableBalance = signal<number | null>(null);
-
   readonly carouselIndex = signal(0);
   private carouselTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -141,10 +137,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.categoryService.getAll().subscribe({
       next: (cats) => this.categories.set(cats),
       error: (err) => this.logger.error('Failed to load categories', err),
-    });
-    this.balanceService.getAvailableBalance().subscribe({
-      next: (v) => this.availableBalance.set(v),
-      error: () => {},
     });
     this.loadData();
   }

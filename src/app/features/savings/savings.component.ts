@@ -12,7 +12,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SavingsService } from '../../core/services/savings.service';
 import { DomainListService } from '../../core/services/domain-list.service';
 import { AccountService } from '../../core/services/account.service';
-import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SavingsMovement } from '../../core/models/interfaces/savings-movement.interface';
@@ -33,7 +32,6 @@ export class SavingsComponent implements OnInit {
   private readonly savingsService = inject(SavingsService);
   private readonly domainService = inject(DomainListService);
   private readonly accountService = inject(AccountService);
-  private readonly balanceService = inject(BalanceService);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
 
@@ -44,9 +42,6 @@ export class SavingsComponent implements OnInit {
   readonly monthMovements = signal<SavingsMovement[]>([]);
   readonly types = signal<DomainList[]>([]);
   readonly accounts = signal<Account[]>([]);
-  readonly availableBalance = signal<number | null>(null);
-  readonly projectedBalance = signal<number | null>(null);
-
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly showForm = signal(false);
@@ -99,14 +94,6 @@ export class SavingsComponent implements OnInit {
         if (types.length > 0) this.formTypeId.set(types[0].id);
       },
       error: (err) => this.logger.error('Failed to load savings types', err),
-    });
-    this.balanceService.getAvailableBalance().subscribe({
-      next: (v) => this.availableBalance.set(v),
-      error: () => {},
-    });
-    this.balanceService.getProjectedBalance().subscribe({
-      next: (v) => this.projectedBalance.set(v),
-      error: () => {},
     });
     this.loadAll();
     this.loadMonth();
