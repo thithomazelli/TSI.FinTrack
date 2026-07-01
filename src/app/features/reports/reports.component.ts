@@ -48,12 +48,6 @@ interface CategorySpend {
   monthlyAvg: number;
 }
 
-interface CalendarEvent {
-  date: string;
-  label: string;
-  type: 'bill' | 'goal';
-  amount: number;
-}
 
 @Component({
   selector: 'tsi-reports',
@@ -102,7 +96,6 @@ export class ReportsComponent implements OnInit {
   readonly savingsMovements = signal<SavingsMovement[]>([]);
   readonly paymentTypeSpend = signal<{ label: string; amount: number; color: string }[]>([]);
   readonly catEvolPoints = signal<{ label: string; amount: number }[]>([]);
-  readonly calendarEvents = signal<CalendarEvent[]>([]);
 
   private gridColor(): string {
     return this.themeService.isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
