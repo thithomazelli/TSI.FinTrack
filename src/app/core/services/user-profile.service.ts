@@ -43,7 +43,7 @@ export class UserProfileService {
         .then(({ data, error }) => {
           if (error) throw error;
           const { data: urlData } = this.supabase.client.storage.from('avatars').getPublicUrl(data.path);
-          return urlData.publicUrl;
+          return `${urlData.publicUrl}?t=${Date.now()}`;
         })
     );
   }
