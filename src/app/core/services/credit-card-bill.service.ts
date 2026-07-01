@@ -30,9 +30,26 @@ export class CreditCardBillService {
         .order('created_at')
         .then(({ data, error }) => {
           if (error) throw error;
-          return (data ?? []) as CreditCardBill[];
+          return (data ?? []).map((r: any) => this.toModel(r));
         })
     );
+  }
+
+  private toModel(r: any): CreditCardBill & { credit_cards?: { name: string; last_four_digits: string } } {
+    return {
+      id: r.id,
+      ownerId: r.owner_id,
+      creditCardId: r.credit_card_id,
+      year: r.year,
+      month: r.month,
+      totalAmount: Number(r.total_amount ?? 0),
+      status: r.status as BillStatus,
+      closingDate: r.closing_date ?? null,
+      dueDate: r.due_date ?? null,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+      credit_cards: r.credit_cards ?? undefined,
+    };
   }
 
   getByCard(creditCardId: string): Observable<CreditCardBill[]> {
@@ -68,7 +85,7 @@ export class CreditCardBillService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as CreditCardBill;
+          return this.toModel(data);
         })
     );
   }
@@ -85,7 +102,7 @@ export class CreditCardBillService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as CreditCardBill;
+          return this.toModel(data);
         })
     );
   }

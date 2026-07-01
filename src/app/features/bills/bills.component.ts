@@ -1,21 +1,25 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionService } from '../../core/services/transaction.service';
-import { AccountService } from '../../core/services/account.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { CategoryService } from '../../core/services/category.service';
 import { LoggingService } from '../../core/services/logging.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Category } from '../../core/models/interfaces/category.interface';
 
+Chart.register(...registerables);
+
 @Component({
   selector: 'tsi-bills',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, MonthPickerComponent, TranslatePipe],
+  imports: [DecimalPipe, DatePipe, FormsModule, MonthPickerComponent, TranslatePipe, BaseChartDirective],
   templateUrl: './bills.component.html',
   styleUrls: ['./bills.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +29,7 @@ export class BillsComponent implements OnInit {
   private readonly cardService = inject(CreditCardService);
   private readonly categoryService = inject(CategoryService);
   private readonly logger = inject(LoggingService);
+  readonly themeService = inject(ThemeService);
 
   readonly transactions = signal<Transaction[]>([]);
   readonly cards = signal<CreditCard[]>([]);
@@ -43,6 +48,51 @@ export class BillsComponent implements OnInit {
   });
 
   readonly total = computed(() => this.filtered().reduce((s, t) => s + t.amount, 0));
+
+  readonly categorySpend = computed(() => {
+    const map = new Map<string, number>();
+    for (const t of this.filtered()) {
+      const key = t.categoryId || '__sem__';
+      map.set(key, (map.get(key) ?? 0) + t.amount);
+    }
+    return [...map.entries()]
+      .map(([categoryId, amount]) => ({
+        categoryId,
+        name: categoryId === '__sem__' ? 'Sem categoria' : (this.categoryName(categoryId) || 'Sem categoria'),
+        color: categoryId === '__sem__' ? '#9ca3af' : this.categoryColor(categoryId),
+        amount,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  });
+
+  readonly categoryPieData = computed<ChartData<'doughnut'>>(() => ({
+    labels: this.categorySpend().map(c => c.name),
+    datasets: [{
+      data: this.categorySpend().map(c => c.amount),
+      backgroundColor: this.categorySpend().map(c => c.color),
+      borderWidth: 2,
+      borderColor: this.themeService.isDark() ? '#1a1d27' : '#ffffff',
+    }],
+  }));
+
+  readonly doughnutOptions = computed<ChartConfiguration<'doughnut'>['options']>(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => {
+            const v = ctx.parsed as number;
+            const total = this.categorySpend().reduce((s, c) => s + c.amount, 0) || 1;
+            const pct = ((v / total) * 100).toFixed(1);
+            return ` ${ctx.label}: R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${pct}%)`;
+          },
+        },
+      },
+    },
+  } as ChartConfiguration<'doughnut'>['options']));
 
   ngOnInit(): void {
     this.cardService.getAll().subscribe({ next: c => this.cards.set(c) });

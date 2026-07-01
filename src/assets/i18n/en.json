@@ -228,6 +228,11 @@
     "title": "Savings",
     "add": "New Movement",
     "balance": "Savings Balance",
+    "balanceHint": "Accumulated across all months",
+    "allTypes": "All types",
+    "deposits": "Deposits",
+    "withdrawals": "Withdrawals",
+    "monthNet": "Month net",
     "deposit": "Deposit",
     "withdrawal": "Withdrawal"
   },
@@ -371,7 +376,8 @@
     "all": "All",
     "empty": "No transactions found.",
     "colPurchaseDate": "Purchase date",
-    "colCard": "Card"
+    "colCard": "Card",
+    "byCategory": "Spending by category"
   },
   "recurring": {
     "title": "Recurring",

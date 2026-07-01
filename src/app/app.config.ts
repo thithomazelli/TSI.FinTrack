@@ -1,4 +1,4 @@
-import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
+import { ApplicationConfig, APP_INITIALIZER, LOCALE_ID } from '@angular/core';
 import { provideRouter, withHashLocation } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -22,5 +22,6 @@ export const appConfig: ApplicationConfig = {
       deps: [LanguageService],
       multi: true,
     },
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
   ],
 };

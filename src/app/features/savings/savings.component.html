@@ -1,63 +1,128 @@
 <div class="page">
   <div class="page-header">
-    <h2>{{ 'savings.title' | translate }}</h2>
-    <button class="btn btn-primary" (click)="openForm()">{{ 'savings.add' | translate }}</button>
+    <div>
+      <h2 class="page-title">{{ 'savings.title' | translate }}</h2>
+    </div>
+    <button class="btn-nova btn-nova--deposit" (click)="openForm()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      {{ 'savings.add' | translate }}
+    </button>
   </div>
 
-  <div class="balance-card">
-    <span class="balance-label">{{ 'savings.balance' | translate }}</span>
-    <span class="balance-value">R$ {{ balance() | number:'1.2-2' }}</span>
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="filter-section filter-section--period">
+      <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+    </div>
+    <div class="filter-section filter-section--refine">
+      <div class="filter-group">
+        <label class="filter-label">{{ 'common.type' | translate }}</label>
+        <select class="input input-sm" [ngModel]="filterTypeId()" (ngModelChange)="filterTypeId.set($event)">
+          <option value="">{{ 'savings.allTypes' | translate }}</option>
+          @for (t of types(); track t.id) {
+            <option [value]="t.id">{{ t.value }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saldo acumulado -->
+  @if (availableBalance() !== null) {
+    <div class="current-balance-card" [class.is-negative]="availableBalance()! < 0">
+      <div class="cb-info">
+        <span class="cb-label">{{ 'movimentos.currentBalance' | translate }}</span>
+        <span class="cb-hint">{{ 'movimentos.currentBalanceHint' | translate }}</span>
+      </div>
+      <span class="cb-value">R$ {{ availableBalance()! | number:'1.2-2' }}</span>
+    </div>
+  }
+
+  <!-- Saldo poupança acumulado -->
+  <div class="savings-balance-card" [class.is-negative]="cumulativeBalance() < 0">
+    <div class="cb-info">
+      <span class="cb-label">{{ 'savings.balance' | translate }}</span>
+      <span class="cb-hint">{{ 'savings.balanceHint' | translate }}</span>
+    </div>
+    <span class="cb-value">R$ {{ cumulativeBalance() | number:'1.2-2' }}</span>
+  </div>
+
+  <!-- Resumo do mês -->
+  <div class="summary-bar">
+    <div class="summary-card summary-card--entrada">
+      <span class="summary-label">{{ 'savings.deposits' | translate }}</span>
+      <span class="summary-value">R$ {{ monthDeposits() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card summary-card--saida">
+      <span class="summary-label">{{ 'savings.withdrawals' | translate }}</span>
+      <span class="summary-value">R$ {{ monthWithdrawals() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card" [class.summary-card--positivo]="monthNet() >= 0" [class.summary-card--negativo]="monthNet() < 0">
+      <span class="summary-label">{{ 'savings.monthNet' | translate }}</span>
+      <span class="summary-value">R$ {{ monthNet() | number:'1.2-2' }}</span>
+    </div>
   </div>
 
   @if (loading()) {
-    <p class="loading-text">{{ 'common.loading' | translate }}</p>
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
   } @else {
-    <table class="list">
-      <thead>
-        <tr>
-          <th>{{ 'common.date' | translate }}</th>
-          <th>{{ 'common.description' | translate }}</th>
-          <th>{{ 'common.type' | translate }}</th>
-          <th>{{ 'common.account' | translate }}</th>
-          <th class="text-right">{{ 'common.amount' | translate }}</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (m of movements(); track m.id) {
+    <div class="table-wrap">
+      <table>
+        <thead>
           <tr>
-            <td>{{ m.date | slice:0:10 }}</td>
-            <td>{{ m.description }}</td>
-            <td>{{ typeLabel(m.typeId) }}</td>
-            <td>{{ accountName(m.accountId) }}</td>
-            <td class="text-right">R$ {{ m.amount | number:'1.2-2' }}</td>
-            <td class="actions-cell">
-              <button
-                class="btn btn-danger-ghost btn-sm"
-                [disabled]="deletingId() === m.id"
-                (click)="deleteMovement(m.id)"
-              >{{ 'common.delete' | translate }}</button>
-            </td>
+            <th>{{ 'common.date' | translate }}</th>
+            <th>{{ 'common.description' | translate }}</th>
+            <th>{{ 'common.type' | translate }}</th>
+            <th>{{ 'common.account' | translate }}</th>
+            <th class="text-right">{{ 'common.amount' | translate }}</th>
+            <th></th>
           </tr>
-        }
-        @if (movements().length === 0) {
-          <tr>
-            <td colspan="6" class="no-results">{{ 'common.noResults' | translate }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (m of filteredMovements(); track m.id) {
+            <tr>
+              <td class="col-date">{{ m.date | slice:0:10 }}</td>
+              <td>{{ m.description }}</td>
+              <td class="col-muted">
+                <span class="tipo-badge" [class.tipo-badge--deposit]="typeCode(m.typeId) !== 'WITHDRAWAL'" [class.tipo-badge--withdrawal]="typeCode(m.typeId) === 'WITHDRAWAL'">
+                  {{ typeLabel(m.typeId) }}
+                </span>
+              </td>
+              <td class="col-muted">{{ accountName(m.accountId) }}</td>
+              <td class="text-right col-amount" [class.amount-deposit]="typeCode(m.typeId) !== 'WITHDRAWAL'" [class.amount-withdrawal]="typeCode(m.typeId) === 'WITHDRAWAL'">
+                {{ typeCode(m.typeId) === 'WITHDRAWAL' ? '−' : '+' }}R$ {{ m.amount | number:'1.2-2' }}
+              </td>
+              <td>
+                <div class="action-btns">
+                  <button class="action-btn action-btn--delete" [disabled]="deletingId() === m.id" (click)="deleteMovement(m.id)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                    {{ 'common.delete' | translate }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (filteredMovements().length === 0) {
+            <tr>
+              <td colspan="6" class="state-msg">{{ 'common.noResults' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>
 
 @if (showForm()) {
   <div class="modal-backdrop" (click)="closeForm()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal--sm" (click)="$event.stopPropagation()">
       <h3 class="modal-title">{{ 'savings.add' | translate }}</h3>
 
       <div class="form-field">
-        <label>{{ 'common.type' | translate }}</label>
-        <select class="input" [value]="formTypeId()" (change)="formTypeId.set($any($event.target).value)">
+        <label class="form-label">{{ 'common.type' | translate }}</label>
+        <select class="input" [ngModel]="formTypeId()" (ngModelChange)="formTypeId.set($event)">
           @for (t of types(); track t.id) {
             <option [value]="t.id">{{ t.value }}</option>
           }
@@ -65,29 +130,23 @@
       </div>
 
       <div class="form-field">
-        <label>{{ 'common.description' | translate }}</label>
-        <input class="input" type="text"
-          [value]="formDescription()"
-          (input)="formDescription.set($any($event.target).value)" />
+        <label class="form-label">{{ 'common.description' | translate }}</label>
+        <input class="input" type="text" [value]="formDescription()" (input)="formDescription.set($any($event.target).value)" />
       </div>
 
       <div class="form-field">
-        <label>{{ 'common.amount' | translate }}</label>
-        <input class="input" type="number" min="0" step="0.01"
-          [value]="formAmount()"
-          (input)="formAmount.set(+$any($event.target).value)" />
+        <label class="form-label">{{ 'common.amount' | translate }}</label>
+        <input class="input" type="number" min="0" step="0.01" [value]="formAmount()" (input)="formAmount.set(+$any($event.target).value)" />
       </div>
 
       <div class="form-field">
-        <label>{{ 'common.date' | translate }}</label>
-        <input class="input" type="date"
-          [value]="formDate()"
-          (input)="formDate.set($any($event.target).value)" />
+        <label class="form-label">{{ 'common.date' | translate }}</label>
+        <input class="input" type="date" [value]="formDate()" (input)="formDate.set($any($event.target).value)" />
       </div>
 
       <div class="form-field">
-        <label>{{ 'common.account' | translate }}</label>
-        <select class="input" [value]="formAccountId()" (change)="formAccountId.set($any($event.target).value)">
+        <label class="form-label">{{ 'common.account' | translate }}</label>
+        <select class="input" [ngModel]="formAccountId()" (ngModelChange)="formAccountId.set($event)">
           <option value="">--</option>
           @for (a of accounts(); track a.id) {
             <option [value]="a.id">{{ a.name }}</option>
@@ -95,7 +154,7 @@
         </select>
       </div>
 
-      <div class="modal-actions">
+      <div class="modal-footer">
         <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
         <button class="btn btn-primary"
           [disabled]="saving() || !formDescription() || !formAmount() || !formTypeId()"

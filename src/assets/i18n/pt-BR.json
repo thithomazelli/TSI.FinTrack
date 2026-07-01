@@ -228,6 +228,11 @@
     "title": "Poupança",
     "add": "Novo Movimento",
     "balance": "Saldo em Poupança",
+    "balanceHint": "Acumulado de todos os meses",
+    "allTypes": "Todos os tipos",
+    "deposits": "Aportes",
+    "withdrawals": "Resgates",
+    "monthNet": "Saldo do mês",
     "deposit": "Depósito",
     "withdrawal": "Resgate"
   },
@@ -371,7 +376,8 @@
     "all": "Todos",
     "empty": "Nenhuma transação encontrada.",
     "colPurchaseDate": "Data compra",
-    "colCard": "Cartão"
+    "colCard": "Cartão",
+    "byCategory": "Gastos por categoria"
   },
   "recurring": {
     "title": "Recorrentes",

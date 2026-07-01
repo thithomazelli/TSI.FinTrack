@@ -108,3 +108,30 @@ tfoot td {
 .tfoot-total { text-align: right; font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; }
 
 .state-msg { color: var(--color-text-2); text-align: center; padding: 3rem 1rem; }
+
+.pie-card {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.pie-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
+}
+.pie-title { font-size: 1rem; font-weight: 700; color: var(--color-text); margin: 0; }
+.pie-total { font-size: .875rem; font-weight: 600; color: #ef4444; }
+.pie-body { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+.pie-chart-wrap { width: 200px; height: 200px; flex-shrink: 0; }
+.pie-legend {
+  flex: 1; min-width: 200px; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .35rem .75rem;
+  max-height: 200px; overflow-y: auto;
+}
+.pie-legend-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
+.pie-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.pie-legend-name { color: var(--color-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pie-legend-val { margin-left: auto; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 600px) {
+  .pie-body { justify-content: center; }
+  .pie-chart-wrap { width: 160px; height: 160px; }
+}

@@ -21,6 +21,30 @@
     }
   </div>
 
+  <!-- Gráfico por categoria -->
+  @if (categorySpend().length > 0) {
+    <div class="pie-card">
+      <div class="pie-header">
+        <h3 class="pie-title">{{ 'bills.byCategory' | translate }}</h3>
+        <span class="pie-total">{{ 'common.total' | translate }}: R$ {{ total() | number:'1.2-2' }}</span>
+      </div>
+      <div class="pie-body">
+        <div class="pie-chart-wrap">
+          <canvas baseChart [data]="categoryPieData()" [options]="doughnutOptions()" type="doughnut"></canvas>
+        </div>
+        <div class="pie-legend">
+          @for (cat of categorySpend(); track cat.categoryId) {
+            <div class="pie-legend-row">
+              <span class="pie-dot" [style.background]="cat.color"></span>
+              <span class="pie-legend-name">{{ cat.name }}</span>
+              <span class="pie-legend-val">R$ {{ cat.amount | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Tabela de transações -->
   @if (filtered().length === 0) {
     <p class="state-msg">{{ 'bills.empty' | translate }}</p>
