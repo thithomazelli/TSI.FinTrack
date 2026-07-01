@@ -44,7 +44,7 @@
               [class.text-right]="col.numeric"
               (click)="col.sortable ? toggleSort(col.key) : null"
             >
-              {{ col.label }}
+              {{ col.label | translate }}
               @if (col.sortable) {
                 <span class="sort-icon">
                   @if (sortKey() === col.key && sortDir() === 'asc') { ↑ }
@@ -58,7 +58,7 @@
       </thead>
       <tbody>
         @for (item of pageItems(); track item.id) {
-          <tr [class]="rowClass(item)">
+          <tr [class]="rowClass(item)" (click)="onRowClick()?.(item)" [style.cursor]="onRowClick() ? 'pointer' : null">
             <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ $implicit: item }" />
           </tr>
         }

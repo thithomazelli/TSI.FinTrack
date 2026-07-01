@@ -94,9 +94,16 @@ export class MovimentosComponent implements OnInit {
   readonly saving = signal(false);
 
   // Filters
-  readonly filterTipo = signal<'all' | 'entry' | 'transaction'>('all');
-  readonly filterStatus = signal<'all' | 'REALIZED' | 'PROJECTED'>('all');
+  readonly filterTipos      = signal<Set<string>>(new Set());
+  readonly filterStatuses   = signal<Set<string>>(new Set());
   readonly filterCategoryId = signal<string>('');
+  readonly filterCardIds    = signal<Set<string>>(new Set());
+  readonly filterPanelOpen  = signal(false);
+
+  readonly activeFilterCount = computed(() =>
+    this.filterTipos().size + this.filterStatuses().size +
+    (this.filterCategoryId() ? 1 : 0) + this.filterCardIds().size
+  );
 
   // Período: 'month' = mês único, 'range' = intervalo personalizado
   readonly periodMode = signal<'month' | 'range'>('month');
@@ -178,9 +185,13 @@ export class MovimentosComponent implements OnInit {
 
   readonly filteredItems = computed<MovimentoItem[]>(() => {
     return this.allItems().filter(item => {
-      if (this.filterTipo() !== 'all' && item.kind !== this.filterTipo()) return false;
-      if (this.filterStatus() !== 'all' && item.status !== this.filterStatus()) return false;
+      const tipos = this.filterTipos();
+      if (tipos.size > 0 && !tipos.has(item.kind)) return false;
+      const statuses = this.filterStatuses();
+      if (statuses.size > 0 && !statuses.has(item.status)) return false;
       if (this.filterCategoryId() && item.categoryId !== this.filterCategoryId()) return false;
+      const cardIds = this.filterCardIds();
+      if (cardIds.size > 0 && item.kind === 'transaction' && !cardIds.has(item.creditCardId ?? '')) return false;
       return true;
     });
   });
@@ -232,8 +243,30 @@ export class MovimentosComponent implements OnInit {
     status:      (a, b) => a.status.localeCompare(b.status),
   };
 
-  readonly tableRowClassFn: RowClassFn<MovimentoItem> = (item) =>
-    this.isSelected(item.id) ? 'row-selected' : '';
+  readonly tableRowClassFn: RowClassFn<MovimentoItem> = (item) => {
+    const parts: string[] = [];
+    if (item.status === 'PROJECTED') parts.push('row-projected');
+    if (this.isSelected(item.id)) parts.push('row-selected');
+    return parts.join(' ');
+  };
+
+  readonly rowClickFn = (item: MovimentoItem) => this.toggleItem(item.id);
+
+  toggleFilterTipo(kind: string): void {
+    this.filterTipos.update(s => { const n = new Set(s); n.has(kind) ? n.delete(kind) : n.add(kind); return n; });
+  }
+  toggleFilterStatus(status: string): void {
+    this.filterStatuses.update(s => { const n = new Set(s); n.has(status) ? n.delete(status) : n.add(status); return n; });
+  }
+  toggleFilterCard(id: string): void {
+    this.filterCardIds.update(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
+  clearFilters(): void {
+    this.filterTipos.set(new Set());
+    this.filterStatuses.set(new Set());
+    this.filterCategoryId.set('');
+    this.filterCardIds.set(new Set());
+  }
 
   // Bulk actions
   readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | null>(null);

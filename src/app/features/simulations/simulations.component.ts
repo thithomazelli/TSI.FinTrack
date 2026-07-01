@@ -82,9 +82,16 @@ export class SimulationsComponent implements OnInit {
   readonly month = signal(new Date().getMonth() + 1);
 
   // Filters
-  readonly filterTipo = signal<'all' | 'entry' | 'transaction'>('all');
-  readonly filterStatus = signal<'all' | 'REALIZED' | 'PROJECTED'>('all');
+  readonly filterTipos      = signal<Set<string>>(new Set());
+  readonly filterStatuses   = signal<Set<string>>(new Set());
   readonly filterCategoryId = signal<string>('');
+  readonly filterCardIds    = signal<Set<string>>(new Set());
+  readonly filterPanelOpen  = signal(false);
+
+  readonly activeFilterCount = computed(() =>
+    this.filterTipos().size + this.filterStatuses().size +
+    (this.filterCategoryId() ? 1 : 0) + this.filterCardIds().size
+  );
 
   // Overrides: id → {amount?, date?, deleted?}
   readonly overrides = signal<Map<string, SimOverride>>(new Map());
@@ -136,9 +143,13 @@ export class SimulationsComponent implements OnInit {
   // Apply filters on top of simulated items
   readonly filteredItems = computed<SimItem[]>(() =>
     this.simulatedItems().filter(item => {
-      if (this.filterTipo() !== 'all' && item.kind !== this.filterTipo()) return false;
-      if (this.filterStatus() !== 'all' && item.status !== this.filterStatus()) return false;
+      const tipos = this.filterTipos();
+      if (tipos.size > 0 && !tipos.has(item.kind)) return false;
+      const statuses = this.filterStatuses();
+      if (statuses.size > 0 && !statuses.has(item.status)) return false;
       if (this.filterCategoryId() && item.categoryId !== this.filterCategoryId()) return false;
+      const cardIds = this.filterCardIds();
+      if (cardIds.size > 0 && item.kind === 'transaction' && !cardIds.has(item.creditCardId ?? '')) return false;
       return true;
     })
   );
@@ -206,10 +217,29 @@ export class SimulationsComponent implements OnInit {
 
   readonly tableRowClassFn: RowClassFn<SimItem> = (item) => {
     const parts: string[] = [];
+    if (item.status === 'PROJECTED') parts.push('row-projected');
     if (this.isSelected(item.id)) parts.push('row-selected');
     if (this.isModified(item.id)) parts.push('row-modified');
     return parts.join(' ');
   };
+
+  readonly rowClickFn = (item: SimItem) => this.toggleItem(item.id);
+
+  toggleFilterTipo(kind: string): void {
+    this.filterTipos.update(s => { const n = new Set(s); n.has(kind) ? n.delete(kind) : n.add(kind); return n; });
+  }
+  toggleFilterStatus(status: string): void {
+    this.filterStatuses.update(s => { const n = new Set(s); n.has(status) ? n.delete(status) : n.add(status); return n; });
+  }
+  toggleFilterCard(id: string): void {
+    this.filterCardIds.update(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
+  clearFilters(): void {
+    this.filterTipos.set(new Set());
+    this.filterStatuses.set(new Set());
+    this.filterCategoryId.set('');
+    this.filterCardIds.set(new Set());
+  }
 
   isEditing(id: string): boolean { return this.editingId() === id; }
   isModified(id: string): boolean { return this.overrides().has(id) && !this.overrides().get(id)?.deleted; }

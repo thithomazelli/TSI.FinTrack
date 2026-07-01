@@ -327,6 +327,8 @@
     "balance": "Balance",
     "expensesByCategory": "Expenses by category",
     "search": "Search movements...",
+    "filters": "Filters",
+    "clearFilters": "Clear filters",
     "empty": "No movements found.",
     "colType": "Type",
     "colCardAccount": "Card/Account",

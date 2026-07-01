@@ -327,6 +327,8 @@
     "balance": "Saldo",
     "expensesByCategory": "Saídas por categoria",
     "search": "Buscar movimentos...",
+    "filters": "Filtros",
+    "clearFilters": "Limpar filtros",
     "empty": "Nenhum movimento encontrado.",
     "colType": "Tipo",
     "colCardAccount": "Cartão/Conta",

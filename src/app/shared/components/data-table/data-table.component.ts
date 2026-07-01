@@ -48,6 +48,7 @@ export class DataTableComponent implements OnInit {
   readonly defaultPageSize = input<number>(25);
   readonly rowClassFn      = input<RowClassFn | null>(null);
   readonly emptyMsg        = input<string>('Nenhum resultado encontrado.');
+  readonly onRowClick      = input<((item: any) => void) | null>(null);
 
   // ── Content templates ─────────────────────────────────────────────────────
   @ContentChild('row')       rowTpl!: TemplateRef<{ $implicit: any }>;

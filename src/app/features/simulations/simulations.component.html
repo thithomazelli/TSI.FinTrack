@@ -13,39 +13,92 @@
     {{ 'simulations.banner' | translate }}
   </div>
 
-  <!-- Filters -->
+  <!-- Período + Filtros toggle -->
   <div class="filter-bar">
-    <!-- Período -->
     <div class="filter-section filter-section--period">
       <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
     </div>
+    <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      {{ 'movimentos.filters' | translate }}
+      @if (activeFilterCount() > 0) {
+        <span class="filter-badge">{{ activeFilterCount() }}</span>
+      }
+      <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+  </div>
 
-    <!-- Refinos -->
-    <div class="filter-section filter-section--refine">
-      <div class="filter-group">
-        <label class="filter-label">{{ 'common.type' | translate }}</label>
-        <select class="input input-sm" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
-          <option value="all">{{ 'movimentos.allM' | translate }}</option>
-          <option value="entry">{{ 'movimentos.income' | translate }}</option>
-          <option value="transaction">{{ 'movimentos.expenses' | translate }}</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">{{ 'common.status' | translate }}</label>
-        <select class="input input-sm" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
-          <option value="all">{{ 'movimentos.allM' | translate }}</option>
-          <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
-          <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">{{ 'common.category' | translate }}</label>
-        <select class="input input-sm" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
-          <option value="">{{ 'movimentos.allF' | translate }}</option>
-          @for (cat of categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
-          }
-        </select>
+  <!-- Painel de filtros (animado) -->
+  <div class="filter-panel" [class.is-open]="filterPanelOpen()">
+    <div class="filter-panel-inner">
+      <div class="filter-panel-content">
+        <div class="fp-group">
+          <span class="fp-label">{{ 'common.type' | translate }}</span>
+          <div class="fp-checks">
+            <label class="fp-check">
+              <input type="checkbox" [checked]="filterTipos().has('entry')" (change)="toggleFilterTipo('entry')" />
+              <span class="fp-check-box"></span>
+              {{ 'movimentos.income' | translate }}
+            </label>
+            <label class="fp-check">
+              <input type="checkbox" [checked]="filterTipos().has('transaction')" (change)="toggleFilterTipo('transaction')" />
+              <span class="fp-check-box"></span>
+              {{ 'movimentos.expenses' | translate }}
+            </label>
+          </div>
+        </div>
+        <div class="fp-divider"></div>
+        <div class="fp-group">
+          <span class="fp-label">{{ 'common.status' | translate }}</span>
+          <div class="fp-checks">
+            <label class="fp-check">
+              <input type="checkbox" [checked]="filterStatuses().has('REALIZED')" (change)="toggleFilterStatus('REALIZED')" />
+              <span class="fp-check-box"></span>
+              {{ 'movimentos.realized' | translate }}
+            </label>
+            <label class="fp-check">
+              <input type="checkbox" [checked]="filterStatuses().has('PROJECTED')" (change)="toggleFilterStatus('PROJECTED')" />
+              <span class="fp-check-box"></span>
+              {{ 'movimentos.projected' | translate }}
+            </label>
+          </div>
+        </div>
+        <div class="fp-divider"></div>
+        <div class="fp-group">
+          <span class="fp-label">{{ 'common.category' | translate }}</span>
+          <select class="input input-sm fp-select" [ngModel]="filterCategoryId()" (ngModelChange)="filterCategoryId.set($event)">
+            <option value="">{{ 'movimentos.allF' | translate }}</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+        @if (cards().length > 0) {
+          <div class="fp-divider"></div>
+          <div class="fp-group">
+            <span class="fp-label">{{ 'movimentos.creditCard' | translate }}</span>
+            <div class="fp-checks">
+              @for (card of cards(); track card.id) {
+                <label class="fp-check">
+                  <input type="checkbox" [checked]="filterCardIds().has(card.id)" (change)="toggleFilterCard(card.id)" />
+                  <span class="fp-check-box"></span>
+                  {{ card.name }}
+                </label>
+              }
+            </div>
+          </div>
+        }
+        @if (activeFilterCount() > 0) {
+          <div class="fp-divider"></div>
+          <button class="fp-clear" (click)="clearFilters()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            {{ 'movimentos.clearFilters' | translate }}
+          </button>
+        }
       </div>
     </div>
   </div>
@@ -150,6 +203,7 @@
       [searchPlaceholder]="'simulations.search' | translate"
       [sortComparators]="tableSortComparators"
       [rowClassFn]="tableRowClassFn"
+      [onRowClick]="rowClickFn"
       [initialSortKey]="'date'"
       [initialSortDir]="'desc'"
       [emptyMsg]="'simulations.empty' | translate"
@@ -208,7 +262,7 @@
             R$ {{ item.amount | number:'1.2-2' }}
           </td>
           <td>
-            <div class="action-btns">
+            <div class="action-btns" (click)="$event.stopPropagation()">
               <button class="action-btn action-btn--edit" (click)="startEdit(item)" [title]="'simulations.editHint' | translate">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
               </button>
