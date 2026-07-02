@@ -247,13 +247,9 @@
           <td></td>
           <td></td>
           <td class="col-amount text-right">
-            <div class="totals-values">
-              <span class="amount-entrada">+R$&nbsp;{{ gridSumEntradas(items) | number:'1.2-2' }}</span>
-              <span class="amount-saida">-R$&nbsp;{{ gridSumSaidas(items) | number:'1.2-2' }}</span>
-              <span class="totals-net" [class.amount-entrada]="gridNet(items) >= 0" [class.amount-saida]="gridNet(items) < 0">
-                =R$&nbsp;{{ gridNet(items) | number:'1.2-2' }}
-              </span>
-            </div>
+            <span class="totals-net" [class.amount-entrada]="gridNet(items) >= 0" [class.amount-saida]="gridNet(items) < 0">
+              R$&nbsp;{{ gridNet(items) | number:'1.2-2' }}
+            </span>
           </td>
           <td></td>
           <td></td>
