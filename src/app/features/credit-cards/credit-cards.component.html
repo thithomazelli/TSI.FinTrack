@@ -1,129 +1,119 @@
 <div class="page">
   <div class="page-header">
     <h2 class="page-title">{{ 'creditCards.bills' | translate }}</h2>
-    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
   </div>
 
   @if (loading()) {
     <p class="loading-text">{{ 'common.loading' | translate }}</p>
+  } @else if (bills().length === 0) {
+    <p class="no-results">{{ 'common.noResults' | translate }}</p>
   } @else {
-    <div class="bills-list">
-      @for (bill of bills(); track bill.id) {
-        <div class="bill-block" [class.is-closed]="bill.status === BillStatus.Closed" [class.is-paid]="bill.status === BillStatus.Paid">
+    @for (group of monthGroups(); track group.year + '-' + group.month) {
+      <div class="month-group">
+        <h3 class="month-label">{{ group.label }}</h3>
 
-          <!-- Bill header -->
-          <div class="bill-header" (click)="toggleExpand(bill.id)">
-            <div class="bill-header-left">
-              <span class="bill-status-badge" [class]="statusClass(bill.status)">
-                {{ 'creditCards.status.' + bill.status | translate }}
-              </span>
-              <div class="bill-card-info">
-                <span class="bill-card-name">{{ bill.credit_cards?.name ?? bill.creditCardId }}</span>
-                @if (bill.credit_cards?.last_four_digits) {
-                  <span class="bill-card-digits">•••• {{ bill.credit_cards?.last_four_digits }}</span>
-                }
-              </div>
-              @if (bill.status === BillStatus.Closed) {
-                <span class="closed-tag">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                  {{ 'creditCards.billClosed' | translate }}
-                </span>
-              }
-            </div>
-            <div class="bill-header-right">
-              <span class="bill-total">R$ {{ billTotal(bill.creditCardId) | number:'1.2-2' }}</span>
-              <span class="bill-tx-count">{{ billTransactions(bill.creditCardId).length }} {{ 'bills.transactions' | translate }}</span>
-              <svg class="chevron" [class.is-open]="isExpanded(bill.id)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-          </div>
+        <div class="bills-list">
+          @for (bill of group.bills; track bill.id) {
+            <div class="bill-block" [class.is-closed]="bill.status === BillStatus.Closed" [class.is-paid]="bill.status === BillStatus.Paid">
 
-          <!-- Bill actions -->
-          <div class="bill-actions">
-            @if (bill.dueDate) {
-              <span class="bill-due">{{ 'creditCards.dueDay' | translate }}: {{ bill.dueDate | slice:0:10 }}</span>
-            }
-            <button
-              class="btn btn-sm"
-              [class.btn-ghost]="bill.status !== BillStatus.Closed"
-              [class.btn-success]="bill.status === BillStatus.Closed"
-              [disabled]="updatingId() === bill.id"
-              (click)="updateStatus(bill, nextStatus(bill.status))"
-            >
-              {{ nextStatusLabel(bill.status) | translate }}
-            </button>
-          </div>
-
-          <!-- Transaction list (expandable) -->
-          <div class="bill-txs" [class.is-open]="isExpanded(bill.id)">
-            <div class="bill-txs-inner">
-              @if (billTransactions(bill.creditCardId).length === 0) {
-                <p class="no-tx">{{ 'bills.empty' | translate }}</p>
-              } @else {
-                <table class="tx-table">
-                  <thead>
-                    <tr>
-                      <th>{{ 'bills.colPurchaseDate' | translate }}</th>
-                      <th>{{ 'common.description' | translate }}</th>
-                      <th>{{ 'common.category' | translate }}</th>
-                      <th class="th-right">{{ 'common.amount' | translate }}</th>
-                      <th class="th-right">{{ 'common.status' | translate }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (tx of billTransactions(bill.creditCardId); track tx.id) {
-                      <tr>
-                        <td class="td-date">{{ tx.date | date:'dd/MM' }}</td>
-                        <td class="td-desc">
-                          {{ tx.description }}
-                          @if (tx.installmentNumber && tx.totalInstallments) {
-                            <span class="installment-badge">{{ tx.installmentNumber }}/{{ tx.totalInstallments }}</span>
-                          }
-                        </td>
-                        <td>
-                          <span class="cat-cell">
-                            <span class="cat-dot" [style.background]="categoryColor(tx.categoryId)"></span>
-                            {{ categoryName(tx.categoryId) }}
-                          </span>
-                        </td>
-                        <td class="td-amount">R$ {{ tx.amount | number:'1.2-2' }}</td>
-                        <td class="td-status">
-                          <span class="status-badge" [class.status-badge--realized]="tx.status === 'REALIZED'" [class.status-badge--projected]="tx.status === 'PROJECTED'">
-                            {{ (tx.status === 'REALIZED' ? 'movimentos.realized' : 'movimentos.projected') | translate }}
-                          </span>
-                        </td>
-                      </tr>
+              <!-- Bill header -->
+              <div class="bill-header" (click)="toggleExpand(bill.id)">
+                <div class="bill-header-left">
+                  <span class="bill-status-badge" [class]="statusClass(bill.status)">
+                    {{ 'creditCards.status.' + bill.status | translate }}
+                  </span>
+                  <div class="bill-card-info">
+                    <span class="bill-card-name">{{ bill.credit_cards?.name ?? bill.creditCardId }}</span>
+                    @if (bill.credit_cards?.last_four_digits) {
+                      <span class="bill-card-digits">•••• {{ bill.credit_cards?.last_four_digits }}</span>
                     }
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colspan="3" class="tfoot-label">{{ 'common.total' | translate }}</td>
-                      <td class="tfoot-total">R$ {{ billTotal(bill.creditCardId) | number:'1.2-2' }}</td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              }
-            </div>
-          </div>
-        </div>
-      }
-    </div>
+                  </div>
+                  @if (bill.status === BillStatus.Closed) {
+                    <span class="closed-tag">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                      {{ 'creditCards.billClosed' | translate }}
+                    </span>
+                  }
+                </div>
+                <div class="bill-header-right">
+                  <span class="bill-total">R$ {{ billTotal(bill) | number:'1.2-2' }}</span>
+                  <span class="bill-tx-count">{{ billTransactions(bill).length }} {{ 'bills.transactions' | translate }}</span>
+                  <svg class="chevron" [class.is-open]="isExpanded(bill.id)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
 
-    @if (cardsWithoutBill().length > 0) {
-      <div class="add-bill-section">
-        <p class="add-bill-hint">{{ 'creditCards.addBillHint' | translate }}</p>
-        <div class="add-bill-cards">
-          @for (card of cardsWithoutBill(); track card.id) {
-            <button class="btn btn-ghost btn-sm" (click)="createBillForCard(card)">
-              + {{ card.name }} (•••• {{ card.lastFourDigits }})
-            </button>
+              <!-- Bill actions -->
+              <div class="bill-actions">
+                @if (bill.dueDate) {
+                  <span class="bill-due">{{ 'creditCards.dueDay' | translate }}: {{ bill.dueDate | slice:0:10 }}</span>
+                }
+                <button
+                  class="btn btn-sm"
+                  [class.btn-ghost]="bill.status !== BillStatus.Closed"
+                  [class.btn-success]="bill.status === BillStatus.Closed"
+                  [disabled]="updatingId() === bill.id"
+                  (click)="updateStatus(bill, nextStatus(bill.status))"
+                >
+                  {{ nextStatusLabel(bill.status) | translate }}
+                </button>
+              </div>
+
+              <!-- Transaction list (expandable) -->
+              <div class="bill-txs" [class.is-open]="isExpanded(bill.id)">
+                <div class="bill-txs-inner">
+                  @if (billTransactions(bill).length === 0) {
+                    <p class="no-tx">{{ 'bills.empty' | translate }}</p>
+                  } @else {
+                    <table class="tx-table">
+                      <thead>
+                        <tr>
+                          <th>{{ 'bills.colPurchaseDate' | translate }}</th>
+                          <th>{{ 'common.description' | translate }}</th>
+                          <th>{{ 'common.category' | translate }}</th>
+                          <th class="th-right">{{ 'common.amount' | translate }}</th>
+                          <th class="th-right">{{ 'common.status' | translate }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (tx of billTransactions(bill); track tx.id) {
+                          <tr>
+                            <td class="td-date">{{ tx.date | date:'dd/MM' }}</td>
+                            <td class="td-desc">
+                              {{ tx.description }}
+                              @if (tx.installmentNumber && tx.totalInstallments) {
+                                <span class="installment-badge">{{ tx.installmentNumber }}/{{ tx.totalInstallments }}</span>
+                              }
+                            </td>
+                            <td>
+                              <span class="cat-cell">
+                                <span class="cat-dot" [style.background]="categoryColor(tx.categoryId)"></span>
+                                {{ categoryName(tx.categoryId) }}
+                              </span>
+                            </td>
+                            <td class="td-amount">R$ {{ tx.amount | number:'1.2-2' }}</td>
+                            <td class="td-status">
+                              <span class="status-badge" [class.status-badge--realized]="tx.status === 'REALIZED'" [class.status-badge--projected]="tx.status === 'PROJECTED'">
+                                {{ (tx.status === 'REALIZED' ? 'movimentos.realized' : 'movimentos.projected') | translate }}
+                              </span>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td colspan="3" class="tfoot-label">{{ 'common.total' | translate }}</td>
+                          <td class="tfoot-total">R$ {{ billTotal(bill) | number:'1.2-2' }}</td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  }
+                </div>
+              </div>
+            </div>
           }
         </div>
       </div>
-    }
-
-    @if (bills().length === 0 && cardsWithoutBill().length === 0) {
-      <p class="no-results">{{ 'common.noResults' | translate }}</p>
     }
   }
 </div>

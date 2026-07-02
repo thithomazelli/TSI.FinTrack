@@ -22,28 +22,34 @@ import { Transaction } from '../../core/models/interfaces/transaction.interface'
 import { Category } from '../../core/models/interfaces/category.interface';
 import { BillStatus } from '../../core/models/enums/bill-status.enum';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
-import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 
 interface BillWithCard extends CreditCardBill {
   credit_cards?: { name: string; last_four_digits: string };
 }
 
+interface MonthGroup {
+  year: number;
+  month: number;
+  label: string;
+  bills: BillWithCard[];
+}
+
 @Component({
   selector: 'tsi-credit-cards',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe, MonthPickerComponent],
+  imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe],
   templateUrl: './credit-cards.component.html',
   styleUrls: ['./credit-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreditCardsComponent implements OnInit {
-  private readonly billService    = inject(CreditCardBillService);
-  private readonly cardService    = inject(CreditCardService);
-  private readonly txService      = inject(TransactionService);
+  private readonly billService     = inject(CreditCardBillService);
+  private readonly cardService     = inject(CreditCardService);
+  private readonly txService       = inject(TransactionService);
   private readonly categoryService = inject(CategoryService);
-  private readonly balanceService = inject(BalanceService);
-  private readonly logger         = inject(LoggingService);
-  private readonly toast          = inject(ToastService);
+  private readonly balanceService  = inject(BalanceService);
+  private readonly logger          = inject(LoggingService);
+  private readonly toast           = inject(ToastService);
 
   readonly BillStatus = BillStatus;
 
@@ -55,20 +61,33 @@ export class CreditCardsComponent implements OnInit {
   readonly updatingId   = signal<string | null>(null);
   readonly expandedBillIds = signal<Set<string>>(new Set());
 
-  readonly year  = signal(new Date().getFullYear());
-  readonly month = signal(new Date().getMonth() + 1);
-
-  readonly cardsWithoutBill = computed(() => {
-    const billCardIds = new Set(this.bills().map(b => b.creditCardId));
-    return this.cards().filter(c => !billCardIds.has(c.id));
+  readonly monthGroups = computed<MonthGroup[]>(() => {
+    const bills = this.bills();
+    const map = new Map<string, BillWithCard[]>();
+    for (const b of bills) {
+      const key = `${b.year}-${b.month}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(b);
+    }
+    return [...map.entries()].map(([, bills]) => {
+      const { year, month } = bills[0];
+      const date = new Date(year, month - 1, 1);
+      const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      return { year, month, label: label.charAt(0).toUpperCase() + label.slice(1), bills };
+    });
   });
 
-  billTransactions(cardId: string): Transaction[] {
-    return this.transactions().filter(t => t.creditCardId === cardId);
+  billTransactions(bill: BillWithCard): Transaction[] {
+    const startDate = `${bill.year}-${String(bill.month).padStart(2, '0')}-01`;
+    const endDate   = new Date(bill.year, bill.month, 0).toISOString().split('T')[0];
+    return this.transactions().filter(t =>
+      t.creditCardId === bill.creditCardId &&
+      t.date >= startDate && t.date <= endDate
+    );
   }
 
-  billTotal(cardId: string): number {
-    return this.billTransactions(cardId).reduce((s, t) => s + t.amount, 0);
+  billTotal(bill: BillWithCard): number {
+    return this.billTransactions(bill).reduce((s, t) => s + t.amount, 0);
   }
 
   categoryName(id: string | null | undefined): string {
@@ -82,38 +101,26 @@ export class CreditCardsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loading.set(true);
     forkJoin({
       cards: this.cardService.getAll(false),
       cats:  this.categoryService.getAll(),
+      bills: this.billService.getAll(),
+      txs:   this.txService.getAllCreditCard(),
     }).subscribe({
-      next: ({ cards, cats }) => { this.cards.set(cards); this.categories.set(cats); },
-      error: err => this.logger.error('Failed to load cards/cats', err),
-    });
-    this.loadAll();
-  }
-
-  onMonthChanged(event: { year: number; month: number }): void {
-    this.year.set(event.year);
-    this.month.set(event.month);
-    this.expandedBillIds.set(new Set());
-    this.loadAll();
-  }
-
-  private loadAll(): void {
-    this.loading.set(true);
-    const y = this.year(), m = this.month();
-    forkJoin({
-      bills: this.billService.getByMonth(y, m),
-      txs:   this.txService.getByMonth({ year: y, month: m }),
-    }).subscribe({
-      next: ({ bills, txs }) => {
-        const cardTxs = txs.filter(t => !!t.creditCardId);
+      next: ({ cards, cats, bills, txs }) => {
+        this.cards.set(cards);
+        this.categories.set(cats);
         this.bills.set(bills as BillWithCard[]);
-        this.transactions.set(cardTxs);
+        this.transactions.set(txs);
         // Auto-expand bills that have transactions
         const withTx = new Set(
           (bills as BillWithCard[])
-            .filter(b => cardTxs.some(t => t.creditCardId === b.creditCardId))
+            .filter(b => txs.some(t => {
+              const start = `${b.year}-${String(b.month).padStart(2, '0')}-01`;
+              const end   = new Date(b.year, b.month, 0).toISOString().split('T')[0];
+              return t.creditCardId === b.creditCardId && t.date >= start && t.date <= end;
+            }))
             .map(b => b.id)
         );
         this.expandedBillIds.set(withTx);
@@ -142,20 +149,21 @@ export class CreditCardsComponent implements OnInit {
       next: updated => {
         this.bills.update(list => list.map(b => b.id === updated.id ? { ...b, ...updated } : b));
 
-        // Bulk-update transaction statuses
-        const txStatus = status === BillStatus.Paid   ? TransactionStatus.Realized
-                       : status === BillStatus.Open   ? TransactionStatus.Projected
+        const txStatus = status === BillStatus.Paid  ? TransactionStatus.Realized
+                       : status === BillStatus.Open  ? TransactionStatus.Projected
                        : null;
 
         if (txStatus && bill.creditCardId) {
           this.txService.bulkUpdateStatusByCardMonth(
-            bill.creditCardId, this.year(), this.month(), txStatus
+            bill.creditCardId, bill.year, bill.month, txStatus
           ).subscribe({
             next: () => {
-              // refresh local transactions
+              const start = `${bill.year}-${String(bill.month).padStart(2, '0')}-01`;
+              const end   = new Date(bill.year, bill.month, 0).toISOString().split('T')[0];
               this.transactions.update(list =>
                 list.map(t =>
-                  t.creditCardId === bill.creditCardId ? { ...t, status: txStatus } : t
+                  t.creditCardId === bill.creditCardId && t.date >= start && t.date <= end
+                    ? { ...t, status: txStatus } : t
                 )
               );
               this.balanceService.invalidate();
@@ -172,22 +180,6 @@ export class CreditCardsComponent implements OnInit {
         this.updatingId.set(null);
         this.toast.error('Erro ao atualizar status da fatura.');
       },
-    });
-  }
-
-  createBillForCard(card: CreditCard): void {
-    this.billService.upsert({ creditCardId: card.id, year: this.year(), month: this.month() }).subscribe({
-      next: bill => {
-        const exists = this.bills().some(b => b.id === bill.id);
-        if (!exists) {
-          const billWithCard: BillWithCard = {
-            ...(bill as BillWithCard),
-            credit_cards: { name: card.name, last_four_digits: card.lastFourDigits },
-          };
-          this.bills.update(list => [...list, billWithCard]);
-        }
-      },
-      error: err => this.logger.error('Failed to create bill', err),
     });
   }
 

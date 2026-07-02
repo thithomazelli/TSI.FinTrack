@@ -35,6 +35,23 @@ export class CreditCardBillService {
     );
   }
 
+  getAll(): Observable<CreditCardBill[]> {
+    this.logger.debug('Fetching all bills');
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .select('*, credit_cards(name, last_four_digits)')
+        .eq('owner_id', this.ownerId)
+        .order('year', { ascending: false })
+        .order('month', { ascending: false })
+        .order('created_at')
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []).map((r: any) => this.toModel(r));
+        })
+    );
+  }
+
   private toModel(r: any): CreditCardBill & { credit_cards?: { name: string; last_four_digits: string } } {
     return {
       id: r.id,

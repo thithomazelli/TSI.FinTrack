@@ -157,6 +157,21 @@ export class TransactionService {
     );
   }
 
+  getAllCreditCard(): Observable<Transaction[]> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .select('*')
+        .eq('owner_id', this.ownerId)
+        .not('credit_card_id', 'is', null)
+        .order('date', { ascending: false })
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []).map((r: any) => this.toModel(r));
+        })
+    );
+  }
+
   bulkUpdateStatusByCardMonth(creditCardId: string, year: number, month: number, status: TransactionStatus): Observable<void> {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
     const endDate = new Date(year, month, 0).toISOString().split('T')[0];
