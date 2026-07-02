@@ -411,7 +411,8 @@ body {
     }
   }
 
-  &.form-field--sm { max-width: 160px; }
+  &.form-field--sm   { max-width: 160px; }
+  &.form-field--date { max-width: 180px; flex: 0 0 auto; }
 }
 
 .form-row {

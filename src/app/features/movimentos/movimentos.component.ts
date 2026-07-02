@@ -30,6 +30,7 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
+import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
 import { DataTableComponent, TableColumn, SearchFn, CompareFn, RowClassFn } from '../../shared/components/data-table/data-table.component';
@@ -56,7 +57,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 @Component({
   selector: 'tsi-movimentos',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, BalanceCardComponent, DataTableComponent],
+  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, BalanceCardComponent, DataTableComponent, CurrencyMaskDirective],
   templateUrl: './movimentos.component.html',
   styleUrls: ['./movimentos.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
