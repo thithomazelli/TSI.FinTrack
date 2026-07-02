@@ -89,10 +89,6 @@ export class CreditCardsComponent implements OnInit {
       next: ({ cards, cats }) => { this.cards.set(cards); this.categories.set(cats); },
       error: err => this.logger.error('Failed to load cards/cats', err),
     });
-    // Mark all non-paid bills up to June 2026 as Paid (historical data)
-    this.billService.settleHistoricalBills(2026, 6, BillStatus.Paid).subscribe({
-      error: err => this.logger.warn('settleHistoricalBills failed', err),
-    });
     this.loadAll();
   }
 
