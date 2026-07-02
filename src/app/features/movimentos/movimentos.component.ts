@@ -240,7 +240,11 @@ export class MovimentosComponent implements OnInit {
     date:        (a, b) => a.date.localeCompare(b.date),
     description: (a, b) => a.description.localeCompare(b.description, 'pt-BR'),
     amount:      (a, b) => a.amount - b.amount,
-    status:      (a, b) => a.status.localeCompare(b.status),
+    status: (a, b) => {
+      const sv = (s: string) => s === 'REALIZED' ? 0 : 1;
+      const sd = sv(a.status) - sv(b.status);
+      return sd !== 0 ? sd : a.date.localeCompare(b.date);
+    },
   };
 
   readonly tableRowClassFn: RowClassFn<MovimentoItem> = (item) => {
