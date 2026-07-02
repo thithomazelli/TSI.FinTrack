@@ -90,6 +90,19 @@ export class CreditCardBillService {
     );
   }
 
+  /** Mark all OPEN bills up to (and including) the given year/month as CLOSED. */
+  closeHistoricalBills(upToYear: number, upToMonth: number): Observable<void> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update({ status: BillStatus.Closed, updated_at: new Date().toISOString() })
+        .eq('owner_id', this.ownerId)
+        .eq('status', BillStatus.Open)
+        .or(`year.lt.${upToYear},and(year.eq.${upToYear},month.lte.${upToMonth})`)
+        .then(({ error }) => { if (error) throw error; })
+    );
+  }
+
   updateStatus(id: string, status: BillStatus): Observable<CreditCardBill> {
     this.logger.info('Updating bill status', id, status);
     return from(

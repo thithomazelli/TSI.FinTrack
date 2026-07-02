@@ -114,6 +114,8 @@
     "closingDay": "Closing day",
     "dueDay": "Due day",
     "archiveCard": "Archive card",
+    "disableCard": "Disable",
+    "enableCard": "Enable",
     "domainsSubtitle": "Manage the domain values used in the system.",
     "all": "All",
     "code": "Code",

@@ -159,4 +159,18 @@ export class CreditCardsSettingsComponent implements OnInit {
       },
     });
   }
+
+  toggleActive(card: CreditCard): void {
+    const newActive = !card.isActive;
+    this.cardService.toggleActive(card.id, newActive).subscribe({
+      next: updated => {
+        this.cards.update(list => list.map(c => c.id === updated.id ? updated : c));
+        this.toast.success(newActive ? 'Cartão habilitado.' : 'Cartão desabilitado.');
+      },
+      error: err => {
+        this.logger.error('Failed to toggle card active state', err);
+        this.toast.error('Erro ao atualizar cartão.');
+      },
+    });
+  }
 }

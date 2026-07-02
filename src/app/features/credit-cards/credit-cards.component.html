@@ -33,7 +33,7 @@
             <div class="bill-header-right">
               <span class="bill-total">R$ {{ billTotal(bill.creditCardId) | number:'1.2-2' }}</span>
               <span class="bill-tx-count">{{ billTransactions(bill.creditCardId).length }} {{ 'bills.transactions' | translate }}</span>
-              <svg class="chevron" [class.is-open]="expandedBillId() === bill.id" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg class="chevron" [class.is-open]="isExpanded(bill.id)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
 
@@ -54,7 +54,7 @@
           </div>
 
           <!-- Transaction list (expandable) -->
-          <div class="bill-txs" [class.is-open]="expandedBillId() === bill.id">
+          <div class="bill-txs" [class.is-open]="isExpanded(bill.id)">
             <div class="bill-txs-inner">
               @if (billTransactions(bill.creditCardId).length === 0) {
                 <p class="no-tx">{{ 'bills.empty' | translate }}</p>

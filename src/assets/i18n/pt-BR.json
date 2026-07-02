@@ -114,6 +114,8 @@
     "closingDay": "Dia de fechamento",
     "dueDay": "Dia de vencimento",
     "archiveCard": "Arquivar cartão",
+    "disableCard": "Desabilitar",
+    "enableCard": "Habilitar",
     "domainsSubtitle": "Gerencie os valores de domínio utilizados no sistema.",
     "all": "Todos",
     "code": "Código",

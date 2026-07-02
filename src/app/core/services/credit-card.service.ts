@@ -30,12 +30,12 @@ export class CreditCardService {
     return from(
       query.then(({ data, error }) => {
         if (error) throw error;
-        return (data ?? []) as CreditCard[];
+        return (data ?? []).map((r: any) => this.toModel(r));
       })
     );
   }
 
-  create(payload: Omit<CreditCard, 'id' | 'ownerId' | 'isArchived' | 'createdAt' | 'updatedAt'>): Observable<CreditCard> {
+  create(payload: Omit<CreditCard, 'id' | 'ownerId' | 'isArchived' | 'isActive' | 'createdAt' | 'updatedAt'>): Observable<CreditCard> {
     this.logger.info('Creating credit card', payload.name);
     return from(
       this.supabase.client
@@ -52,12 +52,12 @@ export class CreditCardService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as CreditCard;
+          return this.toModel(data);
         })
     );
   }
 
-  update(id: string, payload: Partial<Omit<CreditCard, 'id' | 'ownerId' | 'isArchived' | 'createdAt' | 'updatedAt'>>): Observable<CreditCard> {
+  update(id: string, payload: Partial<Omit<CreditCard, 'id' | 'ownerId' | 'isArchived' | 'isActive' | 'createdAt' | 'updatedAt'>>): Observable<CreditCard> {
     this.logger.info('Updating credit card', id);
     return from(
       this.supabase.client
@@ -76,7 +76,23 @@ export class CreditCardService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as CreditCard;
+          return this.toModel(data);
+        })
+    );
+  }
+
+  toggleActive(id: string, active: boolean): Observable<CreditCard> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update({ is_archived: !active, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .select()
+        .single()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return this.toModel(data);
         })
     );
   }
@@ -88,9 +104,7 @@ export class CreditCardService {
         .update({ is_archived: true, updated_at: new Date().toISOString() })
         .eq('id', id)
         .eq('owner_id', this.ownerId)
-        .then(({ error }) => {
-          if (error) throw error;
-        })
+        .then(({ error }) => { if (error) throw error; })
     );
   }
 
@@ -101,9 +115,23 @@ export class CreditCardService {
         .update({ is_archived: false, updated_at: new Date().toISOString() })
         .eq('id', id)
         .eq('owner_id', this.ownerId)
-        .then(({ error }) => {
-          if (error) throw error;
-        })
+        .then(({ error }) => { if (error) throw error; })
     );
+  }
+
+  private toModel(r: any): CreditCard {
+    return {
+      id: r.id,
+      ownerId: r.owner_id,
+      name: r.name,
+      lastFourDigits: r.last_four_digits ?? '',
+      creditLimit: r.credit_limit ?? 0,
+      closingDay: r.closing_day ?? 1,
+      dueDay: r.due_day ?? 1,
+      isArchived: r.is_archived ?? false,
+      isActive: !(r.is_archived ?? false),
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    };
   }
 }

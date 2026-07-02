@@ -7,6 +7,7 @@ export interface CreditCard {
   closingDay: number;
   dueDay: number;
   isArchived: boolean;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }

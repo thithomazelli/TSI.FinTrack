@@ -53,7 +53,7 @@ export class CreditCardsComponent implements OnInit {
   readonly categories   = signal<Category[]>([]);
   readonly loading      = signal(false);
   readonly updatingId   = signal<string | null>(null);
-  readonly expandedBillId = signal<string | null>(null);
+  readonly expandedBillIds = signal<Set<string>>(new Set());
 
   readonly year  = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
@@ -89,13 +89,17 @@ export class CreditCardsComponent implements OnInit {
       next: ({ cards, cats }) => { this.cards.set(cards); this.categories.set(cats); },
       error: err => this.logger.error('Failed to load cards/cats', err),
     });
+    // Close all OPEN bills up to June 2026 (historical data)
+    this.billService.closeHistoricalBills(2026, 6).subscribe({
+      error: err => this.logger.warn('closeHistoricalBills failed', err),
+    });
     this.loadAll();
   }
 
   onMonthChanged(event: { year: number; month: number }): void {
     this.year.set(event.year);
     this.month.set(event.month);
-    this.expandedBillId.set(null);
+    this.expandedBillIds.set(new Set());
     this.loadAll();
   }
 
@@ -107,16 +111,32 @@ export class CreditCardsComponent implements OnInit {
       txs:   this.txService.getByMonth({ year: y, month: m }),
     }).subscribe({
       next: ({ bills, txs }) => {
+        const cardTxs = txs.filter(t => !!t.creditCardId);
         this.bills.set(bills as BillWithCard[]);
-        this.transactions.set(txs.filter(t => !!t.creditCardId));
+        this.transactions.set(cardTxs);
+        // Auto-expand bills that have transactions
+        const withTx = new Set(
+          (bills as BillWithCard[])
+            .filter(b => cardTxs.some(t => t.creditCardId === b.creditCardId))
+            .map(b => b.id)
+        );
+        this.expandedBillIds.set(withTx);
         this.loading.set(false);
       },
       error: err => { this.logger.error('Failed to load', err); this.loading.set(false); },
     });
   }
 
+  isExpanded(billId: string): boolean {
+    return this.expandedBillIds().has(billId);
+  }
+
   toggleExpand(billId: string): void {
-    this.expandedBillId.update(id => id === billId ? null : billId);
+    this.expandedBillIds.update(set => {
+      const next = new Set(set);
+      next.has(billId) ? next.delete(billId) : next.add(billId);
+      return next;
+    });
   }
 
   updateStatus(bill: BillWithCard, status: BillStatus): void {
