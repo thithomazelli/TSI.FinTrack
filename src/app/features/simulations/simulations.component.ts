@@ -79,13 +79,22 @@ export class SimulationsComponent implements OnInit {
   readonly applying = signal(false);
 
   // Period
+  readonly periodMode = signal<'month' | 'range'>('month');
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
-  readonly dateTo = computed(() => {
-    const y = this.year(), m = this.month();
-    const last = new Date(y, m, 0).getDate();
-    return `${y}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
-  });
+
+  private defaultFrom(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  }
+  private defaultTo(): string {
+    const now = new Date();
+    const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return last.toISOString().split('T')[0];
+  }
+
+  readonly dateFrom = signal<string>(this.defaultFrom());
+  readonly dateTo = signal<string>(this.defaultTo());
 
   // Filters
   readonly filterTipos      = signal<Set<string>>(new Set());
@@ -271,9 +280,30 @@ export class SimulationsComponent implements OnInit {
     this.load();
   }
 
+  setPeriodMode(mode: 'month' | 'range'): void {
+    this.periodMode.set(mode);
+    if (mode === 'month') {
+      this.applyMonth(this.year(), this.month());
+    }
+  }
+
   onMonthChanged(e: { year: number; month: number }): void {
     this.year.set(e.year);
     this.month.set(e.month);
+    this.applyMonth(e.year, e.month);
+  }
+
+  private applyMonth(year: number, month: number): void {
+    const from = `${year}-${String(month).padStart(2, '0')}-01`;
+    const last = new Date(year, month, 0).getDate();
+    const to = `${year}-${String(month).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+    this.dateFrom.set(from);
+    this.dateTo.set(to);
+    this.resetSim();
+    this.load();
+  }
+
+  onDateChange(): void {
     this.resetSim();
     this.load();
   }
@@ -281,10 +311,8 @@ export class SimulationsComponent implements OnInit {
   async load(): Promise<void> {
     this.loading.set(true);
     const uid = this.auth.currentUser!.id;
-    const y = this.year(), m = this.month();
-    const from = `${y}-${String(m).padStart(2, '0')}-01`;
-    const last = new Date(y, m, 0).getDate();
-    const to = `${y}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+    const from = this.dateFrom();
+    const to = this.dateTo();
     try {
       const [eRes, tRes] = await Promise.all([
         this.supabase.client.from('entries').select('*').eq('owner_id', uid).gte('date', from).lte('date', to).order('date', { ascending: false }),
