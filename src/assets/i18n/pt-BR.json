@@ -47,7 +47,10 @@
     "creditCard": "Cartão de Crédito",
     "dismiss": "Dispensar",
     "saving": "Salvando...",
-    "email": "E-mail"
+    "email": "E-mail",
+    "confirmDeleteTitle": "Confirmar exclusão",
+    "confirmDeleteMsg": "Deseja excluir \"{{ name }}\"? Esta ação não pode ser desfeita.",
+    "confirmDeleteSimple": "Deseja excluir este registro? Esta ação não pode ser desfeita."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -354,7 +357,8 @@
       "txUpdateError": "Erro ao atualizar transação.",
       "txCreateError": "Erro ao criar transação.",
       "deleted": "Registro excluído.",
-      "deleteError": "Erro ao excluir."
+      "deleteError": "Erro ao excluir.",
+      "statusUpdated": "Status atualizado com sucesso."
     },
     "currentBalance": "Saldo Atual",
     "currentBalanceHint": "acumulado, todos os meses",
@@ -371,8 +375,12 @@
       "editAmountTitle": "Editar valor em massa",
       "editAmountMsg": "Aplicar novo valor em {{count}} registro(s):",
       "moveTitle": "Mover para outro mês",
-      "moveMsg": "Mover {{count}} registro(s) para:"
-    }
+      "moveMsg": "Mover {{count}} registro(s) para:",
+      "toggleStatus": "Alternar status",
+      "confirmToggleStatus": "Alternar status",
+      "confirmToggleStatusMsg": "Alternar status de {{ count }} registro(s)? Realizado ↔ Projetado."
+    },
+    "toggleStatusHint": "Duplo clique para alternar status"
   },
   "bills": {
     "title": "Faturas",

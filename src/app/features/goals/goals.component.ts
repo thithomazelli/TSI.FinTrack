@@ -51,6 +51,7 @@ export class GoalsComponent implements OnInit {
   readonly saving = signal(false);
   readonly showForm = signal(false);
   readonly editingId = signal<string | null>(null);
+  readonly deletingGoalId = signal<string | null>(null);
 
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
@@ -174,14 +175,21 @@ export class GoalsComponent implements OnInit {
   }
 
   deleteGoal(id: string): void {
-    if (!confirm('')) return;
+    this.deletingGoalId.set(id);
+  }
+
+  confirmDeleteGoal(): void {
+    const id = this.deletingGoalId();
+    if (!id) return;
     this.goalService.delete(id).subscribe({
       next: () => {
         this.goals.update((list) => list.filter((g) => g.id !== id));
+        this.deletingGoalId.set(null);
         this.toast.success('Meta excluída.');
       },
       error: (err) => {
         this.logger.error('Failed to delete goal', err);
+        this.deletingGoalId.set(null);
         this.toast.error('Erro ao excluir meta.');
       },
     });

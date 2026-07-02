@@ -106,6 +106,18 @@
   }
 </div>
 
+@if (deletingId()) {
+  <div class="modal-backdrop" (click)="deletingId.set(null)"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <p class="modal-text">{{ 'common.confirmDeleteSimple' | translate }}</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="deletingId.set(null)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-danger" (click)="confirmDeleteMovement()">{{ 'common.delete' | translate }}</button>
+    </div>
+  </div>
+}
+
 @if (showForm()) {
   <div class="modal-backdrop" (click)="closeForm()">
     <div class="modal modal--sm" (click)="$event.stopPropagation()">

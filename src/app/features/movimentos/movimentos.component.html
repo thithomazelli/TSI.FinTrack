@@ -99,6 +99,10 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           {{ 'movimentos.bulk.editAmount' | translate }}
         </button>
+        <button class="bulk-btn bulk-btn--status" (click)="openBulkAction('status')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          {{ 'movimentos.bulk.toggleStatus' | translate }}
+        </button>
         <button class="bulk-btn bulk-btn--delete" (click)="openBulkAction('delete')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
           {{ 'movimentos.bulk.delete' | translate }}
@@ -274,7 +278,12 @@
           R$ {{ item.amount | number:'1.2-2' }}
         </td>
         <td>
-          <span class="status-pill" [class.status-pill--realized]="item.status === 'REALIZED'" [class.status-pill--projected]="item.status === 'PROJECTED'">
+          <span class="status-pill"
+            [class.status-pill--realized]="item.status === 'REALIZED'"
+            [class.status-pill--projected]="item.status === 'PROJECTED'"
+            [title]="'movimentos.toggleStatusHint' | translate"
+            style="cursor:pointer"
+            (dblclick)="toggleStatus(item); $event.stopPropagation()">
             {{ (item.status === 'REALIZED' ? 'movimentos.realized' : 'movimentos.projected') | translate }}
           </span>
         </td>
@@ -286,7 +295,7 @@
               </svg>
               {{ 'common.edit' | translate }}
             </button>
-            <button class="action-btn action-btn--delete" (click)="delete(item)">
+            <button class="action-btn action-btn--delete" (click)="delete(item); $event.stopPropagation()">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
               </svg>
@@ -299,6 +308,19 @@
   }
 </div>
 
+<!-- Single delete confirm modal -->
+@if (deletingItem()) {
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <p class="modal-text">{{ 'common.confirmDeleteMsg' | translate: { name: deletingItem()!.description } }}</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cancelDelete()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-danger" (click)="confirmDelete()">{{ 'common.delete' | translate }}</button>
+    </div>
+  </div>
+}
+
 <!-- Bulk delete confirm modal -->
 @if (bulkActionOpen() === 'delete') {
   <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
@@ -309,6 +331,21 @@
       <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-danger" (click)="bulkDelete()" [disabled]="bulkSaving()">
         {{ bulkSaving() ? ('common.saving' | translate) : ('common.delete' | translate) }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Bulk toggle status confirm modal -->
+@if (bulkActionOpen() === 'status') {
+  <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'movimentos.bulk.confirmToggleStatus' | translate }}</h3>
+    <p class="modal-text">{{ 'movimentos.bulk.confirmToggleStatusMsg' | translate: { count: selectionCount() } }}</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="bulkToggleStatus()" [disabled]="bulkSaving()">
+        {{ bulkSaving() ? ('common.saving' | translate) : ('movimentos.bulk.toggleStatus' | translate) }}
       </button>
     </div>
   </div>

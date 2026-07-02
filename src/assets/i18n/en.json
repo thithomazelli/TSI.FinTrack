@@ -47,7 +47,10 @@
     "creditCard": "Credit Card",
     "dismiss": "Dismiss",
     "saving": "Saving...",
-    "email": "Email"
+    "email": "Email",
+    "confirmDeleteTitle": "Confirm deletion",
+    "confirmDeleteMsg": "Delete \"{{ name }}\"? This action cannot be undone.",
+    "confirmDeleteSimple": "Delete this record? This action cannot be undone."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -354,7 +357,8 @@
       "txUpdateError": "Failed to update expense.",
       "txCreateError": "Failed to create expense.",
       "deleted": "Record deleted.",
-      "deleteError": "Failed to delete."
+      "deleteError": "Failed to delete.",
+      "statusUpdated": "Status updated successfully."
     },
     "currentBalance": "Current Balance",
     "currentBalanceHint": "cumulative, all months",
@@ -371,8 +375,12 @@
       "editAmountTitle": "Bulk edit amount",
       "editAmountMsg": "Apply new amount to {{count}} record(s):",
       "moveTitle": "Move to another month",
-      "moveMsg": "Move {{count}} record(s) to:"
-    }
+      "moveMsg": "Move {{count}} record(s) to:",
+      "toggleStatus": "Toggle status",
+      "confirmToggleStatus": "Toggle status",
+      "confirmToggleStatusMsg": "Toggle status of {{ count }} record(s)? Realized ↔ Projected."
+    },
+    "toggleStatusHint": "Double-click to toggle status"
   },
   "bills": {
     "title": "Bills",

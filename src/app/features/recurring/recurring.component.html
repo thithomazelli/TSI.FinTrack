@@ -54,6 +54,18 @@
   </div>
 }
 
+@if (deletingTemplate()) {
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <p class="modal-text">{{ 'common.confirmDeleteMsg' | translate: { name: deletingTemplate()!.description } }}</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelDelete()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-danger" (click)="confirmDelete()">{{ 'common.delete' | translate }}</button>
+    </div>
+  </div>
+}
+
 @if (showForm()) {
   <div class="modal-backdrop" (click)="closeForm()"></div>
   <div class="modal">

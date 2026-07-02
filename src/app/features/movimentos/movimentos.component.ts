@@ -278,8 +278,11 @@ export class MovimentosComponent implements OnInit {
     return this.gridSumEntradas(items) - this.gridSumSaidas(items);
   }
 
+  // Single delete confirm
+  readonly deletingItem = signal<MovimentoItem | null>(null);
+
   // Bulk actions
-  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | null>(null);
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | null>(null);
   bulkNewAmount = 0;
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
@@ -577,6 +580,12 @@ export class MovimentosComponent implements OnInit {
   }
 
   delete(item: MovimentoItem): void {
+    this.deletingItem.set(item);
+  }
+
+  confirmDelete(): void {
+    const item = this.deletingItem();
+    if (!item) return;
     const op$ = item.kind === 'entry'
       ? this.entryService.delete(item.id)
       : this.transactionService.delete(item.id);
@@ -588,13 +597,60 @@ export class MovimentosComponent implements OnInit {
         } else {
           this.allTransactions.update(list => list.filter(t => t.id !== item.id));
         }
+        this.deletingItem.set(null);
         this.toast.success(this.tr('movimentos.toast.deleted'));
       },
       error: err => {
         this.logger.error('Failed to delete', err);
+        this.deletingItem.set(null);
         this.toast.error(this.tr('movimentos.toast.deleteError'));
       },
     });
+  }
+
+  cancelDelete(): void {
+    this.deletingItem.set(null);
+  }
+
+  toggleStatus(item: MovimentoItem): void {
+    const newStatus = (item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED') as TransactionStatus;
+    const apply = () => {
+      if (item.kind === 'entry') {
+        this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status: newStatus } : e));
+      } else {
+        this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status: newStatus } : t));
+      }
+    };
+    if (item.kind === 'entry') {
+      this.entryService.update(item.id, { status: newStatus }).subscribe({ next: apply, error: (err: unknown) => this.logger.error('Failed to toggle status', err) });
+    } else {
+      this.transactionService.update(item.id, { status: newStatus }).subscribe({ next: apply, error: (err: unknown) => this.logger.error('Failed to toggle status', err) });
+    }
+  }
+
+  async bulkToggleStatus(): Promise<void> {
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    this.bulkSaving.set(true);
+    try {
+      for (const item of items) {
+        const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED';
+        if (item.kind === 'entry') {
+          await this.entryService.update(item.id, { status: newStatus as TransactionStatus }).toPromise();
+          this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status: newStatus as TransactionStatus } : e));
+        } else {
+          await this.transactionService.update(item.id, { status: newStatus as TransactionStatus }).toPromise();
+          this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status: newStatus as TransactionStatus } : t));
+        }
+      }
+      this.clearSelection();
+      this.toast.success(this.tr('movimentos.toast.statusUpdated'));
+    } catch (err) {
+      this.logger.error('Bulk status toggle failed', err);
+      this.toast.error(this.tr('movimentos.toast.deleteError'));
+    } finally {
+      this.bulkSaving.set(false);
+    }
   }
 
   // ── Seleção ──────────────────────────────────────────────────────────────
@@ -623,7 +679,7 @@ export class MovimentosComponent implements OnInit {
     this.bulkActionOpen.set(null);
   }
 
-  openBulkAction(action: 'delete' | 'amount' | 'move'): void {
+  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status'): void {
     this.bulkNewAmount = 0;
     this.bulkTargetYear = new Date().getFullYear();
     this.bulkTargetMonth = new Date().getMonth() + 1;

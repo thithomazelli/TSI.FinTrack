@@ -169,8 +169,12 @@ export class SavingsComponent implements OnInit {
   }
 
   deleteMovement(id: string): void {
-    if (!confirm('Confirma a exclusão?')) return;
     this.deletingId.set(id);
+  }
+
+  confirmDeleteMovement(): void {
+    const id = this.deletingId();
+    if (!id) return;
     this.savingsService.delete(id).subscribe({
       next: () => {
         this.allMovements.update((list) => list.filter((m) => m.id !== id));

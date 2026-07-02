@@ -38,6 +38,7 @@ export class RecurringComponent implements OnInit {
   readonly saving = signal(false);
   readonly showForm = signal(false);
   readonly editingId = signal<string | null>(null);
+  readonly deletingTemplate = signal<RecurringTemplate | null>(null);
 
   formDescription = '';
   formAmount = 0;
@@ -135,16 +136,28 @@ export class RecurringComponent implements OnInit {
   }
 
   delete(t: RecurringTemplate): void {
+    this.deletingTemplate.set(t);
+  }
+
+  confirmDelete(): void {
+    const t = this.deletingTemplate();
+    if (!t) return;
     this.service.delete(t.id).subscribe({
       next: () => {
         this.templates.update(list => list.filter(x => x.id !== t.id));
+        this.deletingTemplate.set(null);
         this.toast.success('Recorrente excluído.');
       },
       error: err => {
         this.logger.error('Failed to delete recurring template', err);
+        this.deletingTemplate.set(null);
         this.toast.error('Erro ao excluir recorrente.');
       },
     });
+  }
+
+  cancelDelete(): void {
+    this.deletingTemplate.set(null);
   }
 
   toggleActive(t: RecurringTemplate): void {
