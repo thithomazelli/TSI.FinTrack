@@ -393,6 +393,7 @@ export class MovimentosComponent implements OnInit {
         paymentMethod: r.payment_method, labels: r.labels ?? [],
         createdAt: r.created_at, updatedAt: r.updated_at,
       }) as Transaction));
+      this.balanceService.invalidate();
     } catch (err) {
       this.logger.error('Failed to load movimentos', err);
       this.toast.error(this.tr('movimentos.toast.loadError'));
@@ -602,6 +603,7 @@ export class MovimentosComponent implements OnInit {
           this.allTransactions.update(list => list.filter(t => t.id !== item.id));
         }
         this.deletingItem.set(null);
+        this.balanceService.invalidate();
         this.toast.success(this.tr('movimentos.toast.deleted'));
       },
       error: err => {
@@ -624,6 +626,7 @@ export class MovimentosComponent implements OnInit {
       } else {
         this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status: newStatus } : t));
       }
+      this.balanceService.invalidate();
     };
     if (item.kind === 'entry') {
       this.entryService.update(item.id, { status: newStatus }).subscribe({ next: apply, error: (err: unknown) => this.logger.error('Failed to toggle status', err) });

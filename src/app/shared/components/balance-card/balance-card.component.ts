@@ -22,7 +22,10 @@ export class BalanceCardComponent implements OnInit {
 
   constructor() {
     effect(() => {
+      // Re-fetch whenever upToDate changes OR balance is invalidated externally
+      this.balanceService.version();
       const end = this.upToDate();
+      this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} });
       if (end) {
         this.balanceService.getProjectedBalanceUpTo(end).subscribe({ next: v => this.projected.set(v), error: () => {} });
       } else {
@@ -31,10 +34,5 @@ export class BalanceCardComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} });
-    if (!this.upToDate()) {
-      this.balanceService.getProjectedBalance().subscribe({ next: v => this.projected.set(v), error: () => {} });
-    }
-  }
+  ngOnInit(): void { /* handled by effect */ }
 }

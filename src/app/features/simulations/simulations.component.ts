@@ -20,6 +20,7 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
+import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { DataTableComponent, TableColumn, SearchFn, CompareFn, RowClassFn } from '../../shared/components/data-table/data-table.component';
 
 export interface SimItem {
@@ -40,11 +41,12 @@ interface SimOverride {
   date?: string;
   description?: string;
   deleted?: boolean;
+  status?: TransactionStatus;
 }
 
 interface DiffEntry {
   item: SimItem;
-  type: 'amount' | 'date' | 'description' | 'deleted';
+  type: 'amount' | 'date' | 'description' | 'deleted' | 'status';
   originalValue: string;
   newValue: string;
 }
@@ -119,7 +121,7 @@ export class SimulationsComponent implements OnInit {
 
   // Multi-select
   readonly selectedIds = signal<Set<string>>(new Set());
-  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | null>(null);
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | null>(null);
   bulkNewAmount = 0;
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
@@ -151,7 +153,7 @@ export class SimulationsComponent implements OnInit {
       .map(i => {
         const o = ovr.get(i.id);
         if (!o) return i;
-        return { ...i, amount: o.amount ?? i.amount, date: o.date ?? i.date, description: o.description ?? i.description };
+        return { ...i, amount: o.amount ?? i.amount, date: o.date ?? i.date, description: o.description ?? i.description, status: o.status ?? i.status };
       })
       .sort((a, b) => b.date.localeCompare(a.date));
   });
@@ -219,6 +221,7 @@ export class SimulationsComponent implements OnInit {
     { key: 'categoryId',  label: 'common.category',          sortable: false },
     { key: '_card',       label: 'movimentos.colCardAccount', sortable: false },
     { key: 'amount',      label: 'common.amount',            sortable: true, numeric: true },
+    { key: 'status',      label: 'common.status',            sortable: true },
     { key: '_actions',    label: 'common.actions',           sortable: false },
   ];
 
@@ -231,6 +234,11 @@ export class SimulationsComponent implements OnInit {
     date:        (a, b) => a.date.localeCompare(b.date),
     description: (a, b) => a.description.localeCompare(b.description, 'pt-BR'),
     amount:      (a, b) => a.amount - b.amount,
+    status: (a, b) => {
+      const sv = (s: string) => s === 'REALIZED' ? 0 : 1;
+      const sd = sv(a.status) - sv(b.status);
+      return sd !== 0 ? sd : a.date.localeCompare(b.date);
+    },
   };
 
   readonly tableRowClassFn: RowClassFn<SimItem> = (item) => {
@@ -387,6 +395,29 @@ export class SimulationsComponent implements OnInit {
     });
   }
 
+  toggleItemStatus(item: SimItem): void {
+    const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED';
+    this.overrides.update(m => {
+      const next = new Map(m);
+      next.set(item.id, { ...(next.get(item.id) ?? {}), status: newStatus as TransactionStatus });
+      return next;
+    });
+  }
+
+  bulkToggleStatus(): void {
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    this.overrides.update(m => {
+      const next = new Map(m);
+      for (const item of items) {
+        const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED';
+        next.set(item.id, { ...(next.get(item.id) ?? {}), status: newStatus as TransactionStatus });
+      }
+      return next;
+    });
+    this.clearSelection();
+  }
+
   removeDiff(d: DiffEntry): void {
     this.overrides.update(m => {
       const next = new Map(m);
@@ -425,7 +456,7 @@ export class SimulationsComponent implements OnInit {
     this.bulkActionOpen.set(null);
   }
 
-  openBulkAction(action: 'delete' | 'amount' | 'move'): void {
+  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status'): void {
     this.bulkNewAmount = 0;
     this.bulkTargetYear = new Date().getFullYear();
     this.bulkTargetMonth = new Date().getMonth() + 1;

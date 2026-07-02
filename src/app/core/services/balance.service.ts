@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Observable, from, map } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { AuthService } from '../auth/auth.service';
@@ -14,6 +14,10 @@ export interface BalanceSummary {
 export class BalanceService {
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
+
+  /** Increment to trigger balance card refresh across the app. */
+  readonly version = signal(0);
+  invalidate(): void { this.version.update(v => v + 1); }
 
   private get ownerId(): string { return this.auth.currentUser!.id; }
 
