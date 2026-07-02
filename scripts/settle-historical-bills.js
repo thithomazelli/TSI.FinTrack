@@ -17,7 +17,7 @@ if (!KEY) {
 
 const UP_TO_YEAR  = 2026;
 const UP_TO_MONTH = 6;
-const TARGET_STATUS = 'paid';
+const TARGET_STATUS = 'PAID';
 
 async function run() {
   const url = `${SUPABASE_URL}/rest/v1/credit_card_bills` +
