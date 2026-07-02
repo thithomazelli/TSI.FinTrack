@@ -268,6 +268,16 @@ export class MovimentosComponent implements OnInit {
     this.filterCardIds.set(new Set());
   }
 
+  gridSumEntradas(items: MovimentoItem[]): number {
+    return items.filter(i => i.kind === 'entry').reduce((s, i) => s + i.amount, 0);
+  }
+  gridSumSaidas(items: MovimentoItem[]): number {
+    return items.filter(i => i.kind === 'transaction').reduce((s, i) => s + i.amount, 0);
+  }
+  gridNet(items: MovimentoItem[]): number {
+    return this.gridSumEntradas(items) - this.gridSumSaidas(items);
+  }
+
   // Bulk actions
   readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | null>(null);
   bulkNewAmount = 0;

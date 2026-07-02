@@ -246,6 +246,16 @@ export class SimulationsComponent implements OnInit {
     this.filterCardIds.set(new Set());
   }
 
+  gridSumEntradas(items: SimItem[]): number {
+    return items.filter(i => i.kind === 'entry').reduce((s, i) => s + i.amount, 0);
+  }
+  gridSumSaidas(items: SimItem[]): number {
+    return items.filter(i => i.kind === 'transaction').reduce((s, i) => s + i.amount, 0);
+  }
+  gridNet(items: SimItem[]): number {
+    return this.gridSumEntradas(items) - this.gridSumSaidas(items);
+  }
+
   isEditing(id: string): boolean { return this.editingId() === id; }
   isModified(id: string): boolean { return this.overrides().has(id) && !this.overrides().get(id)?.deleted; }
   isSelected(id: string): boolean { return this.selectedIds().has(id); }

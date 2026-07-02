@@ -51,10 +51,11 @@ export class DataTableComponent implements OnInit {
   readonly onRowClick      = input<((item: any) => void) | null>(null);
 
   // ── Content templates ─────────────────────────────────────────────────────
-  @ContentChild('row')        rowTpl!: TemplateRef<{ $implicit: any }>;
-  @ContentChild('extraTh')    extraThTpl?: TemplateRef<void>;
-  @ContentChild('filterBtn')  filterBtnTpl?: TemplateRef<void>;
+  @ContentChild('row')         rowTpl!: TemplateRef<{ $implicit: any }>;
+  @ContentChild('extraTh')     extraThTpl?: TemplateRef<void>;
+  @ContentChild('filterBtn')   filterBtnTpl?: TemplateRef<void>;
   @ContentChild('filterPanel') filterPanelTpl?: TemplateRef<void>;
+  @ContentChild('totals')      totalsTpl?: TemplateRef<{ $implicit: any[] }>;
 
   // ── Internal state ────────────────────────────────────────────────────────
   readonly query    = signal('');

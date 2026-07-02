@@ -75,6 +75,11 @@
           </tr>
         }
       </tbody>
+      @if (totalsTpl) {
+        <tfoot>
+          <ng-container [ngTemplateOutlet]="totalsTpl" [ngTemplateOutletContext]="{ $implicit: filtered() }" />
+        </tfoot>
+      }
     </table>
   }
 </div>
