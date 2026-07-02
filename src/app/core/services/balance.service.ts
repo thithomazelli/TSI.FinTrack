@@ -39,6 +39,23 @@ export class BalanceService {
     ).pipe(map(res => Number((res.data as { projected: number } | null)?.projected ?? 0)));
   }
 
+  /** Saldo projetado até uma data específica: realizado (todo histórico) + projetado até endDate. */
+  getProjectedBalanceUpTo(endDate: string): Observable<number> {
+    const uid = this.ownerId;
+    return from(
+      Promise.all([
+        this.supabase.client.from('v_available_balance').select('available').eq('owner_id', uid).maybeSingle(),
+        this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('status', 'PROJECTED').lte('date', endDate),
+        this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('status', 'PROJECTED').lte('date', endDate),
+      ])
+    ).pipe(map(([bal, entries, txs]) => {
+      const realized = Number((bal.data as { available: number } | null)?.available ?? 0);
+      const projIncome = (entries.data ?? []).reduce((s: number, e: { amount: number }) => s + e.amount, 0);
+      const projExpenses = (txs.data ?? []).reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+      return realized + projIncome - projExpenses;
+    }));
+  }
+
   getSummary(year: number, month: number): Observable<BalanceSummary> {
     const start = `${year}-${String(month).padStart(2,'0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];

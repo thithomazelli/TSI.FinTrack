@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <tsi-balance-card />
+  <tsi-balance-card [upToDate]="dateTo()" />
 
   <!-- Diff panel (changes summary) -->
   @if (hasChanges()) {

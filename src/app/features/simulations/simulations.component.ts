@@ -80,6 +80,11 @@ export class SimulationsComponent implements OnInit {
   // Period
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
+  readonly dateTo = computed(() => {
+    const y = this.year(), m = this.month();
+    const last = new Date(y, m, 0).getDate();
+    return `${y}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
+  });
 
   // Filters
   readonly filterTipos      = signal<Set<string>>(new Set());
