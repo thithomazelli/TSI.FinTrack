@@ -173,4 +173,14 @@ export class CreditCardsSettingsComponent implements OnInit {
       },
     });
   }
+
+  cardBrandIcon(name: string): string {
+    const n = name.toLowerCase();
+    if (n.includes('visa')) return '💳';
+    if (n.includes('master') || n.includes('mastercard')) return '🔴';
+    if (n.includes('amex') || n.includes('american')) return '🔵';
+    if (n.includes('elo')) return '⭐';
+    if (n.includes('hipercard') || n.includes('hiper')) return '💜';
+    return '💳';
+  }
 }

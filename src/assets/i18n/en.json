@@ -116,6 +116,8 @@
     "archiveCard": "Archive card",
     "disableCard": "Disable",
     "enableCard": "Enable",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
     "domainsSubtitle": "Manage the domain values used in the system.",
     "all": "All",
     "code": "Code",

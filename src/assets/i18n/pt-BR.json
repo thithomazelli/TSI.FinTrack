@@ -116,6 +116,8 @@
     "archiveCard": "Arquivar cartão",
     "disableCard": "Desabilitar",
     "enableCard": "Habilitar",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo",
     "domainsSubtitle": "Gerencie os valores de domínio utilizados no sistema.",
     "all": "Todos",
     "code": "Código",

@@ -21,6 +21,7 @@
           <th>{{ 'settings.limit' | translate }}</th>
           <th>{{ 'settings.closing' | translate }}</th>
           <th>{{ 'settings.due' | translate }}</th>
+          <th>{{ 'common.status' | translate }}</th>
           <th class="th-right td-actions">{{ 'common.actions' | translate }}</th>
         </tr>
       </thead>
@@ -28,7 +29,10 @@
         @for (card of cards(); track card.id) {
           <tr>
             <td>
-              {{ card.name }}
+              <span class="card-name-cell">
+                <span class="card-brand-icon">{{ cardBrandIcon(card.name) }}</span>
+                {{ card.name }}
+              </span>
               @if (card.isArchived) {
                 <span class="badge badge-system" style="margin-left:6px">{{ 'settings.archivedM' | translate }}</span>
               }
@@ -37,6 +41,11 @@
             <td>{{ card.creditLimit ?? '—' }}</td>
             <td>{{ card.closingDay ?? '—' }}</td>
             <td>{{ card.dueDay ?? '—' }}</td>
+            <td>
+              <span class="card-status-badge" [class.card-status--active]="card.isActive" [class.card-status--inactive]="!card.isActive">
+                {{ (card.isActive ? 'settings.statusActive' : 'settings.statusInactive') | translate }}
+              </span>
+            </td>
             <td class="td-actions">
               @if (!card.isArchived) {
                 <button class="btn-action" (click)="openEdit(card)">

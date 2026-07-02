@@ -90,14 +90,14 @@ export class CreditCardBillService {
     );
   }
 
-  /** Mark all OPEN bills up to (and including) the given year/month as CLOSED. */
-  closeHistoricalBills(upToYear: number, upToMonth: number): Observable<void> {
+  /** Mark all non-paid bills up to (and including) the given year/month with the target status. */
+  settleHistoricalBills(upToYear: number, upToMonth: number, targetStatus: BillStatus): Observable<void> {
     return from(
       this.supabase.client
         .from(TABLE)
-        .update({ status: BillStatus.Closed, updated_at: new Date().toISOString() })
+        .update({ status: targetStatus, updated_at: new Date().toISOString() })
         .eq('owner_id', this.ownerId)
-        .eq('status', BillStatus.Open)
+        .neq('status', BillStatus.Paid)
         .or(`year.lt.${upToYear},and(year.eq.${upToYear},month.lte.${upToMonth})`)
         .then(({ error }) => { if (error) throw error; })
     );

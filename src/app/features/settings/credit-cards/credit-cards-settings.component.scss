@@ -159,6 +159,34 @@
   white-space: nowrap;
 }
 
+.card-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-brand-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.card-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+
+  &.card-status--active {
+    background: color-mix(in srgb, #22c55e 15%, transparent);
+    color: #16a34a;
+  }
+  &.card-status--inactive {
+    background: color-mix(in srgb, #9ca3af 15%, transparent);
+    color: #6b7280;
+  }
+}
+
 .btn-action {
   display: inline-flex;
   align-items: center;
