@@ -199,6 +199,7 @@ tr:hover td { background: var(--color-surface-2); }
 
 .input-inline { height: 2rem; padding: 0 .5rem; font-size: .8rem; border-radius: var(--radius-sm); min-width: 0; }
 .input-amount { width: 110px; text-align: right; }
+.input-desc { width: 100%; min-width: 140px; }
 .deleted-section { margin-top: 1.25rem; }
 .deleted-title { font-size: .8rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 .5rem; }
 .deleted-row {

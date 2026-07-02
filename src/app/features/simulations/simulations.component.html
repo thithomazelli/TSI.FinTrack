@@ -50,6 +50,10 @@
                 <span class="diff-old">{{ d.originalValue }}</span>
                 <span class="diff-arrow">→</span>
                 <span class="diff-new">{{ d.newValue }}</span>
+              } @else if (d.type === 'description') {
+                <span class="diff-old">{{ d.originalValue }}</span>
+                <span class="diff-arrow">→</span>
+                <span class="diff-new">{{ d.newValue }}</span>
               } @else {
                 <span class="diff-old">{{ d.originalValue | date:'dd/MM/yy' }}</span>
                 <span class="diff-arrow">→</span>
@@ -245,11 +249,13 @@
         @if (isEditing(item.id)) {
           <td class="col-check"></td>
           <td><input class="input input-inline" type="date" [(ngModel)]="editDate" /></td>
-          <td colspan="3">
+          <td>
             <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
-              {{ item.description }}
+              {{ (item.kind === 'entry' ? 'movimentos.typeEntry' : 'movimentos.typeExit') | translate }}
             </span>
           </td>
+          <td><input class="input input-inline input-desc" type="text" [(ngModel)]="editDescription" /></td>
+          <td></td>
           <td></td>
           <td class="text-right">
             <input class="input input-inline input-amount" type="number" min="0.01" step="0.01" [(ngModel)]="editAmount" />

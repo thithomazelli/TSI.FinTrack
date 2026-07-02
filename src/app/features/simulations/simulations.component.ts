@@ -38,12 +38,13 @@ export interface SimItem {
 interface SimOverride {
   amount?: number;
   date?: string;
+  description?: string;
   deleted?: boolean;
 }
 
 interface DiffEntry {
   item: SimItem;
-  type: 'amount' | 'date' | 'deleted';
+  type: 'amount' | 'date' | 'description' | 'deleted';
   originalValue: string;
   newValue: string;
 }
@@ -105,6 +106,7 @@ export class SimulationsComponent implements OnInit {
   readonly editingId = signal<string | null>(null);
   editAmount = 0;
   editDate = '';
+  editDescription = '';
 
   // Multi-select
   readonly selectedIds = signal<Set<string>>(new Set());
@@ -140,7 +142,7 @@ export class SimulationsComponent implements OnInit {
       .map(i => {
         const o = ovr.get(i.id);
         if (!o) return i;
-        return { ...i, amount: o.amount ?? i.amount, date: o.date ?? i.date };
+        return { ...i, amount: o.amount ?? i.amount, date: o.date ?? i.date, description: o.description ?? i.description };
       })
       .sort((a, b) => b.date.localeCompare(a.date));
   });
@@ -172,6 +174,8 @@ export class SimulationsComponent implements OnInit {
           result.push({ item, type: 'amount', originalValue: `R$ ${item.amount.toFixed(2)}`, newValue: `R$ ${o.amount.toFixed(2)}` });
         if (o.date !== undefined && o.date !== item.date)
           result.push({ item, type: 'date', originalValue: item.date, newValue: o.date });
+        if (o.description !== undefined && o.description !== item.description)
+          result.push({ item, type: 'description', originalValue: item.description, newValue: o.description });
       }
     }
     return result;
@@ -313,18 +317,22 @@ export class SimulationsComponent implements OnInit {
     const ovr = this.overrides().get(item.id);
     this.editAmount = ovr?.amount ?? item.amount;
     this.editDate = ovr?.date ?? item.date;
+    this.editDescription = ovr?.description ?? item.description;
   }
 
   cancelEdit(): void { this.editingId.set(null); }
 
   applyEdit(item: SimItem): void {
-    const changed = this.editAmount !== item.amount || this.editDate !== item.date;
+    const changed = this.editAmount !== item.amount
+      || this.editDate !== item.date
+      || this.editDescription.trim() !== item.description;
     if (!changed) { this.cancelEdit(); return; }
     this.overrides.update(m => {
       const next = new Map(m);
       const o: SimOverride = { ...(next.get(item.id) ?? {}) };
       if (this.editAmount !== item.amount) o.amount = this.editAmount;
       if (this.editDate !== item.date) o.date = this.editDate;
+      if (this.editDescription.trim() !== item.description) o.description = this.editDescription.trim();
       next.set(item.id, o);
       return next;
     });
@@ -357,6 +365,7 @@ export class SimulationsComponent implements OnInit {
       const o = { ...(next.get(d.item.id) ?? {}) };
       if (d.type === 'amount') delete o.amount;
       if (d.type === 'date') delete o.date;
+      if (d.type === 'description') delete o.description;
       if (d.type === 'deleted') delete o.deleted;
       if (Object.keys(o).length === 0) next.delete(d.item.id);
       else next.set(d.item.id, o);
@@ -456,6 +465,7 @@ export class SimulationsComponent implements OnInit {
           const payload: any = {};
           if (o.amount !== undefined) payload['amount'] = o.amount;
           if (o.date !== undefined) payload['date'] = o.date;
+          if (o.description !== undefined) payload['description'] = o.description;
           if (item.kind === 'entry') await this.entryService.update(item.id, payload).toPromise();
           else await this.transactionService.update(item.id, payload).toPromise();
         }
