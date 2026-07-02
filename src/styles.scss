@@ -419,11 +419,16 @@ body {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
+  align-items: flex-start;
+
+  /* Cancel the sibling margin rule (.form-field + .form-field) inside a row */
+  > .form-field + .form-field { margin-top: 0; }
 
   @media (max-width: 480px) {
     flex-direction: column;
 
     .form-field--sm { max-width: 100%; }
+    > .form-field + .form-field { margin-top: 1rem; }
   }
 }
 
