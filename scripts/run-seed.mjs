@@ -184,7 +184,7 @@ async function main() {
   console.log('\nInserindo entradas de renda...')
   const entries = data.entries.map(e => ({
     owner_id: e.owner_id, description: e.description,
-    amount: e.amount, date: e.date, labels: e.labels, status: e.status
+    amount: e.amount, date: e.date, labels: e.labels ?? [], status: e.status
   }))
   await batchInsert('entries', entries, 'Entradas')
 
@@ -192,7 +192,7 @@ async function main() {
   console.log('\nInserindo transações de despesa...')
   const transactions = data.transactions.map(t => ({
     owner_id: t.owner_id, description: t.description,
-    amount: t.amount, date: t.date, labels: t.labels, status: t.status,
+    amount: t.amount, date: t.date, labels: t.labels ?? [], status: t.status,
     category_id: catMap[t.category_name?.toLowerCase()] ?? null,
     credit_card_id: cardMap[(t.credit_card_name ?? 'Débito Itaú').toLowerCase()] ?? null,
     account_id: null,
