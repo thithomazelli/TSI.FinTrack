@@ -185,7 +185,21 @@
   cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface);
   color: var(--color-text-2); transition: all var(--transition);
   &:hover { background: var(--color-surface-2); color: var(--color-text); }
-  &--danger { color: #ef4444; border-color: rgba(239,68,68,.4); &:hover { background: rgba(239,68,68,.08); } }
+  &--danger  { color: #ef4444; border-color: rgba(239,68,68,.4); &:hover { background: rgba(239,68,68,.08); } }
+  &--delete  { color: #ef4444; border-color: rgba(239,68,68,.4); &:hover { background: rgba(239,68,68,.08); } }
+  &--status  { color: #8b5cf6; border-color: rgba(139,92,246,.4); background: rgba(139,92,246,.08); &:hover { background: rgba(139,92,246,.15); } }
+  &--move    { color: #3b82f6; border-color: rgba(59,130,246,.4); &:hover { background: rgba(59,130,246,.08); } }
+  &--amount  { color: #f59e0b; border-color: rgba(245,158,11,.4); &:hover { background: rgba(245,158,11,.08); } }
+  &--clear   { color: var(--color-text-2); &:hover { color: var(--color-text); } }
+}
+.status-select {
+  appearance: none; -webkit-appearance: none;
+  padding: .2rem .55rem; border-radius: 999px;
+  font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  border: 1.5px solid transparent; cursor: pointer; outline: none;
+  transition: all var(--transition);
+  &--realized { background: rgba(34,197,94,.15); color: #22c55e; border-color: rgba(34,197,94,.3); }
+  &--projected { background: rgba(245,158,11,.15); color: #d97706; border-color: rgba(245,158,11,.3); }
 }
 .table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; font-size: .875rem; min-width: 720px; }

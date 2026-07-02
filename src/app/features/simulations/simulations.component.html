@@ -128,10 +128,11 @@
       <div class="bulk-bar">
         <span class="bulk-count">{{ selectionCount() }} {{ 'movimentos.bulk.selected' | translate }}</span>
         <div class="bulk-actions">
-          <button class="bulk-btn" (click)="openBulkAction('move')">{{ 'movimentos.bulk.move' | translate }}</button>
-          <button class="bulk-btn" (click)="openBulkAction('amount')">{{ 'movimentos.bulk.editAmount' | translate }}</button>
-          <button class="bulk-btn bulk-btn--danger" (click)="openBulkAction('delete')">{{ 'movimentos.bulk.delete' | translate }}</button>
-          <button class="bulk-btn" (click)="clearSelection()">✕</button>
+          <button class="bulk-btn bulk-btn--move" (click)="openBulkAction('move')">{{ 'movimentos.bulk.move' | translate }}</button>
+          <button class="bulk-btn bulk-btn--amount" (click)="openBulkAction('amount')">{{ 'movimentos.bulk.editAmount' | translate }}</button>
+          <button class="bulk-btn bulk-btn--status" (click)="openBulkAction('status')">{{ 'movimentos.bulk.toggleStatus' | translate }}</button>
+          <button class="bulk-btn bulk-btn--delete" (click)="openBulkAction('delete')">{{ 'movimentos.bulk.delete' | translate }}</button>
+          <button class="bulk-btn bulk-btn--clear" (click)="clearSelection()">✕</button>
         </div>
       </div>
     }
@@ -144,8 +145,8 @@
       [sortComparators]="tableSortComparators"
       [rowClassFn]="tableRowClassFn"
       [onRowClick]="rowClickFn"
-      [initialSortKey]="'date'"
-      [initialSortDir]="'desc'"
+      [initialSortKey]="'status'"
+      [initialSortDir]="'asc'"
       [emptyMsg]="'simulations.empty' | translate"
     >
       <ng-template #filterBtn>
@@ -255,6 +256,7 @@
             </div>
           </td>
           <td></td>
+          <td></td>
         </tr>
       </ng-template>
 
@@ -279,6 +281,7 @@
           <td class="text-right">
             <input class="input input-inline input-amount" type="number" min="0.01" step="0.01" [(ngModel)]="editAmount" />
           </td>
+          <td></td>
           <td>
             <div class="action-btns">
               <button class="action-btn action-btn--edit" (click)="applyEdit(item)">✓</button>
@@ -312,6 +315,16 @@
           <td class="col-muted">{{ payerName(item) }}</td>
           <td class="col-amount text-right" [class.amount-entrada]="item.kind === 'entry'" [class.amount-saida]="item.kind === 'transaction'">
             R$ {{ item.amount | number:'1.2-2' }}
+          </td>
+          <td (click)="$event.stopPropagation()">
+            <select class="status-select"
+              [class.status-select--realized]="item.status === 'REALIZED'"
+              [class.status-select--projected]="item.status === 'PROJECTED'"
+              [ngModel]="item.status"
+              (ngModelChange)="item.status !== $event && toggleItemStatus(item)">
+              <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
+              <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
+            </select>
           </td>
           <td>
             <div class="action-btns" (click)="$event.stopPropagation()">
@@ -385,6 +398,18 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary" (click)="bulkSimMove()">{{ 'common.confirm' | translate }}</button>
+    </div>
+  </div>
+}
+
+@if (bulkActionOpen() === 'status') {
+  <div class="modal-backdrop" (click)="clearSelection()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'movimentos.bulk.confirmToggleStatus' | translate }}</h3>
+    <p class="modal-text">{{ 'movimentos.bulk.confirmToggleStatusMsg' | translate: { count: selectionCount() } }}</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="bulkToggleStatus()">{{ 'common.confirm' | translate }}</button>
     </div>
   </div>
 }
