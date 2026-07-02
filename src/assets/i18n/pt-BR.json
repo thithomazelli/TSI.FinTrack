@@ -168,6 +168,7 @@
     "markPaid": "Marcar como Pago",
     "reopen": "Reabrir",
     "addBillHint": "Abrir fatura para cartão:",
+    "billClosed": "Fatura fechada",
     "status": {
       "OPEN": "Aberta",
       "CLOSED": "Fechada",
@@ -390,7 +391,8 @@
     "empty": "Nenhuma transação encontrada.",
     "colPurchaseDate": "Data compra",
     "colCard": "Cartão",
-    "byCategory": "Gastos por categoria"
+    "byCategory": "Gastos por categoria",
+    "transactions": "lançamentos"
   },
   "recurring": {
     "title": "Recorrentes",

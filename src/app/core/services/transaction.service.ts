@@ -157,6 +157,21 @@ export class TransactionService {
     );
   }
 
+  bulkUpdateStatusByCardMonth(creditCardId: string, year: number, month: number, status: TransactionStatus): Observable<void> {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('owner_id', this.ownerId)
+        .eq('credit_card_id', creditCardId)
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .then(({ error }) => { if (error) throw error; })
+    );
+  }
+
   delete(id: string): Observable<void> {
     this.logger.info('Deleting transaction', id);
     return from(

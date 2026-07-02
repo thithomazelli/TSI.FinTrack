@@ -168,6 +168,7 @@
     "markPaid": "Mark as Paid",
     "reopen": "Reopen",
     "addBillHint": "Open bill for card:",
+    "billClosed": "Bill closed",
     "status": {
       "OPEN": "Open",
       "CLOSED": "Closed",
@@ -390,7 +391,8 @@
     "empty": "No transactions found.",
     "colPurchaseDate": "Purchase date",
     "colCard": "Card",
-    "byCategory": "Spending by category"
+    "byCategory": "Spending by category",
+    "transactions": "transactions"
   },
   "recurring": {
     "title": "Recurring",
