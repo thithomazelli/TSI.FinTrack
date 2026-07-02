@@ -6,7 +6,7 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 import { CreditCardBillService } from '../../core/services/credit-card-bill.service';
@@ -31,7 +31,7 @@ interface BillWithCard extends CreditCardBill {
 @Component({
   selector: 'tsi-credit-cards',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, TranslatePipe, MonthPickerComponent],
+  imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe, MonthPickerComponent],
   templateUrl: './credit-cards.component.html',
   styleUrls: ['./credit-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
