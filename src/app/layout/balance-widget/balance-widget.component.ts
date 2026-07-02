@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BalanceService, BalanceSummary } from '../../core/services/balance.service';
@@ -34,20 +34,25 @@ export class BalanceWidgetComponent implements OnInit {
     return `${capitalized}/${this.year}`;
   });
 
-  ngOnInit(): void {
-    this.balanceService.getSummary(this.year, this.month).subscribe({
-      next: s => { this.summary.set(s); this.loading.set(false); },
-      error: () => this.loading.set(false),
-    });
-    this.balanceService.getAvailableBalance().subscribe({
-      next: v => this.available.set(v),
-      error: () => {},
-    });
-    this.balanceService.getProjectedBalance().subscribe({
-      next: v => this.projected.set(v),
-      error: () => {},
+  constructor() {
+    effect(() => {
+      this.balanceService.version();
+      this.balanceService.getSummary(this.year, this.month).subscribe({
+        next: s => { this.summary.set(s); this.loading.set(false); },
+        error: () => this.loading.set(false),
+      });
+      this.balanceService.getAvailableBalance().subscribe({
+        next: v => this.available.set(v),
+        error: () => {},
+      });
+      this.balanceService.getProjectedBalance().subscribe({
+        next: v => this.projected.set(v),
+        error: () => {},
+      });
     });
   }
+
+  ngOnInit(): void { /* handled by effect */ }
 
   readonly collapsed = signal(false);
   toggle(): void { this.hidden.update(v => !v); }
