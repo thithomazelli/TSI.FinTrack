@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { BalanceService, BalanceSummary } from '../../core/services/balance.service';
 import { LanguageService } from '../../core/services/language.service';
 
@@ -35,18 +36,20 @@ export class BalanceWidgetComponent implements OnInit {
   });
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       this.balanceService.version();
-      // Regra C: sidebar não tem navegação de mês → acumulado até fim do mês corrente (todos os status)
-      const end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
-      this.balanceService.getSummary(this.year, this.month).subscribe({
-        next: s => { this.summary.set(s); this.loading.set(false); },
-        error: () => this.loading.set(false),
-      });
-      this.balanceService.getBalanceUpTo(end).subscribe({
-        next: v => { this.available.set(v); this.projected.set(v); },
-        error: () => {},
-      });
+      // Regra C: sidebar não tem navegação de mês → saldo do mês corrente (todos os status)
+      const subs: Subscription[] = [
+        this.balanceService.getSummary(this.year, this.month).subscribe({
+          next: s => { this.summary.set(s); this.loading.set(false); },
+          error: () => this.loading.set(false),
+        }),
+        this.balanceService.getMonthBalance(this.year, this.month).subscribe({
+          next: v => { this.available.set(v); this.projected.set(v); },
+          error: () => {},
+        }),
+      ];
+      onCleanup(() => subs.forEach(s => s.unsubscribe()));
     });
   }
 

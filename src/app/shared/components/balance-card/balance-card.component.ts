@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, effect, inject, input, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { BalanceService } from '../../../core/services/balance.service';
 
 @Component({
@@ -21,24 +22,27 @@ export class BalanceCardComponent implements OnInit {
   readonly projected = signal<number | null>(null);
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       this.balanceService.version();
       const y = this.year();
       const m = this.month();
       const now = new Date();
       const curYear  = now.getFullYear();
       const curMonth = now.getMonth() + 1;
-      const end = new Date(y, m, 0).toISOString().split('T')[0];
       const isCurrent = y === curYear && m === curMonth;
+
+      const subs: Subscription[] = [];
 
       if (isCurrent) {
         // Regra B: Atual = apenas REALIZED do mês; Projetado = todos os status do mês
-        this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} });
-        this.balanceService.getMonthBalance(y, m).subscribe({ next: v => this.projected.set(v), error: () => {} });
+        subs.push(this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} }));
+        subs.push(this.balanceService.getMonthBalance(y, m).subscribe({ next: v => this.projected.set(v), error: () => {} }));
       } else {
         // Regra A (passado) ou C (futuro): saldo do mês sem filtro de status
-        this.balanceService.getMonthBalance(y, m).subscribe({ next: v => { this.available.set(v); this.projected.set(v); }, error: () => {} });
+        subs.push(this.balanceService.getMonthBalance(y, m).subscribe({ next: v => { this.available.set(v); this.projected.set(v); }, error: () => {} }));
       }
+
+      onCleanup(() => subs.forEach(s => s.unsubscribe()));
     });
   }
 
