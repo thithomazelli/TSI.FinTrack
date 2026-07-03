@@ -38,7 +38,7 @@
               }
             </td>
             <td>{{ card.lastFourDigits ? '•••• ' + card.lastFourDigits : '—' }}</td>
-            <td>{{ card.creditLimit ?? '—' }}</td>
+            <td>{{ card.creditLimit != null ? (card.creditLimit | currency:'BRL':'symbol':'1.2-2':'pt-BR') : '—' }}</td>
             <td>{{ card.closingDay ?? '—' }}</td>
             <td>{{ card.dueDay ?? '—' }}</td>
             <td>
@@ -91,7 +91,7 @@
       </div>
       <div class="form-field">
         <label>{{ 'settings.creditLimit' | translate }}</label>
-        <input class="input" type="number" [(ngModel)]="formLimit" />
+        <input class="input" type="text" inputmode="numeric" tsiCurrencyMask [(ngModel)]="formLimit" />
       </div>
     </div>
     <div class="form-row">
