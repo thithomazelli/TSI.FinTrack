@@ -56,8 +56,8 @@ export class BalanceService {
   getBalanceUpTo(endDate: string): Observable<number> {
     const uid = this.ownerId;
     return from(Promise.all([
-      this.supabase.client.from('entries').select('amount,date').eq('owner_id', uid).lte('date', endDate).range(0, 9999),
-      this.supabase.client.from('transactions').select('amount,date').eq('owner_id', uid).lte('date', endDate).range(0, 9999),
+      this.supabase.client.from('entries').select('amount,date').eq('owner_id', uid).lte('date', endDate).limit(10000),
+      this.supabase.client.from('transactions').select('amount,date').eq('owner_id', uid).lte('date', endDate).limit(10000),
     ])).pipe(map(([entries, txs]) => {
       console.log(`[getBalanceUpTo] endDate=${endDate} | entries=${entries.data?.length} | txs=${txs.data?.length}`);
       console.log('[getBalanceUpTo] entries sample:', entries.data?.slice(0,3));
