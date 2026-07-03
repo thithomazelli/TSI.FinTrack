@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, Component, OnInit, OnDestroy,
-  inject, output, signal, computed, HostListener, ElementRef,
+  inject, output, signal, computed, HostListener, ElementRef, untracked,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
@@ -111,14 +111,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
       // Regra C — chip do header: saldo realizado (v_available_balance)
       this.version$.pipe(
         switchMap(() => this.balanceService.getAvailableBalance())
-      ).subscribe({ next: v => this.availableBalance.set(v), error: () => {} }),
+      ).subscribe({ next: v => untracked(() => this.availableBalance.set(v)), error: () => {} }),
       // Regra C — popover: todos os status até fim do mês atual
       this.version$.pipe(
         switchMap(() => this.balanceService.getBalanceUpTo(this.end))
-      ).subscribe({ next: v => this.projectedBalance.set(v), error: () => {} }),
+      ).subscribe({ next: v => untracked(() => this.projectedBalance.set(v)), error: () => {} }),
       this.version$.pipe(
         switchMap(() => this.balanceService.getSummary(this.year, this.month))
-      ).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} }),
+      ).subscribe({ next: s => untracked(() => this.balanceSummary.set(s)), error: () => {} }),
     );
 
     this.routeSub.add(

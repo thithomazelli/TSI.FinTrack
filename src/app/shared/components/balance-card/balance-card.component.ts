@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, ChangeDetectorRef, Component, Input,
-  OnChanges, OnDestroy, OnInit, SimpleChanges, inject,
+  OnChanges, OnDestroy, OnInit, SimpleChanges, inject, untracked,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -50,11 +50,11 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
       // Regra B: mês atual — Atual = só REALIZED; Projetado = todos os status até fim do mês
       this.subs.push(
         this.version$.pipe(switchMap(() => this.balanceService.getAvailableBalance())).subscribe({
-          next: v => { this.available = v; this.cdr.markForCheck(); },
+          next: v => untracked(() => { this.available = v; this.cdr.markForCheck(); }),
           error: () => {},
         }),
         this.version$.pipe(switchMap(() => this.balanceService.getBalanceUpTo(end))).subscribe({
-          next: v => { this.projected = v; this.cdr.markForCheck(); },
+          next: v => untracked(() => { this.projected = v; this.cdr.markForCheck(); }),
           error: () => {},
         }),
       );
@@ -62,7 +62,7 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
       // Regra A (mês passado) ou C (mês futuro): ambos = cumulativo até o fim do mês selecionado
       this.subs.push(
         this.version$.pipe(switchMap(() => this.balanceService.getBalanceUpTo(end))).subscribe({
-          next: v => { this.available = v; this.projected = v; this.cdr.markForCheck(); },
+          next: v => untracked(() => { this.available = v; this.projected = v; this.cdr.markForCheck(); }),
           error: () => {},
         }),
       );
