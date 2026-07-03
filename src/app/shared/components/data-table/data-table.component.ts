@@ -8,6 +8,7 @@ import {
   effect,
   input,
   signal,
+  untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -71,11 +72,10 @@ export class DataTableComponent implements OnInit {
   }
 
   constructor() {
-    // Reset to page 0 whenever source data changes
     effect(() => {
       this.items();
-      this.page.set(0);
-    }, { allowSignalWrites: true });
+      untracked(() => this.page.set(0));
+    });
   }
 
   // ── Derived data ──────────────────────────────────────────────────────────

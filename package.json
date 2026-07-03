@@ -22,6 +22,7 @@
     "@ngx-translate/core": "^18.0.0",
     "@ngx-translate/http-loader": "^18.0.0",
     "@supabase/supabase-js": "^2.108.2",
+    "@angular/cdk": "^21.2.14",
     "chart.js": "^4.5.1",
     "ng2-charts": "^10.0.0",
     "pdfjs-dist": "^6.1.200",
