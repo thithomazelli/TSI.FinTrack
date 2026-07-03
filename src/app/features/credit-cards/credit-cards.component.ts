@@ -4,7 +4,6 @@ import {
   OnInit,
   inject,
   signal,
-  computed,
 } from '@angular/core';
 import { DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -22,22 +21,16 @@ import { Transaction } from '../../core/models/interfaces/transaction.interface'
 import { Category } from '../../core/models/interfaces/category.interface';
 import { BillStatus } from '../../core/models/enums/bill-status.enum';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
+import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 
 interface BillWithCard extends CreditCardBill {
   credit_cards?: { name: string; last_four_digits: string };
 }
 
-interface MonthGroup {
-  year: number;
-  month: number;
-  label: string;
-  bills: BillWithCard[];
-}
-
 @Component({
   selector: 'tsi-credit-cards',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe],
+  imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe, MonthPickerComponent],
   templateUrl: './credit-cards.component.html',
   styleUrls: ['./credit-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,29 +54,11 @@ export class CreditCardsComponent implements OnInit {
   readonly updatingId   = signal<string | null>(null);
   readonly expandedBillIds = signal<Set<string>>(new Set());
 
-  readonly monthGroups = computed<MonthGroup[]>(() => {
-    const bills = this.bills();
-    const map = new Map<string, BillWithCard[]>();
-    for (const b of bills) {
-      const key = `${b.year}-${b.month}`;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(b);
-    }
-    return [...map.entries()].map(([, bills]) => {
-      const { year, month } = bills[0];
-      const date = new Date(year, month - 1, 1);
-      const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-      return { year, month, label: label.charAt(0).toUpperCase() + label.slice(1), bills };
-    });
-  });
+  readonly year  = signal(new Date().getFullYear());
+  readonly month = signal(new Date().getMonth() + 1);
 
   billTransactions(bill: BillWithCard): Transaction[] {
-    const startDate = `${bill.year}-${String(bill.month).padStart(2, '0')}-01`;
-    const endDate   = new Date(bill.year, bill.month, 0).toISOString().split('T')[0];
-    return this.transactions().filter(t =>
-      t.creditCardId === bill.creditCardId &&
-      t.date >= startDate && t.date <= endDate
-    );
+    return this.transactions().filter(t => t.creditCardId === bill.creditCardId);
   }
 
   billTotal(bill: BillWithCard): number {
@@ -101,26 +76,38 @@ export class CreditCardsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loading.set(true);
     forkJoin({
       cards: this.cardService.getAll(false),
       cats:  this.categoryService.getAll(),
-      bills: this.billService.getAll(),
-      txs:   this.txService.getAllCreditCard(),
     }).subscribe({
-      next: ({ cards, cats, bills, txs }) => {
-        this.cards.set(cards);
-        this.categories.set(cats);
+      next: ({ cards, cats }) => { this.cards.set(cards); this.categories.set(cats); },
+      error: err => this.logger.error('Failed to load cards/cats', err),
+    });
+    this.loadAll();
+  }
+
+  onMonthChanged(event: { year: number; month: number }): void {
+    this.year.set(event.year);
+    this.month.set(event.month);
+    this.expandedBillIds.set(new Set());
+    this.loadAll();
+  }
+
+  private loadAll(): void {
+    this.loading.set(true);
+    const y = this.year(), m = this.month();
+    forkJoin({
+      bills: this.billService.getByMonth(y, m),
+      txs:   this.txService.getByMonth({ year: y, month: m }),
+    }).subscribe({
+      next: ({ bills, txs }) => {
+        const cardTxs = txs.filter(t => !!t.creditCardId);
         this.bills.set(bills as BillWithCard[]);
-        this.transactions.set(txs);
+        this.transactions.set(cardTxs);
         // Auto-expand bills that have transactions
         const withTx = new Set(
           (bills as BillWithCard[])
-            .filter(b => txs.some(t => {
-              const start = `${b.year}-${String(b.month).padStart(2, '0')}-01`;
-              const end   = new Date(b.year, b.month, 0).toISOString().split('T')[0];
-              return t.creditCardId === b.creditCardId && t.date >= start && t.date <= end;
-            }))
+            .filter(b => cardTxs.some(t => t.creditCardId === b.creditCardId))
             .map(b => b.id)
         );
         this.expandedBillIds.set(withTx);
@@ -155,15 +142,12 @@ export class CreditCardsComponent implements OnInit {
 
         if (txStatus && bill.creditCardId) {
           this.txService.bulkUpdateStatusByCardMonth(
-            bill.creditCardId, bill.year, bill.month, txStatus
+            bill.creditCardId, this.year(), this.month(), txStatus
           ).subscribe({
             next: () => {
-              const start = `${bill.year}-${String(bill.month).padStart(2, '0')}-01`;
-              const end   = new Date(bill.year, bill.month, 0).toISOString().split('T')[0];
               this.transactions.update(list =>
                 list.map(t =>
-                  t.creditCardId === bill.creditCardId && t.date >= start && t.date <= end
-                    ? { ...t, status: txStatus } : t
+                  t.creditCardId === bill.creditCardId ? { ...t, status: txStatus } : t
                 )
               );
               this.balanceService.invalidate();
