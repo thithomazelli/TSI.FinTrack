@@ -217,11 +217,22 @@ async function main() {
 }
 
 async function backfillBills() {
-  const { data: txs, error } = await supabase
-    .from('transactions')
-    .select('owner_id, credit_card_id, date')
-    .not('credit_card_id', 'is', null)
-  if (error) { console.error('Erro ao buscar transações:', error.message); process.exit(1) }
+  // Paginate to avoid the default 1000-row limit
+  const PAGE = 1000
+  let allTxs = [], offset = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('owner_id, credit_card_id, date')
+      .not('credit_card_id', 'is', null)
+      .range(offset, offset + PAGE - 1)
+    if (error) { console.error('Erro ao buscar transações:', error.message); process.exit(1) }
+    allTxs = allTxs.concat(data)
+    if (data.length < PAGE) break
+    offset += PAGE
+  }
+  const txs = allTxs
+  console.log(`  ${txs.length} transações de cartão encontradas`)
 
   const seen = new Map()
   for (const t of txs) {
