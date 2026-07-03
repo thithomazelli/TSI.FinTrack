@@ -14,8 +14,8 @@ import { BalanceService } from '../../../core/services/balance.service';
 export class BalanceCardComponent implements OnInit {
   private readonly balanceService = inject(BalanceService);
 
-  /** When provided, projected balance is capped to this ISO date (YYYY-MM-DD). */
-  readonly upToDate = input<string | null>(null);
+  readonly year  = input<number>(new Date().getFullYear());
+  readonly month = input<number>(new Date().getMonth() + 1);
 
   readonly available = signal<number | null>(null);
   readonly projected = signal<number | null>(null);
@@ -23,12 +23,21 @@ export class BalanceCardComponent implements OnInit {
   constructor() {
     effect(() => {
       this.balanceService.version();
-      const end = this.upToDate();
-      this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} });
-      if (end) {
-        this.balanceService.getProjectedBalanceUpTo(end).subscribe({ next: v => this.projected.set(v), error: () => {} });
+      const y = this.year();
+      const m = this.month();
+      const now = new Date();
+      const curYear  = now.getFullYear();
+      const curMonth = now.getMonth() + 1;
+      const end = new Date(y, m, 0).toISOString().split('T')[0];
+      const isCurrent = y === curYear && m === curMonth;
+
+      if (isCurrent) {
+        // Regra B: Atual = apenas REALIZED; Projetado = todos os registros até fim do mês
+        this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} });
+        this.balanceService.getBalanceUpTo(end).subscribe({ next: v => this.projected.set(v), error: () => {} });
       } else {
-        this.balanceService.getProjectedBalance().subscribe({ next: v => this.projected.set(v), error: () => {} });
+        // Regra A (passado) ou C (futuro): ambos = todos os registros acumulados até fim do mês
+        this.balanceService.getBalanceUpTo(end).subscribe({ next: v => { this.available.set(v); this.projected.set(v); }, error: () => {} });
       }
     });
   }

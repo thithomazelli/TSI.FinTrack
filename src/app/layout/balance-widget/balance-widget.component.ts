@@ -16,14 +16,14 @@ export class BalanceWidgetComponent implements OnInit {
   private readonly balanceService = inject(BalanceService);
   private readonly lang = inject(LanguageService);
 
-  readonly summary = signal<BalanceSummary | null>(null);
+  readonly summary   = signal<BalanceSummary | null>(null);
   readonly available = signal<number | null>(null);
   readonly projected = signal<number | null>(null);
-  readonly hidden = signal(false);
-  readonly loading = signal(true);
+  readonly hidden    = signal(false);
+  readonly loading   = signal(true);
 
-  readonly now = new Date();
-  readonly year = this.now.getFullYear();
+  readonly now   = new Date();
+  readonly year  = this.now.getFullYear();
   readonly month = this.now.getMonth() + 1;
 
   readonly monthLabel = computed(() => {
@@ -37,12 +37,14 @@ export class BalanceWidgetComponent implements OnInit {
   constructor() {
     effect(() => {
       this.balanceService.version();
+      // Regra C: sidebar não tem navegação de mês → acumulado até fim do mês corrente (todos os status)
+      const end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
       this.balanceService.getSummary(this.year, this.month).subscribe({
-        next: s => { this.summary.set(s); this.projected.set(s.projectedBalance); this.loading.set(false); },
+        next: s => { this.summary.set(s); this.loading.set(false); },
         error: () => this.loading.set(false),
       });
-      this.balanceService.getAvailableBalance().subscribe({
-        next: v => this.available.set(v),
+      this.balanceService.getBalanceUpTo(end).subscribe({
+        next: v => { this.available.set(v); this.projected.set(v); },
         error: () => {},
       });
     });

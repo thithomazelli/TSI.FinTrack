@@ -87,8 +87,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       this.balanceService.version();
-      this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v), error: () => {} });
-      this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => { this.balanceSummary.set(s); this.projectedBalance.set(s.projectedBalance); }, error: () => {} });
+      // Regra C: navbar não tem navegação de mês → acumulado até fim do mês corrente (todos os status)
+      const end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
+      this.balanceService.getBalanceUpTo(end).subscribe({ next: v => { this.availableBalance.set(v); this.projectedBalance.set(v); }, error: () => {} });
+      this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} });
     });
   }
 
