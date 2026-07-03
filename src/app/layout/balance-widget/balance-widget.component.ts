@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, effect, inject, signal, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -13,15 +13,17 @@ import { LanguageService } from '../../core/services/language.service';
   styleUrls: ['./balance-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BalanceWidgetComponent implements OnInit {
+export class BalanceWidgetComponent implements OnInit, OnDestroy {
   private readonly balanceService = inject(BalanceService);
   private readonly lang = inject(LanguageService);
+  private subs: Subscription[] = [];
 
   readonly summary   = signal<BalanceSummary | null>(null);
   readonly available = signal<number | null>(null);
   readonly projected = signal<number | null>(null);
   readonly hidden    = signal(false);
   readonly loading   = signal(true);
+  readonly collapsed = signal(false);
 
   readonly now   = new Date();
   readonly year  = this.now.getFullYear();
@@ -36,26 +38,32 @@ export class BalanceWidgetComponent implements OnInit {
   });
 
   constructor() {
-    effect((onCleanup) => {
+    effect(() => {
       this.balanceService.version();
-      // Regra C: sidebar não tem navegação de mês → saldo do mês corrente (todos os status)
-      const subs: Subscription[] = [
-        this.balanceService.getSummary(this.year, this.month).subscribe({
-          next: s => { this.summary.set(s); this.loading.set(false); },
-          error: () => this.loading.set(false),
-        }),
-        this.balanceService.getMonthBalance(this.year, this.month).subscribe({
-          next: v => { this.available.set(v); this.projected.set(v); },
-          error: () => {},
-        }),
-      ];
-      onCleanup(() => subs.forEach(s => s.unsubscribe()));
-    });
+      this.load();
+    }, { allowSignalWrites: true });
   }
 
-  ngOnInit(): void { /* handled by effect */ }
+  ngOnInit(): void {}
+  ngOnDestroy(): void { this.subs.forEach(s => s.unsubscribe()); }
 
-  readonly collapsed = signal(false);
+  private load(): void {
+    this.subs.forEach(s => s.unsubscribe());
+    this.subs = [];
+    // Regra C: sidebar — saldo do mês corrente, todos os status
+    const end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
+    this.subs.push(
+      this.balanceService.getSummary(this.year, this.month).subscribe({
+        next: s => { this.summary.set(s); this.loading.set(false); },
+        error: () => this.loading.set(false),
+      }),
+      this.balanceService.getBalanceUpTo(end).subscribe({
+        next: v => { this.available.set(v); this.projected.set(v); },
+        error: () => {},
+      }),
+    );
+  }
+
   toggle(): void { this.hidden.update(v => !v); }
   toggleCollapse(): void { this.collapsed.update(v => !v); }
 }

@@ -84,16 +84,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private readonly year = this.now.getFullYear();
   private readonly month = this.now.getMonth() + 1;
 
+  private balanceSubs: Subscription[] = [];
+
   constructor() {
-    effect((onCleanup) => {
+    effect(() => {
       this.balanceService.version();
-      // Regra C: navbar não tem navegação de mês → saldo do mês corrente (todos os status)
-      const subs = [
-        this.balanceService.getMonthBalance(this.year, this.month).subscribe({ next: v => { this.availableBalance.set(v); this.projectedBalance.set(v); }, error: () => {} }),
-        this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} }),
-      ];
-      onCleanup(() => subs.forEach(s => s.unsubscribe()));
-    });
+      this.loadBalance();
+    }, { allowSignalWrites: true });
+  }
+
+  private loadBalance(): void {
+    this.balanceSubs.forEach(s => s.unsubscribe());
+    this.balanceSubs = [];
+    // Regra C: navbar — saldo do mês corrente, todos os status
+    const end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
+    this.balanceSubs.push(
+      this.balanceService.getBalanceUpTo(end).subscribe({ next: v => { this.availableBalance.set(v); this.projectedBalance.set(v); }, error: () => {} }),
+      this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} }),
+    );
   }
 
   private resolveTitle(url: string): string {
@@ -137,7 +145,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void { this.routeSub.unsubscribe(); }
+  ngOnDestroy(): void { this.routeSub.unsubscribe(); this.balanceSubs.forEach(s => s.unsubscribe()); }
 
   toggleBell(): void { this.bellOpen.update(v => !v); this.userMenuOpen.set(false); this.balanceOpen.set(false); }
   closeBell(): void { this.bellOpen.set(false); }
