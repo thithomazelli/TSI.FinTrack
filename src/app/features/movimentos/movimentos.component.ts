@@ -521,6 +521,7 @@ export class MovimentosComponent implements OnInit {
         this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
         this.saving.set(false);
         this.closeModal();
+        this.balanceService.invalidate();
         this.load();
       },
       error: err => {
@@ -559,6 +560,7 @@ export class MovimentosComponent implements OnInit {
           this.toast.success(this.tr('movimentos.toast.txUpdated'));
           this.saving.set(false);
           this.closeModal();
+          this.balanceService.invalidate();
           this.load();
         },
         error: err => {
@@ -573,6 +575,7 @@ export class MovimentosComponent implements OnInit {
           this.toast.success(this.tr('movimentos.toast.txAdded'));
           this.saving.set(false);
           this.closeModal();
+          this.balanceService.invalidate();
           this.load();
         },
         error: err => {
@@ -651,6 +654,7 @@ export class MovimentosComponent implements OnInit {
         }
       }
       this.clearSelection();
+      this.balanceService.invalidate();
       this.toast.success(this.tr('movimentos.toast.statusUpdated'));
     } catch (err) {
       this.logger.error('Bulk status toggle failed', err);

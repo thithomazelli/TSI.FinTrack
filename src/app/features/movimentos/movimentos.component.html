@@ -241,7 +241,7 @@
       </ng-template>
 
       <ng-template #row let-item>
-        <td class="col-check">
+        <td class="col-check" (click)="$event.stopPropagation()">
           <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" class="row-check" />
         </td>
         <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
