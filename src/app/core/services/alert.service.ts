@@ -93,8 +93,9 @@ export class AlertService {
     }
 
     // 2. Category goals — exceeded or close (≥80%)
+    // Use allTx so future months with only PROJECTED transactions also trigger goal alerts
     const spentByCategory: Record<string, number> = {};
-    for (const t of realized) {
+    for (const t of allTx) {
       if (t.categoryId) spentByCategory[t.categoryId] = (spentByCategory[t.categoryId] ?? 0) + t.amount;
     }
 
@@ -185,7 +186,7 @@ export class AlertService {
 
     // 6. Spending >30% above previous month (per category)
     const prevSpentByCategory: Record<string, number> = {};
-    for (const t of prevTransactions.filter((t) => t.status === TransactionStatus.Realized)) {
+    for (const t of prevTransactions) {
       if (t.categoryId) prevSpentByCategory[t.categoryId] = (prevSpentByCategory[t.categoryId] ?? 0) + t.amount;
     }
 
@@ -209,11 +210,11 @@ export class AlertService {
       .sort(([, a], [, b]) => b - a)
       .slice(0, 3);
 
-    if (topCats.length > 0 && totalRealizedExpense > 0) {
+    if (topCats.length > 0 && totalProjectedExpense > 0) {
       const detail = topCats
         .map(([catId, amt]) => {
           const cat = categories.find((c) => c.id === catId);
-          const pct = ((amt / totalRealizedExpense) * 100).toFixed(0);
+          const pct = ((amt / totalProjectedExpense) * 100).toFixed(0);
           return `${cat?.name ?? catId}: R$ ${amt.toFixed(2).replace('.', ',')} (${pct}%)`;
         })
         .join(' · ');
@@ -228,15 +229,15 @@ export class AlertService {
 
     // 8. Month-over-month total comparison
     const prevTotal = Object.values(prevSpentByCategory).reduce((s, v) => s + v, 0);
-    if (prevTotal > 0 && totalRealizedExpense > 0) {
-      const diff = totalRealizedExpense - prevTotal;
+    if (prevTotal > 0 && totalProjectedExpense > 0) {
+      const diff = totalProjectedExpense - prevTotal;
       const diffPct = (diff / prevTotal) * 100;
       if (Math.abs(diffPct) >= 10) {
         alerts.push({
           id: 'mom-comparison',
           level: diff > 0 ? 'warning' : 'info',
           title: diff > 0 ? 'Gastos maiores que o mês anterior' : 'Gastos menores que o mês anterior',
-          detail: `${diff > 0 ? '+' : ''}${diffPct.toFixed(0)}% em relação ao mês anterior (R$ ${prevTotal.toFixed(2).replace('.', ',')} → R$ ${totalRealizedExpense.toFixed(2).replace('.', ',')})`,
+          detail: `${diff > 0 ? '+' : ''}${diffPct.toFixed(0)}% em relação ao mês anterior (R$ ${prevTotal.toFixed(2).replace('.', ',')} → R$ ${totalProjectedExpense.toFixed(2).replace('.', ',')})`,
         });
       }
     }
