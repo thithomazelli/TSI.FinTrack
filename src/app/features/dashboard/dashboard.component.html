@@ -11,7 +11,7 @@
     <p class="loading-text">{{ 'common.loading' | translate }}</p>
   } @else {
 
-    <tsi-balance-card [year]="year()" [month]="month()" />
+    <tsi-balance-card />
 
     <!-- Alerts carousel -->
     @if (visibleAlerts().length > 0) {

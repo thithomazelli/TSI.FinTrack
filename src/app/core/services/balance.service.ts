@@ -7,6 +7,7 @@ export interface BalanceSummary {
   totalIncome: number;
   totalExpenses: number;
   balance: number;
+  projectedBalance: number;
   currentBill: number;
 }
 
@@ -68,10 +69,14 @@ export class BalanceService {
     return from(Promise.all([
       this.supabase.client.from('entries').select('amount').eq('owner_id', uid).gte('date', start).lte('date', end).eq('status', 'REALIZED'),
       this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).gte('date', start).lte('date', end).eq('status', 'REALIZED'),
-    ])).pipe(map(([entriesRes, txRes]) => {
+      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).gte('date', start).lte('date', end),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).gte('date', start).lte('date', end),
+    ])).pipe(map(([entriesRes, txRes, allEntriesRes, allTxRes]) => {
       const totalIncome = (entriesRes.data ?? []).reduce((s, e) => s + e.amount, 0);
       const totalExpenses = (txRes.data ?? []).reduce((s, t) => s + t.amount, 0);
-      return { totalIncome, totalExpenses, balance: totalIncome - totalExpenses, currentBill: totalExpenses };
+      const allIncome = (allEntriesRes.data ?? []).reduce((s, e) => s + e.amount, 0);
+      const allExpenses = (allTxRes.data ?? []).reduce((s, t) => s + t.amount, 0);
+      return { totalIncome, totalExpenses, balance: totalIncome - totalExpenses, projectedBalance: allIncome - allExpenses, currentBill: totalExpenses };
     }));
   }
 

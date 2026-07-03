@@ -14,10 +14,7 @@ import { BalanceService } from '../../../core/services/balance.service';
 export class BalanceCardComponent implements OnInit {
   private readonly balanceService = inject(BalanceService);
 
-  /** Year for month-balance calculation. When both year+month provided, uses getMonthBalance. */
-  readonly year = input<number | null>(null);
-  readonly month = input<number | null>(null);
-  /** Legacy: when provided without year/month, caps projected to this date. */
+  /** When provided, projected balance is capped to this ISO date (YYYY-MM-DD). */
   readonly upToDate = input<string | null>(null);
 
   readonly available = signal<number | null>(null);
@@ -26,13 +23,9 @@ export class BalanceCardComponent implements OnInit {
   constructor() {
     effect(() => {
       this.balanceService.version();
-      const y = this.year();
-      const m = this.month();
       const end = this.upToDate();
       this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} });
-      if (y !== null && m !== null) {
-        this.balanceService.getMonthBalance(y, m).subscribe({ next: v => this.projected.set(v), error: () => {} });
-      } else if (end) {
+      if (end) {
         this.balanceService.getProjectedBalanceUpTo(end).subscribe({ next: v => this.projected.set(v), error: () => {} });
       } else {
         this.balanceService.getProjectedBalance().subscribe({ next: v => this.projected.set(v), error: () => {} });

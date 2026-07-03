@@ -38,15 +38,11 @@ export class BalanceWidgetComponent implements OnInit {
     effect(() => {
       this.balanceService.version();
       this.balanceService.getSummary(this.year, this.month).subscribe({
-        next: s => { this.summary.set(s); this.loading.set(false); },
+        next: s => { this.summary.set(s); this.projected.set(s.projectedBalance); this.loading.set(false); },
         error: () => this.loading.set(false),
       });
       this.balanceService.getAvailableBalance().subscribe({
         next: v => this.available.set(v),
-        error: () => {},
-      });
-      this.balanceService.getMonthBalance(this.year, this.month).subscribe({
-        next: v => this.projected.set(v),
         error: () => {},
       });
     });

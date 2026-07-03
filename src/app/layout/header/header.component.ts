@@ -88,8 +88,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     effect(() => {
       this.balanceService.version();
       this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v), error: () => {} });
-      this.balanceService.getMonthBalance(this.year, this.month).subscribe({ next: v => this.projectedBalance.set(v), error: () => {} });
-      this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} });
+      this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => { this.balanceSummary.set(s); this.projectedBalance.set(s.projectedBalance); }, error: () => {} });
     });
   }
 
