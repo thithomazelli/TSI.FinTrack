@@ -5,10 +5,9 @@ import {
   OnInit,
   TemplateRef,
   computed,
-  effect,
   input,
+  linkedSignal,
   signal,
-  untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -61,7 +60,8 @@ export class DataTableComponent implements OnInit {
   readonly query    = signal('');
   readonly sortKey  = signal<string | null>(null);
   readonly sortDir  = signal<SortDir>('desc');
-  readonly page     = signal(0);
+  // Resets to 0 whenever items reference changes, but can be updated manually
+  readonly page     = linkedSignal({ source: this.items, computation: () => 0 });
   readonly pageSize = signal(25);
   readonly pageSizeOptions = PAGE_SIZES;
 
@@ -69,13 +69,6 @@ export class DataTableComponent implements OnInit {
     this.sortKey.set(this.initialSortKey());
     this.sortDir.set(this.initialSortDir());
     this.pageSize.set(this.defaultPageSize());
-  }
-
-  constructor() {
-    effect(() => {
-      this.items();
-      untracked(() => this.page.set(0));
-    });
   }
 
   // ── Derived data ──────────────────────────────────────────────────────────
