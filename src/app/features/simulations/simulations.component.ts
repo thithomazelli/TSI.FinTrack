@@ -50,12 +50,11 @@ interface DiffEntry {
 }
 
 @Component({
-  selector: 'tsi-simulations',
-  standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent, DataTableComponent],
-  templateUrl: './simulations.component.html',
-  styleUrls: ['./simulations.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-simulations',
+    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent, DataTableComponent],
+    templateUrl: './simulations.component.html',
+    styleUrls: ['./simulations.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimulationsComponent implements OnInit {
   private readonly entryService = inject(EntryService);

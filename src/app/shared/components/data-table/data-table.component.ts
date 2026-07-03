@@ -29,12 +29,11 @@ export type RowClassFn<T = any> = (item: T) => string;
 const PAGE_SIZES = [10, 25, 50, 100];
 
 @Component({
-  selector: 'tsi-data-table',
-  standalone: true,
-  imports: [NgTemplateOutlet, FormsModule, TranslatePipe],
-  templateUrl: './data-table.component.html',
-  styleUrls: ['./data-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-data-table',
+    imports: [NgTemplateOutlet, FormsModule, TranslatePipe],
+    templateUrl: './data-table.component.html',
+    styleUrls: ['./data-table.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DataTableComponent implements OnInit {
   // ── Inputs ────────────────────────────────────────────────────────────────

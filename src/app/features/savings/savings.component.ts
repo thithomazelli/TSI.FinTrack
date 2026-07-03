@@ -21,12 +21,11 @@ import { MonthPickerComponent } from '../../shared/components/month-picker/month
 import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
 
 @Component({
-  selector: 'tsi-savings',
-  standalone: true,
-  imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent],
-  templateUrl: './savings.component.html',
-  styleUrls: ['./savings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-savings',
+    imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent],
+    templateUrl: './savings.component.html',
+    styleUrls: ['./savings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SavingsComponent implements OnInit {
   private readonly savingsService = inject(SavingsService);

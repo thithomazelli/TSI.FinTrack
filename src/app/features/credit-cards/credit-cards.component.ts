@@ -22,12 +22,11 @@ interface BillWithCard extends CreditCardBill {
 }
 
 @Component({
-  selector: 'tsi-credit-cards',
-  standalone: true,
-  imports: [DecimalPipe, SlicePipe, TranslatePipe, MonthPickerComponent],
-  templateUrl: './credit-cards.component.html',
-  styleUrls: ['./credit-cards.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-credit-cards',
+    imports: [DecimalPipe, SlicePipe, TranslatePipe, MonthPickerComponent],
+    templateUrl: './credit-cards.component.html',
+    styleUrls: ['./credit-cards.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreditCardsComponent implements OnInit {
   private readonly billService = inject(CreditCardBillService);

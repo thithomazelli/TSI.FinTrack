@@ -3,12 +3,11 @@ import { LanguageService } from '../../../core/services/language.service';
 import { Language } from '../../../core/models/enums/language.enum';
 
 @Component({
-  selector: 'tsi-language-switcher',
-  standalone: true,
-  imports: [],
-  templateUrl: './language-switcher.component.html',
-  styleUrls: ['./language-switcher.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-language-switcher',
+    imports: [],
+    templateUrl: './language-switcher.component.html',
+    styleUrls: ['./language-switcher.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LanguageSwitcherComponent {
   readonly lang = inject(LanguageService);

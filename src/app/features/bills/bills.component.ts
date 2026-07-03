@@ -17,12 +17,11 @@ import { Category } from '../../core/models/interfaces/category.interface';
 Chart.register(...registerables);
 
 @Component({
-  selector: 'tsi-bills',
-  standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, MonthPickerComponent, TranslatePipe, BaseChartDirective],
-  templateUrl: './bills.component.html',
-  styleUrls: ['./bills.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-bills',
+    imports: [DecimalPipe, DatePipe, FormsModule, MonthPickerComponent, TranslatePipe, BaseChartDirective],
+    templateUrl: './bills.component.html',
+    styleUrls: ['./bills.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BillsComponent implements OnInit {
   private readonly txService = inject(TransactionService);

@@ -16,12 +16,11 @@ import { Account } from '../../../core/models/interfaces/account.interface';
 import { DomainList } from '../../../core/models/interfaces/domain-list.interface';
 
 @Component({
-  selector: 'tsi-accounts-settings',
-  standalone: true,
-  imports: [TranslatePipe, DecimalPipe, FormsModule],
-  templateUrl: './accounts-settings.component.html',
-  styleUrls: ['./accounts-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-accounts-settings',
+    imports: [TranslatePipe, DecimalPipe, FormsModule],
+    templateUrl: './accounts-settings.component.html',
+    styleUrls: ['./accounts-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccountsSettingsComponent implements OnInit {
   private readonly accountService = inject(AccountService);

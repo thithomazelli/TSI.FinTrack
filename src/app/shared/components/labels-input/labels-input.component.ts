@@ -16,12 +16,11 @@ import { PeopleService } from '../../../core/services/people.service';
 import { People } from '../../../core/models/interfaces/people.interface';
 
 @Component({
-  selector: 'tsi-labels-input',
-  standalone: true,
-  imports: [FormsModule, TranslatePipe],
-  templateUrl: './labels-input.component.html',
-  styleUrls: ['./labels-input.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-labels-input',
+    imports: [FormsModule, TranslatePipe],
+    templateUrl: './labels-input.component.html',
+    styleUrls: ['./labels-input.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LabelsInputComponent implements OnInit {
   @ViewChild('inputEl') inputEl!: ElementRef<HTMLInputElement>;

@@ -3,12 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
-  selector: 'tsi-month-picker',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './month-picker.component.html',
-  styleUrls: ['./month-picker.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-month-picker',
+    imports: [FormsModule],
+    templateUrl: './month-picker.component.html',
+    styleUrls: ['./month-picker.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MonthPickerComponent {
   private readonly language = inject(LanguageService);

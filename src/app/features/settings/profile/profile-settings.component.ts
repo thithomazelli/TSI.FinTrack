@@ -16,12 +16,11 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
-  selector: 'tsi-profile-settings',
-  standalone: true,
-  imports: [FormsModule, TranslatePipe, LanguageSwitcherComponent],
-  templateUrl: './profile-settings.component.html',
-  styleUrls: ['./profile-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-profile-settings',
+    imports: [FormsModule, TranslatePipe, LanguageSwitcherComponent],
+    templateUrl: './profile-settings.component.html',
+    styleUrls: ['./profile-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileSettingsComponent implements OnInit {
   private readonly auth = inject(AuthService);

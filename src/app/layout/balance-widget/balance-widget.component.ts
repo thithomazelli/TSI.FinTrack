@@ -5,12 +5,11 @@ import { BalanceService, BalanceSummary } from '../../core/services/balance.serv
 import { LanguageService } from '../../core/services/language.service';
 
 @Component({
-  selector: 'tsi-balance-widget',
-  standalone: true,
-  imports: [DecimalPipe, TranslatePipe],
-  templateUrl: './balance-widget.component.html',
-  styleUrls: ['./balance-widget.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-balance-widget',
+    imports: [DecimalPipe, TranslatePipe],
+    templateUrl: './balance-widget.component.html',
+    styleUrls: ['./balance-widget.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BalanceWidgetComponent implements OnInit {
   private readonly balanceService = inject(BalanceService);
