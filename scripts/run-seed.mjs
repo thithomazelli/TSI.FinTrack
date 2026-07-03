@@ -182,28 +182,40 @@ async function main() {
 
   // 3. Entradas de renda
   console.log('\nInserindo entradas de renda...')
-  const entries = data.entries.map(e => ({
-    owner_id: e.owner_id, description: e.description,
-    amount: e.amount, date: e.date, labels: e.labels ?? [], status: e.status
-  }))
-  await batchInsert('entries', entries, 'Entradas')
+  const { count: entryCount } = await supabase
+    .from('entries').select('id', { count: 'exact', head: true }).eq('owner_id', OWNER_ID)
+  if (entryCount > 0) {
+    console.log(`  Entradas já existem (${entryCount} registros) — pulando ✓`)
+  } else {
+    const entries = data.entries.map(e => ({
+      owner_id: e.owner_id, description: e.description,
+      amount: e.amount, date: e.date, labels: e.labels ?? [], status: e.status
+    }))
+    await batchInsert('entries', entries, 'Entradas')
+    console.log(`   ${entries.length} entradas de renda`)
+  }
 
   // 4. Transações de despesa
   console.log('\nInserindo transações de despesa...')
-  const transactions = data.transactions.map(t => ({
-    owner_id: t.owner_id, description: t.description,
-    amount: t.amount, date: t.date, labels: t.labels ?? [], status: t.status,
-    category_id: catMap[t.category_name?.toLowerCase()] ?? null,
-    credit_card_id: cardMap[(t.credit_card_name ?? 'Débito Itaú').toLowerCase()] ?? null,
-    account_id: null,
-    installment_number: t.installment_number ?? null,
-    total_installments: t.total_installments ?? null,
-  }))
-  await batchInsert('transactions', transactions, 'Transações')
+  const { count: txCount } = await supabase
+    .from('transactions').select('id', { count: 'exact', head: true }).eq('owner_id', OWNER_ID)
+  if (txCount > 0) {
+    console.log(`  Transações já existem (${txCount} registros) — pulando ✓`)
+  } else {
+    const transactions = data.transactions.map(t => ({
+      owner_id: t.owner_id, description: t.description,
+      amount: t.amount, date: t.date, labels: t.labels ?? [], status: t.status,
+      category_id: catMap[t.category_name?.toLowerCase()] ?? null,
+      credit_card_id: cardMap[(t.credit_card_name ?? 'Débito Itaú').toLowerCase()] ?? null,
+      account_id: null,
+      installment_number: t.installment_number ?? null,
+      total_installments: t.total_installments ?? null,
+    }))
+    await batchInsert('transactions', transactions, 'Transações')
+    console.log(`   ${transactions.length} transações de despesa`)
+  }
 
   console.log('\n✅ Seed concluído!')
-  console.log(`   ${entries.length} entradas de renda`)
-  console.log(`   ${transactions.length} transações de despesa`)
 
   // 5. Backfill credit_card_bills
   console.log('\nBackfill de faturas de cartão...')
