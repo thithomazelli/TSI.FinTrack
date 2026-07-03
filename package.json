@@ -7,11 +7,14 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler dev"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "^21.2.17",
+    "@angular/cdk": "^21.2.14",
     "@angular/common": "^21.2.17",
     "@angular/compiler": "^21.2.17",
     "@angular/core": "^21.2.17",
@@ -22,7 +25,6 @@
     "@ngx-translate/core": "^18.0.0",
     "@ngx-translate/http-loader": "^18.0.0",
     "@supabase/supabase-js": "^2.108.2",
-    "@angular/cdk": "^21.2.14",
     "chart.js": "^4.5.1",
     "ng2-charts": "^10.0.0",
     "pdfjs-dist": "^6.1.200",
@@ -50,6 +52,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "wrangler": "^4.107.0"
   }
 }
