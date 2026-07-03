@@ -56,11 +56,17 @@ export class BalanceService {
   getBalanceUpTo(endDate: string): Observable<number> {
     const uid = this.ownerId;
     return from(Promise.all([
-      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).lte('date', endDate).range(0, 9999),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).lte('date', endDate).range(0, 9999),
+      this.supabase.client.from('entries').select('amount,date').eq('owner_id', uid).lte('date', endDate).range(0, 9999),
+      this.supabase.client.from('transactions').select('amount,date').eq('owner_id', uid).lte('date', endDate).range(0, 9999),
     ])).pipe(map(([entries, txs]) => {
+      console.log(`[getBalanceUpTo] endDate=${endDate} | entries=${entries.data?.length} | txs=${txs.data?.length}`);
+      console.log('[getBalanceUpTo] entries sample:', entries.data?.slice(0,3));
+      console.log('[getBalanceUpTo] txs sample:', txs.data?.slice(0,3));
+      console.log('[getBalanceUpTo] entries error:', entries.error);
+      console.log('[getBalanceUpTo] txs error:', txs.error);
       const income  = (entries.data ?? []).reduce((s: number, e: { amount: number }) => s + e.amount, 0);
       const expenses = (txs.data ?? []).reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+      console.log(`[getBalanceUpTo] income=${income} expenses=${expenses} balance=${income - expenses}`);
       return income - expenses;
     }));
   }
