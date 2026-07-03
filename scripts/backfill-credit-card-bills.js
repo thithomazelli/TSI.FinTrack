@@ -134,13 +134,13 @@ async function runViaRest() {
   let inserted = 0;
   for (let i = 0; i < rows.length; i += 50) {
     const batch = rows.slice(i, i + 50);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/credit_card_bills`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/credit_card_bills?on_conflict=credit_card_id,year,month`, {
       method: 'POST',
       headers: {
         'apikey': KEY,
         'Authorization': `Bearer ${KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates,return=minimal',
+        'Prefer': 'resolution=ignore-duplicates,return=minimal',
       },
       body: JSON.stringify(batch),
     });
