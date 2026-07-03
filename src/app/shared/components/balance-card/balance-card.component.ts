@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy, ChangeDetectorRef, Component, Input,
-  OnChanges, OnDestroy, OnInit, SimpleChanges, inject, untracked,
+  OnChanges, OnDestroy, SimpleChanges, effect, inject, untracked,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { switchMap, Subscription } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { BalanceService } from '../../../core/services/balance.service';
 
 @Component({
@@ -15,11 +14,10 @@ import { BalanceService } from '../../../core/services/balance.service';
     styleUrls: ['./balance-card.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
+export class BalanceCardComponent implements OnChanges, OnDestroy {
   private readonly balanceService = inject(BalanceService);
   private readonly cdr = inject(ChangeDetectorRef);
   private subs: Subscription[] = [];
-  private readonly version$ = toObservable(this.balanceService.version);
 
   @Input() year: number  = new Date().getFullYear();
   @Input() month: number = new Date().getMonth() + 1;
@@ -27,15 +25,21 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
   available: number | null = null;
   projected: number | null = null;
 
-  ngOnInit(): void { this.load(); }
+  constructor() {
+    // Recarrega sempre que balanceService.invalidate() for chamado
+    effect(() => {
+      this.balanceService.version();
+      untracked(() => this.fetch());
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['year'] || changes['month']) { this.load(); }
+    if (changes['year'] || changes['month']) { this.fetch(); }
   }
 
   ngOnDestroy(): void { this.subs.forEach(s => s.unsubscribe()); }
 
-  private load(): void {
+  private fetch(): void {
     this.subs.forEach(s => s.unsubscribe());
     this.subs = [];
 
@@ -43,26 +47,25 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
     const m = this.month;
     const now = new Date();
     const isCurrent = y === now.getFullYear() && m === now.getMonth() + 1;
-
     const end = new Date(y, m, 0).toISOString().split('T')[0];
 
     if (isCurrent) {
       // Regra B: mês atual — Atual = só REALIZED; Projetado = todos os status até fim do mês
       this.subs.push(
-        this.version$.pipe(switchMap(() => this.balanceService.getAvailableBalance())).subscribe({
-          next: v => untracked(() => { this.available = v; this.cdr.markForCheck(); }),
+        this.balanceService.getAvailableBalance().subscribe({
+          next: v => { this.available = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
-        this.version$.pipe(switchMap(() => this.balanceService.getBalanceUpTo(end))).subscribe({
-          next: v => untracked(() => { this.projected = v; this.cdr.markForCheck(); }),
+        this.balanceService.getBalanceUpTo(end).subscribe({
+          next: v => { this.projected = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
       );
     } else {
       // Regra A (mês passado) ou C (mês futuro): ambos = cumulativo até o fim do mês selecionado
       this.subs.push(
-        this.version$.pipe(switchMap(() => this.balanceService.getBalanceUpTo(end))).subscribe({
-          next: v => untracked(() => { this.available = v; this.projected = v; this.cdr.markForCheck(); }),
+        this.balanceService.getBalanceUpTo(end).subscribe({
+          next: v => { this.available = v; this.projected = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
       );
