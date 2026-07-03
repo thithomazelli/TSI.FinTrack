@@ -197,10 +197,11 @@ export class MovimentosComponent implements OnInit {
 
   // Totais server-side (sem limite de 1000 linhas)
   readonly periodTotals = signal<{ totalEntries: number; totalTransactions: number } | null>(null);
+  readonly balanceUpTo  = signal<number>(0);
 
   readonly totalEntradas = computed(() => this.periodTotals()?.totalEntries ?? 0);
   readonly totalSaidas   = computed(() => this.periodTotals()?.totalTransactions ?? 0);
-  readonly saldo         = computed(() => this.totalEntradas() - this.totalSaidas());
+  readonly saldo         = this.balanceUpTo;
 
 
   // Multi-seleção
@@ -346,7 +347,7 @@ export class MovimentosComponent implements OnInit {
     const to = this.dateTo();
 
     try {
-      const [entriesRes, txsRes, totalsRes] = await Promise.all([
+      const [entriesRes, txsRes, totalsRes, balanceRes] = await Promise.all([
         this.supabase.client
           .from('entries')
           .select('*')
@@ -362,6 +363,7 @@ export class MovimentosComponent implements OnInit {
           .lte('date', to)
           .order('date', { ascending: false }),
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
+        this.supabase.client.rpc('get_balance_up_to', { end_date: to }),
       ]);
 
       if (entriesRes.error) throw entriesRes.error;
@@ -372,6 +374,7 @@ export class MovimentosComponent implements OnInit {
         totalEntries: Number(totalsRow?.total_entries ?? 0),
         totalTransactions: Number(totalsRow?.total_transactions ?? 0),
       });
+      this.balanceUpTo.set(Number(balanceRes.data ?? 0));
 
       this.allEntries.set((entriesRes.data ?? []).map((r: any) => ({
         id: r.id, ownerId: r.owner_id, description: r.description,
