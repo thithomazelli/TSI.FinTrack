@@ -76,7 +76,7 @@ export class DataTableComponent implements OnInit {
     effect(() => {
       this.items();
       this.page.set(0);
-    });
+    }, { allowSignalWrites: true });
   }
 
   // ── Derived data ──────────────────────────────────────────────────────────
