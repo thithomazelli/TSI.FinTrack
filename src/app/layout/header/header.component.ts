@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, Component, OnInit, OnDestroy,
-  inject, output, signal, computed, HostListener, ElementRef,
+  inject, output, signal, computed, effect, HostListener, ElementRef,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
@@ -80,6 +80,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   readonly pageTitleKey = signal(this.resolveTitle(this.router.url));
 
+  private readonly now = new Date();
+  private readonly year = this.now.getFullYear();
+  private readonly month = this.now.getMonth() + 1;
+
+  constructor() {
+    effect(() => {
+      this.balanceService.version();
+      const endOfMonth = new Date(this.year, this.month, 0).toISOString().split('T')[0];
+      this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v), error: () => {} });
+      this.balanceService.getProjectedBalanceUpTo(endOfMonth).subscribe({ next: v => this.projectedBalance.set(v), error: () => {} });
+      this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} });
+    });
+  }
+
   private resolveTitle(url: string): string {
     const path = url.split('?')[0].split('#')[0];
     // match longest prefix
@@ -104,11 +118,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.pageTitleKey.set(this.resolveTitle((e as NavigationEnd).urlAfterRedirects));
       })
     );
-    const now = new Date();
-    this.balanceService.getAvailableBalance().subscribe({ next: v => this.availableBalance.set(v), error: () => {} });
-    this.balanceService.getProjectedBalance().subscribe({ next: v => this.projectedBalance.set(v), error: () => {} });
-    this.balanceService.getSummary(now.getFullYear(), now.getMonth() + 1).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} });
-    this.alertService.getAlerts(now.getFullYear(), now.getMonth() + 1).subscribe({
+    this.alertService.getAlerts(this.year, this.month).subscribe({
       next: alerts => this.alerts.set(alerts),
       error: () => {},
     });
