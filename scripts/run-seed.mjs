@@ -176,7 +176,8 @@ async function main() {
     if (error) { console.error('Erro ao criar conta:', error.message); process.exit(1) }
     console.log(`  Conta Corrente criada (saldo abertura ${opening}) ✓`)
   } else {
-    await supabase.from('accounts').update({ balance: opening }).eq('id', acct.id)
+    const { error: updErr } = await supabase.from('accounts').update({ balance: opening }).eq('id', acct.id)
+    if (updErr) { console.error('Erro ao atualizar conta:', updErr.message); process.exit(1) }
     console.log(`  Conta Corrente saldo abertura atualizado p/ ${opening} ✓`)
   }
 
