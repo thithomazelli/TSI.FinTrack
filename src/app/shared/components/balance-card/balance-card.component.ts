@@ -45,13 +45,13 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
     const end = new Date(y, m, 0).toISOString().split('T')[0];
 
     if (isCurrent) {
-      // Regra B: mês atual — Atual = apenas REALIZED; Projetado = todos os status (todo histórico)
+      // Regra B: mês atual — Atual = só REALIZED; Projetado = todos os status até fim do mês
       this.subs.push(
         this.balanceService.getAvailableBalance().subscribe({
           next: v => { this.available = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
-        this.balanceService.getProjectedBalance().subscribe({
+        this.balanceService.getBalanceUpTo(end).subscribe({
           next: v => { this.projected = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
