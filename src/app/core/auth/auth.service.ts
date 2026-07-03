@@ -45,7 +45,9 @@ export class AuthService {
     return this.sessionSubject.value?.user ?? null;
   }
 
-  private readonly redirectTo = `${window.location.origin}/TSI.FinTrack/`;
+  private readonly redirectTo = window.location.hostname === 'localhost'
+    ? `${window.location.origin}/`
+    : `${window.location.origin}/TSI.FinTrack/`;
 
   signInWithGoogle(): Observable<void> {
     return from(
