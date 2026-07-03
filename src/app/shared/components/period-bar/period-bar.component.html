@@ -1,0 +1,32 @@
+<div class="top-section">
+  <div class="filter-bar">
+    <div class="filter-section filter-section--period">
+      @if (showModeTabs) {
+        <div class="period-toggle">
+          <button type="button" class="period-tab" [class.is-active]="periodMode === 'month'"
+                  (click)="periodModeChange.emit('month')">{{ 'movimentos.periodMonth' | translate }}</button>
+          <button type="button" class="period-tab" [class.is-active]="periodMode === 'range'"
+                  (click)="periodModeChange.emit('range')">{{ 'movimentos.periodRange' | translate }}</button>
+        </div>
+      }
+      @if (periodMode === 'month' || !showModeTabs) {
+        <tsi-month-picker [year]="year" [month]="month" (monthChanged)="monthChanged.emit($event)" />
+      } @else {
+        <div class="range-fields">
+          <div class="filter-group">
+            <label class="filter-label">{{ 'movimentos.from' | translate }}</label>
+            <input class="input input-sm" type="date" [ngModel]="dateFrom"
+                   (ngModelChange)="dateFromChange.emit($event)" />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">{{ 'movimentos.to' | translate }}</label>
+            <input class="input input-sm" type="date" [ngModel]="dateTo"
+                   (ngModelChange)="dateToChange.emit($event)" />
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <tsi-balance-card [year]="year" [month]="month" />
+</div>

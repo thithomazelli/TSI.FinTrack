@@ -19,8 +19,7 @@ import { Transaction } from '../../core/models/interfaces/transaction.interface'
 import { Category } from '../../core/models/interfaces/category.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
-import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
-import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
+import { PeriodBarComponent } from '../../shared/components/period-bar/period-bar.component';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { DataTableComponent, TableColumn, SearchFn, CompareFn, RowClassFn } from '../../shared/components/data-table/data-table.component';
 
@@ -54,7 +53,7 @@ interface DiffEntry {
 
 @Component({
     selector: 'tsi-simulations',
-    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent, DataTableComponent],
+    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, PeriodBarComponent, DataTableComponent],
     templateUrl: './simulations.component.html',
     styleUrls: ['./simulations.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

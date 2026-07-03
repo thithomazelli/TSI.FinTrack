@@ -14,32 +14,17 @@
   </div>
 
   <!-- Top section: period picker + balance card side by side -->
-  <div class="top-section">
-    <div class="filter-bar">
-      <div class="filter-section filter-section--period">
-        <div class="period-toggle">
-          <button type="button" class="period-tab" [class.is-active]="periodMode() === 'month'" (click)="setPeriodMode('month')">{{ 'movimentos.periodMonth' | translate }}</button>
-          <button type="button" class="period-tab" [class.is-active]="periodMode() === 'range'" (click)="setPeriodMode('range')">{{ 'movimentos.periodRange' | translate }}</button>
-        </div>
-        @if (periodMode() === 'month') {
-          <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
-        } @else {
-          <div class="range-fields">
-            <div class="filter-group">
-              <label class="filter-label">{{ 'movimentos.from' | translate }}</label>
-              <input class="input input-sm" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); onDateChange()" />
-            </div>
-            <div class="filter-group">
-              <label class="filter-label">{{ 'movimentos.to' | translate }}</label>
-              <input class="input input-sm" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); onDateChange()" />
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-
-    <tsi-balance-card [year]="year()" [month]="month()" />
-  </div>
+  <tsi-period-bar
+    [year]="year()"
+    [month]="month()"
+    [periodMode]="periodMode()"
+    [dateFrom]="dateFrom()"
+    [dateTo]="dateTo()"
+    (monthChanged)="onMonthChanged($event)"
+    (periodModeChange)="setPeriodMode($event)"
+    (dateFromChange)="dateFrom.set($event); onDateChange()"
+    (dateToChange)="dateTo.set($event); onDateChange()"
+  />
 
   <!-- Diff panel (changes summary) -->
   @if (hasChanges()) {

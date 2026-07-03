@@ -4,14 +4,18 @@
       <h2>{{ 'dashboard.title' | translate }}</h2>
       <p class="subtitle">{{ 'dashboard.subtitle' | translate }}</p>
     </div>
-    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
   </div>
+
+  <tsi-period-bar
+    [year]="year()"
+    [month]="month()"
+    [showModeTabs]="false"
+    (monthChanged)="onMonthChanged($event)"
+  />
 
   @if (loading()) {
     <p class="loading-text">{{ 'common.loading' | translate }}</p>
   } @else {
-
-    <tsi-balance-card [year]="year()" [month]="month()" />
 
     <!-- Alerts carousel -->
     @if (visibleAlerts().length > 0) {
