@@ -140,7 +140,7 @@ async function runViaRest() {
         'apikey': KEY,
         'Authorization': `Bearer ${KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=ignore-duplicates,return=minimal',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
       },
       body: JSON.stringify(batch),
     });
