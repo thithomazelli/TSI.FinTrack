@@ -32,12 +32,12 @@ export class BalanceCardComponent implements OnInit {
       const isCurrent = y === curYear && m === curMonth;
 
       if (isCurrent) {
-        // Regra B: Atual = apenas REALIZED; Projetado = todos os registros até fim do mês
+        // Regra B: Atual = apenas REALIZED do mês; Projetado = todos os status do mês
         this.balanceService.getAvailableBalance().subscribe({ next: v => this.available.set(v), error: () => {} });
-        this.balanceService.getBalanceUpTo(end).subscribe({ next: v => this.projected.set(v), error: () => {} });
+        this.balanceService.getMonthBalance(y, m).subscribe({ next: v => this.projected.set(v), error: () => {} });
       } else {
-        // Regra A (passado) ou C (futuro): ambos = todos os registros acumulados até fim do mês
-        this.balanceService.getBalanceUpTo(end).subscribe({ next: v => { this.available.set(v); this.projected.set(v); }, error: () => {} });
+        // Regra A (passado) ou C (futuro): saldo do mês sem filtro de status
+        this.balanceService.getMonthBalance(y, m).subscribe({ next: v => { this.available.set(v); this.projected.set(v); }, error: () => {} });
       }
     });
   }
