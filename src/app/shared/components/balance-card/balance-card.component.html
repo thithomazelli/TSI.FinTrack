@@ -1,4 +1,4 @@
-@if (available() !== null) {
+@if (available !== null) {
   <div class="balance-card">
     <div class="bc-info">
       <span class="bc-label">{{ 'widget.balance' | translate }}</span>
@@ -6,11 +6,11 @@
     <div class="bc-values">
       <div class="bc-row">
         <span class="bc-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
-        <span class="bc-value" [class.bc-pos]="available()! >= 0" [class.bc-neg]="available()! < 0">R$ {{ available()! | number:'1.2-2' }}</span>
+        <span class="bc-value" [class.bc-pos]="available! >= 0" [class.bc-neg]="available! < 0">R$ {{ available! | number:'1.2-2' }}</span>
       </div>
       <div class="bc-row">
         <span class="bc-sublabel">{{ 'widget.balanceProjectedShort' | translate }}</span>
-        <span class="bc-value" [class.bc-pos]="(projected() ?? 0) >= 0" [class.bc-neg]="(projected() ?? 0) < 0">R$ {{ (projected() ?? 0) | number:'1.2-2' }}</span>
+        <span class="bc-value" [class.bc-pos]="(projected ?? 0) >= 0" [class.bc-neg]="(projected ?? 0) < 0">R$ {{ (projected ?? 0) | number:'1.2-2' }}</span>
       </div>
     </div>
   </div>
