@@ -50,12 +50,11 @@ interface CategorySpend {
 
 
 @Component({
-  selector: 'tsi-reports',
-  standalone: true,
-  imports: [FormsModule, BaseChartDirective, TranslatePipe],
-  templateUrl: './reports.component.html',
-  styleUrls: ['./reports.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-reports',
+    imports: [FormsModule, BaseChartDirective, TranslatePipe],
+    templateUrl: './reports.component.html',
+    styleUrls: ['./reports.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReportsComponent implements OnInit {
   private readonly transactionService = inject(TransactionService);

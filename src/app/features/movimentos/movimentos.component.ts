@@ -55,12 +55,11 @@ export interface MovimentoItem {
 type ModalMode = 'entry' | 'transaction' | null;
 
 @Component({
-  selector: 'tsi-movimentos',
-  standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, BalanceCardComponent, DataTableComponent, CurrencyMaskDirective],
-  templateUrl: './movimentos.component.html',
-  styleUrls: ['./movimentos.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-movimentos',
+    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, BalanceCardComponent, DataTableComponent, CurrencyMaskDirective],
+    templateUrl: './movimentos.component.html',
+    styleUrls: ['./movimentos.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MovimentosComponent implements OnInit {
   private readonly entryService = inject(EntryService);

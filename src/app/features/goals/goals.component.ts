@@ -29,12 +29,11 @@ interface GoalRow {
 }
 
 @Component({
-  selector: 'tsi-goals',
-  standalone: true,
-  imports: [DecimalPipe, FormsModule, TranslatePipe, MonthPickerComponent],
-  templateUrl: './goals.component.html',
-  styleUrls: ['./goals.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-goals',
+    imports: [DecimalPipe, FormsModule, TranslatePipe, MonthPickerComponent],
+    templateUrl: './goals.component.html',
+    styleUrls: ['./goals.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GoalsComponent implements OnInit {
   private readonly goalService = inject(GoalService);

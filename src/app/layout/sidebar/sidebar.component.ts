@@ -8,12 +8,11 @@ import { LanguageSwitcherComponent } from '../../shared/components/language-swit
 interface NavItem { path: string; labelKey: string; icon: string; }
 
 @Component({
-  selector: 'tsi-sidebar',
-  standalone: true,
-  imports: [RouterLink, RouterLinkActive, BalanceWidgetComponent, LanguageSwitcherComponent, TranslatePipe],
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-sidebar',
+    imports: [RouterLink, RouterLinkActive, BalanceWidgetComponent, LanguageSwitcherComponent, TranslatePipe],
+    templateUrl: './sidebar.component.html',
+    styleUrls: ['./sidebar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SidebarComponent {
   readonly themeService = inject(ThemeService);

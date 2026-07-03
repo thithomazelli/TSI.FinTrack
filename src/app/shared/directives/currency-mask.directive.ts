@@ -11,8 +11,9 @@ export class CurrencyMaskDirective implements ControlValueAccessor {
   private onChange: (v: number) => void = () => {};
   private onTouched: () => void = () => {};
 
-  @HostListener('input', ['$event.target.value'])
-  onInput(raw: string): void {
+  @HostListener('input', ['$event'])
+  onInput(event: Event): void {
+    const raw = (event.target as HTMLInputElement).value ?? '';
     const digits = raw.replace(/\D/g, '');
     const num = parseInt(digits || '0', 10) / 100;
     this.el.nativeElement.value = this.fmt(num);

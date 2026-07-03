@@ -14,12 +14,11 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { DomainList } from '../../../core/models/interfaces/domain-list.interface';
 
 @Component({
-  selector: 'tsi-domains-settings',
-  standalone: true,
-  imports: [TranslatePipe, FormsModule],
-  templateUrl: './domains-settings.component.html',
-  styleUrls: ['./domains-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-domains-settings',
+    imports: [TranslatePipe, FormsModule],
+    templateUrl: './domains-settings.component.html',
+    styleUrls: ['./domains-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DomainsSettingsComponent implements OnInit {
   private readonly domainListService = inject(DomainListService);

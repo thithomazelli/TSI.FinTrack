@@ -33,12 +33,11 @@ interface GoalSummary {
 }
 
 @Component({
-  selector: 'tsi-dashboard',
-  standalone: true,
-  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, RouterLink, BalanceCardComponent],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-dashboard',
+    imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, RouterLink, BalanceCardComponent],
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly transactionService = inject(TransactionService);

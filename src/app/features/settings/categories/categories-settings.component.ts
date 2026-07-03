@@ -15,12 +15,11 @@ import { Category } from '../../../core/models/interfaces/category.interface';
 const DEFAULT_COLOR = '#6366f1';
 
 @Component({
-  selector: 'tsi-categories-settings',
-  standalone: true,
-  imports: [FormsModule, TranslatePipe],
-  templateUrl: './categories-settings.component.html',
-  styleUrls: ['./categories-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-categories-settings',
+    imports: [FormsModule, TranslatePipe],
+    templateUrl: './categories-settings.component.html',
+    styleUrls: ['./categories-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CategoriesSettingsComponent implements OnInit {
   private readonly categoryService = inject(CategoryService);

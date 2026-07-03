@@ -5,12 +5,11 @@ import { AlertService, Alert } from '../../core/services/alert.service';
 import { LoggingService } from '../../core/services/logging.service';
 
 @Component({
-  selector: 'tsi-notifications',
-  standalone: true,
-  imports: [TranslatePipe, MonthPickerComponent],
-  templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-notifications',
+    imports: [TranslatePipe, MonthPickerComponent],
+    templateUrl: './notifications.component.html',
+    styleUrls: ['./notifications.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationsComponent implements OnInit {
   private readonly alertService = inject(AlertService);

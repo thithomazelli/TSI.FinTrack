@@ -4,12 +4,11 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { LoggingService } from '../../../core/services/logging.service';
 
 @Component({
-  selector: 'tsi-login',
-  standalone: true,
-  imports: [TranslatePipe],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-login',
+    imports: [TranslatePipe],
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent {
   private readonly authService = inject(AuthService);

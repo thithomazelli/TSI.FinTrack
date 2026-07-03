@@ -40,12 +40,11 @@ interface DebitReviewRow extends ParsedDebitRow {
 }
 
 @Component({
-  selector: 'tsi-import',
-  standalone: true,
-  imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe],
-  templateUrl: './import.component.html',
-  styleUrls: ['./import.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-import',
+    imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe],
+    templateUrl: './import.component.html',
+    styleUrls: ['./import.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImportComponent implements OnInit {
   private readonly transactionService = inject(TransactionService);

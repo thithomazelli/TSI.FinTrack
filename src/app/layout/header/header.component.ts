@@ -33,12 +33,11 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
 };
 
 @Component({
-  selector: 'tsi-header',
-  standalone: true,
-  imports: [DecimalPipe, TranslatePipe, RouterLink],
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-header',
+    imports: [DecimalPipe, TranslatePipe, RouterLink],
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   private readonly routeSub = new Subscription();

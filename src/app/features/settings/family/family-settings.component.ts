@@ -14,12 +14,11 @@ import { FamilyMember } from '../../../core/models/interfaces/family-member.inte
 import { FamilyRole } from '../../../core/models/enums/family-role.enum';
 
 @Component({
-  selector: 'tsi-family-settings',
-  standalone: true,
-  imports: [TranslatePipe, FormsModule],
-  templateUrl: './family-settings.component.html',
-  styleUrls: ['./family-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-family-settings',
+    imports: [TranslatePipe, FormsModule],
+    templateUrl: './family-settings.component.html',
+    styleUrls: ['./family-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FamilySettingsComponent implements OnInit {
   private readonly familyService = inject(FamilyService);

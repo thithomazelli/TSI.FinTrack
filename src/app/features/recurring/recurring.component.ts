@@ -14,12 +14,11 @@ import { Account } from '../../core/models/interfaces/account.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 
 @Component({
-  selector: 'tsi-recurring',
-  standalone: true,
-  imports: [DecimalPipe, FormsModule, TranslatePipe],
-  templateUrl: './recurring.component.html',
-  styleUrls: ['./recurring.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-recurring',
+    imports: [DecimalPipe, FormsModule, TranslatePipe],
+    templateUrl: './recurring.component.html',
+    styleUrls: ['./recurring.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecurringComponent implements OnInit {
   private readonly service = inject(RecurringTemplateService);

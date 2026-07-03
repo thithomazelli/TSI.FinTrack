@@ -13,12 +13,11 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { CreditCard } from '../../../core/models/interfaces/credit-card.interface';
 
 @Component({
-  selector: 'tsi-credit-cards-settings',
-  standalone: true,
-  imports: [TranslatePipe, FormsModule],
-  templateUrl: './credit-cards-settings.component.html',
-  styleUrls: ['./credit-cards-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-credit-cards-settings',
+    imports: [TranslatePipe, FormsModule],
+    templateUrl: './credit-cards-settings.component.html',
+    styleUrls: ['./credit-cards-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreditCardsSettingsComponent implements OnInit {
   private readonly cardService = inject(CreditCardService);

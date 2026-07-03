@@ -8,12 +8,11 @@ import { Subscription } from 'rxjs';
 import { BalanceService } from '../../../core/services/balance.service';
 
 @Component({
-  selector: 'tsi-balance-card',
-  standalone: true,
-  imports: [DecimalPipe, TranslatePipe],
-  templateUrl: './balance-card.component.html',
-  styleUrls: ['./balance-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'tsi-balance-card',
+    imports: [DecimalPipe, TranslatePipe],
+    templateUrl: './balance-card.component.html',
+    styleUrls: ['./balance-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
   private readonly balanceService = inject(BalanceService);
