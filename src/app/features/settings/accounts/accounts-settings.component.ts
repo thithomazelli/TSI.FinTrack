@@ -5,7 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AccountService } from '../../../core/services/account.service';
@@ -17,7 +17,7 @@ import { DomainList } from '../../../core/models/interfaces/domain-list.interfac
 
 @Component({
     selector: 'tsi-accounts-settings',
-    imports: [TranslatePipe, DecimalPipe, FormsModule],
+    imports: [TranslatePipe, CurrencyPipe, FormsModule],
     templateUrl: './accounts-settings.component.html',
     styleUrls: ['./accounts-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

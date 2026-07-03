@@ -7,6 +7,20 @@ import { Account } from '../models/interfaces/account.interface';
 
 const TABLE = 'accounts';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function fromDb(row: any): Account {
+  return {
+    id: row.id,
+    ownerId: row.owner_id,
+    name: row.name,
+    typeId: row.type_id,
+    balance: row.balance,
+    isArchived: row.is_archived,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AccountService {
   private readonly supabase = inject(SupabaseService);
@@ -30,7 +44,7 @@ export class AccountService {
     return from(
       query.then(({ data, error }) => {
         if (error) throw error;
-        return (data ?? []) as Account[];
+        return (data ?? []).map(fromDb);
       })
     );
   }
@@ -50,7 +64,7 @@ export class AccountService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as Account;
+          return fromDb(data);
         })
     );
   }
@@ -72,7 +86,7 @@ export class AccountService {
         .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return data as Account;
+          return fromDb(data);
         })
     );
   }

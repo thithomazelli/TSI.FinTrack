@@ -32,8 +32,8 @@
               }
             </td>
             <td>{{ typeName(acc.typeId) }}</td>
-            <td style="text-align:right; font-weight:600; color:#059669">
-              {{ acc.balance | number:'1.2-2' }}
+            <td [style.color]="acc.balance >= 0 ? '#059669' : '#dc2626'" style="text-align:right; font-weight:600">
+              {{ acc.balance | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
             </td>
             <td class="td-actions">
               @if (!acc.isArchived) {
