@@ -204,6 +204,67 @@ async function main() {
   console.log('\n✅ Seed concluído!')
   console.log(`   ${entries.length} entradas de renda`)
   console.log(`   ${transactions.length} transações de despesa`)
+
+  // 5. Backfill credit_card_bills
+  console.log('\nBackfill de faturas de cartão...')
+  await backfillBills()
+
+  // 6. Marcar faturas até Jun/2026 como PAID
+  console.log('\nMarcando faturas históricas como PAID...')
+  await settleHistoricalBills()
+
+  console.log('\n✅ Tudo pronto!')
+}
+
+async function backfillBills() {
+  const { data: txs, error } = await supabase
+    .from('transactions')
+    .select('owner_id, credit_card_id, date')
+    .not('credit_card_id', 'is', null)
+  if (error) { console.error('Erro ao buscar transações:', error.message); process.exit(1) }
+
+  const seen = new Map()
+  for (const t of txs) {
+    const d = new Date(t.date)
+    const year = d.getFullYear(), month = d.getMonth() + 1
+    const key = `${t.credit_card_id}-${year}-${month}`
+    if (!seen.has(key)) {
+      const isPaid = year < 2026 || (year === 2026 && month <= 6)
+      seen.set(key, {
+        owner_id: t.owner_id,
+        credit_card_id: t.credit_card_id,
+        year, month,
+        status: isPaid ? 'PAID' : 'OPEN',
+        total_amount: 0,
+      })
+    }
+  }
+
+  const rows = [...seen.values()]
+  if (rows.length === 0) { console.log('  Nenhuma fatura para criar ✓'); return }
+
+  const BATCH = 50
+  let done = 0
+  for (let i = 0; i < rows.length; i += BATCH) {
+    const chunk = rows.slice(i, i + BATCH)
+    const { error: insErr } = await supabase
+      .from('credit_card_bills')
+      .upsert(chunk, { onConflict: 'credit_card_id,year,month', ignoreDuplicates: true })
+    if (insErr) { console.error(`Erro no batch ${i}:`, insErr.message); process.exit(1) }
+    done += chunk.length
+    process.stdout.write(`\r  Faturas: ${done}/${rows.length}`)
+  }
+  console.log(' ✓')
+}
+
+async function settleHistoricalBills() {
+  const { error } = await supabase
+    .from('credit_card_bills')
+    .update({ status: 'PAID', updated_at: new Date().toISOString() })
+    .neq('status', 'PAID')
+    .or('year.lt.2026,and(year.eq.2026,month.lte.6)')
+  if (error) { console.error('Erro ao marcar faturas:', error.message); process.exit(1) }
+  console.log('  Faturas históricas marcadas como PAID ✓')
 }
 
 main()
