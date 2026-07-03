@@ -84,6 +84,19 @@ export class BalanceService {
     }));
   }
 
+  /** Totais de entradas e saídas para um período via RPC — sem limite de linhas. */
+  getPeriodTotals(startDate: string, endDate: string): Observable<{ totalEntries: number; totalTransactions: number }> {
+    return from(
+      this.supabase.client.rpc('get_period_totals', { start_date: startDate, end_date: endDate })
+    ).pipe(map(res => {
+      const row = Array.isArray(res.data) ? res.data[0] : res.data;
+      return {
+        totalEntries: Number(row?.total_entries ?? 0),
+        totalTransactions: Number(row?.total_transactions ?? 0),
+      };
+    }));
+  }
+
   getCurrentBillByCard(creditCardId: string, year: number, month: number): Observable<number> {
     const start = `${year}-${String(month).padStart(2,'0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];

@@ -196,19 +196,12 @@ export class MovimentosComponent implements OnInit {
     });
   });
 
-  readonly totalEntradas = computed(() =>
-    this.filteredItems()
-      .filter(i => i.kind === 'entry')
-      .reduce((s, i) => s + i.amount, 0)
-  );
+  // Totais server-side (sem limite de 1000 linhas)
+  readonly periodTotals = signal<{ totalEntries: number; totalTransactions: number } | null>(null);
 
-  readonly totalSaidas = computed(() =>
-    this.filteredItems()
-      .filter(i => i.kind === 'transaction')
-      .reduce((s, i) => s + i.amount, 0)
-  );
-
-  readonly saldo = computed(() => this.totalEntradas() - this.totalSaidas());
+  readonly totalEntradas = computed(() => this.periodTotals()?.totalEntries ?? 0);
+  readonly totalSaidas   = computed(() => this.periodTotals()?.totalTransactions ?? 0);
+  readonly saldo         = computed(() => this.totalEntradas() - this.totalSaidas());
 
 
   // Multi-seleção
@@ -354,7 +347,7 @@ export class MovimentosComponent implements OnInit {
     const to = this.dateTo();
 
     try {
-      const [entriesRes, txsRes] = await Promise.all([
+      const [entriesRes, txsRes, totalsRes] = await Promise.all([
         this.supabase.client
           .from('entries')
           .select('*')
@@ -369,10 +362,17 @@ export class MovimentosComponent implements OnInit {
           .gte('date', from)
           .lte('date', to)
           .order('date', { ascending: false }),
+        this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
       ]);
 
       if (entriesRes.error) throw entriesRes.error;
       if (txsRes.error) throw txsRes.error;
+
+      const totalsRow = Array.isArray(totalsRes.data) ? totalsRes.data[0] : totalsRes.data;
+      this.periodTotals.set({
+        totalEntries: Number(totalsRow?.total_entries ?? 0),
+        totalTransactions: Number(totalsRow?.total_transactions ?? 0),
+      });
 
       this.allEntries.set((entriesRes.data ?? []).map((r: any) => ({
         id: r.id, ownerId: r.owner_id, description: r.description,
