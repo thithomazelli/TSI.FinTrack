@@ -86,6 +86,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private readonly balanceSubs: Subscription[] = [];
   private readonly end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
+  private readonly version$ = toObservable(this.balanceService.version);
 
   private resolveTitle(url: string): string {
     const path = url.split('?')[0].split('#')[0];
@@ -106,12 +107,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Regra C: navbar — recarrega sempre que version mudar (sem effect)
     this.balanceSubs.push(
-      toObservable(this.balanceService.version).pipe(
+      this.version$.pipe(
         switchMap(() => this.balanceService.getBalanceUpTo(this.end))
       ).subscribe({ next: v => { this.availableBalance.set(v); this.projectedBalance.set(v); }, error: () => {} }),
-      toObservable(this.balanceService.version).pipe(
+      this.version$.pipe(
         switchMap(() => this.balanceService.getSummary(this.year, this.month))
       ).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} }),
     );

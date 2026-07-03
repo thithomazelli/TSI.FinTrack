@@ -29,6 +29,7 @@ export class BalanceWidgetComponent implements OnInit, OnDestroy {
   readonly year  = this.now.getFullYear();
   readonly month = this.now.getMonth() + 1;
   readonly end   = new Date(this.year, this.month, 0).toISOString().split('T')[0];
+  private readonly version$ = toObservable(this.balanceService.version);
 
   readonly monthLabel = computed(() => {
     const locale = this.lang.current() === 'pt-BR' ? 'pt-BR' : 'en-US';
@@ -39,13 +40,11 @@ export class BalanceWidgetComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    // Regra C: sidebar — recarrega sempre que version mudar
     this.subs.push(
-      toObservable(this.balanceService.version).pipe(
+      this.version$.pipe(
         switchMap(() => this.balanceService.getSummary(this.year, this.month))
       ).subscribe({ next: s => { this.summary.set(s); this.loading.set(false); }, error: () => this.loading.set(false) }),
-
-      toObservable(this.balanceService.version).pipe(
+      this.version$.pipe(
         switchMap(() => this.balanceService.getBalanceUpTo(this.end))
       ).subscribe({ next: v => { this.available.set(v); this.projected.set(v); }, error: () => {} }),
     );
