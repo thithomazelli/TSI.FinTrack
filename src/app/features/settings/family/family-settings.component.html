@@ -21,8 +21,8 @@
           <tbody>
             @for (member of members(); track member.id) {
               <tr>
-                <td>{{ member.memberProfile?.fullName }}</td>
-                <td>{{ member.memberProfile?.email }}</td>
+                <td>{{ member.memberProfile.fullName }}</td>
+                <td>{{ member.memberProfile.email }}</td>
                 <td>
                   <select class="input input-sm"
                     [value]="member.role"
@@ -114,7 +114,7 @@
   <div class="modal modal--sm">
     <h3 class="modal-title">{{ 'settings.removeMember' | translate }}</h3>
     <p class="confirm-msg">
-      {{ 'settings.removeConfirm' | translate }} <strong>{{ deletingItem()!.memberProfile?.fullName ?? deletingItem()!.memberProfile?.email }}</strong>?
+      {{ 'settings.removeConfirm' | translate }} <strong>{{ deletingItem()!.memberProfile.fullName || deletingItem()!.memberProfile.email }}</strong>?
     </p>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="cancelDelete()">{{ 'common.cancel' | translate }}</button>

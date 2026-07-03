@@ -39,8 +39,8 @@
             </td>
             <td>{{ card.lastFourDigits ? '•••• ' + card.lastFourDigits : '—' }}</td>
             <td>{{ card.creditLimit != null ? (card.creditLimit | currency:'BRL':'symbol':'1.2-2':'pt-BR') : '—' }}</td>
-            <td>{{ card.closingDay ?? '—' }}</td>
-            <td>{{ card.dueDay ?? '—' }}</td>
+            <td>{{ card.closingDay }}</td>
+            <td>{{ card.dueDay }}</td>
             <td>
               <span class="card-status-badge" [class.card-status--active]="card.isActive" [class.card-status--inactive]="!card.isActive">
                 {{ (card.isActive ? 'settings.statusActive' : 'settings.statusInactive') | translate }}

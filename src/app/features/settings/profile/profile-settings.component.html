@@ -18,7 +18,7 @@
           @if (avatarUrl()) {
             <img class="avatar-img" [src]="avatarUrl()!" alt="Avatar" />
           } @else {
-            <div class="avatar-placeholder">{{ email()?.[0]?.toUpperCase() ?? '?' }}</div>
+            <div class="avatar-placeholder">{{ email()[0]?.toUpperCase() ?? '?' }}</div>
           }
           <span class="avatar-overlay">
             @if (avatarUploading()) {
