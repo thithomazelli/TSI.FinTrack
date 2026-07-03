@@ -9,6 +9,7 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { AccountService } from '../../core/services/account.service';
+import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -67,6 +68,7 @@ export class SimulationsComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
+  private readonly balanceService = inject(BalanceService);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
   private readonly t = inject(TranslateService);
@@ -532,6 +534,7 @@ export class SimulationsComponent implements OnInit {
       this.toast.success(this.tr('simulations.applied', { count: changes.length }));
       this.resetSim();
       this.load();
+      this.balanceService.invalidate();
     } catch (err) {
       this.logger.error('Simulation apply failed', err);
       this.toast.error(this.tr('simulations.applyError'));
