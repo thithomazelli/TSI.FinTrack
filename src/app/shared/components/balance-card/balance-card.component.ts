@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, ChangeDetectorRef, Component, Input,
-  OnChanges, OnDestroy, OnInit, SimpleChanges, inject, signal,
+  OnChanges, OnDestroy, OnInit, SimpleChanges, inject,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -13,7 +13,7 @@ import { BalanceService } from '../../../core/services/balance.service';
   imports: [DecimalPipe, TranslatePipe],
   templateUrl: './balance-card.component.html',
   styleUrls: ['./balance-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
   private readonly balanceService = inject(BalanceService);
@@ -37,20 +37,29 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
   private load(): void {
     this.subs.forEach(s => s.unsubscribe());
     this.subs = [];
+
     const y = this.year;
     const m = this.month;
     const now = new Date();
     const isCurrent = y === now.getFullYear() && m === now.getMonth() + 1;
 
     if (isCurrent) {
+      // Regra B: mês atual — Atual = apenas REALIZED; Projetado = todos os status
       this.subs.push(
-        this.balanceService.getAvailableBalance().subscribe({ next: v => { this.available = v; }, error: () => {} }),
-        this.balanceService.getMonthBalance(y, m).subscribe({ next: v => { this.projected = v; }, error: () => {} }),
+        this.balanceService.getAvailableBalance().subscribe({
+          next: v => { this.available = v; this.cdr.markForCheck(); },
+          error: () => {},
+        }),
+        this.balanceService.getMonthBalance(y, m).subscribe({
+          next: v => { this.projected = v; this.cdr.markForCheck(); },
+          error: () => {},
+        }),
       );
     } else {
+      // Regra A (mês passado) ou C (mês futuro): ambos = todos os status do mês selecionado
       this.subs.push(
         this.balanceService.getMonthBalance(y, m).subscribe({
-          next: v => { this.available = v; this.projected = v; },
+          next: v => { this.available = v; this.projected = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
       );
