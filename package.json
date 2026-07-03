@@ -29,6 +29,9 @@
     "tslib": "^2.3.0",
     "zone.js": "~0.15.1"
   },
+  "overrides": {
+    "@angular/cdk": "^21.2.14"
+  },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.2.18",
     "@angular/cli": "^21.2.18",
