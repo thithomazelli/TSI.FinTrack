@@ -1,10 +1,11 @@
 import {
   ChangeDetectionStrategy, Component, OnInit, OnDestroy,
-  inject, output, signal, computed, effect, HostListener, ElementRef,
+  inject, output, signal, computed, HostListener, ElementRef,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
-import { filter, Subscription } from 'rxjs';
+import { filter, switchMap, Subscription } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -84,25 +85,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private readonly year = this.now.getFullYear();
   private readonly month = this.now.getMonth() + 1;
 
-  private balanceSubs: Subscription[] = [];
-
-  constructor() {
-    effect(() => {
-      this.balanceService.version();
-      this.loadBalance();
-    }, { allowSignalWrites: true });
-  }
-
-  private loadBalance(): void {
-    this.balanceSubs.forEach(s => s.unsubscribe());
-    this.balanceSubs = [];
-    // Regra C: navbar — saldo do mês corrente, todos os status
-    const end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
-    this.balanceSubs.push(
-      this.balanceService.getBalanceUpTo(end).subscribe({ next: v => { this.availableBalance.set(v); this.projectedBalance.set(v); }, error: () => {} }),
-      this.balanceService.getSummary(this.year, this.month).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} }),
-    );
-  }
+  private readonly balanceSubs: Subscription[] = [];
+  private readonly end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
 
   private resolveTitle(url: string): string {
     const path = url.split('?')[0].split('#')[0];
@@ -123,6 +107,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Regra C: navbar — recarrega sempre que version mudar (sem effect)
+    this.balanceSubs.push(
+      toObservable(this.balanceService.version).pipe(
+        switchMap(() => this.balanceService.getBalanceUpTo(this.end))
+      ).subscribe({ next: v => { this.availableBalance.set(v); this.projectedBalance.set(v); }, error: () => {} }),
+      toObservable(this.balanceService.version).pipe(
+        switchMap(() => this.balanceService.getSummary(this.year, this.month))
+      ).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} }),
+    );
+
     this.routeSub.add(
       this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(e => {
         this.pageTitleKey.set(this.resolveTitle((e as NavigationEnd).urlAfterRedirects));
@@ -146,6 +140,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void { this.routeSub.unsubscribe(); this.balanceSubs.forEach(s => s.unsubscribe()); }
+
 
   toggleBell(): void { this.bellOpen.update(v => !v); this.userMenuOpen.set(false); this.balanceOpen.set(false); }
   closeBell(): void { this.bellOpen.set(false); }
