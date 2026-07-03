@@ -75,14 +75,13 @@ export class BalanceService {
     }));
   }
 
-  /** Saldo projetado do mês: soma de entradas menos despesas no mês (todos os status). */
+  /** Saldo projetado: soma de todos os registros (qualquer status) até o final do mês informado. */
   getMonthBalance(year: number, month: number): Observable<number> {
-    const start = `${year}-${String(month).padStart(2,'0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];
     const uid = this.ownerId;
     return from(Promise.all([
-      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).gte('date', start).lte('date', end),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).gte('date', start).lte('date', end),
+      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).lte('date', end),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).lte('date', end),
     ])).pipe(map(([entries, txs]) => {
       const income = (entries.data ?? []).reduce((s: number, e: { amount: number }) => s + e.amount, 0);
       const expenses = (txs.data ?? []).reduce((s: number, t: { amount: number }) => s + t.amount, 0);
