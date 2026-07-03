@@ -4,7 +4,8 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { switchMap, Subscription } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { BalanceService } from '../../../core/services/balance.service';
 
 @Component({
@@ -18,6 +19,7 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
   private readonly balanceService = inject(BalanceService);
   private readonly cdr = inject(ChangeDetectorRef);
   private subs: Subscription[] = [];
+  private readonly version$ = toObservable(this.balanceService.version);
 
   @Input() year: number  = new Date().getFullYear();
   @Input() month: number = new Date().getMonth() + 1;
@@ -47,11 +49,11 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
     if (isCurrent) {
       // Regra B: mês atual — Atual = só REALIZED; Projetado = todos os status até fim do mês
       this.subs.push(
-        this.balanceService.getAvailableBalance().subscribe({
+        this.version$.pipe(switchMap(() => this.balanceService.getAvailableBalance())).subscribe({
           next: v => { this.available = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
-        this.balanceService.getBalanceUpTo(end).subscribe({
+        this.version$.pipe(switchMap(() => this.balanceService.getBalanceUpTo(end))).subscribe({
           next: v => { this.projected = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
@@ -59,7 +61,7 @@ export class BalanceCardComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       // Regra A (mês passado) ou C (mês futuro): ambos = cumulativo até o fim do mês selecionado
       this.subs.push(
-        this.balanceService.getBalanceUpTo(end).subscribe({
+        this.version$.pipe(switchMap(() => this.balanceService.getBalanceUpTo(end))).subscribe({
           next: v => { this.available = v; this.projected = v; this.cdr.markForCheck(); },
           error: () => {},
         }),
