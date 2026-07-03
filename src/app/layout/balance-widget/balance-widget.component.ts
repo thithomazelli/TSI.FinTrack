@@ -28,7 +28,6 @@ export class BalanceWidgetComponent implements OnInit, OnDestroy {
   readonly now   = new Date();
   readonly year  = this.now.getFullYear();
   readonly month = this.now.getMonth() + 1;
-  readonly end   = new Date(this.year, this.month, 0).toISOString().split('T')[0];
   private readonly version$ = toObservable(this.balanceService.version);
 
   readonly monthLabel = computed(() => {
@@ -41,12 +40,18 @@ export class BalanceWidgetComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subs.push(
+      // Regra B — resumo do mês (só REALIZED)
       this.version$.pipe(
         switchMap(() => this.balanceService.getSummary(this.year, this.month))
       ).subscribe({ next: s => { this.summary.set(s); this.loading.set(false); }, error: () => this.loading.set(false) }),
+      // Regra B — ATUAL = saldo realizado acumulado (v_available_balance)
       this.version$.pipe(
-        switchMap(() => this.balanceService.getBalanceUpTo(this.end))
-      ).subscribe({ next: v => { this.available.set(v); this.projected.set(v); }, error: () => {} }),
+        switchMap(() => this.balanceService.getAvailableBalance())
+      ).subscribe({ next: v => this.available.set(v), error: () => {} }),
+      // Regra B — PROJETADO = saldo projetado acumulado (v_projected_balance)
+      this.version$.pipe(
+        switchMap(() => this.balanceService.getProjectedBalance())
+      ).subscribe({ next: v => this.projected.set(v), error: () => {} }),
     );
   }
 

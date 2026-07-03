@@ -85,7 +85,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private readonly month = this.now.getMonth() + 1;
 
   private readonly balanceSubs: Subscription[] = [];
-  private readonly end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
   private readonly version$ = toObservable(this.balanceService.version);
 
   private resolveTitle(url: string): string {
@@ -108,9 +107,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.balanceSubs.push(
+      // Regra C — chip do header: saldo realizado (v_available_balance)
       this.version$.pipe(
-        switchMap(() => this.balanceService.getBalanceUpTo(this.end))
-      ).subscribe({ next: v => { this.availableBalance.set(v); this.projectedBalance.set(v); }, error: () => {} }),
+        switchMap(() => this.balanceService.getAvailableBalance())
+      ).subscribe({ next: v => this.availableBalance.set(v), error: () => {} }),
+      // Regra C — popover: saldo projetado (v_projected_balance)
+      this.version$.pipe(
+        switchMap(() => this.balanceService.getProjectedBalance())
+      ).subscribe({ next: v => this.projectedBalance.set(v), error: () => {} }),
       this.version$.pipe(
         switchMap(() => this.balanceService.getSummary(this.year, this.month))
       ).subscribe({ next: s => this.balanceSummary.set(s), error: () => {} }),
