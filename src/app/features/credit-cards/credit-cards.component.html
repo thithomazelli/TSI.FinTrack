@@ -20,7 +20,7 @@
               <div class="bill-card-info">
                 <span class="bill-card-name">{{ bill.credit_cards?.name ?? bill.creditCardId }}</span>
                 @if (bill.credit_cards?.last_four_digits) {
-                  <span class="bill-card-digits">•••• {{ bill.credit_cards?.last_four_digits }}</span>
+                  <span class="bill-card-digits">•••• {{ bill.credit_cards!.last_four_digits }}</span>
                 }
               </div>
               @if (bill.status === BillStatus.Closed) {
