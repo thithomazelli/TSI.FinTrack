@@ -45,9 +45,7 @@ export class BalanceWidgetComponent implements OnInit {
         next: v => this.available.set(v),
         error: () => {},
       });
-      // Use same logic as balance card: realized + projected up to end of current month
-      const endOfMonth = new Date(this.year, this.month, 0).toISOString().split('T')[0];
-      this.balanceService.getProjectedBalanceUpTo(endOfMonth).subscribe({
+      this.balanceService.getMonthBalance(this.year, this.month).subscribe({
         next: v => this.projected.set(v),
         error: () => {},
       });
