@@ -269,7 +269,7 @@ export class SimulationsComponent implements OnInit {
       const hasOpen = txs.some(t => t.status === 'PROJECTED');
       cardGroups.push({
         id: cardId,
-        label: card?.name ?? '...',
+        label: `Fatura ${card?.name ?? '...'}`,
         items: txs,
         total: txs.reduce((s, t) => s + t.amount, 0),
         status: hasOpen ? 'PROJECTED' : 'REALIZED',
