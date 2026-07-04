@@ -39,6 +39,8 @@ export class BillsComponent implements OnInit {
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
   readonly dndMode = signal(false);
+  readonly billsPage = signal(0);
+  readonly billsPageSize = 25;
 
   // Drag state
   dragFromIndex = -1;
@@ -58,6 +60,20 @@ export class BillsComponent implements OnInit {
   });
 
   readonly total = computed(() => this.filtered().reduce((s, t) => s + t.amount, 0));
+
+  readonly pagedFiltered = computed(() => {
+    const page = this.billsPage();
+    const ps = this.billsPageSize;
+    return this.filtered().slice(page * ps, (page + 1) * ps);
+  });
+
+  readonly billsTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filtered().length / this.billsPageSize))
+  );
+
+  goToBillsPage(p: number): void {
+    this.billsPage.set(Math.max(0, Math.min(p, this.billsTotalPages() - 1)));
+  }
 
   readonly categorySpend = computed(() => {
     const map = new Map<string, number>();
@@ -131,6 +147,7 @@ export class BillsComponent implements OnInit {
   onMonthChanged(e: { year: number; month: number }): void {
     this.year.set(e.year);
     this.month.set(e.month);
+    this.billsPage.set(0);
     this.load();
   }
 

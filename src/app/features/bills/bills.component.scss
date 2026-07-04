@@ -78,6 +78,50 @@
 .cat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 .td-amount { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; white-space: nowrap; }
 .td-status { text-align: right; }
+.amount-negativo { color: #ef4444; }
+.amount-positivo { color: #22c55e; }
+
+.th-tipo, .td-tipo { white-space: nowrap; }
+.tipo-badge {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: .15rem .5rem;
+  border-radius: 99px;
+  &--entrada {
+    background: color-mix(in srgb, #22c55e 15%, var(--color-surface));
+    color: #16a34a;
+  }
+  &--saida {
+    background: color-mix(in srgb, #ef4444 15%, var(--color-surface));
+    color: #dc2626;
+  }
+}
+
+.bills-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color var(--transition);
+  &:hover:not(:disabled) { border-color: var(--color-accent); color: var(--color-accent); }
+  &:disabled { opacity: .35; cursor: default; }
+}
+.page-info { font-size: .8rem; color: var(--color-text-2); min-width: 48px; text-align: center; }
 
 .installment-badge {
   display: inline-block;

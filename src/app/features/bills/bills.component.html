@@ -64,6 +64,7 @@
         <tr>
           @if (dndMode()) { <th class="th-drag"></th> }
           <th>{{ 'bills.colPurchaseDate' | translate }}</th>
+          <th class="th-tipo">{{ 'common.type' | translate }}</th>
           <th>{{ 'common.description' | translate }}</th>
           <th>{{ 'common.category' | translate }}</th>
           <th>{{ 'bills.colCard' | translate }}</th>
@@ -72,7 +73,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (tx of filtered(); track tx.id; let i = $index) {
+        @for (tx of pagedFiltered(); track tx.id; let i = $index) {
           <tr
             [draggable]="dndMode()"
             [class.drag-over]="dndMode() && dragOverIndex === i && dragFromIndex !== i"
@@ -87,6 +88,9 @@
               </td>
             }
             <td class="td-date">{{ tx.date | date:'dd/MM' }}</td>
+            <td class="td-tipo">
+              <span class="tipo-badge tipo-badge--saida">Saída</span>
+            </td>
             <td class="td-desc">
               {{ tx.description }}
               @if (tx.installmentNumber && tx.totalInstallments) {
@@ -100,7 +104,7 @@
               </span>
             </td>
             <td class="td-card">{{ cardName(tx.creditCardId) }}</td>
-            <td class="td-amount">R$ {{ tx.amount | number:'1.2-2' }}</td>
+            <td class="td-amount amount-negativo">R$ {{ tx.amount | number:'1.2-2' }}</td>
             <td class="td-status">
               <span class="status-badge" [class.status-badge--realized]="tx.status === 'REALIZED'" [class.status-badge--projected]="tx.status === 'PROJECTED'">
                 {{ (tx.status === 'REALIZED' ? 'movimentos.realized' : 'movimentos.projected') | translate }}
@@ -111,13 +115,21 @@
       </tbody>
       <tfoot>
         <tr>
-          <td [attr.colspan]="dndMode() ? 5 : 4" class="tfoot-label">{{ 'common.total' | translate }}</td>
-          <td class="tfoot-total">R$ {{ total() | number:'1.2-2' }}</td>
+          <td [attr.colspan]="dndMode() ? 6 : 5" class="tfoot-label">{{ 'common.total' | translate }}</td>
+          <td class="tfoot-total amount-negativo">R$ {{ total() | number:'1.2-2' }}</td>
           <td></td>
         </tr>
       </tfoot>
     </table>
     </div>
+
+    @if (billsTotalPages() > 1) {
+      <div class="bills-pagination">
+        <button class="page-btn" [disabled]="billsPage() === 0" (click)="goToBillsPage(billsPage() - 1)">‹</button>
+        <span class="page-info">{{ billsPage() + 1 }} / {{ billsTotalPages() }}</span>
+        <button class="page-btn" [disabled]="billsPage() >= billsTotalPages() - 1" (click)="goToBillsPage(billsPage() + 1)">›</button>
+      </div>
+    }
   }
 }
 </div>
