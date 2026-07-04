@@ -1,0 +1,157 @@
+<!-- ── Toolbar ─────────────────────────────────────────────────────────────── -->
+<div class="gt-toolbar">
+  <div class="gt-toolbar-top">
+    <div class="gt-search-wrap">
+      <svg class="gt-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        class="gt-search"
+        type="search"
+        [placeholder]="searchPlaceholder()"
+        [ngModel]="query()"
+        (ngModelChange)="onSearch($event)"
+      />
+      @if (query()) {
+        <button class="gt-clear" (click)="onSearch('')" aria-label="Limpar busca">✕</button>
+      }
+    </div>
+
+    <div class="gt-toolbar-right">
+      <span class="gt-count">
+        {{ allFilteredItems().length }} {{ allFilteredItems().length === 1 ? 'item' : 'itens' }}
+      </span>
+      @if (filterBtnTpl) {
+        <ng-container [ngTemplateOutlet]="filterBtnTpl" />
+      }
+    </div>
+  </div>
+
+  @if (filterPanelTpl) {
+    <ng-container [ngTemplateOutlet]="filterPanelTpl" />
+  }
+</div>
+
+<!-- ── Table ──────────────────────────────────────────────────────────────── -->
+<div class="gt-table-wrap">
+  @if (visibleGroups().length === 0) {
+    <p class="gt-empty">{{ emptyMsg() }}</p>
+  } @else {
+    <table class="gt-table">
+      <thead>
+        <tr>
+          @if (draggable()) {
+            <th class="th-drag"></th>
+          }
+          @if (theadRowTpl) {
+            <ng-container [ngTemplateOutlet]="theadRowTpl" />
+          }
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (group of visibleGroups(); track group.id) {
+          <!-- Group header row -->
+          <tr class="gt-group-row" (click)="toggleGroup(group.id)">
+            <td [attr.colspan]="draggable() ? 99 : 99" class="gt-group-cell">
+              <div class="gt-group-inner">
+                <span class="gt-group-chevron" [class.is-open]="isExpanded(group.id)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </span>
+                <span class="gt-group-label">{{ group.label }}</span>
+                @if (group.total !== undefined) {
+                  <span class="gt-group-total">R$ {{ group.total | number:'1.2-2' }}</span>
+                }
+                @if (group.badge) {
+                  <span class="gt-group-badge" [class]="group.badgeClass ?? ''">{{ group.badge }}</span>
+                }
+                @if (group.status) {
+                  <span class="gt-group-status" [class.gt-status--realized]="group.status === 'REALIZED'" [class.gt-status--projected]="group.status === 'PROJECTED'">
+                    {{ group.status === 'REALIZED' ? 'Realizado' : 'Projetado' }}
+                  </span>
+                }
+                <span class="gt-group-count">{{ group.items.length }} itens</span>
+              </div>
+            </td>
+          </tr>
+
+          @if (isExpanded(group.id)) {
+            <!-- Insert zone before first item -->
+            <tr class="gt-insert-zone" [class.gt-insert-zone--active]="isActiveInsert(group.id, null)">
+              <td colspan="99" class="gt-insert-td">
+                <div class="gt-insert-line">
+                  <button class="gt-insert-btn" (click)="requestInsert(group.id, null)" title="Inserir aqui">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            @if (isActiveInsert(group.id, null) && insertFormTpl) {
+              <tr class="gt-inline-form-row">
+                <td colspan="99" class="gt-inline-form-td">
+                  <ng-container [ngTemplateOutlet]="insertFormTpl" [ngTemplateOutletContext]="{ groupId: group.id, afterItemId: null }" />
+                </td>
+              </tr>
+            }
+
+            @for (item of group.items; track item.id; let i = $index) {
+              <!-- Data row -->
+              <tr
+                class="gt-data-row"
+                [class.drag-over]="isDragOver(group.id, i)"
+                [draggable]="draggable()"
+                (dragstart)="onDragStart(group.id, i, $event)"
+                (dragover)="onDragOver(group.id, i, $event)"
+                (drop)="onDrop(group.id, i, $event)"
+                (dragend)="onDragEnd()"
+              >
+                @if (draggable()) {
+                  <td class="td-drag" title="Arrastar para reordenar">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.4">
+                      <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                      <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                      <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+                    </svg>
+                  </td>
+                }
+                <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ $implicit: item }" />
+              </tr>
+
+              <!-- Insert zone after each item -->
+              <tr class="gt-insert-zone" [class.gt-insert-zone--active]="isActiveInsert(group.id, item.id)">
+                <td colspan="99" class="gt-insert-td">
+                  <div class="gt-insert-line">
+                    <button class="gt-insert-btn" (click)="requestInsert(group.id, item.id)" title="Inserir aqui">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              @if (isActiveInsert(group.id, item.id) && insertFormTpl) {
+                <tr class="gt-inline-form-row">
+                  <td colspan="99" class="gt-inline-form-td">
+                    <ng-container [ngTemplateOutlet]="insertFormTpl" [ngTemplateOutletContext]="{ groupId: group.id, afterItemId: item.id }" />
+                  </td>
+                </tr>
+              }
+            }
+          }
+        }
+      </tbody>
+
+      @if (totalsTpl) {
+        <tfoot>
+          <ng-container [ngTemplateOutlet]="totalsTpl" [ngTemplateOutletContext]="{ $implicit: allFilteredItems() }" />
+        </tfoot>
+      }
+    </table>
+  }
+</div>
