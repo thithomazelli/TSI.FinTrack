@@ -160,6 +160,17 @@ async function sendDailyDigest(today: Date) {
       .maybeSingle();
     const available = Number(balRow?.available ?? 0);
 
+    // Saldo projetado acumulado até fim do mês (equivalente ao get_balance_up_to)
+    const [{ data: accRows }, { data: allEntries }, { data: allTxs }] = await Promise.all([
+      supabase.from('accounts').select('balance').eq('owner_id', sub.user_id).eq('is_archived', false),
+      supabase.from('entries').select('amount').eq('owner_id', sub.user_id).lte('date', end),
+      supabase.from('transactions').select('amount').eq('owner_id', sub.user_id).lte('date', end),
+    ]);
+    const accBalance = (accRows ?? []).reduce((s, a) => s + a.balance, 0);
+    const allEntriesSum = (allEntries ?? []).reduce((s, e) => s + e.amount, 0);
+    const allTxsSum = (allTxs ?? []).reduce((s, t) => s + t.amount, 0);
+    const projectedBalance = accBalance + allEntriesSum - allTxsSum;
+
     // Faturas em aberto vencidas ou a vencer (contagem rápida)
     const soon7 = new Date(today);
     soon7.setDate(soon7.getDate() + 7);
@@ -185,18 +196,16 @@ async function sendDailyDigest(today: Date) {
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
-    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
+    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo atual: ${fmt(available)}</b>\n`;
+    msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} <b>Saldo projetado: ${fmt(projectedBalance)}</b>\n`;
     msg += `<i>(acumulado, considerando todos os meses)</i>\n\n`;
     msg += `<b>Este mês:</b>\n`;
-    const balanceProjected = totalIncome - (spentRealized + spentProjected);
     msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
     msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
     if (spentProjected > 0) {
       msg += `📋 Gastos projetados: ${fmt(spentProjected)}\n`;
       msg += `⏳ Pendente a pagar: ${fmt(spentProjected)}\n`;
     }
-    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
-    msg += `${balanceProjected >= 0 ? '📊' : '⚠️'} Saldo projetado: ${fmt(balanceProjected)}\n`;
     if (overdueCount || dueSoonCount) {
       msg += `\n<b>Faturas:</b>\n`;
       if (overdueCount) msg += `  🚨 ${overdueCount} vencida(s)\n`;
