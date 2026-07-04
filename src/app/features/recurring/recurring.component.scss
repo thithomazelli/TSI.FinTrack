@@ -5,26 +5,17 @@
 }
 
 .col-muted { font-size: 13px; color: var(--color-text-2); }
-.col-amount { text-align: right; font-weight: 600; white-space: nowrap; }
-.text-right { text-align: right; }
-
-.type-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 99px;
+.col-freq  { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-amount {
+  text-align: right;
   font-weight: 600;
-
-  &--transaction {
-    background: color-mix(in srgb, #ef4444 15%, var(--color-surface));
-    color: #ef4444;
-  }
-  &--entry {
-    background: color-mix(in srgb, var(--color-success) 15%, var(--color-surface));
-    color: var(--color-success);
-  }
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
-
-.row-inactive td { opacity: 0.5; }
+.col-inactive { opacity: 0.5; }
+.amount-positive { color: var(--color-success); }
+.amount-negative { color: #ef4444; }
+.text-right { text-align: right; }
 
 .status-toggle {
   font-size: 12px;
@@ -43,25 +34,85 @@
   }
 }
 
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--color-text-2);
+// ── Inline insert form ────────────────────────────────────────────────────────
+
+.inline-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  gap: .5rem;
 }
+
+.inline-form-row {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.inline-form-actions {
+  display: flex;
+  gap: .5rem;
+}
+
+.input--sm {
+  padding: .28rem .55rem;
+  font-size: .82rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  &:focus { outline: none; border-color: var(--color-accent); }
+}
+
+.input--num { width: 100px; }
+
+.btn--sm {
+  padding: .28rem .75rem;
+  font-size: .82rem;
+}
+
+// ── Month picker ──────────────────────────────────────────────────────────────
+
+.month-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: .25rem;
+}
+
+.month-btn {
+  padding: .2rem .5rem;
+  font-size: .75rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all .15s;
+
+  &.active {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+  }
+  &:hover:not(.active) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
 
 .btn-icon {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  border-radius: 4px;
   font-size: 14px;
   opacity: 0.7;
-  transition: opacity 0.15s;
+  transition: opacity .15s;
   &:hover { opacity: 1; }
-  &--danger:hover { background: color-mix(in srgb, #ef4444 10%, transparent); }
+  &--danger:hover { color: #ef4444; }
 }

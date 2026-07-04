@@ -9,5 +9,8 @@ export interface RecurringTemplate {
   type: 'TRANSACTION' | 'ENTRY';
   dayOfMonth: number;
   isActive: boolean;
+  frequency: 'monthly' | 'sporadic';
+  months: number[];
+  position: number;
   createdAt: string;
 }

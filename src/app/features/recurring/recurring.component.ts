@@ -1,7 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+} from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
 import { RecurringTemplateService } from '../../core/services/recurring-template.service';
 import { CategoryService } from '../../core/services/category.service';
 import { AccountService } from '../../core/services/account.service';
@@ -12,13 +18,23 @@ import { RecurringTemplate } from '../../core/models/interfaces/recurring-templa
 import { Category } from '../../core/models/interfaces/category.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
+import {
+  GroupedTableComponent,
+  TableGroup,
+  GroupInsertEvent,
+  GroupReorderEvent,
+  GroupSearchFn,
+} from '../../shared/components/grouped-table/grouped-table.component';
+import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
+
+const MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 @Component({
-    selector: 'tsi-recurring',
-    imports: [DecimalPipe, FormsModule, TranslatePipe],
-    templateUrl: './recurring.component.html',
-    styleUrls: ['./recurring.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'tsi-recurring',
+  imports: [DecimalPipe, FormsModule, GroupedTableComponent, CurrencyMaskDirective],
+  templateUrl: './recurring.component.html',
+  styleUrls: ['./recurring.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecurringComponent implements OnInit {
   private readonly service = inject(RecurringTemplateService);
@@ -35,10 +51,14 @@ export class RecurringComponent implements OnInit {
 
   readonly loading = signal(false);
   readonly saving = signal(false);
-  readonly showForm = signal(false);
-  readonly editingId = signal<string | null>(null);
-  readonly deletingTemplate = signal<RecurringTemplate | null>(null);
+  readonly projecting = signal(false);
 
+  readonly activeInsert = signal<GroupInsertEvent | null>(null);
+  readonly editingTemplate = signal<RecurringTemplate | null>(null);
+  readonly deletingTemplate = signal<RecurringTemplate | null>(null);
+  readonly showProjectModal = signal(false);
+
+  // Form state (used both for inline insert and edit modal)
   formDescription = '';
   formAmount = 0;
   formType: 'TRANSACTION' | 'ENTRY' = 'TRANSACTION';
@@ -47,8 +67,76 @@ export class RecurringComponent implements OnInit {
   formAccountId = '';
   formCreditCardId = '';
   formIsActive = true;
+  formFrequency: 'monthly' | 'sporadic' = 'monthly';
+  formMonths: number[] = [];
 
+  // Project modal state
+  projectYear = new Date().getFullYear();
+  projectMonth = new Date().getMonth() + 1;
+
+  readonly monthNames = MONTH_NAMES;
   readonly days = Array.from({ length: 31 }, (_, i) => i + 1);
+  readonly allMonths = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  readonly tableSearchFn: GroupSearchFn<RecurringTemplate> = (item, q) =>
+    item.description.toLowerCase().includes(q) ||
+    this.categoryName(item.categoryId).toLowerCase().includes(q);
+
+  readonly tableGroups = computed<TableGroup<RecurringTemplate>[]>(() => {
+    const templates = this.templates();
+    const entries = templates.filter(t => t.type === 'ENTRY');
+    const debitTxs = templates.filter(t => t.type === 'TRANSACTION' && !t.creditCardId);
+    const cardTxs = templates.filter(t => t.type === 'TRANSACTION' && !!t.creditCardId);
+
+    const groups: TableGroup<RecurringTemplate>[] = [];
+
+    if (entries.length > 0 || true) {
+      groups.push({
+        id: '__entries',
+        label: 'Entradas',
+        items: entries,
+        defaultExpanded: true,
+      });
+    }
+
+    // Group debit transactions by account
+    const debitMap = new Map<string, RecurringTemplate[]>();
+    for (const tx of debitTxs) {
+      const key = tx.accountId ?? '__no_account';
+      if (!debitMap.has(key)) debitMap.set(key, []);
+      debitMap.get(key)!.push(tx);
+    }
+    for (const [accountId, txs] of debitMap) {
+      const account = this.accounts().find(a => a.id === accountId);
+      groups.push({
+        id: `__debit_${accountId}`,
+        label: account ? `Débito ${account.name}` : 'Débito',
+        items: txs,
+        defaultExpanded: true,
+      });
+    }
+
+    // Group credit card transactions by card, sorted alphabetically
+    const cardMap = new Map<string, RecurringTemplate[]>();
+    for (const tx of cardTxs) {
+      const cid = tx.creditCardId!;
+      if (!cardMap.has(cid)) cardMap.set(cid, []);
+      cardMap.get(cid)!.push(tx);
+    }
+    const cardGroups: TableGroup<RecurringTemplate>[] = [];
+    for (const [cardId, txs] of cardMap) {
+      const card = this.cards().find(c => c.id === cardId);
+      cardGroups.push({
+        id: cardId,
+        label: `Fatura ${card?.name ?? '...'}`,
+        items: txs,
+        defaultExpanded: false,
+      });
+    }
+    cardGroups.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+
+    return [...groups, ...cardGroups];
+  });
 
   ngOnInit(): void {
     this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
@@ -65,21 +153,33 @@ export class RecurringComponent implements OnInit {
     });
   }
 
-  openCreate(): void {
-    this.editingId.set(null);
-    this.formDescription = '';
-    this.formAmount = 0;
-    this.formType = 'TRANSACTION';
-    this.formDayOfMonth = 1;
-    this.formCategoryId = this.categories()[0]?.id ?? '';
-    this.formAccountId = '';
-    this.formCreditCardId = '';
-    this.formIsActive = true;
-    this.showForm.set(true);
+  // ── Insert zone ─────────────────────────────────────────────────────────────
+
+  onInsertRequested(event: GroupInsertEvent): void {
+    this.editingTemplate.set(null);
+    this.resetForm();
+    if (event.groupId === '__entries') {
+      this.formType = 'ENTRY';
+    } else if (event.groupId.startsWith('__debit_')) {
+      this.formType = 'TRANSACTION';
+      const accountId = event.groupId.replace('__debit_', '');
+      if (accountId !== '__no_account') this.formAccountId = accountId;
+    } else {
+      this.formType = 'TRANSACTION';
+      this.formCreditCardId = event.groupId;
+    }
+    this.activeInsert.set(event);
   }
 
+  cancelInsert(): void {
+    this.activeInsert.set(null);
+    this.resetForm();
+  }
+
+  // ── Edit ────────────────────────────────────────────────────────────────────
+
   openEdit(t: RecurringTemplate): void {
-    this.editingId.set(t.id);
+    this.editingTemplate.set(t);
     this.formDescription = t.description;
     this.formAmount = t.amount;
     this.formType = t.type;
@@ -88,17 +188,22 @@ export class RecurringComponent implements OnInit {
     this.formAccountId = t.accountId ?? '';
     this.formCreditCardId = t.creditCardId ?? '';
     this.formIsActive = t.isActive;
-    this.showForm.set(true);
+    this.formFrequency = t.frequency;
+    this.formMonths = [...t.months];
   }
 
-  closeForm(): void {
-    this.showForm.set(false);
-    this.editingId.set(null);
+  closeEdit(): void {
+    this.editingTemplate.set(null);
+    this.resetForm();
   }
+
+  // ── Save ────────────────────────────────────────────────────────────────────
 
   save(): void {
-    if (!this.formDescription.trim() || this.formAmount <= 0) return;
+    if (!this.formDescription.trim() || this.formAmount === 0) return;
     this.saving.set(true);
+
+    const editingId = this.editingTemplate()?.id ?? null;
 
     const payload = {
       description: this.formDescription.trim(),
@@ -109,22 +214,29 @@ export class RecurringComponent implements OnInit {
       accountId: this.formCreditCardId ? null : (this.formAccountId || null),
       creditCardId: this.formCreditCardId || null,
       isActive: this.formIsActive,
+      frequency: this.formFrequency,
+      months: this.formFrequency === 'sporadic' ? this.formMonths : [],
+      position: editingId
+        ? (this.editingTemplate()!.position)
+        : (this.nextPosition()),
     };
 
-    const id = this.editingId();
-    const op$ = id ? this.service.update(id, payload) : this.service.create(payload);
+    const op$ = editingId
+      ? this.service.update(editingId, payload)
+      : this.service.create(payload);
 
     op$.subscribe({
       next: saved => {
-        if (id) {
-          this.templates.update(list => list.map(t => t.id === id ? saved : t));
+        if (editingId) {
+          this.templates.update(list => list.map(t => t.id === editingId ? saved : t));
           this.toast.success('Recorrente atualizado!');
+          this.closeEdit();
         } else {
           this.templates.update(list => [...list, saved]);
           this.toast.success('Recorrente criado com sucesso!');
+          this.cancelInsert();
         }
         this.saving.set(false);
-        this.closeForm();
       },
       error: err => {
         this.logger.error('Failed to save recurring template', err);
@@ -133,6 +245,13 @@ export class RecurringComponent implements OnInit {
       },
     });
   }
+
+  private nextPosition(): number {
+    const list = this.templates();
+    return list.length === 0 ? 10 : Math.max(...list.map(t => t.position)) + 10;
+  }
+
+  // ── Delete ───────────────────────────────────────────────────────────────────
 
   delete(t: RecurringTemplate): void {
     this.deletingTemplate.set(t);
@@ -159,6 +278,8 @@ export class RecurringComponent implements OnInit {
     this.deletingTemplate.set(null);
   }
 
+  // ── Toggle active ────────────────────────────────────────────────────────────
+
   toggleActive(t: RecurringTemplate): void {
     this.service.update(t.id, { isActive: !t.isActive }).subscribe({
       next: saved => {
@@ -168,6 +289,90 @@ export class RecurringComponent implements OnInit {
       error: err => this.logger.error('Failed to toggle recurring', err),
     });
   }
+
+  // ── Drag & drop ──────────────────────────────────────────────────────────────
+
+  onRowReordered(event: GroupReorderEvent): void {
+    const list = this.templates();
+    const item = list.find(t => t.id === event.id);
+    if (!item) return;
+
+    const groupItems = list.filter(t => this.groupIdFor(t) === event.groupId);
+    const above = event.aboveId ? groupItems.find(t => t.id === event.aboveId) : null;
+    const below = event.belowId ? groupItems.find(t => t.id === event.belowId) : null;
+
+    let newPos: number;
+    if (above && below) {
+      newPos = (above.position + below.position) / 2;
+    } else if (above) {
+      newPos = above.position + 10;
+    } else if (below) {
+      newPos = below.position - 10;
+    } else {
+      newPos = item.position;
+    }
+
+    this.templates.update(list => list.map(t => t.id === event.id ? { ...t, position: newPos } : t));
+    this.service.updatePosition(event.id, newPos).subscribe({
+      error: err => this.logger.error('Failed to update position', err),
+    });
+  }
+
+  private groupIdFor(t: RecurringTemplate): string {
+    if (t.type === 'ENTRY') return '__entries';
+    if (t.creditCardId) return t.creditCardId;
+    return `__debit_${t.accountId ?? '__no_account'}`;
+  }
+
+  // ── Project period ───────────────────────────────────────────────────────────
+
+  openProjectModal(): void {
+    const now = new Date();
+    this.projectYear = now.getFullYear();
+    this.projectMonth = now.getMonth() + 1;
+    this.showProjectModal.set(true);
+  }
+
+  closeProjectModal(): void {
+    this.showProjectModal.set(false);
+  }
+
+  projectPeriod(): void {
+    this.projecting.set(true);
+    this.service.projectPeriod(this.projectYear, this.projectMonth).subscribe({
+      next: result => {
+        this.projecting.set(false);
+        this.closeProjectModal();
+        this.toast.success(`${result?.created ?? 0} lançamentos projetados com sucesso!`);
+      },
+      error: err => {
+        this.logger.error('Failed to project period', err);
+        this.projecting.set(false);
+        this.toast.error('Erro ao projetar período.');
+      },
+    });
+  }
+
+  // ── Month toggle (for sporadic) ──────────────────────────────────────────────
+
+  toggleMonth(m: number): void {
+    const idx = this.formMonths.indexOf(m);
+    if (idx === -1) {
+      this.formMonths = [...this.formMonths, m].sort((a, b) => a - b);
+    } else {
+      this.formMonths = this.formMonths.filter(x => x !== m);
+    }
+  }
+
+  hasMonth(m: number): boolean {
+    return this.formMonths.includes(m);
+  }
+
+  monthLabel(m: number): string {
+    return MONTH_NAMES[m - 1];
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
 
   categoryName(id: string | null): string {
     return this.categories().find(c => c.id === id)?.name ?? '—';
@@ -179,5 +384,24 @@ export class RecurringComponent implements OnInit {
 
   cardName(id: string | null): string {
     return this.cards().find(c => c.id === id)?.name ?? '';
+  }
+
+  frequencyLabel(t: RecurringTemplate): string {
+    if (t.frequency === 'monthly') return 'mensal';
+    if (!t.months || t.months.length === 0) return 'esporádico';
+    return t.months.map(m => MONTH_NAMES[m - 1]).join(', ');
+  }
+
+  private resetForm(): void {
+    this.formDescription = '';
+    this.formAmount = 0;
+    this.formType = 'TRANSACTION';
+    this.formDayOfMonth = 1;
+    this.formCategoryId = '';
+    this.formAccountId = '';
+    this.formCreditCardId = '';
+    this.formIsActive = true;
+    this.formFrequency = 'monthly';
+    this.formMonths = [];
   }
 }

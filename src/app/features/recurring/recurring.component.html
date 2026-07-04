@@ -1,97 +1,122 @@
 <div class="page-header">
-  <h2 class="page-title">{{ 'recurring.title' | translate }}</h2>
+  <h2 class="page-title">Recorrentes</h2>
   <div class="header-right">
-    <button class="btn btn-primary" (click)="openCreate()">+ {{ 'recurring.new' | translate }}</button>
+    <button class="btn btn-secondary" (click)="openProjectModal()">▶ Projetar período</button>
+    <button class="btn btn-primary" (click)="onInsertRequested({ groupId: '__entries', afterItemId: null })">+ Novo</button>
   </div>
 </div>
 
 @if (loading()) {
-  <p class="loading-text">{{ 'common.loading' | translate }}</p>
-} @else if (templates().length === 0) {
-  <div class="empty-state">
-    <p>{{ 'recurring.emptyTitle' | translate }}</p>
-    <button class="btn btn-primary" (click)="openCreate()">{{ 'recurring.createFirst' | translate }}</button>
-  </div>
+  <p class="loading-text">Carregando...</p>
 } @else {
-  <div class="table-wrap">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>{{ 'common.description' | translate }}</th>
-          <th>{{ 'common.type' | translate }}</th>
-          <th>{{ 'recurring.colDay' | translate }}</th>
-          <th>{{ 'common.category' | translate }}</th>
-          <th class="text-right">{{ 'common.amount' | translate }}</th>
-          <th>{{ 'common.status' | translate }}</th>
-          <th class="text-right">{{ 'common.actions' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (t of templates(); track t.id) {
-          <tr [class.row-inactive]="!t.isActive">
-            <td>{{ t.description }}</td>
-            <td>
-              <span class="type-badge type-badge--{{ t.type.toLowerCase() }}">
-                {{ (t.type === 'TRANSACTION' ? 'recurring.expense' : 'recurring.income') | translate }}
-              </span>
-            </td>
-            <td>{{ 'recurring.day' | translate }} {{ t.dayOfMonth }}</td>
-            <td class="col-muted">{{ categoryName(t.categoryId) }}</td>
-            <td class="col-amount">R$ {{ t.amount | number:'1.2-2' }}</td>
-            <td>
-              <button class="status-toggle" [class.active]="t.isActive" (click)="toggleActive(t)" [title]="(t.isActive ? 'recurring.pause' : 'recurring.activate') | translate">
-                {{ (t.isActive ? 'recurring.active' : 'recurring.paused') | translate }}
+  <tsi-grouped-table
+    [groups]="tableGroups()"
+    [draggable]="true"
+    [searchFn]="tableSearchFn"
+    searchPlaceholder="Buscar recorrente..."
+    emptyMsg="Nenhum recorrente encontrado."
+    [activeInsert]="activeInsert()"
+    (rowReordered)="onRowReordered($event)"
+    (insertRequested)="onInsertRequested($event)"
+  >
+    <ng-template #theadRow>
+      <th>Descrição</th>
+      <th>Frequência</th>
+      <th>Dia</th>
+      <th>Categoria</th>
+      <th class="text-right">Valor</th>
+      <th>Status</th>
+      <th class="text-right">Ações</th>
+    </ng-template>
+
+    <ng-template #row let-t>
+      <td [class.col-inactive]="!t.isActive">{{ t.description }}</td>
+      <td class="col-muted col-freq">{{ frequencyLabel(t) }}</td>
+      <td class="col-muted">dia {{ t.dayOfMonth }}</td>
+      <td class="col-muted">{{ categoryName(t.categoryId) }}</td>
+      <td class="col-amount" [class.amount-positive]="t.amount > 0" [class.amount-negative]="t.amount < 0">
+        R$ {{ t.amount | number:'1.2-2' }}
+      </td>
+      <td>
+        <button class="status-toggle" [class.active]="t.isActive" (click)="toggleActive(t)">
+          {{ t.isActive ? 'Ativo' : 'Pausado' }}
+        </button>
+      </td>
+      <td class="text-right">
+        <button class="btn-icon" (click)="openEdit(t)" title="Editar">✏️</button>
+        <button class="btn-icon btn-icon--danger" (click)="delete(t)" title="Excluir">🗑️</button>
+      </td>
+    </ng-template>
+
+    <ng-template #insertForm let-groupId="groupId" let-afterItemId="afterItemId">
+      <div class="inline-form">
+        <div class="inline-form-row">
+          <input class="input input--sm" type="text" placeholder="Descrição" [(ngModel)]="formDescription" />
+          <input class="input input--sm input--num" type="text" inputmode="decimal" placeholder="0,00"
+            [(ngModel)]="formAmount" tsiCurrencyMask />
+          <select class="input input--sm" [(ngModel)]="formCategoryId">
+            <option value="">Categoria</option>
+            @for (c of categories(); track c.id) {
+              <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+          <select class="input input--sm" [(ngModel)]="formDayOfMonth">
+            @for (d of days; track d) {
+              <option [value]="d">Dia {{ d }}</option>
+            }
+          </select>
+          <select class="input input--sm" [(ngModel)]="formFrequency">
+            <option value="monthly">Mensal</option>
+            <option value="sporadic">Esporádico</option>
+          </select>
+        </div>
+        @if (formFrequency === 'sporadic') {
+          <div class="month-picker">
+            @for (m of allMonths; track m) {
+              <button class="month-btn" [class.active]="hasMonth(m)" (click)="toggleMonth(m)">
+                {{ monthLabel(m) }}
               </button>
-            </td>
-            <td class="text-right">
-              <button class="btn-icon" (click)="openEdit(t)" [title]="'common.edit' | translate">✏️</button>
-              <button class="btn-icon btn-icon--danger" (click)="delete(t)" [title]="'common.delete' | translate">🗑️</button>
-            </td>
-          </tr>
+            }
+          </div>
         }
-      </tbody>
-    </table>
-  </div>
+        <div class="inline-form-actions">
+          <button class="btn btn-primary btn--sm" (click)="save()" [disabled]="saving()">
+            {{ saving() ? 'Salvando...' : 'Salvar' }}
+          </button>
+          <button class="btn btn-secondary btn--sm" (click)="cancelInsert()">Cancelar</button>
+        </div>
+      </div>
+    </ng-template>
+  </tsi-grouped-table>
 }
 
-@if (deletingTemplate()) {
-  <div class="modal-backdrop" (click)="cancelDelete()"></div>
-  <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
-    <p class="modal-text">{{ 'common.confirmDeleteMsg' | translate: { name: deletingTemplate()!.description } }}</p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="cancelDelete()">{{ 'common.cancel' | translate }}</button>
-      <button class="btn btn-danger" (click)="confirmDelete()">{{ 'common.delete' | translate }}</button>
-    </div>
-  </div>
-}
-
-@if (showForm()) {
-  <div class="modal-backdrop" (click)="closeForm()"></div>
+<!-- Edit modal -->
+@if (editingTemplate()) {
+  <div class="modal-backdrop" (click)="closeEdit()"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ (editingId() ? 'recurring.edit' : 'recurring.new') | translate }}</h3>
+    <h3 class="modal-title">Editar recorrente</h3>
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.description' | translate }}</label>
-        <input class="input" type="text" [(ngModel)]="formDescription" [placeholder]="'recurring.descPlaceholder' | translate" />
+        <label>Descrição</label>
+        <input class="input" type="text" [(ngModel)]="formDescription" />
       </div>
       <div class="form-field form-field--sm">
-        <label>{{ 'common.type' | translate }}</label>
+        <label>Tipo</label>
         <select class="input" [(ngModel)]="formType">
-          <option value="TRANSACTION">{{ 'recurring.expense' | translate }}</option>
-          <option value="ENTRY">{{ 'recurring.income' | translate }}</option>
+          <option value="TRANSACTION">Despesa</option>
+          <option value="ENTRY">Entrada</option>
         </select>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.amount' | translate }} (R$)</label>
-        <input class="input" type="number" min="0.01" step="0.01" [(ngModel)]="formAmount" />
+        <label>Valor (R$)</label>
+        <input class="input" type="text" inputmode="decimal" [(ngModel)]="formAmount" tsiCurrencyMask />
       </div>
       <div class="form-field form-field--sm">
-        <label>{{ 'recurring.dayOfMonth' | translate }}</label>
+        <label>Dia do mês</label>
         <select class="input" [(ngModel)]="formDayOfMonth">
           @for (d of days; track d) {
             <option [value]="d">{{ d }}</option>
@@ -102,9 +127,32 @@
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.category' | translate }}</label>
+        <label>Frequência</label>
+        <select class="input" [(ngModel)]="formFrequency">
+          <option value="monthly">Mensal</option>
+          <option value="sporadic">Esporádico</option>
+        </select>
+      </div>
+    </div>
+
+    @if (formFrequency === 'sporadic') {
+      <div class="form-field">
+        <label>Meses de ocorrência</label>
+        <div class="month-picker">
+          @for (m of allMonths; track m) {
+            <button class="month-btn" [class.active]="hasMonth(m)" (click)="toggleMonth(m)">
+              {{ monthLabel(m) }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>Categoria</label>
         <select class="input" [(ngModel)]="formCategoryId">
-          <option value="">{{ 'recurring.none' | translate }}</option>
+          <option value="">Nenhuma</option>
           @for (c of categories(); track c.id) {
             <option [value]="c.id">{{ c.name }}</option>
           }
@@ -114,18 +162,18 @@
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.account' | translate }}</label>
+        <label>Conta</label>
         <select class="input" [(ngModel)]="formAccountId" [disabled]="!!formCreditCardId">
-          <option value="">{{ 'recurring.none' | translate }}</option>
+          <option value="">Nenhuma</option>
           @for (a of accounts(); track a.id) {
             <option [value]="a.id">{{ a.name }}</option>
           }
         </select>
       </div>
       <div class="form-field">
-        <label>{{ 'recurring.creditCard' | translate }}</label>
+        <label>Cartão de crédito</label>
         <select class="input" [(ngModel)]="formCreditCardId">
-          <option value="">{{ 'recurring.noneM' | translate }}</option>
+          <option value="">Nenhum</option>
           @for (c of cards(); track c.id) {
             <option [value]="c.id">{{ c.name }}</option>
           }
@@ -134,9 +182,51 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-secondary" (click)="closeEdit()">Cancelar</button>
       <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
-        {{ (saving() ? 'recurring.saving' : 'common.save') | translate }}
+        {{ saving() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Delete confirm modal -->
+@if (deletingTemplate()) {
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">Confirmar exclusão</h3>
+    <p class="modal-text">Excluir <strong>{{ deletingTemplate()!.description }}</strong>?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmDelete()">Excluir</button>
+    </div>
+  </div>
+}
+
+<!-- Project period modal -->
+@if (showProjectModal()) {
+  <div class="modal-backdrop" (click)="closeProjectModal()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">Projetar período</h3>
+    <p class="modal-text">Serão criados lançamentos projetados para todos os templates ativos neste mês.</p>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Mês</label>
+        <select class="input" [(ngModel)]="projectMonth">
+          @for (m of allMonths; track m) {
+            <option [value]="m">{{ monthLabel(m) }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-field form-field--sm">
+        <label>Ano</label>
+        <input class="input" type="number" [(ngModel)]="projectYear" min="2020" max="2099" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeProjectModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="projectPeriod()" [disabled]="projecting()">
+        {{ projecting() ? 'Projetando...' : 'Projetar' }}
       </button>
     </div>
   </div>
