@@ -146,7 +146,18 @@
     &:last-child td { border-bottom: none; }
     &:hover { background: var(--color-surface-2); }
     &.row-selected { background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)); }
+    &.drag-over { background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface)); outline: 2px solid var(--color-accent); outline-offset: -2px; }
+    &[draggable="true"] { cursor: grab; }
   }
+
+  .th-drag, .td-drag {
+    width: 28px;
+    min-width: 28px;
+    padding: 0 4px;
+    text-align: center;
+    color: var(--color-text-2);
+  }
+  .td-drag { cursor: grab; }
 }
 
 // ── Totals footer ─────────────────────────────────────────────────────────────

@@ -240,6 +240,11 @@ tr:hover td { background: var(--color-surface-2); }
 }
 
 .state-msg { text-align: center; color: var(--color-text-2); padding: 3rem 0; }
+
+.dnd-bar {
+  display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem;
+  .dnd-hint { font-size: .8rem; color: var(--color-text-2); }
+}
 .form-toggles { display: flex; gap: 1.5rem; margin-bottom: .75rem; }
 .toggle-label { display: flex; align-items: center; gap: 0.5rem; font-size: .875rem; cursor: pointer; }
 

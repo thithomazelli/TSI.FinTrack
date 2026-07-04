@@ -21,6 +21,7 @@ export interface Transaction {
   originalAmount: number | null;
   exchangeRate: number | null;
   labels: string[];
+  position?: number;
   createdAt: string;
   updatedAt: string;
 }

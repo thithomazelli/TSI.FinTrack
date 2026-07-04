@@ -75,6 +75,16 @@
   @if (loading()) {
     <p class="state-msg">{{ 'common.loading' | translate }}</p>
   } @else {
+    <!-- DnD mode toggle -->
+    <div class="dnd-bar">
+      <button class="btn btn-sm" [class.btn-primary]="dndMode()" [class.btn-ghost]="!dndMode()" (click)="toggleDndMode()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+        {{ dndMode() ? 'Sair da ordenação' : 'Ordenar manualmente' }}
+      </button>
+      @if (dndMode()) {
+        <span class="dnd-hint">Arraste as linhas para reordenar</span>
+      }
+    </div>
     <!-- Bulk action bar — directly above grid -->
     @if (selectionCount() > 0) {
       <div class="bulk-bar">
@@ -107,10 +117,12 @@
       [searchPlaceholder]="'movimentos.search' | translate"
       [sortComparators]="tableSortComparators"
       [rowClassFn]="tableRowClassFn"
-      [onRowClick]="rowClickFn"
+      [onRowClick]="dndMode() ? null : rowClickFn"
       [initialSortKey]="'status'"
       [initialSortDir]="'asc'"
       [emptyMsg]="'movimentos.empty' | translate"
+      [draggable]="dndMode()"
+      (rowReordered)="onRowReordered($event)"
     >
       <ng-template #filterBtn>
         <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">

@@ -44,6 +44,9 @@
     <table class="dt-table">
       <thead>
         <tr>
+          @if (isDragActive()) {
+            <th class="th-drag"></th>
+          }
           @if (extraThTpl) {
             <ng-container [ngTemplateOutlet]="extraThTpl" />
           }
@@ -69,8 +72,24 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of pageItems(); track item.id) {
-          <tr [class]="rowClass(item)" (click)="onRowClick()?.(item)" [style.cursor]="onRowClick() ? 'pointer' : null">
+        @for (item of pageItems(); track item.id; let i = $index) {
+          <tr
+            [class]="rowClass(item)"
+            [class.drag-over]="isDragActive() && dragOverIndex() === i && dragFromIndex !== i"
+            [draggable]="isDragActive()"
+            (click)="onRowClick()?.(item)"
+            [style.cursor]="isDragActive() ? 'default' : (onRowClick() ? 'pointer' : null)"
+            (dragstart)="onDragStart(i, $event)"
+            (dragover)="onDragOver(i, $event)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop(i, $event)"
+            (dragend)="onDragEnd()"
+          >
+            @if (isDragActive()) {
+              <td class="td-drag" title="Arrastar para reordenar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+              </td>
+            }
             <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ $implicit: item }" />
           </tr>
         }

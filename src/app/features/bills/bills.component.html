@@ -46,6 +46,15 @@
   }
 
   <!-- Tabela de transações -->
+  <div class="dnd-bar">
+    <button class="btn btn-sm" [class.btn-primary]="dndMode()" [class.btn-ghost]="!dndMode()" (click)="toggleDndMode()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+      {{ dndMode() ? 'Sair da ordenação' : 'Ordenar manualmente' }}
+    </button>
+    @if (dndMode()) {
+      <span class="dnd-hint">Arraste as linhas para reordenar</span>
+    }
+  </div>
   @if (filtered().length === 0) {
     <p class="state-msg">{{ 'bills.empty' | translate }}</p>
   } @else {
@@ -53,6 +62,7 @@
     <table class="bills-table">
       <thead>
         <tr>
+          @if (dndMode()) { <th class="th-drag"></th> }
           <th>{{ 'bills.colPurchaseDate' | translate }}</th>
           <th>{{ 'common.description' | translate }}</th>
           <th>{{ 'common.category' | translate }}</th>
@@ -62,8 +72,20 @@
         </tr>
       </thead>
       <tbody>
-        @for (tx of filtered(); track tx.id) {
-          <tr>
+        @for (tx of filtered(); track tx.id; let i = $index) {
+          <tr
+            [draggable]="dndMode()"
+            [class.drag-over]="dndMode() && dragOverIndex === i && dragFromIndex !== i"
+            (dragstart)="onBillDragStart(i, $event)"
+            (dragover)="onBillDragOver(i, $event)"
+            (drop)="onBillDrop(i, $event)"
+            (dragend)="onBillDragEnd()"
+          >
+            @if (dndMode()) {
+              <td class="td-drag" title="Arrastar para reordenar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+              </td>
+            }
             <td class="td-date">{{ tx.date | date:'dd/MM' }}</td>
             <td class="td-desc">
               {{ tx.description }}
@@ -89,7 +111,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="4" class="tfoot-label">{{ 'common.total' | translate }}</td>
+          <td [attr.colspan]="dndMode() ? 5 : 4" class="tfoot-label">{{ 'common.total' | translate }}</td>
           <td class="tfoot-total">R$ {{ total() | number:'1.2-2' }}</td>
           <td></td>
         </tr>

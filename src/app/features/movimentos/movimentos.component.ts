@@ -48,6 +48,7 @@ export interface MovimentoItem {
   accountId?: string | null;
   creditCardId?: string | null;
   typeId?: string;
+  position?: number;
   raw: Entry | Transaction;
 }
 
@@ -152,6 +153,8 @@ export class MovimentosComponent implements OnInit {
   formTxExchangeRate = 0;
   formTxLabels: string[] = [];
 
+  readonly dndMode = signal(false);
+
   // Computed unified list
   readonly allItems = computed<MovimentoItem[]>(() => {
     const entries: MovimentoItem[] = this.allEntries().map(e => ({
@@ -163,6 +166,7 @@ export class MovimentosComponent implements OnInit {
       status: e.status ?? 'REALIZED',
       accountId: e.accountId,
       typeId: e.typeId,
+      position: e.position,
       raw: e,
     }));
 
@@ -176,10 +180,15 @@ export class MovimentosComponent implements OnInit {
       categoryId: t.categoryId,
       accountId: t.accountId,
       creditCardId: t.creditCardId,
+      position: t.position,
       raw: t,
     }));
 
-    return [...entries, ...txs].sort((a, b) => b.date.localeCompare(a.date));
+    const all = [...entries, ...txs];
+    if (this.dndMode()) {
+      return all.sort((a, b) => (a.position ?? 999999) - (b.position ?? 999999));
+    }
+    return all.sort((a, b) => b.date.localeCompare(a.date));
   });
 
   readonly filteredItems = computed<MovimentoItem[]>(() => {
@@ -248,6 +257,46 @@ export class MovimentosComponent implements OnInit {
   };
 
   readonly rowClickFn = (item: MovimentoItem) => this.toggleItem(item.id);
+
+  toggleDndMode(): void {
+    this.dndMode.update(v => !v);
+  }
+
+  onRowReordered(event: { id: string; aboveId: string | null; belowId: string | null }): void {
+    const allItems = this.allItems();
+    const aboveItem = event.aboveId ? allItems.find(i => i.id === event.aboveId) : null;
+    const belowItem = event.belowId ? allItems.find(i => i.id === event.belowId) : null;
+    const draggedItem = allItems.find(i => i.id === event.id);
+    if (!draggedItem) return;
+
+    let newPosition: number;
+    if (!aboveItem && !belowItem) {
+      newPosition = 1000;
+    } else if (!aboveItem) {
+      newPosition = (belowItem!.position ?? 1000) - 1000;
+    } else if (!belowItem) {
+      newPosition = (aboveItem!.position ?? 1000) + 1000;
+    } else {
+      newPosition = ((aboveItem.position ?? 0) + (belowItem.position ?? 0)) / 2;
+    }
+
+    // Optimistically update local state
+    if (draggedItem.kind === 'entry') {
+      this.allEntries.update(list =>
+        list.map(e => e.id === event.id ? { ...e, position: newPosition } : e)
+      );
+      this.entryService.updatePosition(event.id, newPosition).subscribe({
+        error: err => this.logger.error('Failed to update entry position', err),
+      });
+    } else {
+      this.allTransactions.update(list =>
+        list.map(t => t.id === event.id ? { ...t, position: newPosition } : t)
+      );
+      this.transactionService.updatePosition(event.id, newPosition).subscribe({
+        error: err => this.logger.error('Failed to update transaction position', err),
+      });
+    }
+  }
 
   toggleFilterTipo(kind: string): void {
     this.filterTipos.update(s => { const n = new Set(s); n.has(kind) ? n.delete(kind) : n.add(kind); return n; });

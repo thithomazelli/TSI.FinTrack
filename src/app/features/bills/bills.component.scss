@@ -135,3 +135,16 @@ tfoot td {
   .pie-body { justify-content: center; }
   .pie-chart-wrap { width: 160px; height: 160px; }
 }
+
+.dnd-bar {
+  display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem;
+  .dnd-hint { font-size: .8rem; color: var(--color-text-2); }
+}
+.bills-table tbody tr {
+  &.drag-over { background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface)); outline: 2px solid var(--color-accent); outline-offset: -2px; }
+  &[draggable="true"] { cursor: grab; }
+}
+.th-drag, .td-drag {
+  width: 28px; min-width: 28px; padding: 0 4px; text-align: center;
+  color: var(--color-text-2); cursor: grab;
+}

@@ -201,6 +201,17 @@ export class TransactionService {
     );
   }
 
+  updatePosition(id: string, position: number): Observable<void> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update({ position, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .then(({ error }) => { if (error) throw error; })
+    );
+  }
+
   private toModel(r: any): Transaction {
     return {
       id: r.id, ownerId: r.owner_id, description: r.description,
@@ -212,7 +223,7 @@ export class TransactionService {
       originalCurrency: r.original_currency, originalAmount: r.original_amount,
       exchangeRate: r.exchange_rate, paymentDate: r.payment_date,
       paymentMethod: r.payment_method, labels: r.labels ?? [],
-      createdAt: r.created_at, updatedAt: r.updated_at,
+      position: r.position ?? undefined, createdAt: r.created_at, updatedAt: r.updated_at,
     };
   }
 

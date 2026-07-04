@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
@@ -28,6 +28,7 @@ export class BillsComponent implements OnInit {
   private readonly cardService = inject(CreditCardService);
   private readonly categoryService = inject(CategoryService);
   private readonly logger = inject(LoggingService);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly themeService = inject(ThemeService);
 
   readonly transactions = signal<Transaction[]>([]);
@@ -37,13 +38,23 @@ export class BillsComponent implements OnInit {
   readonly selectedCardId = signal<string | 'all'>('all');
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
+  readonly dndMode = signal(false);
+
+  // Drag state
+  dragFromIndex = -1;
+  dragOverIndex = -1;
 
   readonly filtered = computed(() => {
     const id = this.selectedCardId();
     const txs = this.transactions();
-    if (id === 'all') return txs;
-    if (id === 'debit') return txs.filter(t => !t.creditCardId);
-    return txs.filter(t => t.creditCardId === id);
+    let result: Transaction[];
+    if (id === 'all') result = txs;
+    else if (id === 'debit') result = txs.filter(t => !t.creditCardId);
+    else result = txs.filter(t => t.creditCardId === id);
+    if (this.dndMode()) {
+      return [...result].sort((a, b) => (a.position ?? 999999) - (b.position ?? 999999));
+    }
+    return result;
   });
 
   readonly total = computed(() => this.filtered().reduce((s, t) => s + t.amount, 0));
@@ -139,5 +150,71 @@ export class BillsComponent implements OnInit {
     const cardIds = [...new Set(txs.map(t => t.creditCardId))];
     return cardIds.map(id => ({ id, name: this.cardName(id), total: this.cardTotal(id) }))
       .sort((a, b) => b.total - a.total);
+  }
+
+  toggleDndMode(): void { this.dndMode.update(v => !v); }
+
+  onBillDragStart(index: number, event: DragEvent): void {
+    this.dragFromIndex = index;
+    this.dragOverIndex = index;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(index));
+    }
+    this.cdr.markForCheck();
+  }
+
+  onBillDragOver(index: number, event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    this.dragOverIndex = index;
+    this.cdr.markForCheck();
+  }
+
+  onBillDrop(toIndex: number, event: DragEvent): void {
+    event.preventDefault();
+    const fromIndex = this.dragFromIndex;
+    if (fromIndex === -1 || fromIndex === toIndex) {
+      this.dragOverIndex = -1;
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const items = [...this.filtered()];
+    const dragged = items[fromIndex];
+    items.splice(fromIndex, 1);
+    items.splice(toIndex, 0, dragged);
+
+    const aboveItem = toIndex > 0 ? items[toIndex - 1] : null;
+    const belowItem = toIndex < items.length - 1 ? items[toIndex + 1] : null;
+
+    let newPosition: number;
+    if (!aboveItem && !belowItem) {
+      newPosition = 1000;
+    } else if (!aboveItem) {
+      newPosition = (belowItem!.position ?? 1000) - 1000;
+    } else if (!belowItem) {
+      newPosition = (aboveItem!.position ?? 1000) + 1000;
+    } else {
+      newPosition = ((aboveItem.position ?? 0) + (belowItem.position ?? 0)) / 2;
+    }
+
+    this.transactions.update(list =>
+      list.map(t => t.id === dragged.id ? { ...t, position: newPosition } : t)
+    );
+
+    this.txService.updatePosition(dragged.id, newPosition).subscribe({
+      error: err => this.logger.error('Failed to update bill position', err),
+    });
+
+    this.dragOverIndex = -1;
+    this.dragFromIndex = -1;
+    this.cdr.markForCheck();
+  }
+
+  onBillDragEnd(): void {
+    this.dragOverIndex = -1;
+    this.dragFromIndex = -1;
+    this.cdr.markForCheck();
   }
 }

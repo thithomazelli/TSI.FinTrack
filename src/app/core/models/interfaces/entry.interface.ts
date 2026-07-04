@@ -9,6 +9,7 @@ export interface Entry {
   recurringTemplateId: string | null;
   labels: string[];
   status?: string;
+  position?: number;
   createdAt: string;
   updatedAt: string;
 }

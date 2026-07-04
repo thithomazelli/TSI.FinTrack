@@ -5,9 +5,12 @@ import {
   OnInit,
   TemplateRef,
   computed,
+  effect,
   input,
   linkedSignal,
+  output,
   signal,
+  untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -48,6 +51,10 @@ export class DataTableComponent implements OnInit {
   readonly rowClassFn      = input<RowClassFn | null>(null);
   readonly emptyMsg        = input<string>('Nenhum resultado encontrado.');
   readonly onRowClick      = input<((item: any) => void) | null>(null);
+  readonly draggable       = input<boolean>(false);
+
+  // Emits when user drags a row: id of moved item + ids of its new neighbors
+  readonly rowReordered = output<{ id: string; aboveId: string | null; belowId: string | null }>();
 
   // ── Content templates ─────────────────────────────────────────────────────
   @ContentChild('row')         rowTpl!: TemplateRef<{ $implicit: any }>;
@@ -64,6 +71,19 @@ export class DataTableComponent implements OnInit {
   readonly page     = linkedSignal({ source: this.items, computation: () => 0 });
   readonly pageSize = signal(25);
   readonly pageSizeOptions = PAGE_SIZES;
+
+  // Drag state
+  dragFromIndex = -1;
+  readonly dragOverIndex = signal(-1);
+
+  constructor() {
+    // Clear sort when drag mode is activated so handles become visible
+    effect(() => {
+      if (this.draggable()) {
+        untracked(() => this.sortKey.set(null));
+      }
+    });
+  }
 
   ngOnInit() {
     this.sortKey.set(this.initialSortKey());
@@ -170,5 +190,53 @@ export class DataTableComponent implements OnInit {
 
   rowClass(item: any): string {
     return this.rowClassFn()?.(item) ?? '';
+  }
+
+  readonly isDragActive = computed(() => this.draggable() && this.sortKey() === null);
+
+  onDragStart(index: number, event: DragEvent): void {
+    this.dragFromIndex = index;
+    this.dragOverIndex.set(index);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(index));
+    }
+  }
+
+  onDragOver(index: number, event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    this.dragOverIndex.set(index);
+  }
+
+  onDragLeave(): void {
+    // handled by drop or dragend
+  }
+
+  onDrop(toIndex: number, event: DragEvent): void {
+    event.preventDefault();
+    const fromIndex = this.dragFromIndex;
+    if (fromIndex === -1 || fromIndex === toIndex) {
+      this.dragOverIndex.set(-1);
+      return;
+    }
+
+    const items = this.pageItems();
+    const dragged = items[fromIndex];
+    const newOrder = [...items];
+    newOrder.splice(fromIndex, 1);
+    newOrder.splice(toIndex, 0, dragged);
+
+    const aboveId = toIndex > 0 ? newOrder[toIndex - 1].id : null;
+    const belowId = toIndex < newOrder.length - 1 ? newOrder[toIndex + 1].id : null;
+
+    this.dragOverIndex.set(-1);
+    this.dragFromIndex = -1;
+    this.rowReordered.emit({ id: dragged.id, aboveId, belowId });
+  }
+
+  onDragEnd(): void {
+    this.dragOverIndex.set(-1);
+    this.dragFromIndex = -1;
   }
 }

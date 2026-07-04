@@ -110,13 +110,25 @@ export class EntryService {
     );
   }
 
+  updatePosition(id: string, position: number): Observable<void> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update({ position, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .then(({ error }) => { if (error) throw error; })
+    );
+  }
+
   private toModel(r: any): Entry {
     return {
       id: r.id, ownerId: r.owner_id, description: r.description,
       amount: r.amount, date: r.date, status: r.status,
       typeId: r.type_id, accountId: r.account_id,
       recurringTemplateId: r.recurring_template_id,
-      labels: r.labels ?? [], createdAt: r.created_at, updatedAt: r.updated_at,
+      labels: r.labels ?? [], position: r.position ?? undefined,
+      createdAt: r.created_at, updatedAt: r.updated_at,
     };
   }
 
