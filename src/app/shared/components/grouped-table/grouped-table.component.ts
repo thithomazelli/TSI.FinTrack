@@ -9,7 +9,7 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 export interface TableGroup<T = any> {
@@ -40,7 +40,7 @@ export type GroupSearchFn<T = any> = (item: T, query: string) => boolean;
 
 @Component({
   selector: 'tsi-grouped-table',
-  imports: [NgTemplateOutlet, FormsModule],
+  imports: [NgTemplateOutlet, FormsModule, DecimalPipe],
   templateUrl: './grouped-table.component.html',
   styleUrls: ['./grouped-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
