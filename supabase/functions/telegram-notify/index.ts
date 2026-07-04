@@ -138,13 +138,16 @@ async function sendDailyDigest(today: Date) {
       .gte('date', start)
       .lte('date', end);
 
-    const { data: totalsRow } = await supabase
-      .rpc('get_period_totals', { start_date: start, end_date: end })
-      .single();
+    const { data: entries } = await supabase
+      .from('entries')
+      .select('amount')
+      .eq('owner_id', sub.user_id)
+      .gte('date', start)
+      .lte('date', end);
 
     const realized = (txs ?? []).filter((t) => t.status === 'REALIZED');
     const projected = (txs ?? []).filter((t) => t.status === 'PROJECTED');
-    const totalIncome = Number((totalsRow as any)?.total_entries ?? 0);
+    const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
     const spentRealized = realized.reduce((s, t) => s + t.amount, 0);
     const spentProjected = projected.reduce((s, t) => s + t.amount, 0);
     const monthBalance = totalIncome - spentRealized;
