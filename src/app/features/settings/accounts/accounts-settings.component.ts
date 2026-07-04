@@ -40,6 +40,7 @@ export class AccountsSettingsComponent implements OnInit {
   formName = '';
   formTypeId = '';
   formBalance = 0;
+  formOpenedAt = '';
 
   ngOnInit(): void {
     this.domainListService.getByCode('account_type').subscribe({
@@ -73,6 +74,7 @@ export class AccountsSettingsComponent implements OnInit {
     this.formName = '';
     this.formTypeId = this.accountTypes()[0]?.id ?? '';
     this.formBalance = 0;
+    this.formOpenedAt = '';
     this.showForm.set(true);
   }
 
@@ -81,6 +83,7 @@ export class AccountsSettingsComponent implements OnInit {
     this.formName = account.name;
     this.formTypeId = account.typeId ?? '';
     this.formBalance = account.balance;
+    this.formOpenedAt = account.openedAt ?? '';
     this.showForm.set(true);
   }
 
@@ -92,7 +95,7 @@ export class AccountsSettingsComponent implements OnInit {
   save(): void {
     if (!this.formName.trim()) return;
     this.saving.set(true);
-    const payload = { name: this.formName.trim(), typeId: this.formTypeId, balance: this.formBalance };
+    const payload = { name: this.formName.trim(), typeId: this.formTypeId, balance: this.formBalance, openedAt: this.formOpenedAt || null };
     const id = this.editingId();
 
     const op$ = id

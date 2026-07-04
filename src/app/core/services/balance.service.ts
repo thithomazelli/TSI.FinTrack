@@ -84,6 +84,16 @@ export class BalanceService {
     }));
   }
 
+  /**
+   * Saldo acumulado dentro de um intervalo.
+   * Inclui accounts.balance apenas das contas cuja opened_at cai dentro do período.
+   */
+  getBalanceInRange(startDate: string, endDate: string): Observable<number> {
+    return from(
+      this.supabase.client.rpc('get_balance_in_range', { start_date: startDate, end_date: endDate })
+    ).pipe(map(res => Number(res.data ?? 0)));
+  }
+
   /** Totais de entradas e saídas para um período via RPC — sem limite de linhas. */
   getPeriodTotals(startDate: string, endDate: string): Observable<{ totalEntries: number; totalTransactions: number }> {
     return from(

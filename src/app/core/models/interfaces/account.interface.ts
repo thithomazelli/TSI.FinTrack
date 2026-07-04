@@ -4,6 +4,7 @@ export interface Account {
   name: string;
   typeId: string;
   balance: number;
+  openedAt: string | null;
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;

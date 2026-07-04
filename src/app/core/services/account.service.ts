@@ -15,6 +15,7 @@ function fromDb(row: any): Account {
     name: row.name,
     typeId: row.type_id,
     balance: row.balance,
+    openedAt: row.opened_at ?? null,
     isArchived: row.is_archived,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -49,7 +50,7 @@ export class AccountService {
     );
   }
 
-  create(payload: Pick<Account, 'name' | 'typeId' | 'balance'>): Observable<Account> {
+  create(payload: Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>): Observable<Account> {
     this.logger.info('Creating account', payload.name);
     return from(
       this.supabase.client
@@ -58,6 +59,7 @@ export class AccountService {
           name: payload.name,
           type_id: payload.typeId,
           balance: payload.balance,
+          opened_at: payload.openedAt || null,
           owner_id: this.ownerId,
         })
         .select()
@@ -69,7 +71,7 @@ export class AccountService {
     );
   }
 
-  update(id: string, payload: Partial<Pick<Account, 'name' | 'typeId' | 'balance'>>): Observable<Account> {
+  update(id: string, payload: Partial<Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>>): Observable<Account> {
     this.logger.info('Updating account', id);
     return from(
       this.supabase.client
@@ -78,6 +80,7 @@ export class AccountService {
           ...(payload.name !== undefined && { name: payload.name }),
           ...(payload.typeId !== undefined && { type_id: payload.typeId }),
           ...(payload.balance !== undefined && { balance: payload.balance }),
+          ...(payload.openedAt !== undefined && { opened_at: payload.openedAt || null }),
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)

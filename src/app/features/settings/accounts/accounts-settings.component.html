@@ -76,6 +76,10 @@
       <label>{{ 'settings.initialBalance' | translate }}</label>
       <input class="input" type="number" [(ngModel)]="formBalance" />
     </div>
+    <div class="form-field">
+      <label>{{ 'settings.openedAt' | translate }}</label>
+      <input class="input" type="date" [(ngModel)]="formOpenedAt" />
+    </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
       <button
