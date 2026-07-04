@@ -161,15 +161,9 @@ async function sendDailyDigest(today: Date) {
     const available = Number(balRow?.available ?? 0);
 
     // Saldo projetado acumulado até fim do mês (equivalente ao get_balance_up_to)
-    const [{ data: accRows }, { data: allEntries }, { data: allTxs }] = await Promise.all([
-      supabase.from('accounts').select('balance').eq('owner_id', sub.user_id).eq('is_archived', false),
-      supabase.from('entries').select('amount').eq('owner_id', sub.user_id).lte('date', end),
-      supabase.from('transactions').select('amount').eq('owner_id', sub.user_id).lte('date', end),
-    ]);
-    const accBalance = (accRows ?? []).reduce((s, a) => s + a.balance, 0);
-    const allEntriesSum = (allEntries ?? []).reduce((s, e) => s + e.amount, 0);
-    const allTxsSum = (allTxs ?? []).reduce((s, t) => s + t.amount, 0);
-    const projectedBalance = accBalance + allEntriesSum - allTxsSum;
+    const { data: projData } = await supabase
+      .rpc('get_balance_up_to_by_owner', { p_owner_id: sub.user_id, end_date: end });
+    const projectedBalance = Number(projData ?? 0);
 
     // Faturas em aberto vencidas ou a vencer (contagem rápida)
     const soon7 = new Date(today);
