@@ -124,7 +124,7 @@ async function sendDailyDigest(today: Date) {
   const month = today.getMonth() + 1;
   const monthStr = String(month).padStart(2, '0');
   const start = `${year}-${monthStr}-01`;
-  const end = `${year}-${monthStr}-31`;
+  const end = new Date(year, month, 0).toISOString().split('T')[0];
   const todayStr = today.toISOString().split('T')[0];
   const monthName = today.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
 
@@ -138,16 +138,13 @@ async function sendDailyDigest(today: Date) {
       .gte('date', start)
       .lte('date', end);
 
-    const { data: entries } = await supabase
-      .from('entries')
-      .select('amount')
-      .eq('owner_id', sub.user_id)
-      .gte('date', start)
-      .lte('date', end);
+    const { data: totalsRow } = await supabase
+      .rpc('get_period_totals', { start_date: start, end_date: end })
+      .single();
 
     const realized = (txs ?? []).filter((t) => t.status === 'REALIZED');
     const projected = (txs ?? []).filter((t) => t.status === 'PROJECTED');
-    const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
+    const totalIncome = Number((totalsRow as any)?.total_entries ?? 0);
     const spentRealized = realized.reduce((s, t) => s + t.amount, 0);
     const spentProjected = projected.reduce((s, t) => s + t.amount, 0);
     const monthBalance = totalIncome - spentRealized;
@@ -189,12 +186,11 @@ async function sendDailyDigest(today: Date) {
     msg += `<i>(acumulado, considerando todos os meses)</i>\n\n`;
     msg += `<b>Este mês:</b>\n`;
     const balanceProjected = totalIncome - (spentRealized + spentProjected);
-    const pending = spentProjected - spentRealized;
     msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
     msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
-    msg += `📋 Gastos projetados: ${fmt(spentProjected)}\n`;
-    if (pending > 0) {
-      msg += `⏳ Pendente a pagar: ${fmt(pending)}\n`;
+    if (spentProjected > 0) {
+      msg += `📋 Gastos projetados: ${fmt(spentProjected)}\n`;
+      msg += `⏳ Pendente a pagar: ${fmt(spentProjected)}\n`;
     }
     msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
     msg += `${balanceProjected >= 0 ? '📊' : '⚠️'} Saldo projetado: ${fmt(balanceProjected)}\n`;
@@ -262,6 +258,7 @@ async function sendMonthlyAnalysis(today: Date) {
   const year = prev.getFullYear();
   const month = prev.getMonth() + 1;
   const monthStr = String(month).padStart(2, '0');
+  const lastDay = new Date(year, month, 0).toISOString().split('T')[0];
   const monthName = prev.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
 
   const subs = await getAllSubscriptions();
@@ -272,14 +269,14 @@ async function sendMonthlyAnalysis(today: Date) {
       .select('amount, category_id, status')
       .eq('owner_id', sub.user_id)
       .gte('date', `${year}-${monthStr}-01`)
-      .lte('date', `${year}-${monthStr}-31`);
+      .lte('date', lastDay);
 
     const { data: entries } = await supabase
       .from('entries')
       .select('amount')
       .eq('owner_id', sub.user_id)
       .gte('date', `${year}-${monthStr}-01`)
-      .lte('date', `${year}-${monthStr}-31`);
+      .lte('date', lastDay);
 
     const realized = (txs ?? []).filter((t) => t.status === 'REALIZED');
     const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
@@ -320,6 +317,7 @@ async function getCurrentMonthGoalData(userId: string, today: Date) {
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
   const monthStr = String(month).padStart(2, '0');
+  const lastDay = new Date(year, month, 0).toISOString().split('T')[0];
 
   const { data: goals } = await supabase
     .from('goals')
@@ -334,7 +332,7 @@ async function getCurrentMonthGoalData(userId: string, today: Date) {
     .eq('owner_id', userId)
     .eq('status', 'REALIZED')
     .gte('date', `${year}-${monthStr}-01`)
-    .lte('date', `${year}-${monthStr}-31`);
+    .lte('date', lastDay);
 
   const spentMap: Record<string, number> = {};
   for (const t of txs ?? []) {
@@ -395,6 +393,7 @@ async function sendMonthEndSummary(today: Date) {
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
   const monthStr = String(month).padStart(2, '0');
+  const lastDay = new Date(year, month, 0).toISOString().split('T')[0];
   const monthName = today.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
   const subs = await getAllSubscriptions();
 
@@ -404,14 +403,14 @@ async function sendMonthEndSummary(today: Date) {
       .select('amount, category_id, status')
       .eq('owner_id', sub.user_id)
       .gte('date', `${year}-${monthStr}-01`)
-      .lte('date', `${year}-${monthStr}-31`);
+      .lte('date', lastDay);
 
     const { data: entries } = await supabase
       .from('entries')
       .select('amount')
       .eq('owner_id', sub.user_id)
       .gte('date', `${year}-${monthStr}-01`)
-      .lte('date', `${year}-${monthStr}-31`);
+      .lte('date', lastDay);
 
     const realized = (txs ?? []).filter((t) => t.status === 'REALIZED');
     const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
