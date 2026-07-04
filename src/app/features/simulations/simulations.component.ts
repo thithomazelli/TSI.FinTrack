@@ -21,7 +21,7 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { PeriodBarComponent } from '../../shared/components/period-bar/period-bar.component';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
-import { DataTableComponent, TableColumn, SearchFn, CompareFn, RowClassFn } from '../../shared/components/data-table/data-table.component';
+import { GroupedTableComponent, TableGroup, GroupSearchFn } from '../../shared/components/grouped-table/grouped-table.component';
 
 export interface SimItem {
   kind: 'entry' | 'transaction';
@@ -53,7 +53,7 @@ interface DiffEntry {
 
 @Component({
     selector: 'tsi-simulations',
-    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, PeriodBarComponent, DataTableComponent],
+    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, PeriodBarComponent, GroupedTableComponent],
     templateUrl: './simulations.component.html',
     styleUrls: ['./simulations.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -213,43 +213,65 @@ export class SimulationsComponent implements OnInit {
     this.filteredItems().every(i => this.selectedIds().has(i.id)));
   readonly selectionCount = computed(() => this.selectedIds().size);
 
-  // DataTable config
-  readonly tableColumns: TableColumn[] = [
-    { key: 'date',        label: 'common.date',              sortable: true },
-    { key: 'kind',        label: 'movimentos.colType',       sortable: false },
-    { key: 'description', label: 'common.description',       sortable: true },
-    { key: 'categoryId',  label: 'common.category',          sortable: false },
-    { key: '_card',       label: 'movimentos.colCardAccount', sortable: false },
-    { key: 'amount',      label: 'common.amount',            sortable: true, numeric: true },
-    { key: 'status',      label: 'common.status',            sortable: true },
-    { key: '_actions',    label: 'common.actions',           sortable: false },
-  ];
-
-  readonly tableSearchFn: SearchFn<SimItem> = (item, q) =>
+  readonly tableSearchFn: GroupSearchFn<SimItem> = (item, q) =>
     item.description.toLowerCase().includes(q) ||
     this.categoryName(item.categoryId).toLowerCase().includes(q) ||
     this.payerName(item).toLowerCase().includes(q);
 
-  readonly tableSortComparators: Record<string, CompareFn<SimItem>> = {
-    date:        (a, b) => a.date.localeCompare(b.date),
-    description: (a, b) => a.description.localeCompare(b.description, 'pt-BR'),
-    amount:      (a, b) => a.amount - b.amount,
-    status: (a, b) => {
-      const sv = (s: string) => s === 'REALIZED' ? 0 : 1;
-      const sd = sv(a.status) - sv(b.status);
-      return sd !== 0 ? sd : a.date.localeCompare(b.date);
-    },
-  };
+  readonly tableGroups = computed<TableGroup<SimItem>[]>(() => {
+    const items = this.filteredItems();
+    const entries   = items.filter(i => i.kind === 'entry');
+    const debitTxs  = items.filter(i => i.kind === 'transaction' && !i.creditCardId);
+    const cardTxs   = items.filter(i => i.kind === 'transaction' && !!i.creditCardId);
 
-  readonly tableRowClassFn: RowClassFn<SimItem> = (item) => {
-    const parts: string[] = [];
-    if (item.status === 'PROJECTED') parts.push('row-projected');
-    if (this.isSelected(item.id)) parts.push('row-selected');
-    if (this.isModified(item.id)) parts.push('row-modified');
-    return parts.join(' ');
-  };
+    const cardMap = new Map<string, SimItem[]>();
+    for (const tx of cardTxs) {
+      const cid = tx.creditCardId!;
+      if (!cardMap.has(cid)) cardMap.set(cid, []);
+      cardMap.get(cid)!.push(tx);
+    }
 
-  readonly rowClickFn = (item: SimItem) => this.toggleItem(item.id);
+    const groups: TableGroup<SimItem>[] = [];
+
+    if (entries.length > 0) {
+      groups.push({
+        id: '__entries',
+        label: 'Entradas',
+        items: entries,
+        total: entries.reduce((s, e) => s + e.amount, 0),
+        status: entries.some(e => e.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        defaultExpanded: true,
+      });
+    }
+
+    if (debitTxs.length > 0) {
+      groups.push({
+        id: '__debit',
+        label: 'Saídas - Débito',
+        items: debitTxs,
+        total: debitTxs.reduce((s, t) => s + t.amount, 0),
+        status: debitTxs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        defaultExpanded: true,
+      });
+    }
+
+    for (const [cardId, txs] of cardMap) {
+      const card = this.cards().find(c => c.id === cardId);
+      const hasOpen = txs.some(t => t.status === 'PROJECTED');
+      groups.push({
+        id: cardId,
+        label: `Fatura ${card?.name ?? '...'}`,
+        items: txs,
+        total: txs.reduce((s, t) => s + t.amount, 0),
+        status: hasOpen ? 'PROJECTED' : 'REALIZED',
+        badge: hasOpen ? 'em aberto' : 'fechada',
+        badgeClass: hasOpen ? 'badge--open' : 'badge--closed',
+        defaultExpanded: false,
+      });
+    }
+
+    return groups;
+  });
 
   toggleFilterTipo(kind: string): void {
     this.filterTipos.update(s => { const n = new Set(s); n.has(kind) ? n.delete(kind) : n.add(kind); return n; });

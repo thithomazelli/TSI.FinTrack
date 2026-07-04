@@ -32,7 +32,7 @@ import { TransactionStatus } from '../../core/models/enums/transaction-status.en
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
 import { PeriodBarComponent } from '../../shared/components/period-bar/period-bar.component';
-import { DataTableComponent, TableColumn, SearchFn, CompareFn, RowClassFn } from '../../shared/components/data-table/data-table.component';
+import { GroupedTableComponent, TableGroup, GroupInsertEvent, GroupReorderEvent, GroupSearchFn } from '../../shared/components/grouped-table/grouped-table.component';
 import { ThemeService } from '../../core/services/theme.service';
 
 Chart.register(...registerables);
@@ -56,7 +56,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 
 @Component({
     selector: 'tsi-movimentos',
-    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, PeriodBarComponent, BaseChartDirective, TranslatePipe, DataTableComponent, CurrencyMaskDirective],
+    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, PeriodBarComponent, BaseChartDirective, TranslatePipe, GroupedTableComponent, CurrencyMaskDirective],
     templateUrl: './movimentos.component.html',
     styleUrls: ['./movimentos.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -221,48 +221,84 @@ export class MovimentosComponent implements OnInit {
   );
   readonly selectionCount = computed(() => this.selectedIds().size);
 
-  // DataTable config
-  readonly tableColumns: TableColumn[] = [
-    { key: 'date',        label: 'common.date',               sortable: true },
-    { key: 'kind',        label: 'movimentos.colType',        sortable: false },
-    { key: 'description', label: 'common.description',        sortable: true },
-    { key: 'categoryId',  label: 'common.category',           sortable: false },
-    { key: '_card',       label: 'movimentos.colCardAccount',  sortable: false },
-    { key: 'amount',      label: 'common.amount',             sortable: true, numeric: true },
-    { key: 'status',      label: 'common.status',             sortable: true },
-    { key: '_actions',    label: 'common.actions',            sortable: false },
-  ];
-
-  readonly tableSearchFn: SearchFn<MovimentoItem> = (item, q) =>
+  readonly tableSearchFn: GroupSearchFn<MovimentoItem> = (item, q) =>
     item.description.toLowerCase().includes(q) ||
     this.categoryName(item.categoryId).toLowerCase().includes(q) ||
     this.payerName(item).toLowerCase().includes(q);
 
-  readonly tableSortComparators: Record<string, CompareFn<MovimentoItem>> = {
-    date:        (a, b) => a.date.localeCompare(b.date),
-    description: (a, b) => a.description.localeCompare(b.description, 'pt-BR'),
-    amount:      (a, b) => a.amount - b.amount,
-    status: (a, b) => {
-      const sv = (s: string) => s === 'REALIZED' ? 0 : 1;
-      const sd = sv(a.status) - sv(b.status);
-      return sd !== 0 ? sd : a.date.localeCompare(b.date);
-    },
-  };
+  readonly activeInsert = signal<GroupInsertEvent | null>(null);
 
-  readonly tableRowClassFn: RowClassFn<MovimentoItem> = (item) => {
-    const parts: string[] = [];
-    if (item.status === 'PROJECTED') parts.push('row-projected');
-    if (this.isSelected(item.id)) parts.push('row-selected');
-    return parts.join(' ');
-  };
+  readonly tableGroups = computed<TableGroup<MovimentoItem>[]>(() => {
+    const items = this.filteredItems();
+    const entries   = items.filter(i => i.kind === 'entry');
+    const debitTxs  = items.filter(i => i.kind === 'transaction' && !i.creditCardId);
+    const cardTxs   = items.filter(i => i.kind === 'transaction' && !!i.creditCardId);
 
-  readonly rowClickFn = (item: MovimentoItem) => this.toggleItem(item.id);
+    const cardMap = new Map<string, MovimentoItem[]>();
+    for (const tx of cardTxs) {
+      const cid = tx.creditCardId!;
+      if (!cardMap.has(cid)) cardMap.set(cid, []);
+      cardMap.get(cid)!.push(tx);
+    }
+
+    const groups: TableGroup<MovimentoItem>[] = [];
+
+    if (entries.length > 0) {
+      groups.push({
+        id: '__entries',
+        label: 'Entradas',
+        items: entries,
+        total: entries.reduce((s, e) => s + e.amount, 0),
+        status: entries.some(e => e.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        defaultExpanded: true,
+      });
+    }
+
+    if (debitTxs.length > 0) {
+      groups.push({
+        id: '__debit',
+        label: 'Saídas - Débito',
+        items: debitTxs,
+        total: debitTxs.reduce((s, t) => s + t.amount, 0),
+        status: debitTxs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        defaultExpanded: true,
+      });
+    }
+
+    for (const [cardId, txs] of cardMap) {
+      const card = this.cards().find(c => c.id === cardId);
+      const hasOpen = txs.some(t => t.status === 'PROJECTED');
+      groups.push({
+        id: cardId,
+        label: `Fatura ${card?.name ?? '...'}`,
+        items: txs,
+        total: txs.reduce((s, t) => s + t.amount, 0),
+        status: hasOpen ? 'PROJECTED' : 'REALIZED',
+        badge: hasOpen ? 'em aberto' : 'fechada',
+        badgeClass: hasOpen ? 'badge--open' : 'badge--closed',
+        defaultExpanded: false,
+      });
+    }
+
+    return groups;
+  });
 
   toggleDndMode(): void {
     this.dndMode.update(v => !v);
   }
 
-  onRowReordered(event: { id: string; aboveId: string | null; belowId: string | null }): void {
+  onInsertRequested(event: GroupInsertEvent): void {
+    if (event.groupId === '__entries') {
+      this.openCreateEntry();
+    } else {
+      this.openCreateTransaction();
+      if (event.groupId !== '__debit') {
+        this.formTxCreditCardId = event.groupId;
+      }
+    }
+  }
+
+  onRowReordered(event: GroupReorderEvent): void {
     const allItems = this.allItems();
     const aboveItem = event.aboveId ? allItems.find(i => i.id === event.aboveId) : null;
     const belowItem = event.belowId ? allItems.find(i => i.id === event.belowId) : null;

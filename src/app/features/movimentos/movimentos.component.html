@@ -110,19 +110,15 @@
         </div>
       </div>
     }
-    <tsi-data-table
-      [items]="filteredItems()"
-      [columns]="tableColumns"
+    <tsi-grouped-table
+      [groups]="tableGroups()"
       [searchFn]="tableSearchFn"
       [searchPlaceholder]="'movimentos.search' | translate"
-      [sortComparators]="tableSortComparators"
-      [rowClassFn]="tableRowClassFn"
-      [onRowClick]="dndMode() ? null : rowClickFn"
-      [initialSortKey]="'status'"
-      [initialSortDir]="'asc'"
       [emptyMsg]="'movimentos.empty' | translate"
       [draggable]="dndMode()"
+      [activeInsert]="activeInsert()"
       (rowReordered)="onRowReordered($event)"
+      (insertRequested)="onInsertRequested($event)"
     >
       <ng-template #filterBtn>
         <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">
@@ -215,7 +211,6 @@
         <tr class="totals-row">
           <td></td>
           <td></td>
-          <td></td>
           <td class="totals-label">
             {{ items.length }} {{ items.length === 1 ? 'registro' : 'registros' }}
           </td>
@@ -231,10 +226,17 @@
         </tr>
       </ng-template>
 
-      <ng-template #extraTh>
+      <ng-template #theadRow>
         <th class="col-check">
           <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" class="row-check" />
         </th>
+        <th class="col-date">{{ 'common.date' | translate }}</th>
+        <th>{{ 'common.description' | translate }}</th>
+        <th>{{ 'common.category' | translate }}</th>
+        <th>{{ 'movimentos.colCardAccount' | translate }}</th>
+        <th class="text-right">{{ 'common.amount' | translate }}</th>
+        <th>{{ 'common.status' | translate }}</th>
+        <th>{{ 'common.actions' | translate }}</th>
       </ng-template>
 
       <ng-template #row let-item>
@@ -242,11 +244,6 @@
           <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" class="row-check" />
         </td>
         <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
-        <td>
-          <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
-            {{ (item.kind === 'entry' ? 'movimentos.typeEntry' : 'movimentos.typeExit') | translate }}
-          </span>
-        </td>
         <td>
           <div class="desc-cell">
             <span>{{ item.description }}</span>
@@ -296,7 +293,7 @@
           </div>
         </td>
       </ng-template>
-    </tsi-data-table>
+    </tsi-grouped-table>
   }
 </div>
 
