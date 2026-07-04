@@ -231,6 +231,13 @@ export class SimulationsComponent implements OnInit {
       cardMap.get(cid)!.push(tx);
     }
 
+    const debitMap = new Map<string, SimItem[]>();
+    for (const tx of debitTxs) {
+      const key = tx.accountId ?? '__no_account';
+      if (!debitMap.has(key)) debitMap.set(key, []);
+      debitMap.get(key)!.push(tx);
+    }
+
     const groups: TableGroup<SimItem>[] = [];
 
     if (entries.length > 0) {
@@ -244,23 +251,25 @@ export class SimulationsComponent implements OnInit {
       });
     }
 
-    if (debitTxs.length > 0) {
+    for (const [accountId, txs] of debitMap) {
+      const account = this.accounts().find(a => a.id === accountId);
       groups.push({
-        id: '__debit',
-        label: 'Saídas - Débito',
-        items: debitTxs,
-        total: debitTxs.reduce((s, t) => s + t.amount, 0),
-        status: debitTxs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        id: `__debit_${accountId}`,
+        label: account ? `Débito ${account.name}` : 'Débito',
+        items: txs,
+        total: txs.reduce((s, t) => s + t.amount, 0),
+        status: txs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
         defaultExpanded: true,
       });
     }
 
+    const cardGroups: TableGroup<SimItem>[] = [];
     for (const [cardId, txs] of cardMap) {
       const card = this.cards().find(c => c.id === cardId);
       const hasOpen = txs.some(t => t.status === 'PROJECTED');
-      groups.push({
+      cardGroups.push({
         id: cardId,
-        label: `Fatura ${card?.name ?? '...'}`,
+        label: card?.name ?? '...',
         items: txs,
         total: txs.reduce((s, t) => s + t.amount, 0),
         status: hasOpen ? 'PROJECTED' : 'REALIZED',
@@ -269,8 +278,9 @@ export class SimulationsComponent implements OnInit {
         defaultExpanded: false,
       });
     }
+    cardGroups.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
 
-    return groups;
+    return [...groups, ...cardGroups];
   });
 
   toggleFilterTipo(kind: string): void {

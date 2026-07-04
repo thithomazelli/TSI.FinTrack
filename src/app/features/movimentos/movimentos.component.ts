@@ -241,6 +241,14 @@ export class MovimentosComponent implements OnInit {
       cardMap.get(cid)!.push(tx);
     }
 
+    // Group debit transactions by account
+    const debitMap = new Map<string, MovimentoItem[]>();
+    for (const tx of debitTxs) {
+      const key = tx.accountId ?? '__no_account';
+      if (!debitMap.has(key)) debitMap.set(key, []);
+      debitMap.get(key)!.push(tx);
+    }
+
     const groups: TableGroup<MovimentoItem>[] = [];
 
     if (entries.length > 0) {
@@ -254,23 +262,25 @@ export class MovimentosComponent implements OnInit {
       });
     }
 
-    if (debitTxs.length > 0) {
+    for (const [accountId, txs] of debitMap) {
+      const account = this.accounts().find(a => a.id === accountId);
       groups.push({
-        id: '__debit',
-        label: 'Saídas - Débito',
-        items: debitTxs,
-        total: debitTxs.reduce((s, t) => s + t.amount, 0),
-        status: debitTxs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        id: `__debit_${accountId}`,
+        label: account ? `Débito ${account.name}` : 'Débito',
+        items: txs,
+        total: txs.reduce((s, t) => s + t.amount, 0),
+        status: txs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
         defaultExpanded: true,
       });
     }
 
+    const cardGroups: TableGroup<MovimentoItem>[] = [];
     for (const [cardId, txs] of cardMap) {
       const card = this.cards().find(c => c.id === cardId);
       const hasOpen = txs.some(t => t.status === 'PROJECTED');
-      groups.push({
+      cardGroups.push({
         id: cardId,
-        label: `Fatura ${card?.name ?? '...'}`,
+        label: card?.name ?? '...',
         items: txs,
         total: txs.reduce((s, t) => s + t.amount, 0),
         status: hasOpen ? 'PROJECTED' : 'REALIZED',
@@ -279,8 +289,9 @@ export class MovimentosComponent implements OnInit {
         defaultExpanded: false,
       });
     }
+    cardGroups.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
 
-    return groups;
+    return [...groups, ...cardGroups];
   });
 
   toggleDndMode(): void {
@@ -290,11 +301,13 @@ export class MovimentosComponent implements OnInit {
   onInsertRequested(event: GroupInsertEvent): void {
     if (event.groupId === '__entries') {
       this.openCreateEntry();
+    } else if (event.groupId.startsWith('__debit_')) {
+      this.openCreateTransaction();
+      const accountId = event.groupId.replace('__debit_', '');
+      if (accountId !== '__no_account') this.formTxAccountId = accountId;
     } else {
       this.openCreateTransaction();
-      if (event.groupId !== '__debit') {
-        this.formTxCreditCardId = event.groupId;
-      }
+      this.formTxCreditCardId = event.groupId;
     }
   }
 
