@@ -195,8 +195,10 @@ async function sendDailyDigest(today: Date) {
     const debitOverdue = (pendingTxs ?? []).filter((t) => t.date < todayStr).length;
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
+    const balanceProjected = totalIncome - (spentRealized + spentProjected);
+    const pending = spentProjected - spentRealized;
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
-    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo atual: ${fmt(available)}</b>\n`;
+    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
     msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} <b>Saldo projetado: ${fmt(projectedBalance)}</b>\n`;
     msg += `<i>(acumulado, considerando todos os meses)</i>\n\n`;
     msg += `<b>Este mês:</b>\n`;
@@ -206,6 +208,8 @@ async function sendDailyDigest(today: Date) {
       msg += `📋 Gastos projetados: ${fmt(spentProjected)}\n`;
       msg += `⏳ Pendente a pagar: ${fmt(spentProjected)}\n`;
     }
+    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
+    msg += `${balanceProjected >= 0 ? '📊' : '⚠️'} Saldo projetado do mês: ${fmt(balanceProjected)}\n`;
     if (overdueCount || dueSoonCount) {
       msg += `\n<b>Faturas:</b>\n`;
       if (overdueCount) msg += `  🚨 ${overdueCount} vencida(s)\n`;
