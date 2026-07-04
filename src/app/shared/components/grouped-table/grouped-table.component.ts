@@ -8,6 +8,7 @@ import {
   output,
   signal,
   computed,
+  linkedSignal,
 } from '@angular/core';
 import { NgTemplateOutlet, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -46,26 +47,33 @@ export type GroupSearchFn<T = any> = (item: T, query: string) => boolean;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupedTableComponent {
-  readonly groups          = input<TableGroup[]>([]);
-  readonly draggable       = input<boolean>(false);
-  readonly searchFn        = input<GroupSearchFn | null>(null);
-  readonly searchPlaceholder = input<string>('Buscar...');
-  readonly emptyMsg        = input<string>('Nenhum resultado encontrado.');
-  readonly activeInsert    = input<GroupInsertEvent | null>(null);
-  readonly pageSize        = input<number>(0); // 0 = no pagination
+  readonly groups             = input<TableGroup[]>([]);
+  readonly draggable          = input<boolean>(false);
+  readonly searchFn           = input<GroupSearchFn | null>(null);
+  readonly searchPlaceholder  = input<string>('Buscar...');
+  readonly emptyMsg           = input<string>('Nenhum resultado encontrado.');
+  readonly activeInsert       = input<GroupInsertEvent | null>(null);
+  /** Default page size. 0 = no pagination. */
+  readonly pageSize           = input<number>(0);
+  /** Page size options shown in the selector. Empty = hide selector. */
+  readonly pageSizeOptions    = input<number[]>([]);
 
   readonly rowReordered    = output<GroupReorderEvent>();
   readonly insertRequested = output<GroupInsertEvent>();
 
-  @ContentChild('theadRow') theadRowTpl?: TemplateRef<void>;
-  @ContentChild('row')       rowTpl!:      TemplateRef<{ $implicit: any }>;
-  @ContentChild('insertForm') insertFormTpl?: TemplateRef<{ groupId: string; afterItemId: string | null }>;
-  @ContentChild('filterBtn')  filterBtnTpl?:  TemplateRef<void>;
-  @ContentChild('filterPanel') filterPanelTpl?: TemplateRef<void>;
-  @ContentChild('totals')     totalsTpl?: TemplateRef<{ $implicit: any[] }>;
+  @ContentChild('theadRow')   theadRowTpl?:    TemplateRef<void>;
+  @ContentChild('row')         rowTpl!:          TemplateRef<{ $implicit: any }>;
+  @ContentChild('insertForm')  insertFormTpl?:   TemplateRef<{ groupId: string; afterItemId: string | null }>;
+  @ContentChild('filterBtn')   filterBtnTpl?:    TemplateRef<void>;
+  @ContentChild('filterPanel') filterPanelTpl?:  TemplateRef<void>;
+  @ContentChild('totals')      totalsTpl?:       TemplateRef<{ $implicit: any[] }>;
 
   readonly query = signal('');
   readonly currentPage = signal(0);
+
+  /** Tracks selected page size; resets to the `pageSize` input whenever it changes. */
+  readonly _pageSize = linkedSignal(() => this.pageSize());
+
   private readonly _expanded = signal<Map<string, boolean>>(new Map());
 
   // Drag state
@@ -96,33 +104,50 @@ export class GroupedTableComponent {
       .filter(g => !q || g.items.length > 0);
   });
 
+  /** All items across all visible groups (for the totals footer). */
   readonly allFilteredItems = computed(() =>
     this.visibleGroups().flatMap(g => g.items)
   );
 
+  /** Only items from **expanded** groups — the actual visible item set for pagination. */
+  readonly expandedItems = computed(() =>
+    this.visibleGroups()
+      .filter(g => this.isExpanded(g.id))
+      .flatMap(g => g.items)
+  );
+
   readonly totalPages = computed(() => {
-    const ps = this.pageSize();
+    const ps = this._pageSize();
     if (!ps) return 1;
-    return Math.max(1, Math.ceil(this.allFilteredItems().length / ps));
+    return Math.max(1, Math.ceil(this.expandedItems().length / ps));
   });
 
   readonly pagedGroups = computed(() => {
-    const ps = this.pageSize();
+    const ps = this._pageSize();
     if (!ps) return this.visibleGroups();
+
     const page = this.currentPage();
     const start = page * ps;
     const end = start + ps;
     let cursor = 0;
-    return this.visibleGroups()
-      .map(g => {
-        const gStart = cursor;
-        cursor += g.items.length;
-        const gEnd = cursor;
-        if (gEnd <= start || gStart >= end) return { ...g, items: [] };
-        return { ...g, items: g.items.slice(Math.max(0, start - gStart), end - gStart) };
-      })
-      .filter(g => g.items.length > 0);
+
+    return this.visibleGroups().map(g => {
+      // Collapsed groups are shown as headers only — don't paginate them.
+      if (!this.isExpanded(g.id)) return g;
+
+      const gStart = cursor;
+      cursor += g.items.length;
+      const gEnd = cursor;
+
+      if (gEnd <= start || gStart >= end) return { ...g, items: [] as typeof g.items };
+      return { ...g, items: g.items.slice(Math.max(0, start - gStart), end - gStart) };
+    });
   });
+
+  setPageSize(ps: number): void {
+    this._pageSize.set(ps);
+    this.currentPage.set(0);
+  }
 
   goToPage(p: number): void {
     this.currentPage.set(Math.max(0, Math.min(p, this.totalPages() - 1)));
@@ -138,6 +163,8 @@ export class GroupedTableComponent {
       next.set(groupId, !(next.get(groupId) ?? true));
       return next;
     });
+    // When collapsing/expanding, clamp to valid page range.
+    this.currentPage.update(p => Math.min(p, this.totalPages() - 1));
   }
 
   onSearch(q: string): void {
