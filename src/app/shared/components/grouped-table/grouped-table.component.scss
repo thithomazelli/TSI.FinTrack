@@ -337,6 +337,17 @@
   }
 }
 
+// ── Page-size selector ────────────────────────────────────────────────────────
+.gt-page-size {
+  font-size: .75rem;
+  padding: .2rem .4rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
 // ── Pagination ────────────────────────────────────────────────────────────────
 .gt-pagination {
   display: flex;

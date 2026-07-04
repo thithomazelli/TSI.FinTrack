@@ -21,6 +21,13 @@
       <span class="gt-count">
         {{ allFilteredItems().length }} {{ allFilteredItems().length === 1 ? 'item' : 'itens' }}
       </span>
+      @if (pageSizeOptions().length > 0) {
+        <select class="gt-page-size" [ngModel]="_pageSize()" (ngModelChange)="setPageSize(+$event)">
+          @for (opt of pageSizeOptions(); track opt) {
+            <option [value]="opt">{{ opt }} / pág.</option>
+          }
+        </select>
+      }
       @if (filterBtnTpl) {
         <ng-container [ngTemplateOutlet]="filterBtnTpl" />
       }
@@ -156,7 +163,7 @@
   }
 </div>
 
-@if (pageSize() > 0 && totalPages() > 1) {
+@if (_pageSize() > 0 && totalPages() > 1) {
   <div class="gt-pagination">
     <button class="gt-page-btn" [disabled]="currentPage() === 0" (click)="goToPage(currentPage() - 1)">‹</button>
     <span class="gt-page-info">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
