@@ -127,6 +127,7 @@
       [searchFn]="tableSearchFn"
       [searchPlaceholder]="'simulations.search' | translate"
       [emptyMsg]="'simulations.empty' | translate"
+      [pageSize]="25"
     >
       <ng-template #filterBtn>
         <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">
@@ -220,6 +221,7 @@
           <td></td>
           <td></td>
           <td></td>
+          <td></td>
           <td class="totals-label">
             {{ items.length }} {{ items.length === 1 ? 'registro' : 'registros' }}
           </td>
@@ -240,6 +242,7 @@
           <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" />
         </th>
         <th class="col-date">{{ 'common.date' | translate }}</th>
+        <th class="col-tipo">{{ 'common.type' | translate }}</th>
         <th>{{ 'common.description' | translate }}</th>
         <th>{{ 'common.category' | translate }}</th>
         <th>{{ 'movimentos.colCardAccount' | translate }}</th>
@@ -252,6 +255,7 @@
         @if (isEditing(item.id)) {
           <td class="col-check"></td>
           <td><input class="input input-inline" type="date" [(ngModel)]="editDate" /></td>
+          <td></td>
           <td><input class="input input-inline input-desc" type="text" [(ngModel)]="editDescription" /></td>
           <td></td>
           <td></td>
@@ -270,6 +274,11 @@
             <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" />
           </td>
           <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
+          <td class="col-tipo">
+            <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
+              {{ item.kind === 'entry' ? 'Entrada' : 'Saída' }}
+            </span>
+          </td>
           <td>
             <div class="desc-cell">
               <span>{{ item.description }}</span>
@@ -285,7 +294,7 @@
             }
           </td>
           <td class="col-muted">{{ payerName(item) }}</td>
-          <td class="col-amount text-right" [class.amount-entrada]="item.kind === 'entry'" [class.amount-saida]="item.kind === 'transaction'">
+          <td class="col-amount text-right" [class.amount-positivo]="item.amount > 0" [class.amount-negativo]="item.amount < 0">
             R$ {{ item.amount | number:'1.2-2' }}
           </td>
           <td (click)="$event.stopPropagation()">

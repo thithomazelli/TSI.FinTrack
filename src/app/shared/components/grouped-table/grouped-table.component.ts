@@ -52,6 +52,7 @@ export class GroupedTableComponent {
   readonly searchPlaceholder = input<string>('Buscar...');
   readonly emptyMsg        = input<string>('Nenhum resultado encontrado.');
   readonly activeInsert    = input<GroupInsertEvent | null>(null);
+  readonly pageSize        = input<number>(0); // 0 = no pagination
 
   readonly rowReordered    = output<GroupReorderEvent>();
   readonly insertRequested = output<GroupInsertEvent>();
@@ -64,6 +65,7 @@ export class GroupedTableComponent {
   @ContentChild('totals')     totalsTpl?: TemplateRef<{ $implicit: any[] }>;
 
   readonly query = signal('');
+  readonly currentPage = signal(0);
   private readonly _expanded = signal<Map<string, boolean>>(new Map());
 
   // Drag state
@@ -98,6 +100,34 @@ export class GroupedTableComponent {
     this.visibleGroups().flatMap(g => g.items)
   );
 
+  readonly totalPages = computed(() => {
+    const ps = this.pageSize();
+    if (!ps) return 1;
+    return Math.max(1, Math.ceil(this.allFilteredItems().length / ps));
+  });
+
+  readonly pagedGroups = computed(() => {
+    const ps = this.pageSize();
+    if (!ps) return this.visibleGroups();
+    const page = this.currentPage();
+    const start = page * ps;
+    const end = start + ps;
+    let cursor = 0;
+    return this.visibleGroups()
+      .map(g => {
+        const gStart = cursor;
+        cursor += g.items.length;
+        const gEnd = cursor;
+        if (gEnd <= start || gStart >= end) return { ...g, items: [] };
+        return { ...g, items: g.items.slice(Math.max(0, start - gStart), end - gStart) };
+      })
+      .filter(g => g.items.length > 0);
+  });
+
+  goToPage(p: number): void {
+    this.currentPage.set(Math.max(0, Math.min(p, this.totalPages() - 1)));
+  }
+
   isExpanded(groupId: string): boolean {
     return this._expanded().get(groupId) ?? true;
   }
@@ -112,6 +142,7 @@ export class GroupedTableComponent {
 
   onSearch(q: string): void {
     this.query.set(q);
+    this.currentPage.set(0);
   }
 
   // ── Insert zones ───────────────────────────────────────────────────────────

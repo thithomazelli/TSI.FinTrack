@@ -337,6 +337,46 @@
   }
 }
 
+// ── Pagination ────────────────────────────────────────────────────────────────
+.gt-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.gt-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.gt-page-info {
+  font-size: .8rem;
+  color: var(--color-text-2);
+  min-width: 48px;
+  text-align: center;
+}
+
 // ── Totals footer ─────────────────────────────────────────────────────────────
 tfoot .totals-row td {
   padding: .55rem 1rem;

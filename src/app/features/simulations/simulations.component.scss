@@ -216,8 +216,10 @@ tr:hover td { background: var(--color-surface-2); }
 .col-muted { color: var(--color-text-2); }
 .text-right { text-align: right; }
 .col-amount { font-weight: 600; white-space: nowrap; }
-.amount-entrada { color: #22c55e; }
-.amount-saida   { color: #ef4444; }
+.amount-entrada  { color: #22c55e; }
+.amount-saida    { color: #ef4444; }
+.amount-positivo { color: #22c55e; }
+.amount-negativo { color: #ef4444; }
 
 .tipo-badge, .status-pill {
   display: inline-block; padding: .2rem .6rem; border-radius: 999px;

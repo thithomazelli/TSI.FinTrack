@@ -50,7 +50,7 @@
       </thead>
 
       <tbody>
-        @for (group of visibleGroups(); track group.id) {
+        @for (group of pagedGroups(); track group.id) {
           <!-- Group header row -->
           <tr class="gt-group-row" (click)="toggleGroup(group.id)">
             <td [attr.colspan]="draggable() ? 99 : 99" class="gt-group-cell">
@@ -155,3 +155,11 @@
     </table>
   }
 </div>
+
+@if (pageSize() > 0 && totalPages() > 1) {
+  <div class="gt-pagination">
+    <button class="gt-page-btn" [disabled]="currentPage() === 0" (click)="goToPage(currentPage() - 1)">‹</button>
+    <span class="gt-page-info">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
+    <button class="gt-page-btn" [disabled]="currentPage() >= totalPages() - 1" (click)="goToPage(currentPage() + 1)">›</button>
+  </div>
+}
