@@ -348,22 +348,26 @@ export class MovimentosComponent implements OnInit {
       newPosition = ((aboveItem.position ?? 0) + (belowItem.position ?? 0)) / 2;
     }
 
-    // Optimistically update local state
+    const save$ = draggedItem.kind === 'entry'
+      ? this.entryService.updatePosition(event.id, newPosition)
+      : this.transactionService.updatePosition(event.id, newPosition);
+
+    // Apply position locally first so the view updates immediately
     if (draggedItem.kind === 'entry') {
-      this.allEntries.update(list =>
-        list.map(e => e.id === event.id ? { ...e, position: newPosition } : e)
+      this.allEntries.set(
+        this.allEntries().map(e => e.id === event.id ? { ...e, position: newPosition } : e)
       );
-      this.entryService.updatePosition(event.id, newPosition).subscribe({
-        error: err => this.logger.error('Failed to update entry position', err),
-      });
     } else {
-      this.allTransactions.update(list =>
-        list.map(t => t.id === event.id ? { ...t, position: newPosition } : t)
+      this.allTransactions.set(
+        this.allTransactions().map(t => t.id === event.id ? { ...t, position: newPosition } : t)
       );
-      this.transactionService.updatePosition(event.id, newPosition).subscribe({
-        error: err => this.logger.error('Failed to update transaction position', err),
-      });
     }
+
+    // Persist and reload to guarantee visual consistency (silent = no loading spinner)
+    save$.subscribe({
+      next: () => this.load(true),
+      error: err => this.logger.error('Failed to update position', err),
+    });
   }
 
   toggleFilterTipo(kind: string): void {
@@ -457,8 +461,8 @@ export class MovimentosComponent implements OnInit {
     this.load();
   }
 
-  async load(): Promise<void> {
-    this.loading.set(true);
+  async load(silent = false): Promise<void> {
+    if (!silent) this.loading.set(true);
     const uid = this.auth.currentUser!.id;
     const from = this.dateFrom();
     const to = this.dateTo();
