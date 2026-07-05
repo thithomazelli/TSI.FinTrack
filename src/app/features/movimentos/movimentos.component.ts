@@ -185,10 +185,13 @@ export class MovimentosComponent implements OnInit {
     }));
 
     const all = [...entries, ...txs];
-    if (this.dndMode()) {
-      return all.sort((a, b) => (a.position ?? 999999) - (b.position ?? 999999));
-    }
-    return all.sort((a, b) => b.date.localeCompare(a.date));
+    return all.sort((a, b) => {
+      const ap = a.position, bp = b.position;
+      if (ap != null && bp != null) return ap - bp;
+      if (ap != null) return -1;
+      if (bp != null) return 1;
+      return b.date.localeCompare(a.date);
+    });
   });
 
   readonly filteredItems = computed<MovimentoItem[]>(() => {
