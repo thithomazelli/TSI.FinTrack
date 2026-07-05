@@ -90,7 +90,7 @@ export class RecurringComponent implements OnInit {
 
     const groups: TableGroup<RecurringTemplate>[] = [];
 
-    if (entries.length > 0 || true) {
+    if (entries.length > 0) {
       groups.push({
         id: '__entries',
         label: 'Entradas',
