@@ -1,4 +1,6 @@
 .page { padding: 1.5rem; }
+.state-msg { text-align: center; color: var(--color-text-2); padding: 3rem 0; }
+.dnd-bar { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; .dnd-hint { font-size: .8rem; color: var(--color-text-2); } }
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
 .page-title { font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin: 0; }
 .subtitle { font-size: .875rem; color: var(--color-text-2); margin: 4px 0 0; }

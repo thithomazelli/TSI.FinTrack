@@ -21,7 +21,7 @@ import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
 import { PeriodBarComponent } from '../../shared/components/period-bar/period-bar.component';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
-import { GroupedTableComponent, TableGroup, GroupSearchFn } from '../../shared/components/grouped-table/grouped-table.component';
+import { GroupedTableComponent, TableGroup, GroupSearchFn, GroupReorderEvent } from '../../shared/components/grouped-table/grouped-table.component';
 
 export interface SimItem {
   kind: 'entry' | 'transaction';
@@ -79,6 +79,7 @@ export class SimulationsComponent implements OnInit {
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(false);
   readonly applying = signal(false);
+  readonly dndMode = signal(false);
 
   // Period
   readonly periodMode = signal<'month' | 'range'>('month');
@@ -297,6 +298,10 @@ export class SimulationsComponent implements OnInit {
 
     return [...groups, ...cardGroups];
   });
+
+  toggleDndMode(): void { this.dndMode.update(v => !v); }
+
+  onRowReordered(_event: GroupReorderEvent): void { /* DnD visual only in simulations */ }
 
   toggleFilterTipo(kind: string): void {
     this.filterTipos.update(s => { const n = new Set(s); n.has(kind) ? n.delete(kind) : n.add(kind); return n; });

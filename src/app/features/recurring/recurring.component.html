@@ -1,13 +1,14 @@
+<div class="page">
 <div class="page-header">
   <h2 class="page-title">Recorrentes</h2>
-  <div class="header-right">
+  <div class="header-actions">
     <button class="btn btn-secondary" (click)="openProjectModal()">▶ Projetar período</button>
     <button class="btn btn-primary" (click)="onInsertRequested({ groupId: '__entries', afterItemId: null })">+ Novo</button>
   </div>
 </div>
 
 @if (loading()) {
-  <p class="loading-text">Carregando...</p>
+  <p class="state-msg">Carregando...</p>
 } @else {
   <tsi-grouped-table
     [groups]="tableGroups()"
@@ -202,6 +203,8 @@
     </div>
   </div>
 }
+
+</div><!-- /page -->
 
 <!-- Project period modal -->
 @if (showProjectModal()) {

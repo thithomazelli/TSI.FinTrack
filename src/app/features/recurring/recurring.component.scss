@@ -1,8 +1,11 @@
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.page { padding: 1.5rem; }
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
 }
+.page-title { font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin: 0; }
+.header-actions { display: flex; align-items: center; gap: .75rem; }
+.state-msg { text-align: center; color: var(--color-text-2); padding: 3rem 0; }
 
 .col-muted { font-size: 13px; color: var(--color-text-2); }
 .col-freq  { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
