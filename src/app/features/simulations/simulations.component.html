@@ -127,7 +127,8 @@
       [searchFn]="tableSearchFn"
       [searchPlaceholder]="'simulations.search' | translate"
       [emptyMsg]="'simulations.empty' | translate"
-      [pageSize]="0"
+      [pageSize]="150"
+      [pageSizeOptions]="[50, 100, 150, 250]"
     >
       <ng-template #filterBtn>
         <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">

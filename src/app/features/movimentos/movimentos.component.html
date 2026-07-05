@@ -117,7 +117,8 @@
       [emptyMsg]="'movimentos.empty' | translate"
       [draggable]="dndMode()"
       [activeInsert]="activeInsert()"
-      [pageSize]="0"
+      [pageSize]="150"
+      [pageSizeOptions]="[50, 100, 150, 250]"
       (rowReordered)="onRowReordered($event)"
       (insertRequested)="onInsertRequested($event)"
     >
