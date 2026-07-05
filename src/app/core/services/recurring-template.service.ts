@@ -30,10 +30,12 @@ export class RecurringTemplateService {
 
   getAll(): Observable<RecurringTemplate[]> {
     return from(
-      this.supabase.client.from(TABLE).select('*').order('position')
+      this.supabase.client.from(TABLE).select('*').order('created_at')
         .then(({ data, error }) => {
           if (error) throw error;
-          return (data as Record<string, unknown>[]).map(mapRow);
+          const rows = (data as Record<string, unknown>[]).map(mapRow);
+          // Sort by position client-side (position col may not exist on older DB)
+          return rows.sort((a, b) => a.position - b.position);
         })
     );
   }

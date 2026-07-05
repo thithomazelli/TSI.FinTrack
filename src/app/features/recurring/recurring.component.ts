@@ -149,7 +149,11 @@ export class RecurringComponent implements OnInit {
     this.loading.set(true);
     this.service.getAll().subscribe({
       next: data => { this.templates.set(data); this.loading.set(false); },
-      error: err => { this.logger.error('Failed to load recurring templates', err); this.loading.set(false); },
+      error: err => {
+        this.logger.error('Failed to load recurring templates', err);
+        this.toast.error('Erro ao carregar recorrentes: ' + (err?.message ?? err));
+        this.loading.set(false);
+      },
     });
   }
 
