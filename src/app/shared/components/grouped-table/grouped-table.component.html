@@ -24,7 +24,7 @@
       @if (pageSizeOptions().length > 0) {
         <select class="gt-page-size" [ngModel]="_pageSize()" (ngModelChange)="setPageSize(+$event)">
           @for (opt of pageSizeOptions(); track opt) {
-            <option [value]="opt">{{ opt }} / pág.</option>
+            <option [ngValue]="opt">{{ opt }} / pág.</option>
           }
         </select>
       }
