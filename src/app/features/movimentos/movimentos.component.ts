@@ -277,17 +277,33 @@ export class MovimentosComponent implements OnInit {
     const cardGroups: TableGroup<MovimentoItem>[] = [];
     for (const [cardId, txs] of cardMap) {
       const card = this.cards().find(c => c.id === cardId);
+      const rawName = card?.name ?? '...';
+      const isDebitCard = /^d[eé]bito/i.test(rawName);
       const hasOpen = txs.some(t => t.status === 'PROJECTED');
-      cardGroups.push({
-        id: cardId,
-        label: `Fatura ${card?.name ?? '...'}`,
-        items: txs,
-        total: txs.reduce((s, t) => s + t.amount, 0),
-        status: hasOpen ? 'PROJECTED' : 'REALIZED',
-        badge: hasOpen ? 'em aberto' : 'fechada',
-        badgeClass: hasOpen ? 'badge--open' : 'badge--closed',
-        defaultExpanded: false,
-      });
+
+      if (isDebitCard) {
+        // Treat debit-named cards as a debit group (placed before credit card groups)
+        groups.push({
+          id: `__debit_card_${cardId}`,
+          label: rawName,
+          items: txs,
+          total: txs.reduce((s, t) => s + t.amount, 0),
+          status: hasOpen ? 'PROJECTED' : 'REALIZED',
+          defaultExpanded: true,
+        });
+      } else {
+        const displayName = rawName.replace(/^cr[eé]dito\s*/i, '');
+        cardGroups.push({
+          id: cardId,
+          label: `Fatura ${displayName}`,
+          items: txs,
+          total: txs.reduce((s, t) => s + t.amount, 0),
+          status: hasOpen ? 'PROJECTED' : 'REALIZED',
+          badge: hasOpen ? 'em aberto' : 'fechada',
+          badgeClass: hasOpen ? 'badge--open' : 'badge--closed',
+          defaultExpanded: false,
+        });
+      }
     }
     cardGroups.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
 
