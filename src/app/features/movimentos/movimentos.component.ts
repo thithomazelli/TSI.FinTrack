@@ -497,7 +497,8 @@ export class MovimentosComponent implements OnInit {
         id: r.id, ownerId: r.owner_id, description: r.description,
         amount: r.amount, date: r.date, status: r.status,
         typeId: r.type_id, accountId: r.account_id,
-        labels: r.labels ?? [], createdAt: r.created_at, updatedAt: r.updated_at,
+        labels: r.labels ?? [], position: r.position ?? undefined,
+        createdAt: r.created_at, updatedAt: r.updated_at,
       }) as Entry));
 
       this.allTransactions.set((txsRes.data ?? []).map((r: any) => ({
@@ -510,6 +511,7 @@ export class MovimentosComponent implements OnInit {
         originalCurrency: r.original_currency, originalAmount: r.original_amount,
         exchangeRate: r.exchange_rate, paymentDate: r.payment_date,
         paymentMethod: r.payment_method, labels: r.labels ?? [],
+        position: r.position ?? undefined,
         createdAt: r.created_at, updatedAt: r.updated_at,
       }) as Transaction));
       this.balanceService.invalidate();
