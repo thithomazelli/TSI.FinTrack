@@ -1,14 +1,15 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ContentChild,
   TemplateRef,
   effect,
+  inject,
   input,
   output,
   signal,
   computed,
   linkedSignal,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { NgTemplateOutlet, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -44,7 +45,6 @@ export type GroupSearchFn<T = any> = (item: T, query: string) => boolean;
   imports: [NgTemplateOutlet, FormsModule, DecimalPipe],
   templateUrl: './grouped-table.component.html',
   styleUrls: ['./grouped-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupedTableComponent {
   readonly groups             = input<TableGroup[]>([]);
@@ -81,6 +81,8 @@ export class GroupedTableComponent {
   dragFromIndex = -1;
   readonly dragOverIndex = signal(-1);
 
+  private readonly cdr = inject(ChangeDetectorRef);
+
   constructor() {
     effect(() => {
       const groups = this.groups();
@@ -93,6 +95,8 @@ export class GroupedTableComponent {
         }
         return next;
       });
+      // Force view refresh when groups change (needed for OnPush + signal input)
+      this.cdr.markForCheck();
     });
   }
 

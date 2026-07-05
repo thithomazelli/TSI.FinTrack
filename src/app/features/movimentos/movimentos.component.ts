@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  NgZone,
   OnInit,
   inject,
   signal,
@@ -152,6 +154,9 @@ export class MovimentosComponent implements OnInit {
   formTxOriginalAmount = 0;
   formTxExchangeRate = 0;
   formTxLabels: string[] = [];
+
+  private readonly zone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly dndMode = signal(false);
 
@@ -352,16 +357,19 @@ export class MovimentosComponent implements OnInit {
       ? this.entryService.updatePosition(event.id, newPosition)
       : this.transactionService.updatePosition(event.id, newPosition);
 
-    // Apply position locally first so the view updates immediately
-    if (draggedItem.kind === 'entry') {
-      this.allEntries.set(
-        this.allEntries().map(e => e.id === event.id ? { ...e, position: newPosition } : e)
-      );
-    } else {
-      this.allTransactions.set(
-        this.allTransactions().map(t => t.id === event.id ? { ...t, position: newPosition } : t)
-      );
-    }
+    // Apply position locally and force CD so the view updates immediately
+    this.zone.run(() => {
+      if (draggedItem.kind === 'entry') {
+        this.allEntries.set(
+          this.allEntries().map(e => e.id === event.id ? { ...e, position: newPosition } : e)
+        );
+      } else {
+        this.allTransactions.set(
+          this.allTransactions().map(t => t.id === event.id ? { ...t, position: newPosition } : t)
+        );
+      }
+      this.cdr.markForCheck();
+    });
 
     // Persist and reload to guarantee visual consistency (silent = no loading spinner)
     save$.subscribe({
