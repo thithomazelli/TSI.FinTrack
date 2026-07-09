@@ -322,10 +322,21 @@ async function main() {
   } else {
     const { data: depositDomain }    = await supabase.from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'savings_movement_type').eq('value', 'DEPOSIT').maybeSingle()
     const { data: withdrawalDomain } = await supabase.from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'savings_movement_type').eq('value', 'WITHDRAWAL').maybeSingle()
-    const { data: savingsAcct }      = await supabase.from('accounts').select('id').eq('owner_id', OWNER_ID).eq('name', 'Poupança Nubank').maybeSingle()
+    const { data: savingsDomain }    = await supabase.from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'account_type').eq('value', 'SAVINGS').maybeSingle()
 
     const depositTypeId    = depositDomain?.id ?? null
     const withdrawalTypeId = withdrawalDomain?.id ?? null
+
+    // Garante que a conta Poupança Nubank existe
+    let { data: savingsAcct } = await supabase.from('accounts').select('id').eq('owner_id', OWNER_ID).eq('name', 'Poupança Nubank').maybeSingle()
+    if (!savingsAcct) {
+      const { data: created, error: accErr } = await supabase.from('accounts')
+        .insert({ owner_id: OWNER_ID, name: 'Poupança Nubank', type_id: savingsDomain?.id ?? null, balance: 0 })
+        .select('id').single()
+      if (accErr) { console.error('Erro ao criar conta Poupança Nubank:', accErr.message); process.exit(1) }
+      savingsAcct = created
+      console.log('  Conta Poupança Nubank criada ✓')
+    }
     const savingsAccountId = savingsAcct?.id ?? null
 
     const rows = data.savings.map(s => ({
