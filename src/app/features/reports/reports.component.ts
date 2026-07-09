@@ -460,8 +460,8 @@ export class ReportsComponent implements OnInit {
         next: ({ openingBalance, entries, transactions }) => {
           let running = openingBalance;
           const rows: YearMonthRow[] = ALL_MONTHS.map((m, i) => {
-            const income = entries.filter((e) => new Date(e.date).getMonth() + 1 === m).reduce((s, e) => s + e.amount, 0);
-            const expense = transactions.filter((t) => new Date(t.date).getMonth() + 1 === m).reduce((s, t) => s + t.amount, 0);
+            const income = entries.filter((e) => +e.date.substring(5, 7) === m).reduce((s, e) => s + e.amount, 0);
+            const expense = transactions.filter((t) => +t.date.substring(5, 7) === m).reduce((s, t) => s + t.amount, 0);
             const monthlyBalance = income - expense;
             running += monthlyBalance;
             return {
@@ -547,10 +547,10 @@ export class ReportsComponent implements OnInit {
   ): void {
     const points = ALL_MONTHS.map((m, i) => {
       const income = entries
-        .filter((e) => new Date(e.date).getMonth() + 1 === m)
+        .filter((e) => +e.date.substring(5, 7) === m)
         .reduce((s, e) => s + e.amount, 0);
       const expense = realized
-        .filter((t) => new Date(t.date).getMonth() + 1 === m)
+        .filter((t) => +t.date.substring(5, 7) === m)
         .reduce((s, t) => s + t.amount, 0);
       return { label: MONTHS_PT[i], income, expense, balance: income - expense };
     });
@@ -558,10 +558,10 @@ export class ReportsComponent implements OnInit {
 
     const prevPoints = ALL_MONTHS.map((m, i) => {
       const income = prevEntries
-        .filter((e) => new Date(e.date).getMonth() + 1 === m)
+        .filter((e) => +e.date.substring(5, 7) === m)
         .reduce((s, e) => s + e.amount, 0);
       const expense = prevRealized
-        .filter((t) => new Date(t.date).getMonth() + 1 === m)
+        .filter((t) => +t.date.substring(5, 7) === m)
         .reduce((s, t) => s + t.amount, 0);
       return { label: MONTHS_PT[i], income, expense, balance: income - expense };
     });
@@ -583,7 +583,7 @@ export class ReportsComponent implements OnInit {
         };
       }
       catMap[t.categoryId].amount += t.amount;
-      monthsWithData.add(`${t.categoryId}-${new Date(t.date).getMonth()}`);
+      monthsWithData.add(`${t.categoryId}-${t.date.substring(5, 7)}`);
     }
 
     const totalMonthsInYear = Math.min(
