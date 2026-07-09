@@ -254,16 +254,19 @@ async function main() {
   // 2.5 Conta Corrente com saldo de abertura (reconciliação histórica)
   const opening = data.meta?.opening_balance ?? -305
   const openedAt = data.meta?.opened_at ?? '2009-05-01'
+  const { data: checkingDomain } = await supabase
+    .from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'account_type').eq('value', 'CHECKING').maybeSingle()
+  const typeId = checkingDomain?.id ?? null
   const { data: existingAccts } = await supabase
     .from('accounts').select('id, name').eq('owner_id', OWNER_ID)
   const acct = (existingAccts ?? []).find(a => a.name === 'Conta Corrente')
   if (!acct) {
     const { error } = await supabase.from('accounts')
-      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', type: 'CHECKING', balance: opening, opened_at: openedAt })
+      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', type_id: typeId, balance: opening, opened_at: openedAt })
     if (error) { console.error('Erro ao criar conta:', error.message); process.exit(1) }
     console.log(`  Conta Corrente criada (saldo ${opening}, abertura ${openedAt}) ✓`)
   } else {
-    const { error: updErr } = await supabase.from('accounts').update({ type: 'CHECKING', balance: opening, opened_at: openedAt }).eq('id', acct.id)
+    const { error: updErr } = await supabase.from('accounts').update({ type_id: typeId, balance: opening, opened_at: openedAt }).eq('id', acct.id)
     if (updErr) { console.error('Erro ao atualizar conta:', updErr.message); process.exit(1) }
     console.log(`  Conta Corrente saldo atualizado p/ ${opening} (abertura ${openedAt}) ✓`)
   }
