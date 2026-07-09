@@ -6,7 +6,7 @@
 
   .filter-bar { flex: 1; margin-bottom: 0; min-width: 0; }
   tsi-balance-card,
-  tsi-savings-balance-card { flex: 1; min-width: 200px; display: flex; }
+  tsi-savings-balance-card { flex: 1; min-width: 200px; display: flex; flex-direction: column; }
 
   @media (max-width: 640px) { flex-direction: column; }
 }
