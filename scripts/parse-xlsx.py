@@ -278,6 +278,11 @@ def parse_workbook(path: Path, year: int):
         month = int(m.group(1))
         ws = wb[sheet_name]
         e, t, s = parse_sheet(ws, year, month)
+        yr_str = str(year)
+        # Only keep records whose date belongs to this workbook's year to avoid
+        # duplicates when a previous year's file contains projected future months.
+        e = [x for x in e if x["date"].startswith(yr_str)]
+        t = [x for x in t if x["date"].startswith(yr_str)]
         all_entries.extend(e)
         all_transactions.extend(t)
         all_savings.extend(s)
