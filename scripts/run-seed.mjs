@@ -349,6 +349,11 @@ async function main() {
     }
     const savingsAccountId = savingsAcct?.id ?? null
 
+    const nDep = data.savings.filter(s => s.type === 'DEPOSIT').length
+    const nWdw = data.savings.filter(s => s.type === 'WITHDRAWAL').length
+    console.log(`  seed_data.json: ${data.savings.length} movimentos — ${nDep} DEPOSIT, ${nWdw} WITHDRAWAL`)
+    if (nWdw === 0) console.warn('  ⚠  Nenhum WITHDRAWAL no seed_data.json — regenere com parse-xlsx.py')
+
     const rows = data.savings.map(s => ({
       owner_id:   OWNER_ID,
       description: s.description,

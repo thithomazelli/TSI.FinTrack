@@ -255,7 +255,11 @@ def parse_sheet(ws, year: int, month: int):
         })
 
     for e in entries:
-        if "poupan" not in e["description"].lower():
+        desc_l = e["description"].strip().lower()
+        # Only plain "Poupança" income entries are genuine withdrawals from savings.
+        # Entries like "Nubank - Rendimentos Poupança" or "Nubank - Depósito Poupança"
+        # belong to the expense/savings-deposit flow and must not be double-counted.
+        if desc_l != "poupança" and not desc_l.startswith("poupança ") and not desc_l.startswith("resgate poupança"):
             continue
         savings.append({
             "owner_id":    OWNER_ID,
@@ -284,7 +288,9 @@ def parse_workbook(path: Path, year: int):
         all_entries.extend(e)
         all_transactions.extend(t)
         all_savings.extend(s)
-        print(f"  {year}/{month:02d} {sheet_name}: {len(e)} entries, {len(t)} transactions, {len(s)} savings")
+        dep  = sum(1 for x in s if x["type"] == "DEPOSIT")
+        wdw  = sum(1 for x in s if x["type"] == "WITHDRAWAL")
+        print(f"  {year}/{month:02d} {sheet_name}: {len(e)} entries, {len(t)} transactions, {len(s)} savings ({dep}D/{wdw}W)")
 
     return all_entries, all_transactions, all_savings
 
@@ -332,8 +338,11 @@ def main():
         "savings":      all_savings,
     }
 
+    total_dep = sum(1 for s in all_savings if s["type"] == "DEPOSIT")
+    total_wdw = sum(1 for s in all_savings if s["type"] == "WITHDRAWAL")
     OUT_FILE.write_text(json.dumps(result, ensure_ascii=False, indent=2))
-    print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions + {len(all_savings)} savings → {OUT_FILE}")
+    print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions")
+    print(f"   savings: {len(all_savings)} total — {total_dep} DEPOSIT, {total_wdw} WITHDRAWAL → {OUT_FILE}")
 
 
 if __name__ == "__main__":
