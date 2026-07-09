@@ -33,17 +33,60 @@
 
   <!-- Summary bar (período selecionado) -->
   <div class="summary-bar">
-    <div class="summary-card summary-card--entrada">
-      <span class="summary-label">{{ 'movimentos.totalIncome' | translate }}</span>
-      <span class="summary-value">R$ {{ totalEntradas() | number:'1.2-2' }}</span>
+    <div class="sm-period-label">{{ 'movimentos.periodLabel' | translate }}</div>
+
+    <!-- Card 1: Entradas e Saídas – Conta Corrente -->
+    <div class="sm-card sm-card--cc">
+      <div class="sm-left">
+        <span class="sm-title">{{ 'movimentos.balance' | translate }}</span>
+        <span class="sm-account">{{ 'widget.checkingAccount' | translate }}</span>
+      </div>
+      <div class="sm-values">
+        <div class="sm-row">
+          <span class="sm-sublabel">{{ 'movimentos.totalIncome' | translate }}</span>
+          <span class="sm-value sm-pos">R$ {{ totalEntradas() | number:'1.2-2' }}</span>
+        </div>
+        <div class="sm-row">
+          <span class="sm-sublabel">{{ 'movimentos.totalExpenses' | translate }}</span>
+          <span class="sm-value sm-neg">R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+        </div>
+      </div>
     </div>
-    <div class="summary-card summary-card--saida">
-      <span class="summary-label">{{ 'movimentos.totalExpenses' | translate }}</span>
-      <span class="summary-value">R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+
+    <!-- Card 2: Entradas e Saídas – Poupança -->
+    <div class="sm-card sm-card--savings">
+      <div class="sm-left">
+        <span class="sm-title">{{ 'movimentos.balance' | translate }}</span>
+        <span class="sm-account">{{ 'widget.savingsAccount' | translate }}</span>
+      </div>
+      <div class="sm-values">
+        <div class="sm-row">
+          <span class="sm-sublabel">{{ 'movimentos.totalIncome' | translate }}</span>
+          <span class="sm-value sm-pos">R$ {{ totalSavingsDeposits() | number:'1.2-2' }}</span>
+        </div>
+        <div class="sm-row">
+          <span class="sm-sublabel">{{ 'movimentos.totalExpenses' | translate }}</span>
+          <span class="sm-value sm-neg">R$ {{ totalSavingsWithdrawals() | number:'1.2-2' }}</span>
+        </div>
+      </div>
     </div>
-    <div class="summary-card" [class.summary-card--positivo]="saldo() >= 0" [class.summary-card--negativo]="saldo() < 0">
-      <span class="summary-label">{{ 'movimentos.balance' | translate }}</span>
-      <span class="summary-value">R$ {{ saldo() | number:'1.2-2' }}</span>
+
+    <!-- Card 3: Saldo Conta Corrente + Poupança -->
+    <div class="sm-card">
+      <div class="sm-left">
+        <span class="sm-title">{{ 'movimentos.balance' | translate }}</span>
+        <span class="sm-account">{{ 'movimentos.periodBalance' | translate }}</span>
+      </div>
+      <div class="sm-values">
+        <div class="sm-row">
+          <span class="sm-sublabel">{{ 'widget.checkingAccount' | translate }}</span>
+          <span class="sm-value" [class.sm-pos]="saldo() >= 0" [class.sm-neg]="saldo() < 0">R$ {{ saldo() | number:'1.2-2' }}</span>
+        </div>
+        <div class="sm-row">
+          <span class="sm-sublabel">{{ 'widget.savingsAccount' | translate }}</span>
+          <span class="sm-value" [class.sm-pos]="saldoPoupanca() >= 0" [class.sm-neg]="saldoPoupanca() < 0">R$ {{ saldoPoupanca() | number:'1.2-2' }}</span>
+        </div>
+      </div>
     </div>
   </div>
 

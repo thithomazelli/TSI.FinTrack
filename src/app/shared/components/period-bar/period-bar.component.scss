@@ -4,8 +4,9 @@
   align-items: stretch;
   margin-bottom: 1.25rem;
 
-  .filter-bar { flex: 2; margin-bottom: 0; min-width: 0; }
-  tsi-balance-card { flex: 1; min-width: 200px; }
+  .filter-bar { flex: 1; margin-bottom: 0; min-width: 0; }
+  tsi-balance-card,
+  tsi-savings-balance-card { flex: 1; min-width: 200px; display: flex; }
 
   @media (max-width: 640px) { flex-direction: column; }
 }

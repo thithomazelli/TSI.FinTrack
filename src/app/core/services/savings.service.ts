@@ -86,13 +86,14 @@ export class SavingsService {
     };
   }
 
-  /** Saldo atual da poupança: soma de depósitos menos retiradas (todos os registros). */
-  getBalance(): Observable<number> {
+  /** Saldo acumulado da poupança até endDate (inclusive). */
+  getBalanceUpTo(endDate: string): Observable<number> {
     return from(
       this.supabase.client
         .from('savings_movements')
-        .select('amount, domain_lists(value)')
+        .select('amount, date, domain_lists(value)')
         .eq('owner_id', this.ownerId)
+        .lte('date', endDate)
         .range(0, 9999)
         .then(({ data, error }) => {
           if (error) throw error;
@@ -100,6 +101,28 @@ export class SavingsService {
             const isDeposit = (r.domain_lists?.value ?? '') === 'DEPOSIT';
             return sum + (isDeposit ? Number(r.amount) : -Number(r.amount));
           }, 0);
+        })
+    );
+  }
+
+  /** Totais de depósito e retirada dentro de um período. */
+  getPeriodTotals(startDate: string, endDate: string): Observable<{ deposits: number; withdrawals: number }> {
+    return from(
+      this.supabase.client
+        .from('savings_movements')
+        .select('amount, domain_lists(value)')
+        .eq('owner_id', this.ownerId)
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .range(0, 9999)
+        .then(({ data, error }) => {
+          if (error) throw error;
+          let deposits = 0, withdrawals = 0;
+          for (const r of (data ?? []) as any[]) {
+            if ((r.domain_lists?.value ?? '') === 'DEPOSIT') deposits += Number(r.amount);
+            else withdrawals += Number(r.amount);
+          }
+          return { deposits, withdrawals };
         })
     );
   }

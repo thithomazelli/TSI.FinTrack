@@ -24,6 +24,7 @@ import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { BalanceService } from '../../core/services/balance.service';
+import { SavingsService } from '../../core/services/savings.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { Entry } from '../../core/models/interfaces/entry.interface';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
@@ -78,6 +79,7 @@ export class MovimentosComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly supabase = inject(SupabaseService);
   private readonly balanceService = inject(BalanceService);
+  private readonly savingsService = inject(SavingsService);
   private readonly auth = inject(AuthService);
   readonly themeService = inject(ThemeService);
   private readonly t = inject(TranslateService);
@@ -226,10 +228,14 @@ export class MovimentosComponent implements OnInit {
   // Totais server-side (sem limite de 1000 linhas)
   readonly periodTotals = signal<{ totalEntries: number; totalTransactions: number } | null>(null);
   readonly balanceInRange = signal<number>(0);
+  readonly savingsPeriodTotals = signal<{ deposits: number; withdrawals: number }>({ deposits: 0, withdrawals: 0 });
 
   readonly totalEntradas = computed(() => this.periodTotals()?.totalEntries ?? 0);
   readonly totalSaidas   = computed(() => this.periodTotals()?.totalTransactions ?? 0);
   readonly saldo         = this.balanceInRange;
+  readonly totalSavingsDeposits    = computed(() => this.savingsPeriodTotals().deposits);
+  readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
+  readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
 
 
   // Multi-seleção
@@ -506,7 +512,7 @@ export class MovimentosComponent implements OnInit {
     const to = this.dateTo();
 
     try {
-      const [entriesRes, txsRes, totalsRes, rangeBalanceRes] = await Promise.all([
+      const [entriesRes, txsRes, totalsRes, rangeBalanceRes, savingsTotals] = await Promise.all([
         this.supabase.client
           .from('entries')
           .select('*')
@@ -525,6 +531,7 @@ export class MovimentosComponent implements OnInit {
           .order('position', { ascending: true, nullsFirst: false }),
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
         this.supabase.client.rpc('get_balance_in_range', { start_date: from, end_date: to }),
+        this.savingsService.getPeriodTotals(from, to).toPromise(),
       ]);
 
       if (entriesRes.error) throw entriesRes.error;
@@ -536,6 +543,7 @@ export class MovimentosComponent implements OnInit {
         totalTransactions: Number(totalsRow?.total_transactions ?? 0),
       });
       this.balanceInRange.set(Number(rangeBalanceRes.data ?? 0));
+      this.savingsPeriodTotals.set(savingsTotals ?? { deposits: 0, withdrawals: 0 });
 
       this.allEntries.set((entriesRes.data ?? []).map((r: any) => ({
         id: r.id, ownerId: r.owner_id, description: r.description,
