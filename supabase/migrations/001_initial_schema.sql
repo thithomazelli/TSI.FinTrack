@@ -1,9 +1,7 @@
--- Enable UUID extension
-
 -- =====================
 -- USER PROFILES
 -- =====================
-create table user_profiles (
+create table if not exists user_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null,
   full_name text not null,
@@ -21,7 +19,7 @@ create policy "Users manage own profile"
 -- =====================
 -- FAMILY INVITES
 -- =====================
-create table family_invites (
+create table if not exists family_invites (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   invited_email text not null,
@@ -41,7 +39,7 @@ create policy "Owner manages invites"
 -- =====================
 -- FAMILY MEMBERS
 -- =====================
-create table family_members (
+create table if not exists family_members (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   member_id uuid not null references user_profiles(id) on delete cascade,
@@ -63,7 +61,7 @@ create policy "Member reads own membership"
 -- =====================
 -- DOMAIN LISTS
 -- =====================
-create table domain_lists (
+create table if not exists domain_lists (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   code text not null,
@@ -95,13 +93,14 @@ create policy "Family members read domain lists"
 -- =====================
 -- ACCOUNTS
 -- =====================
-create table accounts (
+create table if not exists accounts (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
   type_id uuid references domain_lists(id),
   balance numeric(15, 2) not null default 0,
   is_archived boolean not null default false,
+  opened_at date null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -147,7 +146,7 @@ create policy "Family editors update accounts"
 -- =====================
 -- CREDIT CARDS
 -- =====================
-create table credit_cards (
+create table if not exists credit_cards (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
@@ -179,7 +178,7 @@ create policy "Family members read credit cards"
 -- =====================
 -- CATEGORIES
 -- =====================
-create table categories (
+create table if not exists categories (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
@@ -208,7 +207,7 @@ create policy "Family members read categories"
 -- =====================
 -- CREDIT CARD BILLS
 -- =====================
-create table credit_card_bills (
+create table if not exists credit_card_bills (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   credit_card_id uuid not null references credit_cards(id) on delete cascade,
@@ -242,7 +241,7 @@ create policy "Family members read bills"
 -- =====================
 -- RECURRING TEMPLATES
 -- =====================
-create table recurring_templates (
+create table if not exists recurring_templates (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
@@ -253,6 +252,9 @@ create table recurring_templates (
   type text not null check (type in ('TRANSACTION', 'ENTRY')),
   day_of_month integer not null,
   is_active boolean not null default true,
+  frequency text not null default 'monthly' check (frequency in ('monthly', 'sporadic')),
+  months int[] not null default '{}',
+  position float8 not null default 0,
   created_at timestamptz not null default now()
 );
 
@@ -265,12 +267,15 @@ create policy "Owner manages recurring templates"
 -- =====================
 -- TRANSACTIONS
 -- =====================
-create table transactions (
+create table if not exists transactions (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
   amount numeric(15, 2) not null,
   date date not null,
+  purchase_date date,
+  payment_date date,
+  payment_method text check (payment_method in ('PIX', 'DEBIT', 'CREDIT')),
   category_id uuid references categories(id),
   account_id uuid references accounts(id),
   credit_card_id uuid references credit_cards(id),
@@ -284,6 +289,7 @@ create table transactions (
   original_amount numeric(15, 2),
   exchange_rate numeric(10, 6),
   labels text[] not null default '{}',
+  position float,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -329,16 +335,18 @@ create policy "Family editors update transactions"
 -- =====================
 -- ENTRIES
 -- =====================
-create table entries (
+create table if not exists entries (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
   amount numeric(15, 2) not null,
   date date not null,
+  status text not null default 'REALIZED' check (status in ('REALIZED', 'PROJECTED')),
   type_id uuid references domain_lists(id),
   account_id uuid references accounts(id),
   recurring_template_id uuid references recurring_templates(id),
   labels text[] not null default '{}',
+  position float,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -384,7 +392,7 @@ create policy "Family editors update entries"
 -- =====================
 -- SAVINGS MOVEMENTS
 -- =====================
-create table savings_movements (
+create table if not exists savings_movements (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   description text not null,
@@ -415,7 +423,7 @@ create policy "Family members read savings"
 -- =====================
 -- GOALS
 -- =====================
-create table goals (
+create table if not exists goals (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   category_id uuid not null references categories(id) on delete cascade,
@@ -446,7 +454,7 @@ create policy "Family members read goals"
 -- =====================
 -- PEOPLE (labels)
 -- =====================
-create table people (
+create table if not exists people (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references user_profiles(id) on delete cascade,
   name text not null,
@@ -459,3 +467,50 @@ alter table people enable row level security;
 create policy "Owner manages people"
   on people for all
   using (auth.uid() = owner_id);
+
+-- =====================
+-- TELEGRAM
+-- =====================
+create table if not exists telegram_links (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references user_profiles(id) on delete cascade,
+  token text not null unique,
+  used boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table telegram_links enable row level security;
+
+create policy "Owner manages telegram links"
+  on telegram_links for all
+  using (auth.uid() = user_id);
+
+create table if not exists telegram_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references user_profiles(id) on delete cascade unique,
+  chat_id bigint not null,
+  notifications_enabled boolean not null default true,
+  linked_at timestamptz not null default now()
+);
+
+alter table telegram_subscriptions enable row level security;
+
+create policy "Owner manages telegram subscription"
+  on telegram_subscriptions for all
+  using (auth.uid() = user_id);
+
+create table if not exists telegram_sessions (
+  chat_id   bigint      primary key,
+  step      text        not null,
+  data      jsonb       not null default '{}',
+  updated_at timestamptz not null default now()
+);
+
+-- =====================
+-- INDEXES
+-- =====================
+create index if not exists idx_entries_owner_status      on entries (owner_id, status);
+create index if not exists idx_transactions_owner_status on transactions (owner_id, status);
+create index if not exists idx_accounts_owner            on accounts (owner_id) where not is_archived;
+create index if not exists telegram_links_token_idx      on telegram_links(token) where not used;
+create index if not exists telegram_subscriptions_chat_idx on telegram_subscriptions(chat_id);
