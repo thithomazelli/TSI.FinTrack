@@ -326,7 +326,7 @@ def main():
         print(f"  → subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
 
     result = {
-        "meta": {"opening_balance": -305, "opened_at": "2009-05-01"},
+        "meta": {"opening_balance": -305, "opened_at": "2009-05-01", "savings_opening_balance": -2.28},
         "entries":      all_entries,
         "transactions": all_transactions,
         "savings":      all_savings,
