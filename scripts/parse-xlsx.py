@@ -334,7 +334,7 @@ def main():
 
     total_dep = sum(1 for s in all_savings if s["type"] == "DEPOSIT")
     total_wdw = sum(1 for s in all_savings if s["type"] == "WITHDRAWAL")
-    OUT_FILE.write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    OUT_FILE.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions")
     print(f"   savings: {len(all_savings)} total — {total_dep} DEPOSIT, {total_wdw} WITHDRAWAL → {OUT_FILE}")
 

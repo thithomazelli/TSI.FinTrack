@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 
 const __dir = dirname(fileURLToPath(import.meta.url))
-const data = JSON.parse(readFileSync(join(__dir, 'seed_data.json'), 'utf8'))
+const data = JSON.parse(readFileSync(join(__dir, 'seed_data.json'), { encoding: 'utf8', flag: 'r' }))
 
 const SUPABASE_URL = 'https://rknjcrcvsetspfvexjsu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
