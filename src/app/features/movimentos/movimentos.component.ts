@@ -342,15 +342,25 @@ export class MovimentosComponent implements OnInit {
     const draggedItem = allItems.find(i => i.id === event.id);
     if (!draggedItem) return;
 
+    // When items have no saved position yet, synthesize one from their current index
+    // so the midpoint calculation places the dragged item correctly.
+    const posOf = (item: (typeof allItems)[0] | null | undefined) => {
+      if (!item) return null;
+      return item.position ?? (allItems.indexOf(item) + 1) * 1000;
+    };
+
+    const ap = posOf(aboveItem);
+    const bp = posOf(belowItem);
+
     let newPosition: number;
-    if (!aboveItem && !belowItem) {
+    if (ap == null && bp == null) {
       newPosition = 1000;
-    } else if (!aboveItem) {
-      newPosition = (belowItem!.position ?? 1000) - 1000;
-    } else if (!belowItem) {
-      newPosition = (aboveItem!.position ?? 1000) + 1000;
+    } else if (ap == null) {
+      newPosition = bp! - 1000;
+    } else if (bp == null) {
+      newPosition = ap + 1000;
     } else {
-      newPosition = ((aboveItem.position ?? 0) + (belowItem.position ?? 0)) / 2;
+      newPosition = (ap + bp) / 2;
     }
 
     const save$ = draggedItem.kind === 'entry'

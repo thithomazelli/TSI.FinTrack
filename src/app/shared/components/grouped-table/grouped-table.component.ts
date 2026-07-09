@@ -214,7 +214,8 @@ export class GroupedTableComponent {
       this.dragOverIndex.set(-1);
       return;
     }
-    const group = this.visibleGroups().find(g => g.id === groupId);
+    // Use pagedGroups so indices match what the template rendered
+    const group = this.pagedGroups().find(g => g.id === groupId);
     if (!group) return;
 
     const items = group.items;
