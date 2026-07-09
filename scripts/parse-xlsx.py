@@ -299,6 +299,7 @@ def main():
     # Find all xlsx files with a 4-digit year anywhere in the name
     year_files: dict[int, Path] = {}
     for f in sorted(UPLOADS_DIR.glob("*.xlsx")):
+        if f.name.startswith("~$"): continue  # skip Excel temp/lock files
         m = re.search(r"(\d{4})", f.name)
         if not m: continue
         year = int(m.group(1))
