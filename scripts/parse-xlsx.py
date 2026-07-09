@@ -109,6 +109,12 @@ def parse_sheet(ws, year: int, month: int):
                 in_income  = False
                 in_expense = True
                 continue
+            # Fallback: detect expense section from its column header row
+            # (some months are missing the "DESPESAS MENSAIS" label)
+            if bl == "tipo" and isinstance(raw_row[2], str) and raw_row[2].strip().lower() == "item":
+                in_income  = False
+                in_expense = True
+                continue
             if bl == "total" and in_income:
                 in_income = False
                 continue
