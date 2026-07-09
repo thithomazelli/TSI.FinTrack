@@ -31,13 +31,22 @@
 
   <tsi-balance-card />
 
-  <!-- Saldo poupança acumulado -->
-  <div class="savings-balance-card" [class.is-negative]="cumulativeBalance() < 0">
-    <div class="cb-info">
-      <span class="cb-label">{{ 'savings.balance' | translate }}</span>
-      <span class="cb-hint">{{ 'savings.balanceHint' | translate }}</span>
+  <!-- Saldo poupança -->
+  <div class="savings-balances">
+    <div class="savings-balance-card" [class.is-negative]="balanceUpToMonth() < 0">
+      <div class="cb-info">
+        <span class="cb-label">{{ 'savings.balanceMonth' | translate }}</span>
+        <span class="cb-hint">{{ 'savings.balanceMonthHint' | translate }}</span>
+      </div>
+      <span class="cb-value">R$ {{ balanceUpToMonth() | number:'1.2-2' }}</span>
     </div>
-    <span class="cb-value">R$ {{ cumulativeBalance() | number:'1.2-2' }}</span>
+    <div class="savings-balance-card savings-balance-card--total" [class.is-negative]="cumulativeBalance() < 0">
+      <div class="cb-info">
+        <span class="cb-label">{{ 'savings.balance' | translate }}</span>
+        <span class="cb-hint">{{ 'savings.balanceHint' | translate }}</span>
+      </div>
+      <span class="cb-value">R$ {{ cumulativeBalance() | number:'1.2-2' }}</span>
+    </div>
   </div>
 
   <!-- Resumo do mês -->
@@ -77,13 +86,13 @@
               <td class="col-date">{{ m.date | slice:0:10 }}</td>
               <td>{{ m.description }}</td>
               <td class="col-muted">
-                <span class="tipo-badge" [class.tipo-badge--deposit]="typeCode(m.typeId) !== 'WITHDRAWAL'" [class.tipo-badge--withdrawal]="typeCode(m.typeId) === 'WITHDRAWAL'">
+                <span class="tipo-badge" [class.tipo-badge--deposit]="m.typeCode !== 'WITHDRAWAL'" [class.tipo-badge--withdrawal]="m.typeCode === 'WITHDRAWAL'">
                   {{ typeLabel(m.typeId) }}
                 </span>
               </td>
               <td class="col-muted">{{ accountName(m.accountId) }}</td>
-              <td class="text-right col-amount" [class.amount-deposit]="typeCode(m.typeId) !== 'WITHDRAWAL'" [class.amount-withdrawal]="typeCode(m.typeId) === 'WITHDRAWAL'">
-                {{ typeCode(m.typeId) === 'WITHDRAWAL' ? '−' : '+' }}R$ {{ m.amount | number:'1.2-2' }}
+              <td class="text-right col-amount" [class.amount-deposit]="m.typeCode !== 'WITHDRAWAL'" [class.amount-withdrawal]="m.typeCode === 'WITHDRAWAL'">
+                {{ m.typeCode === 'WITHDRAWAL' ? '−' : '+' }}R$ {{ m.amount | number:'1.2-2' }}
               </td>
               <td>
                 <div class="action-btns">

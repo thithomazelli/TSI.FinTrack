@@ -252,6 +252,92 @@
   }
 }
 
+/* ── Histórico Anual ── */
+
+.history-card {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 700px;
+
+  th, td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-3);
+    background: var(--color-surface-2, var(--color-border));
+  }
+
+  td { color: var(--color-text); }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover { background: var(--color-hover, rgba(99,102,241,0.04)); }
+
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .month-label { font-weight: 500; padding: 0; }
+
+  .month-link {
+    background: none;
+    border: none;
+    padding: 0.65rem 1rem;
+    font-size: inherit;
+    font-weight: 500;
+    color: var(--color-primary);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    width: 100%;
+    text-align: left;
+    transition: opacity var(--transition);
+
+    &:hover { opacity: 0.75; }
+  }
+
+  .zero { color: var(--color-text-3); }
+
+  .positive { color: var(--color-success); font-weight: 600; }
+  .negative { color: var(--color-danger); font-weight: 600; }
+
+  .pct-cell { color: var(--color-text-2); }
+  .over-pct { color: var(--color-danger) !important; }
+
+  .savings-col { border-left: 1px solid var(--color-border); font-size: 0.8rem; color: var(--color-text-2); }
+  .savings-deposit { color: #22c55e; }
+  .savings-withdrawal { color: #ef4444; }
+
+  tfoot .total-row {
+    td {
+      font-weight: 700;
+      font-size: 0.875rem;
+      background: var(--color-surface-2, rgba(99,102,241,0.05));
+      border-top: 2px solid var(--color-border);
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    font-size: 0.8rem;
+    th, td { padding: 0.5rem 0.6rem; }
+  }
+}
+
 /* ── Category matrix ── */
 
 .cat-matrix-wrap {
@@ -365,85 +451,4 @@
 
   .income { color: var(--color-success) !important; }
   .over-pct { color: var(--color-danger) !important; }
-}
-
-/* ── History table ── */
-
-.history-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: background var(--transition), border-color var(--transition);
-}
-
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-
-  th, td {
-    padding: 0.65rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  th {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-text-3);
-    background: var(--color-surface-2, var(--color-border));
-  }
-
-  td { color: var(--color-text); }
-
-  tbody tr:last-child td { border-bottom: none; }
-
-  tbody tr:hover { background: var(--color-hover, rgba(99,102,241,0.04)); }
-
-  .num { text-align: right; font-variant-numeric: tabular-nums; }
-
-  .month-label { font-weight: 500; padding: 0; }
-
-  .month-link {
-    background: none;
-    border: none;
-    padding: 0.65rem 1rem;
-    font-size: inherit;
-    font-weight: 500;
-    color: var(--color-primary);
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    width: 100%;
-    text-align: left;
-    transition: opacity var(--transition);
-
-    &:hover { opacity: 0.75; }
-  }
-
-  .zero { color: var(--color-text-3); }
-
-  .positive { color: var(--color-success); font-weight: 600; }
-  .negative { color: var(--color-danger); font-weight: 600; }
-
-  .pct-cell { color: var(--color-text-2); }
-  .over-pct { color: var(--color-danger) !important; }
-
-  tfoot .total-row {
-    td {
-      font-weight: 700;
-      font-size: 0.875rem;
-      background: var(--color-surface-2, rgba(99,102,241,0.05));
-      border-top: 2px solid var(--color-border);
-      border-bottom: none;
-    }
-  }
-
-  @media (max-width: 640px) {
-    font-size: 0.8rem;
-    th, td { padding: 0.5rem 0.6rem; }
-  }
 }

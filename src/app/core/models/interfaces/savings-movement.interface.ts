@@ -5,6 +5,7 @@ export interface SavingsMovement {
   amount: number;
   date: string;
   typeId: string;
+  typeCode: string;   // 'DEPOSIT' | 'WITHDRAWAL'
   accountId: string;
   createdAt: string;
   updatedAt: string;

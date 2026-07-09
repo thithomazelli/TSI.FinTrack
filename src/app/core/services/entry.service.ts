@@ -47,7 +47,7 @@ export class EntryService {
       .eq('owner_id', this.ownerId)
       .gte('date', startDate)
       .lte('date', endDate)
-      .order('date', { ascending: false });
+      .order('date', { ascending: true });
 
     if (filter.accountId) query = query.eq('account_id', filter.accountId);
     if (filter.typeId) query = query.eq('type_id', filter.typeId);

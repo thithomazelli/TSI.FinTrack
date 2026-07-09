@@ -254,68 +254,18 @@ async function main() {
   // 2.5 Conta Corrente com saldo de abertura (reconciliação histórica)
   const opening = data.meta?.opening_balance ?? -305
   const openedAt = data.meta?.opened_at ?? '2009-05-01'
-  const { data: checkingDomain } = await supabase
-    .from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'account_type').eq('value', 'CHECKING').maybeSingle()
-  const typeId = checkingDomain?.id ?? null
   const { data: existingAccts } = await supabase
     .from('accounts').select('id, name').eq('owner_id', OWNER_ID)
   const acct = (existingAccts ?? []).find(a => a.name === 'Conta Corrente')
   if (!acct) {
     const { error } = await supabase.from('accounts')
-      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', type_id: typeId, balance: opening, opened_at: openedAt })
+      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', type: 'CHECKING', balance: opening, opened_at: openedAt })
     if (error) { console.error('Erro ao criar conta:', error.message); process.exit(1) }
     console.log(`  Conta Corrente criada (saldo ${opening}, abertura ${openedAt}) ✓`)
   } else {
-    const { error: updErr } = await supabase.from('accounts').update({ type_id: typeId, balance: opening, opened_at: openedAt }).eq('id', acct.id)
+    const { error: updErr } = await supabase.from('accounts').update({ type: 'CHECKING', balance: opening, opened_at: openedAt }).eq('id', acct.id)
     if (updErr) { console.error('Erro ao atualizar conta:', updErr.message); process.exit(1) }
     console.log(`  Conta Corrente saldo atualizado p/ ${opening} (abertura ${openedAt}) ✓`)
-  }
-
-  // 2.6 Conta Poupança
-  const { data: savingsDomain } = await supabase
-    .from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'account_type').eq('value', 'SAVINGS').maybeSingle()
-  const savingsTypeId = savingsDomain?.id ?? null
-  const savingsAcct = (existingAccts ?? []).find(a => a.name === 'Poupança Nubank')
-  let savingsAccountId = savingsAcct?.id ?? null
-  if (!savingsAcct) {
-    const { data: newSavings, error } = await supabase.from('accounts')
-      .insert({ owner_id: OWNER_ID, name: 'Poupança Nubank', type_id: savingsTypeId, balance: 0, opened_at: '2020-03-01' })
-      .select('id').single()
-    if (error) { console.error('Erro ao criar conta poupança:', error.message); process.exit(1) }
-    savingsAccountId = newSavings.id
-    console.log('  Poupança Nubank criada ✓')
-  } else {
-    console.log('  Poupança Nubank já existe ✓')
-  }
-
-  // 2.7 Savings movements
-  console.log('\nInserindo lançamentos de poupança...')
-  const { count: savingsCount } = await supabase
-    .from('savings_movements').select('id', { count: 'exact', head: true }).eq('owner_id', OWNER_ID)
-  if (savingsCount > 0) {
-    console.log(`  Savings movements já existem (${savingsCount} registros) — pulando ✓`)
-  } else {
-    const { data: depositDomain } = await supabase
-      .from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'savings_movement_type').eq('value', 'DEPOSIT').maybeSingle()
-    const { data: withdrawalDomain } = await supabase
-      .from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'savings_movement_type').eq('value', 'WITHDRAWAL').maybeSingle()
-    const depositTypeId = depositDomain?.id ?? null
-    const withdrawalTypeId = withdrawalDomain?.id ?? null
-
-    const savingsRows = (data.savings ?? []).map(s => ({
-      owner_id:   s.owner_id,
-      description: s.description,
-      amount:     s.amount,
-      date:       s.date,
-      type_id:    s.type === 'WITHDRAWAL' ? withdrawalTypeId : depositTypeId,
-      account_id: savingsAccountId,
-    }))
-    if (savingsRows.length) {
-      await batchInsert('savings_movements', savingsRows, 'Savings movements')
-      console.log(`  ${savingsRows.length} lançamentos de poupança`)
-    } else {
-      console.log('  Nenhum lançamento de poupança no seed ✓')
-    }
   }
 
   // 3. Entradas de renda

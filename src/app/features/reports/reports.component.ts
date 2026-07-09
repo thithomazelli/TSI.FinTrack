@@ -58,6 +58,9 @@ interface YearMonthRow {
   monthlyBalance: number;
   runningBalance: number;
   pct: number;
+  savingsDeposit: number;
+  savingsWithdrawal: number;
+  savingsBalance: number;
 }
 
 
@@ -114,13 +117,13 @@ export class ReportsComponent implements OnInit {
   readonly paymentTypeSpend = signal<{ label: string; amount: number; color: string }[]>([]);
   readonly catEvolPoints = signal<{ label: string; amount: number }[]>([]);
   readonly realizedTransactions = signal<Transaction[]>([]);
+  readonly yearEntries = signal<Entry[]>([]);
 
   // Multi-year category evolution
   readonly multiYearCatData = signal<{ year: number; catTotals: Record<string, number> }[]>([]);
   readonly loadingMultiYear = signal(false);
   readonly multiYearTopN = signal(8);
   readonly multiYearLoaded = signal(false);
-  readonly yearEntries = signal<Entry[]>([]);
 
   // Category table sorting
   readonly sortColIdx = signal<number>(12); // 0-11 = month, 12 = total, -1 = name
@@ -304,7 +307,6 @@ export class ReportsComponent implements OnInit {
   readonly yoyChartData = computed<ChartData<'bar'>>(() => {
     const year = this.filterYear();
     const curr = this.categorySpend().slice(0, 8);
-    const prev = this.prevMonthlyPoints();
     const prevCatMap: Record<string, number> = {};
     return {
       labels: curr.map((c) => c.name),
@@ -361,7 +363,7 @@ export class ReportsComponent implements OnInit {
     );
     let balance = 0;
     const points = movements.map((m) => {
-      balance += m.amount;
+      balance += m.typeCode === 'WITHDRAWAL' ? -m.amount : m.amount;
       return { label: m.date.slice(0, 7), balance };
     });
     return {
@@ -525,12 +527,19 @@ export class ReportsComponent implements OnInit {
       .subscribe({
         next: ({ openingBalance, entries, realized, projected }) => {
           const transactions = [...realized, ...projected];
+          const allSavings = this.savingsMovements();
           let running = openingBalance;
+          let savingsRunning = 0;
           const rows: YearMonthRow[] = ALL_MONTHS.map((m, i) => {
             const income = entries.filter((e) => +e.date.substring(5, 7) === m).reduce((s, e) => s + e.amount, 0);
             const expense = transactions.filter((t) => +t.date.substring(5, 7) === m).reduce((s, t) => s + t.amount, 0);
             const monthlyBalance = income - expense;
             running += monthlyBalance;
+            const monthPrefix = `${year}-${String(m).padStart(2, '0')}`;
+            const monthSavings = allSavings.filter((s) => s.date.startsWith(monthPrefix));
+            const savingsDeposit = monthSavings.filter((s) => s.typeCode !== 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
+            const savingsWithdrawal = monthSavings.filter((s) => s.typeCode === 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
+            savingsRunning += savingsDeposit - savingsWithdrawal;
             return {
               month: m,
               label: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][i],
@@ -539,6 +548,9 @@ export class ReportsComponent implements OnInit {
               monthlyBalance,
               runningBalance: running,
               pct: income > 0 ? (expense / income) * 100 : 0,
+              savingsDeposit,
+              savingsWithdrawal,
+              savingsBalance: savingsRunning,
             };
           });
           this.yearSummaryRows.set(rows);
@@ -558,7 +570,6 @@ export class ReportsComponent implements OnInit {
     const sortCol = this.sortColIdx();
     const dir = this.sortDir();
 
-    // Build category rows
     const catMap: Record<string, { name: string; months: number[]; total: number }> = {};
     for (const t of realized) {
       if (!t.categoryId) continue;
@@ -579,12 +590,10 @@ export class ReportsComponent implements OnInit {
       return dir === 'asc' ? (va as number) - (vb as number) : (vb as number) - (va as number);
     });
 
-    // Monthly totals and income
     const monthTotals = Array(12).fill(0);
     for (const row of rows) row.months.forEach((v, i) => (monthTotals[i] += v));
     const grandTotal = monthTotals.reduce((s, v) => s + v, 0);
 
-    // Monthly income
     const monthIncome = Array(12).fill(0);
     for (const e of entries) {
       const m = +e.date.substring(5, 7) - 1;
@@ -601,6 +610,75 @@ export class ReportsComponent implements OnInit {
     const expense = rows.reduce((s, r) => s + r.expense, 0);
     return { income, expense, balance: income - expense, pct: income > 0 ? (expense / income) * 100 : 0 };
   });
+
+  private readonly CHART_COLORS = [
+    '#6366f1','#ef4444','#f59e0b','#22c55e','#06b6d4',
+    '#ec4899','#84cc16','#f97316','#a855f7','#14b8a6',
+    '#e11d48','#0ea5e9',
+  ];
+
+  readonly multiYearChartData = computed<ChartData<'line'>>(() => {
+    const rows = this.multiYearCatData();
+    const cats = this.categories();
+    const topN = this.multiYearTopN();
+    if (!rows.length) return { labels: [], datasets: [] };
+
+    const catTotalAll: Record<string, number> = {};
+    for (const row of rows) {
+      for (const [id, amt] of Object.entries(row.catTotals)) {
+        catTotalAll[id] = (catTotalAll[id] ?? 0) + amt;
+      }
+    }
+    const topCatIds = Object.entries(catTotalAll)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, topN)
+      .map(([id]) => id);
+
+    const labels = rows.map((r) => String(r.year));
+    const datasets = topCatIds.map((catId, i) => {
+      const cat = cats.find((c) => c.id === catId);
+      return {
+        label: cat?.name ?? catId,
+        data: rows.map((r) => r.catTotals[catId] ?? 0),
+        borderColor: cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length],
+        backgroundColor: (cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length]) + '18',
+        fill: false,
+        tension: 0.3,
+        pointRadius: 4,
+      };
+    });
+    return { labels, datasets };
+  });
+
+  loadMultiYearCatEvolution(): void {
+    if (this.multiYearLoaded()) return;
+    this.loadingMultiYear.set(true);
+    const years = [...this.availableYears].reverse();
+
+    forkJoin(
+      years.map((y) => this.transactionService.getByYear(y, TransactionStatus.Realized))
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (results) => {
+          const rows = results.map((txList, i) => {
+            const catTotals: Record<string, number> = {};
+            for (const t of txList) {
+              if (!t.categoryId) continue;
+              catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
+            }
+            return { year: years[i], catTotals };
+          });
+          this.multiYearCatData.set(rows);
+          this.loadingMultiYear.set(false);
+          this.multiYearLoaded.set(true);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load multi-year data', err);
+          this.loadingMultiYear.set(false);
+        },
+      });
+  }
 
   private loadAll(): void {
     this.loading.set(true);
@@ -681,7 +759,6 @@ export class ReportsComponent implements OnInit {
     this.prevMonthlyPoints.set(prevPoints);
 
     const catMap: Record<string, CategorySpend> = {};
-    const monthsWithData = new Set<string>();
 
     for (const t of realized) {
       if (!t.categoryId) continue;
@@ -696,7 +773,6 @@ export class ReportsComponent implements OnInit {
         };
       }
       catMap[t.categoryId].amount += t.amount;
-      monthsWithData.add(`${t.categoryId}-${t.date.substring(5, 7)}`);
     }
 
     const totalMonthsInYear = Math.min(
@@ -772,76 +848,6 @@ export class ReportsComponent implements OnInit {
     ].filter((t) => t.amount > 0);
 
     this.paymentTypeSpend.set(types);
-  }
-
-  private readonly CHART_COLORS = [
-    '#6366f1','#ef4444','#f59e0b','#22c55e','#06b6d4',
-    '#ec4899','#84cc16','#f97316','#a855f7','#14b8a6',
-    '#e11d48','#0ea5e9',
-  ];
-
-  readonly multiYearChartData = computed<ChartData<'line'>>(() => {
-    const rows = this.multiYearCatData();
-    const cats = this.categories();
-    const topN = this.multiYearTopN();
-    if (!rows.length) return { labels: [], datasets: [] };
-
-    // Sum totals per category across all years to determine top N
-    const catTotalAll: Record<string, number> = {};
-    for (const row of rows) {
-      for (const [id, amt] of Object.entries(row.catTotals)) {
-        catTotalAll[id] = (catTotalAll[id] ?? 0) + amt;
-      }
-    }
-    const topCatIds = Object.entries(catTotalAll)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, topN)
-      .map(([id]) => id);
-
-    const labels = rows.map((r) => String(r.year));
-    const datasets = topCatIds.map((catId, i) => {
-      const cat = cats.find((c) => c.id === catId);
-      return {
-        label: cat?.name ?? catId,
-        data: rows.map((r) => r.catTotals[catId] ?? 0),
-        borderColor: cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length],
-        backgroundColor: (cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length]) + '18',
-        fill: false,
-        tension: 0.3,
-        pointRadius: 4,
-      };
-    });
-    return { labels, datasets };
-  });
-
-  loadMultiYearCatEvolution(): void {
-    if (this.multiYearLoaded()) return;
-    this.loadingMultiYear.set(true);
-    const years = [...this.availableYears].reverse(); // oldest first
-
-    forkJoin(
-      years.map((y) => this.transactionService.getByYear(y, TransactionStatus.Realized))
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (results) => {
-          const rows = results.map((txList, i) => {
-            const catTotals: Record<string, number> = {};
-            for (const t of txList) {
-              if (!t.categoryId) continue;
-              catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
-            }
-            return { year: years[i], catTotals };
-          });
-          this.multiYearCatData.set(rows);
-          this.loadingMultiYear.set(false);
-          this.multiYearLoaded.set(true);
-        },
-        error: (err) => {
-          this.logger.error('Failed to load multi-year data', err);
-          this.loadingMultiYear.set(false);
-        },
-      });
   }
 
   private loadCategoryEvolution(): void {

@@ -75,6 +75,9 @@
               <th class="num">Saldo Mensal</th>
               <th class="num">Saldo Atual</th>
               <th class="num">Porcentagem</th>
+              <th class="num savings-col">Dep. Poupança</th>
+              <th class="num savings-col">Ret. Poupança</th>
+              <th class="num savings-col">Saldo Poupança</th>
             </tr>
           </thead>
           <tbody>
@@ -104,6 +107,18 @@
                   @if (row.income > 0) { {{ row.pct.toFixed(1) }}% }
                   @else { <span class="zero">0,0%</span> }
                 </td>
+                <td class="num savings-col savings-deposit">
+                  @if (row.savingsDeposit > 0) { {{ formatCurrency(row.savingsDeposit) }} }
+                  @else { <span class="zero">–</span> }
+                </td>
+                <td class="num savings-col savings-withdrawal">
+                  @if (row.savingsWithdrawal > 0) { {{ formatCurrency(row.savingsWithdrawal) }} }
+                  @else { <span class="zero">–</span> }
+                </td>
+                <td class="num savings-col" [class.positive]="row.savingsBalance > 0">
+                  @if (row.savingsBalance !== 0) { {{ formatCurrency(row.savingsBalance) }} }
+                  @else { <span class="zero">R$ -</span> }
+                </td>
               </tr>
             }
           </tbody>
@@ -120,6 +135,15 @@
               </td>
               <td class="num pct-cell" [class.over-pct]="yearSummaryTotals().pct > 100">
                 {{ yearSummaryTotals().pct.toFixed(1) }}%
+              </td>
+              <td class="num savings-col savings-deposit">
+                {{ formatCurrency(yearSummaryRows().reduce((s, r) => s + r.savingsDeposit, 0)) }}
+              </td>
+              <td class="num savings-col savings-withdrawal">
+                {{ formatCurrency(yearSummaryRows().reduce((s, r) => s + r.savingsWithdrawal, 0)) }}
+              </td>
+              <td class="num savings-col" [class.positive]="(yearSummaryRows().at(-1)?.savingsBalance ?? 0) > 0">
+                {{ yearSummaryRows().length ? formatCurrency(yearSummaryRows().at(-1)!.savingsBalance) : '' }}
               </td>
             </tr>
           </tfoot>

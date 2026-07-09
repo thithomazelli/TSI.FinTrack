@@ -236,8 +236,10 @@
   "savings": {
     "title": "Savings",
     "add": "New Movement",
-    "balance": "Savings Balance",
+    "balance": "Total Savings Balance",
     "balanceHint": "Accumulated across all months",
+    "balanceMonth": "Savings Balance up to this month",
+    "balanceMonthHint": "Accumulated up to end of selected month",
     "allTypes": "All types",
     "deposits": "Deposits",
     "withdrawals": "Withdrawals",

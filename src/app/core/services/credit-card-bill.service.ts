@@ -42,8 +42,8 @@ export class CreditCardBillService {
         .from(TABLE)
         .select('*, credit_cards(name, last_four_digits)')
         .eq('owner_id', this.ownerId)
-        .order('year', { ascending: false })
-        .order('month', { ascending: false })
+        .order('year', { ascending: true })
+        .order('month', { ascending: true })
         .order('created_at')
         .then(({ data, error }) => {
           if (error) throw error;
@@ -76,8 +76,8 @@ export class CreditCardBillService {
         .select('*')
         .eq('owner_id', this.ownerId)
         .eq('credit_card_id', creditCardId)
-        .order('year', { ascending: false })
-        .order('month', { ascending: false })
+        .order('year', { ascending: true })
+        .order('month', { ascending: true })
         .then(({ data, error }) => {
           if (error) throw error;
           return (data ?? []) as CreditCardBill[];
