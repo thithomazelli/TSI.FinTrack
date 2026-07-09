@@ -12,20 +12,13 @@
   &--saida   { background: rgba(239,68,68,.12);  color: #ef4444; border-color: rgba(239,68,68,.3);  &:hover { background: rgba(239,68,68,.2);  } }
 }
 
-/* Top row: three peer card components */
+/* Top row: period card (plain div) + two balance card components */
 .top-row {
   display: flex;
   gap: 1rem;
   align-items: stretch;
   margin-bottom: 1.25rem;
 
-  // period-bar styles its own :host — only set flex sizing here
-  tsi-period-bar {
-    flex: 1;
-    min-width: 200px;
-  }
-
-  // balance cards need column direction so their inner flex:1 div fills the host
   tsi-savings-balance-card,
   tsi-balance-card {
     flex: 1;
@@ -35,6 +28,46 @@
   }
 
   @media (max-width: 720px) { flex-direction: column; }
+}
+
+// Period picker card — plain div, same pattern as sm-card
+.tr-card {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: .75rem 1.25rem;
+  box-sizing: border-box;
+}
+
+.tr-controls {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.tr-range { display: flex; gap: 1rem; align-items: flex-end; }
+.tr-group { display: flex; flex-direction: column; gap: .35rem; }
+.tr-input {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: .35rem .55rem;
+  font-size: .8rem;
+  outline: none;
+  &:focus { border-color: var(--color-accent); }
+}
+
+tsi-month-picker ::ng-deep .month-picker {
+  padding: 4px 10px;
+  font-size: .8rem;
 }
 
 .filter-bar {

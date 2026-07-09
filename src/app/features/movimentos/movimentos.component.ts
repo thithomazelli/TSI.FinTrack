@@ -35,7 +35,7 @@ import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
-import { PeriodBarComponent } from '../../shared/components/period-bar/period-bar.component';
+import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
 import { SavingsBalanceCardComponent } from '../../shared/components/savings-balance-card/savings-balance-card.component';
 import { GroupedTableComponent, TableGroup, GroupInsertEvent, GroupReorderEvent, GroupSearchFn } from '../../shared/components/grouped-table/grouped-table.component';
@@ -64,7 +64,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 
 @Component({
     selector: 'tsi-movimentos',
-    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, PeriodBarComponent, BalanceCardComponent, SavingsBalanceCardComponent, BaseChartDirective, TranslatePipe, GroupedTableComponent, CurrencyMaskDirective],
+    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BalanceCardComponent, SavingsBalanceCardComponent, BaseChartDirective, TranslatePipe, GroupedTableComponent, CurrencyMaskDirective],
     templateUrl: './movimentos.component.html',
     styleUrls: ['./movimentos.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
