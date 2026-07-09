@@ -19,6 +19,7 @@ import { CategoryService } from '../../core/services/category.service';
 import { AccountService } from '../../core/services/account.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { DomainListService } from '../../core/services/domain-list.service';
+import { ActivatedRoute } from '@angular/router';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -72,6 +73,7 @@ export class MovimentosComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly cardService = inject(CreditCardService);
   private readonly domainListService = inject(DomainListService);
+  private readonly route = inject(ActivatedRoute);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
   private readonly supabase = inject(SupabaseService);
@@ -481,6 +483,12 @@ export class MovimentosComponent implements OnInit {
   } as ChartConfiguration<'doughnut'>['options']));
 
   ngOnInit(): void {
+    const qp = this.route.snapshot.queryParamMap;
+    const qYear  = qp.get('year');
+    const qMonth = qp.get('month');
+    if (qYear)  this.year.set(+qYear);
+    if (qMonth) this.month.set(+qMonth);
+
     this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
     this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
     this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });

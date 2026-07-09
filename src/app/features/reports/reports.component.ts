@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 import { LanguageService } from '../../core/services/language.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
@@ -73,6 +74,7 @@ export class ReportsComponent implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly savingsService = inject(SavingsService);
   private readonly balanceService = inject(BalanceService);
+  private readonly router = inject(Router);
   private readonly logger = inject(LoggingService);
   readonly themeService = inject(ThemeService);
   private readonly language = inject(LanguageService);
@@ -690,6 +692,10 @@ export class ReportsComponent implements OnInit {
           this.loadingCatEvol.set(false);
         },
       });
+  }
+
+  goToMovimentos(year: number, month: number): void {
+    this.router.navigate(['/movimentos'], { queryParams: { year, month } });
   }
 
   readonly toIncome = (acc: number, p: MonthlyPoint) => acc + p.income;

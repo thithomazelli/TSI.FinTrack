@@ -77,7 +77,11 @@
           <tbody>
             @for (row of yearSummaryRows(); track row.month) {
               <tr>
-                <td class="month-label">{{ row.label }}</td>
+                <td class="month-label">
+                  <button class="month-link" (click)="goToMovimentos(filterYear(), row.month)">
+                    {{ row.label }}
+                  </button>
+                </td>
                 <td class="num">
                   @if (row.income > 0) { {{ formatCurrency(row.income) }} }
                   @else { <span class="zero">R$ -</span> }
