@@ -9,11 +9,9 @@
 
 // Period card — same visual pattern as .sm-card in movimentos
 .sm-card {
-  flex: 1;
-  min-width: 200px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
