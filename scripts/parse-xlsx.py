@@ -301,7 +301,10 @@ def main():
         if year not in year_files or f.stat().st_mtime > year_files[year].stat().st_mtime:
             year_files[year] = f
 
-    print(f"Encontrados {len(year_files)} arquivos: {sorted(year_files)}\n")
+    print(f"Encontrados {len(year_files)} arquivos:")
+    for y, p in sorted(year_files.items()):
+        print(f"  {y} → {p.name}")
+    print()
 
     all_entries      = []
     all_transactions = []
