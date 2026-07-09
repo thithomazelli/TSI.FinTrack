@@ -4,7 +4,17 @@
   margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
 }
 .page-title { font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin: 0; }
+.header-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
 .loading-text, .no-results { color: var(--color-text-2); text-align: center; padding: 2rem; }
+
+.btn-add {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .4rem .9rem; border-radius: var(--radius-md);
+  font-size: .82rem; font-weight: 600; cursor: pointer;
+  background: var(--color-accent); color: #fff; border: none;
+  transition: background var(--transition);
+  &:hover { background: var(--color-accent-hover); }
+}
 
 /* ── Month groups ───────────────────────────────────────────────────────────── */
 .month-group { margin-bottom: 2rem; }
@@ -101,6 +111,18 @@
 }
 .bill-due { font-size: .8rem; color: var(--color-text-2); flex: 1; }
 
+/* Action buttons (shared with tx rows and bill actions bar) */
+.action-btns { display: flex; gap: .4rem; align-items: center; }
+.action-btn {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .25rem .55rem; border-radius: var(--radius-sm);
+  font-size: .75rem; font-weight: 600; cursor: pointer;
+  border: 1.5px solid transparent; background: transparent; transition: all var(--transition);
+  &--edit   { color: #3b82f6; border-color: rgba(59,130,246,.35); &:hover { background: rgba(59,130,246,.1); } }
+  &--delete { color: #ef4444; border-color: rgba(239,68,68,.35);  &:hover { background: rgba(239,68,68,.1);  } }
+  &--add    { color: #22c55e; border-color: rgba(34,197,94,.35);  &:hover { background: rgba(34,197,94,.1);  } }
+}
+
 /* ── Transaction list (collapsible) ────────────────────────────────────── */
 .bill-txs {
   display: grid; grid-template-rows: 0fr;
@@ -128,10 +150,12 @@
   tr:hover td { background: var(--color-surface-2); }
 }
 
-.td-date   { color: var(--color-text-2); white-space: nowrap; }
-.td-desc   { font-weight: 500; }
-.td-amount { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
-.td-status { text-align: right; }
+.td-date    { color: var(--color-text-2); white-space: nowrap; }
+.td-desc    { font-weight: 500; }
+.td-amount  { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.td-status  { text-align: right; }
+.td-actions { white-space: nowrap; }
+.th-actions { white-space: nowrap; }
 
 .installment-badge {
   display: inline-block; font-size: .68rem; font-weight: 700;
@@ -155,6 +179,13 @@ tfoot td {
 }
 .tfoot-label { color: var(--color-text-2); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .tfoot-total { text-align: right; font-weight: 800; color: var(--color-text); font-variant-numeric: tabular-nums; }
+
+/* ── Modal helpers ───────────────────────────────────────────────────────── */
+.modal-text   { font-size: .9rem; color: var(--color-text-2); margin: 0 0 1rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.25rem; }
+.btn-danger   { background: var(--color-danger, #ef4444); color: #fff; border: none; padding: .5rem 1.25rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; &:hover { opacity: .85; } &:disabled { opacity: .5; cursor: default; } }
+.btn-secondary { background: var(--color-surface-2); color: var(--color-text); border: 1px solid var(--color-border); padding: .5rem 1.25rem; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; &:hover { background: var(--color-border); } }
+.modal--sm { max-width: 400px !important; }
 
 /* ── Add bill ───────────────────────────────────────────────────────────── */
 .add-bill-section {

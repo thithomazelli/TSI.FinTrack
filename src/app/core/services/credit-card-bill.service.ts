@@ -120,6 +120,17 @@ export class CreditCardBillService {
     );
   }
 
+  delete(id: string): Observable<void> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .delete()
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .then(({ error }) => { if (error) throw error; })
+    );
+  }
+
   updateStatus(id: string, status: BillStatus): Observable<CreditCardBill> {
     this.logger.info('Updating bill status', id, status);
     return from(

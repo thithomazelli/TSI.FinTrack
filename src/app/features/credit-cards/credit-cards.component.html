@@ -1,7 +1,13 @@
 <div class="page">
   <div class="page-header">
     <h2 class="page-title">{{ 'creditCards.bills' | translate }}</h2>
-    <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+    <div class="header-actions">
+      <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+      <button class="btn-add" (click)="openAddBill()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova Fatura
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -51,6 +57,14 @@
             >
               {{ nextStatusLabel(bill.status) | translate }}
             </button>
+            <button class="action-btn action-btn--add" (click)="openAddTx(bill); $event.stopPropagation()" title="Adicionar lançamento">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Lançamento
+            </button>
+            <button class="action-btn action-btn--delete" (click)="openDeleteBill(bill); $event.stopPropagation()" title="Remover fatura">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+              Fatura
+            </button>
           </div>
 
           <!-- Transaction list (expandable) -->
@@ -67,6 +81,7 @@
                       <th>{{ 'common.category' | translate }}</th>
                       <th class="th-right">{{ 'common.amount' | translate }}</th>
                       <th class="th-right">{{ 'common.status' | translate }}</th>
+                      <th class="th-actions">{{ 'common.actions' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -91,6 +106,18 @@
                             {{ (tx.status === 'REALIZED' ? 'movimentos.realized' : 'movimentos.projected') | translate }}
                           </span>
                         </td>
+                        <td class="td-actions">
+                          <div class="action-btns" (click)="$event.stopPropagation()">
+                            <button class="action-btn action-btn--edit" (click)="openEditTx(tx)">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                              {{ 'common.edit' | translate }}
+                            </button>
+                            <button class="action-btn action-btn--delete" (click)="openDeleteTx(tx)">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                              {{ 'common.delete' | translate }}
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     }
                   </tbody>
@@ -98,7 +125,7 @@
                     <tr>
                       <td colspan="3" class="tfoot-label">{{ 'common.total' | translate }}</td>
                       <td class="tfoot-total">R$ {{ billTotal(bill) | number:'1.2-2' }}</td>
-                      <td></td>
+                      <td colspan="2"></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -114,3 +141,107 @@
     }
   }
 </div>
+
+<!-- ── Add bill modal ───────────────────────────────────────────────────────── -->
+@if (billModalOpen()) {
+  <div class="modal-backdrop" (click)="billModalOpen.set(false)"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">Nova Fatura</h3>
+    <div class="form-field">
+      <label>Cartão de crédito</label>
+      <select class="input" [ngModel]="formBillCardId()" (ngModelChange)="formBillCardId.set($event)">
+        <option value="">— Selecione —</option>
+        @for (card of cards(); track card.id) {
+          <option [value]="card.id">{{ card.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="billModalOpen.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="saveBill()" [disabled]="saving() || !formBillCardId()">
+        {{ saving() ? ('common.saving' | translate) : ('common.save' | translate) }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ── Delete bill confirm modal ────────────────────────────────────────────── -->
+@if (deletingBill()) {
+  <div class="modal-backdrop" (click)="deletingBill.set(null)"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <p class="modal-text">Remover a fatura de <strong>{{ deletingBill()!.credit_cards?.name ?? 'cartão' }}</strong>? Os lançamentos associados não serão removidos.</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="deletingBill.set(null)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-danger" (click)="confirmDeleteBill()" [disabled]="saving()">{{ 'common.delete' | translate }}</button>
+    </div>
+  </div>
+}
+
+<!-- ── Add / Edit transaction modal ─────────────────────────────────────────── -->
+@if (txModalOpen()) {
+  <div class="modal-backdrop" (click)="txModalOpen.set(false)"></div>
+  <div class="modal">
+    <h3 class="modal-title">{{ editingTxId() ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
+
+    <div class="form-field">
+      <label>{{ 'common.description' | translate }}</label>
+      <input class="input" [ngModel]="formTxDescription()" (ngModelChange)="formTxDescription.set($event)" [placeholder]="'common.description' | translate" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>{{ 'common.amount' | translate }}</label>
+        <input class="input" type="number" min="0.01" step="0.01" [ngModel]="formTxAmount()" (ngModelChange)="formTxAmount.set(+$event)" />
+      </div>
+      <div class="form-field form-field--sm">
+        <label>{{ 'common.status' | translate }}</label>
+        <select class="input" [ngModel]="formTxStatus()" (ngModelChange)="formTxStatus.set($event)">
+          <option [value]="TransactionStatus.Realized">{{ 'movimentos.realized' | translate }}</option>
+          <option [value]="TransactionStatus.Projected">{{ 'movimentos.projected' | translate }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label>{{ 'movimentos.paymentDate' | translate }}</label>
+        <input class="input" type="date" [ngModel]="formTxDate()" (ngModelChange)="formTxDate.set($event)" />
+      </div>
+      <div class="form-field">
+        <label>{{ 'movimentos.purchaseDate' | translate }}</label>
+        <input class="input" type="date" [ngModel]="formTxPurchaseDate()" (ngModelChange)="formTxPurchaseDate.set($event)" />
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>{{ 'common.category' | translate }}</label>
+      <select class="input" [ngModel]="formTxCategoryId()" (ngModelChange)="formTxCategoryId.set($event)">
+        <option value="">—</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="txModalOpen.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="saveTx()" [disabled]="saving() || !formTxDescription().trim() || formTxAmount() <= 0">
+        {{ saving() ? ('common.saving' | translate) : ('common.save' | translate) }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ── Delete transaction confirm modal ─────────────────────────────────────── -->
+@if (deletingTx()) {
+  <div class="modal-backdrop" (click)="deletingTx.set(null)"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <p class="modal-text">{{ 'common.confirmDeleteMsg' | translate: { name: deletingTx()!.description } }}</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="deletingTx.set(null)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-danger" (click)="confirmDeleteTx()" [disabled]="saving()">{{ 'common.delete' | translate }}</button>
+    </div>
+  </div>
+}
