@@ -4230,6 +4230,38 @@
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Salário",
+      "amount": 6100.0,
+      "date": "2016-04-05",
+      "status": "REALIZED",
+      "labels": []
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Chilli Beans 04/04 - Ana Paula",
+      "amount": 52.13,
+      "date": "2016-04-05",
+      "status": "REALIZED",
+      "labels": []
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Passagem Volta Ana Paula 04/07",
+      "amount": 68.76,
+      "date": "2016-04-05",
+      "status": "REALIZED",
+      "labels": []
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Aluguel Carro Onix 03/03",
+      "amount": 193.12,
+      "date": "2016-04-05",
+      "status": "REALIZED",
+      "labels": []
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Salário",
       "amount": 6050.0,
       "date": "2016-05-05",
       "status": "REALIZED",

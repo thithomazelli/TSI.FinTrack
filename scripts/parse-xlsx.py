@@ -79,6 +79,22 @@ def to_date_str(val, fallback_year: int, fallback_month: int) -> str | None:
     return None
 
 
+def coerce_amount(val):
+    """Return a float amount from val, handling cells mis-typed as datetime by Excel."""
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, (datetime, date)):
+        # The cell has a numeric value stored with a date format; convert back to serial.
+        d = val.date() if isinstance(val, datetime) else val
+        t = (val.hour*3600 + val.minute*60 + val.second + val.microsecond/1e6
+             if isinstance(val, datetime) else 0)
+        days = (d - date(1900, 1, 1)).days + 1
+        if d >= date(1900, 3, 1):  # Excel's phantom 1900-02-29 (serial 60)
+            days += 1
+        return days + t / 86400
+    return None
+
+
 def payment_date(year: int, month: int, due_day: int) -> str:
     """Return YYYY-MM-DD for due_day clamped to last day of month."""
     last = calendar.monthrange(year, month)[1]
@@ -132,7 +148,8 @@ def parse_sheet(ws, year: int, month: int):
                 continue
             if item.strip().lower() in SKIP_B:
                 continue
-            if not isinstance(amount, (int, float)) or amount == 0:
+            amount = coerce_amount(amount)
+            if not amount:
                 continue
 
             dt_str = to_date_str(dt_val, year, month) or date(year, month, 1).isoformat()
@@ -161,7 +178,8 @@ def parse_sheet(ws, year: int, month: int):
                 continue
             if tipo_l not in TIPO_MAP:
                 continue
-            if not isinstance(amount, (int, float)) or amount == 0:
+            amount = coerce_amount(amount)
+            if not amount:
                 continue
 
             card_name = TIPO_MAP[tipo_l]   # None = debit
