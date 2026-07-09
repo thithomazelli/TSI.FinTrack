@@ -161,8 +161,11 @@ async function seedRecurring(catMap, cardMap) {
   console.log(`  ${rows.length} templates recorrentes criados ✓`)
 }
 
+const RESET_SAVINGS = process.argv.includes('--reset-savings')
+
 async function main() {
   console.log('=== TSI.FinTrack — Seed histórico ===\n')
+  if (RESET_SAVINGS) console.log('⚠  Modo --reset-savings: limpando savings_movements antes de reinserir\n')
 
   // 0. Domínios (listas de configuração)
   const { data: existingDomains } = await supabase
@@ -280,7 +283,8 @@ async function main() {
   } else {
     const entries = data.entries.map(e => ({
       owner_id: e.owner_id, description: e.description,
-      amount: e.amount, date: e.date, labels: e.labels ?? [], status: e.status
+      amount: e.amount, date: e.date, labels: e.labels ?? [], status: e.status,
+      position: e.position ?? null,
     }))
     await batchInsert('entries', entries, 'Entradas')
     console.log(`   ${entries.length} entradas de renda`)
@@ -305,6 +309,7 @@ async function main() {
         account_id: null,
         installment_number: t.installment_number ?? null,
         total_installments: t.total_installments ?? null,
+        position: t.position ?? null,
       }
     })
     await batchInsert('transactions', transactions, 'Transações')
@@ -313,9 +318,14 @@ async function main() {
 
   // 5. Movimentos de poupança
   console.log('\nInserindo movimentos de poupança...')
+  if (RESET_SAVINGS) {
+    const { error: delErr } = await supabase.from('savings_movements').delete().eq('owner_id', OWNER_ID)
+    if (delErr) { console.error('Erro ao limpar savings_movements:', delErr.message); process.exit(1) }
+    console.log('  savings_movements limpos ✓')
+  }
   const { count: savingsCount } = await supabase
     .from('savings_movements').select('id', { count: 'exact', head: true }).eq('owner_id', OWNER_ID)
-  if (savingsCount > 0) {
+  if (!RESET_SAVINGS && savingsCount > 0) {
     console.log(`  Movimentos já existem (${savingsCount} registros) — pulando ✓`)
   } else if ((data.savings ?? []).length === 0) {
     console.log('  Nenhum movimento de poupança no seed — pulando ✓')

@@ -135,7 +135,9 @@ def parse_sheet(ws, year: int, month: int):
     in_income   = False
     in_expense  = False
 
-    for raw_row in ws.iter_rows(values_only=True):
+    for row_cells in ws.iter_rows():
+        row_num = row_cells[0].row
+        raw_row = tuple(c.value for c in row_cells)
         b = raw_row[1]  # col B
 
         # Section headers
@@ -185,6 +187,7 @@ def parse_sheet(ws, year: int, month: int):
                 "date":        dt_str,
                 "status":      status,
                 "labels":      [],
+                "position":    row_num,
             })
 
         # ── Expense row ───────────────────────────────────────────────────
@@ -233,6 +236,7 @@ def parse_sheet(ws, year: int, month: int):
                 "credit_card_name": card_name,
                 "status":           status,
                 "labels":           [],
+                "position":         row_num,
             })
 
     # ── Savings movements ──────────────────────────────────────────────────
