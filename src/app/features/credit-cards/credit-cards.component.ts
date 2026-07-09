@@ -325,6 +325,19 @@ export class CreditCardsComponent implements OnInit {
     }
   }
 
+  toggleTxStatus(tx: Transaction, newStatus: TransactionStatus): void {
+    this.txService.update(tx.id, { status: newStatus }).subscribe({
+      next: (updated: Transaction) => {
+        this.transactions.update(list => list.map(t => t.id === updated.id ? updated : t));
+        this.balanceService.invalidate();
+      },
+      error: err => {
+        this.logger.error('Failed to update tx status', err);
+        this.toast.error('Erro ao atualizar status.');
+      },
+    });
+  }
+
   openDeleteTx(tx: Transaction): void {
     this.deletingTx.set(tx);
   }
