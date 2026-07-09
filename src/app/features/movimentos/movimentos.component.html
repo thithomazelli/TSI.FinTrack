@@ -237,7 +237,9 @@
         <td class="col-check" (click)="$event.stopPropagation()">
           <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" class="row-check" />
         </td>
-        <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
+        <td class="col-date">
+          {{ (item.purchaseDate ?? item.date) | date:'dd/MM/yyyy' }}
+        </td>
         <td class="col-tipo">
           <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
             {{ item.kind === 'entry' ? 'Entrada' : 'Saída' }}
@@ -470,9 +472,15 @@
 
     <div class="form-row">
       <div class="form-field">
-        <label>{{ 'common.date' | translate }}</label>
+        <label>{{ 'movimentos.paymentDate' | translate }}</label>
         <input class="input" type="date" [(ngModel)]="formTxDate" />
       </div>
+      @if (formTxCreditCardId) {
+        <div class="form-field">
+          <label>{{ 'movimentos.purchaseDate' | translate }}</label>
+          <input class="input" type="date" [(ngModel)]="formTxPurchaseDate" />
+        </div>
+      }
       <div class="form-field">
         <label>{{ 'common.status' | translate }}</label>
         <select class="input" [(ngModel)]="formTxStatus">

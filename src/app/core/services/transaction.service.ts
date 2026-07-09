@@ -21,6 +21,7 @@ export interface CreateTransactionPayload {
   description: string;
   amount: number;
   date: string;
+  purchaseDate?: string | null;
   categoryId: string | null;
   accountId: string | null;
   creditCardId: string | null;
@@ -137,6 +138,7 @@ export class TransactionService {
     if (payload.description !== undefined) row['description'] = payload.description;
     if (payload.amount !== undefined) row['amount'] = payload.amount;
     if (payload.date !== undefined) row['date'] = payload.date;
+    if (payload.purchaseDate !== undefined) row['purchase_date'] = payload.purchaseDate ?? null;
     if (payload.categoryId !== undefined) row['category_id'] = payload.categoryId;
     if (payload.accountId !== undefined) row['account_id'] = payload.accountId;
     if (payload.creditCardId !== undefined) row['credit_card_id'] = payload.creditCardId;
@@ -219,7 +221,7 @@ export class TransactionService {
   private toModel(r: any): Transaction {
     return {
       id: r.id, ownerId: r.owner_id, description: r.description,
-      amount: r.amount, date: r.date, status: r.status,
+      amount: r.amount, date: r.date, purchaseDate: r.purchase_date ?? null, status: r.status,
       categoryId: r.category_id, accountId: r.account_id,
       creditCardId: r.credit_card_id, creditCardBillId: r.credit_card_bill_id,
       installmentNumber: r.installment_number, totalInstallments: r.total_installments,
@@ -240,6 +242,7 @@ export class TransactionService {
       description: payload.description,
       amount: payload.amount,
       date: payload.date,
+      purchase_date: payload.purchaseDate ?? null,
       category_id: payload.categoryId,
       account_id: payload.accountId,
       credit_card_id: payload.creditCardId,

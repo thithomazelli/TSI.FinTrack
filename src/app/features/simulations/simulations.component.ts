@@ -27,6 +27,7 @@ export interface SimItem {
   kind: 'entry' | 'transaction';
   id: string;
   date: string;
+  purchaseDate: string | null;
   description: string;
   amount: number;
   status: string;
@@ -132,18 +133,26 @@ export class SimulationsComponent implements OnInit {
   readonly realEntries = signal<Entry[]>([]);
   readonly realTransactions = signal<Transaction[]>([]);
 
+  private sortItems<T extends { date: string; purchaseDate: string | null }>(items: T[]): T[] {
+    return items.sort((a, b) => {
+      const da = a.purchaseDate ?? a.date;
+      const db = b.purchaseDate ?? b.date;
+      return db.localeCompare(da);
+    });
+  }
+
   readonly realItems = computed<SimItem[]>(() => {
     const entries: SimItem[] = this.realEntries().map(e => ({
-      kind: 'entry', id: e.id, date: e.date, description: e.description,
+      kind: 'entry', id: e.id, date: e.date, purchaseDate: null, description: e.description,
       amount: e.amount, status: e.status ?? 'REALIZED',
       accountId: e.accountId, raw: e,
     }));
     const txs: SimItem[] = this.realTransactions().map(t => ({
-      kind: 'transaction', id: t.id, date: t.date, description: t.description,
+      kind: 'transaction', id: t.id, date: t.date, purchaseDate: t.purchaseDate, description: t.description,
       amount: t.amount, status: t.status, categoryId: t.categoryId,
       creditCardId: t.creditCardId, accountId: t.accountId, raw: t,
     }));
-    return [...entries, ...txs].sort((a, b) => b.date.localeCompare(a.date));
+    return this.sortItems([...entries, ...txs]);
   });
 
   // Apply overrides (no filters yet)
@@ -156,7 +165,7 @@ export class SimulationsComponent implements OnInit {
         if (!o) return i;
         return { ...i, amount: o.amount ?? i.amount, date: o.date ?? i.date, description: o.description ?? i.description, status: o.status ?? i.status };
       })
-      .sort((a, b) => b.date.localeCompare(a.date));
+      .sort((a, b) => (b.purchaseDate ?? b.date).localeCompare(a.purchaseDate ?? a.date));
   });
 
   // Apply filters on top of simulated items

@@ -43,6 +43,8 @@ export interface MovimentoItem {
   kind: 'entry' | 'transaction';
   id: string;
   date: string;
+  /** Purchase date for credit card transactions; null for others. */
+  purchaseDate: string | null;
   description: string;
   amount: number;
   status: string;
@@ -147,6 +149,7 @@ export class MovimentosComponent implements OnInit {
   formTxCategoryId = '';
   formTxAccountId = '';
   formTxCreditCardId = '';
+  formTxPurchaseDate = '';
   formTxIsInstallment = false;
   formTxInstallments = 1;
   formTxIsInternational = false;
@@ -166,6 +169,7 @@ export class MovimentosComponent implements OnInit {
       kind: 'entry',
       id: e.id,
       date: e.date,
+      purchaseDate: null,
       description: e.description,
       amount: e.amount,
       status: e.status ?? 'REALIZED',
@@ -179,6 +183,7 @@ export class MovimentosComponent implements OnInit {
       kind: 'transaction',
       id: t.id,
       date: t.date,
+      purchaseDate: t.purchaseDate,
       description: t.description,
       amount: t.amount,
       status: t.status,
@@ -189,13 +194,17 @@ export class MovimentosComponent implements OnInit {
       raw: t,
     }));
 
+    const sortDate = (i: MovimentoItem) => i.purchaseDate ?? i.date;
+
     const all = [...entries, ...txs];
     return all.sort((a, b) => {
+      const dateCmp = sortDate(b).localeCompare(sortDate(a));
+      if (dateCmp !== 0) return dateCmp;
       const ap = a.position, bp = b.position;
       if (ap != null && bp != null) return ap - bp;
       if (ap != null) return -1;
       if (bp != null) return 1;
-      return b.date.localeCompare(a.date);
+      return 0;
     });
   });
 
@@ -593,6 +602,7 @@ export class MovimentosComponent implements OnInit {
     this.formTxCategoryId = '';
     this.formTxAccountId = '';
     this.formTxCreditCardId = '';
+    this.formTxPurchaseDate = '';
     this.formTxIsInstallment = false;
     this.formTxInstallments = 1;
     this.formTxIsInternational = false;
@@ -624,6 +634,7 @@ export class MovimentosComponent implements OnInit {
       this.formTxCategoryId = t.categoryId ?? '';
       this.formTxAccountId = t.accountId ?? '';
       this.formTxCreditCardId = t.creditCardId ?? '';
+      this.formTxPurchaseDate = t.purchaseDate ?? '';
       this.formTxIsInstallment = !!t.totalInstallments && t.totalInstallments > 1;
       this.formTxInstallments = t.totalInstallments ?? 1;
       this.formTxIsInternational = !!t.originalCurrency;
@@ -683,6 +694,7 @@ export class MovimentosComponent implements OnInit {
       description: this.formTxDescription.trim(),
       amount: this.formTxAmount,
       date: this.formTxDate,
+      purchaseDate: this.formTxCreditCardId ? (this.formTxPurchaseDate || null) : null,
       categoryId: this.formTxCategoryId || null,
       accountId: this.formTxCreditCardId ? null : (this.formTxAccountId || null),
       creditCardId: this.formTxCreditCardId || null,

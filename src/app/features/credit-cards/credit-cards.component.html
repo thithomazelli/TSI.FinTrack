@@ -72,7 +72,7 @@
                   <tbody>
                     @for (tx of billTransactions(bill); track tx.id) {
                       <tr>
-                        <td class="td-date">{{ tx.date | date:'dd/MM' }}</td>
+                        <td class="td-date">{{ (tx.purchaseDate ?? tx.date) | date:'dd/MM' }}</td>
                         <td class="td-desc">
                           {{ tx.description }}
                           @if (tx.installmentNumber && tx.totalInstallments) {

@@ -57,7 +57,9 @@ export class CreditCardsComponent implements OnInit {
   readonly month = signal(new Date().getMonth() + 1);
 
   billTransactions(bill: BillWithCard): Transaction[] {
-    return this.transactions().filter(t => t.creditCardId === bill.creditCardId);
+    return this.transactions()
+      .filter(t => t.creditCardId === bill.creditCardId)
+      .sort((a, b) => (b.purchaseDate ?? b.date).localeCompare(a.purchaseDate ?? a.date));
   }
 
   billTotal(bill: BillWithCard): number {

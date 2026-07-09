@@ -352,6 +352,8 @@
     "installment": "Parcelado",
     "international": "Internacional",
     "installmentsCount": "Número de Parcelas",
+    "paymentDate": "Data de Pagamento (fatura)",
+    "purchaseDate": "Data da Compra",
     "currency": "Moeda",
     "originalAmount": "Valor Original",
     "exchangeRate": "Taxa de Câmbio",

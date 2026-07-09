@@ -352,6 +352,8 @@
     "installment": "Installment",
     "international": "International",
     "installmentsCount": "Number of Installments",
+    "paymentDate": "Payment Date (bill)",
+    "purchaseDate": "Purchase Date",
     "currency": "Currency",
     "originalAmount": "Original Amount",
     "exchangeRate": "Exchange Rate",

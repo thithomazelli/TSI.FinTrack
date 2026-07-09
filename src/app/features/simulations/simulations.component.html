@@ -276,7 +276,7 @@
           <td class="col-check row-check">
             <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" />
           </td>
-          <td class="col-date">{{ item.date | date:'dd/MM/yyyy' }}</td>
+          <td class="col-date">{{ (item.purchaseDate ?? item.date) | date:'dd/MM/yyyy' }}</td>
           <td class="col-tipo">
             <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
               {{ item.kind === 'entry' ? 'Entrada' : 'Saída' }}
