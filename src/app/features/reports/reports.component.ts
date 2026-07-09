@@ -491,11 +491,13 @@ export class ReportsComponent implements OnInit {
     forkJoin({
       openingBalance: this.balanceService.getBalanceUpTo(prevYearEnd),
       entries: forkJoin(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).pipe(map((r) => r.flat())),
-      transactions: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).pipe(map((r) => r.flat())),
+      realized: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).pipe(map((r) => r.flat())),
+      projected: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).pipe(map((r) => r.flat())),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ openingBalance, entries, transactions }) => {
+        next: ({ openingBalance, entries, realized, projected }) => {
+          const transactions = [...realized, ...projected];
           let running = openingBalance;
           const rows: YearMonthRow[] = ALL_MONTHS.map((m, i) => {
             const income = entries.filter((e) => +e.date.substring(5, 7) === m).reduce((s, e) => s + e.amount, 0);
