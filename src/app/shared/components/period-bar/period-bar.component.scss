@@ -44,8 +44,7 @@ tsi-balance-card {
   display: flex;
   align-items: center;
   gap: .75rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .period-toggle {
