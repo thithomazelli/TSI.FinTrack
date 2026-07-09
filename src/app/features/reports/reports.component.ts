@@ -178,7 +178,9 @@ export class ReportsComponent implements OnInit {
     const year = this.filterYear();
     const movements = this.savingsMovements().filter((m) => m.date.startsWith(String(year)));
     return ALL_MONTHS.map((month) =>
-      movements.filter((m) => +m.date.substring(5, 7) === month).reduce((s, m) => s + m.amount, 0)
+      movements
+        .filter((m) => +m.date.substring(5, 7) === month)
+        .reduce((s, m) => s + (m.typeCode === 'WITHDRAWAL' ? -m.amount : m.amount), 0)
     );
   });
 
