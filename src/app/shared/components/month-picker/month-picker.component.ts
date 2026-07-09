@@ -70,8 +70,10 @@ export class MonthPickerComponent {
   }
 
   get label(): string {
-    return new Date(this.year(), this.month() - 1, 1)
+    const raw = new Date(this.year(), this.month() - 1, 1)
       .toLocaleDateString(this.language.current(), { month: 'long', year: 'numeric' });
+    // Normalize: browsers/iOS may title-case — ensure only first letter is uppercase
+    return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
   }
 
   private apply(y: number, m: number): void {

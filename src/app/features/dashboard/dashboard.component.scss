@@ -17,6 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: 1rem;
   margin-bottom: 1.25rem;
 }
 .carousel-track {
@@ -26,6 +27,11 @@
   cursor: grab;
   &:active { cursor: grabbing; }
   user-select: none;
+
+  @media (max-width: 480px) {
+    height: auto;
+    overflow: visible;
+  }
 }
 .carousel-btn {
   position: absolute; top: 50%; transform: translateY(-50%);
@@ -78,6 +84,18 @@
   border-left: 4px solid transparent;
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
+
+  @media (max-width: 480px) {
+    position: relative;
+    transform: none !important;
+    height: auto;
+    top: 0; left: 0;
+    display: none;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    align-items: flex-start;
+
+    &.is-current { display: flex; }
+  }
 
   &.alert-danger {
     background: rgba(239, 68, 68, 0.08);
@@ -146,6 +164,12 @@
   gap: 1rem;
   margin-top: 1.25rem;
   margin-bottom: 2rem;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
 }
 
 .summary-card {
@@ -157,6 +181,10 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   transition: background var(--transition), border-color var(--transition);
+
+  @media (max-width: 480px) {
+    padding: 0.875rem 1rem;
+  }
 
   &.income {
     background: color-mix(in srgb, #22c55e 10%, var(--color-surface));
@@ -191,6 +219,8 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-text);
+
+  @media (max-width: 480px) { font-size: 1.25rem; }
 }
 
 .card-sub {
@@ -213,6 +243,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0.75rem;
+
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
 }
 
 .goal-card {
