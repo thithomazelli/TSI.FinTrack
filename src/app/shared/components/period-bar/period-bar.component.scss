@@ -9,9 +9,10 @@
 
 // Period card — same visual pattern as .sm-card in movimentos
 .sm-card {
+  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   align-self: stretch;
   gap: 1rem;
   background: var(--color-surface);
@@ -41,9 +42,10 @@ tsi-balance-card {
 // Period controls on the right side
 .period-controls {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: .5rem;
+  gap: .75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .period-toggle {
