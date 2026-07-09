@@ -235,22 +235,30 @@ def parse_sheet(ws, year: int, month: int):
                 "labels":           [],
             })
 
-    # ── Savings movements (category "Poupança") ───────────────────────────
+    # ── Savings movements ──────────────────────────────────────────────────
+    # Despesas com categoria "Poupança" → DEPOSIT (dinheiro saindo da conta corrente para a poupança)
+    # Entradas com "poupan" na descrição   → WITHDRAWAL (dinheiro vindo da poupança para a conta)
     savings = []
-    WITHDRAWAL_KEYWORDS = ("devolução", "resgate", "restituição", "retirada")
     for t in transactions:
         if (t.get("category_name") or "").lower() != "poupança":
             continue
-        desc_l = t["description"].lower()
-        mv_type = "WITHDRAWAL" if any(k in desc_l for k in WITHDRAWAL_KEYWORDS) else "DEPOSIT"
-        # Withdrawals are negative so the running balance decreases
-        amount = -t["amount"] if mv_type == "WITHDRAWAL" else t["amount"]
         savings.append({
             "owner_id":    OWNER_ID,
             "description": t["description"],
-            "amount":      round(amount, 2),
-            "date":        t["date"],
-            "type":        mv_type,
+            "amount":      round(abs(t["amount"]), 2),
+            "date":        t.get("purchase_date") or t["date"],
+            "type":        "DEPOSIT",
+        })
+
+    for e in entries:
+        if "poupan" not in e["description"].lower():
+            continue
+        savings.append({
+            "owner_id":    OWNER_ID,
+            "description": e["description"],
+            "amount":      round(abs(e["amount"]), 2),
+            "date":        e["date"],
+            "type":        "WITHDRAWAL",
         })
 
     return entries, transactions, savings
