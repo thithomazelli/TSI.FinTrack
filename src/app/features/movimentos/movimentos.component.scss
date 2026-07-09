@@ -19,7 +19,13 @@
   align-items: stretch;
   margin-bottom: 1.25rem;
 
-  tsi-period-bar,
+  // period-bar styles its own :host — only set flex sizing here
+  tsi-period-bar {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  // balance cards need column direction so their inner flex:1 div fills the host
   tsi-savings-balance-card,
   tsi-balance-card {
     flex: 1;
