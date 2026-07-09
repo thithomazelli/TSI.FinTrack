@@ -232,6 +232,7 @@ export class MovimentosComponent implements OnInit {
   readonly balanceInRange = signal<number>(0);
   readonly savingsPeriodTotals = signal<{ deposits: number; withdrawals: number }>({ deposits: 0, withdrawals: 0 });
   readonly preloadedBalance = signal<{ available: number; projected: number } | null>(null);
+  readonly savingsBalance = signal<{ available: number; projected: number } | null>(null);
 
   readonly totalEntradas = computed(() => this.periodTotals()?.totalEntries ?? 0);
   readonly totalSaidas   = computed(() => this.periodTotals()?.totalTransactions ?? 0);
@@ -524,7 +525,7 @@ export class MovimentosComponent implements OnInit {
       const endOfMonth = new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0];
       const today = now.toISOString().split('T')[0];
 
-      const [entriesRes, txsRes, totalsRes, rangeBalanceRes, savingsTotals, availableRes, projectedRes] = await Promise.all([
+      const [entriesRes, txsRes, totalsRes, rangeBalanceRes, savingsTotals, availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = await Promise.all([
         this.supabase.client
           .from('entries')
           .select('*')
@@ -549,6 +550,8 @@ export class MovimentosComponent implements OnInit {
           ? this.balanceService.getAvailableBalance().toPromise()
           : this.balanceService.getBalanceUpTo(endOfMonth).toPromise(),
         this.balanceService.getBalanceUpTo(isCurrent ? endOfMonth : endOfMonth).toPromise(),
+        this.savingsService.getBalanceUpTo(today).toPromise(),
+        this.savingsService.getBalanceUpTo(endOfMonth).toPromise(),
       ]);
 
       if (entriesRes.error) throw entriesRes.error;
@@ -562,6 +565,7 @@ export class MovimentosComponent implements OnInit {
       this.balanceInRange.set(Number(rangeBalanceRes.data ?? 0));
       this.savingsPeriodTotals.set(savingsTotals ?? { deposits: 0, withdrawals: 0 });
       this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
+      this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
 
       this.allEntries.set((entriesRes.data ?? []).map((r: any) => ({
         id: r.id, ownerId: r.owner_id, description: r.description,
