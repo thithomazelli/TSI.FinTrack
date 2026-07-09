@@ -46,6 +46,9 @@
     <button class="tab-btn" [class.active]="activeTab() === 'history'" (click)="onTabChange('history')">
       Histórico Anual
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'categories'" (click)="onTabChange('categories')">
+      Categorias
+    </button>
   </div>
 
   <!-- ══════════════════════════════════════════ -->
@@ -117,6 +120,82 @@
               </td>
               <td class="num pct-cell" [class.over-pct]="yearSummaryTotals().pct > 100">
                 {{ yearSummaryTotals().pct.toFixed(1) }}%
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- TAB: CATEGORIAS                            -->
+  <!-- ══════════════════════════════════════════ -->
+  @if (activeTab() === 'categories') {
+    @if (loading()) {
+      <div class="loading-grid">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="chart-card">
+            <div class="skeleton" style="height:18px;width:55%;margin-bottom:1rem"></div>
+            <div class="skeleton" style="height:40px"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="cat-matrix-wrap animate-fade-up stagger-1">
+        <table class="cat-matrix-table">
+          <thead>
+            <tr>
+              <th class="cat-col">Categoria</th>
+              @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
+                <th class="num-col">{{ monthAbbr(m) }}</th>
+              }
+              <th class="num-col total-col">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of categoryMonthMatrix().rows; track row.name) {
+              <tr>
+                <td class="cat-col">{{ row.name }}</td>
+                @for (val of row.months; track $index) {
+                  <td class="num-col" [class.zero-cell]="val === 0">
+                    @if (val > 0) { {{ formatCurrency(val) }} }
+                    @else { <span class="zero">–</span> }
+                  </td>
+                }
+                <td class="num-col total-col">{{ formatCurrency(row.total) }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td class="cat-col">Total Despesas</td>
+              @for (val of categoryMonthMatrix().monthTotals; track $index) {
+                <td class="num-col">{{ val > 0 ? formatCurrency(val) : '' }}</td>
+              }
+              <td class="num-col total-col">{{ formatCurrency(categoryMonthMatrix().grandTotal) }}</td>
+            </tr>
+            <tr class="income-row">
+              <td class="cat-col">Renda</td>
+              @for (val of categoryMonthMatrix().monthIncome; track $index) {
+                <td class="num-col income">{{ val > 0 ? formatCurrency(val) : '' }}</td>
+              }
+              <td class="num-col total-col income">{{ formatCurrency(categoryMonthMatrix().totalIncome) }}</td>
+            </tr>
+            <tr class="pct-row">
+              <td class="cat-col">% Renda Gasta</td>
+              @for (val of categoryMonthMatrix().monthTotals; track $index) {
+                @let inc = categoryMonthMatrix().monthIncome[$index];
+                @let pct = inc > 0 ? (val / inc * 100) : 0;
+                <td class="num-col pct-cell" [class.over-pct]="pct > 100">
+                  {{ inc > 0 ? pct.toFixed(1) + '%' : '' }}
+                </td>
+              }
+              @let totalPct = categoryMonthMatrix().totalIncome > 0
+                ? (categoryMonthMatrix().grandTotal / categoryMonthMatrix().totalIncome * 100)
+                : 0;
+              <td class="num-col total-col pct-cell" [class.over-pct]="totalPct > 100">
+                {{ categoryMonthMatrix().totalIncome > 0 ? totalPct.toFixed(1) + '%' : '' }}
               </td>
             </tr>
           </tfoot>

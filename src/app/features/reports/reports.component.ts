@@ -96,7 +96,7 @@ export class ReportsComponent implements OnInit {
   readonly currentMonth = this.now.getMonth() + 1;
   readonly availableYears = Array.from({ length: this.currentYear - 2009 + 1 }, (_, i) => this.currentYear - i);
 
-  readonly activeTab = signal<'charts' | 'history'>('charts');
+  readonly activeTab = signal<'charts' | 'history' | 'categories'>('charts');
 
   readonly filterYear = signal(this.currentYear);
   readonly filterMonth = signal(this.currentMonth);
@@ -113,6 +113,8 @@ export class ReportsComponent implements OnInit {
   readonly savingsMovements = signal<SavingsMovement[]>([]);
   readonly paymentTypeSpend = signal<{ label: string; amount: number; color: string }[]>([]);
   readonly catEvolPoints = signal<{ label: string; amount: number }[]>([]);
+  readonly realizedTransactions = signal<Transaction[]>([]);
+  readonly yearEntries = signal<Entry[]>([]);
 
   private gridColor(): string {
     return this.themeService.isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
@@ -439,9 +441,10 @@ export class ReportsComponent implements OnInit {
     this.loadCategoryEvolution();
   }
 
-  onTabChange(tab: 'charts' | 'history'): void {
+  onTabChange(tab: 'charts' | 'history' | 'categories'): void {
     this.activeTab.set(tab);
     if (tab === 'history') this.loadYearSummary();
+    if (tab === 'categories' && this.realizedTransactions().length === 0) this.loadAll();
   }
 
   loadYearSummary(): void {
@@ -483,6 +486,41 @@ export class ReportsComponent implements OnInit {
         },
       });
   }
+
+  readonly categoryMonthMatrix = computed(() => {
+    const realized = this.realizedTransactions();
+    const entries = this.yearEntries();
+    const cats = this.categories();
+
+    // Build category rows
+    const catMap: Record<string, { name: string; months: number[]; total: number }> = {};
+    for (const t of realized) {
+      if (!t.categoryId) continue;
+      const cat = cats.find((c) => c.id === t.categoryId);
+      const name = cat?.name ?? t.categoryId;
+      if (!catMap[t.categoryId]) catMap[t.categoryId] = { name, months: Array(12).fill(0), total: 0 };
+      const m = +t.date.substring(5, 7) - 1;
+      catMap[t.categoryId].months[m] += t.amount;
+      catMap[t.categoryId].total += t.amount;
+    }
+
+    const rows = Object.values(catMap).sort((a, b) => b.total - a.total);
+
+    // Monthly totals and income
+    const monthTotals = Array(12).fill(0);
+    for (const row of rows) row.months.forEach((v, i) => (monthTotals[i] += v));
+    const grandTotal = monthTotals.reduce((s, v) => s + v, 0);
+
+    // Monthly income
+    const monthIncome = Array(12).fill(0);
+    for (const e of entries) {
+      const m = +e.date.substring(5, 7) - 1;
+      monthIncome[m] += e.amount;
+    }
+    const totalIncome = monthIncome.reduce((s, v) => s + v, 0);
+
+    return { rows, monthTotals, grandTotal, monthIncome, totalIncome };
+  });
 
   readonly yearSummaryTotals = computed(() => {
     const rows = this.yearSummaryRows();
@@ -526,6 +564,8 @@ export class ReportsComponent implements OnInit {
         next: ({ realized, projected, entries, prevRealized, prevEntries, savings, categories }) => {
           this.categories.set(categories);
           this.savingsMovements.set(savings);
+          this.realizedTransactions.set(realized);
+          this.yearEntries.set(entries);
           this.buildCharts(year, realized, projected, entries, prevRealized, prevEntries, categories);
           this.loading.set(false);
         },

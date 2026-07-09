@@ -252,6 +252,109 @@
   }
 }
 
+/* ── Category matrix ── */
+
+.cat-matrix-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.cat-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  min-width: 1200px;
+
+  th, td {
+    padding: 0.45rem 0.65rem;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-3);
+    background: var(--color-surface-2, var(--color-border));
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  td { color: var(--color-text); }
+
+  .cat-col {
+    text-align: left;
+    font-weight: 500;
+    min-width: 160px;
+    position: sticky;
+    left: 0;
+    background: var(--color-surface);
+    z-index: 2;
+  }
+
+  th.cat-col {
+    z-index: 3;
+    background: var(--color-surface-2, var(--color-border));
+  }
+
+  .num-col {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 90px;
+  }
+
+  .total-col {
+    font-weight: 700;
+    border-left: 2px solid var(--color-border);
+  }
+
+  .zero-cell { opacity: 0.35; }
+  .zero { color: var(--color-text-3); }
+
+  tbody tr:hover td { background: var(--color-hover, rgba(99,102,241,0.04)); }
+  tbody tr:hover td.cat-col { background: var(--color-hover, rgba(99,102,241,0.04)); }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tfoot {
+    .total-row td {
+      font-weight: 700;
+      background: var(--color-surface-2, rgba(99,102,241,0.05));
+      border-top: 2px solid var(--color-border);
+      color: var(--color-danger);
+    }
+
+    .income-row td {
+      font-weight: 700;
+      background: var(--color-surface-2, rgba(99,102,241,0.05));
+      color: var(--color-success);
+    }
+
+    .pct-row td {
+      font-weight: 600;
+      background: var(--color-surface-2, rgba(99,102,241,0.05));
+      border-bottom: none;
+      color: var(--color-text-2);
+    }
+
+    td.cat-col {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--color-surface-2, rgba(99,102,241,0.05));
+    }
+  }
+
+  .income { color: var(--color-success) !important; }
+  .over-pct { color: var(--color-danger) !important; }
+}
+
 /* ── History table ── */
 
 .history-card {
