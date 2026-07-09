@@ -637,7 +637,7 @@ export class ReportsComponent implements OnInit {
         next: ({ realized, projected, entries, prevRealized, prevEntries, savings, categories }) => {
           this.categories.set(categories);
           this.savingsMovements.set(savings);
-          this.realizedTransactions.set(realized);
+          this.realizedTransactions.set([...realized, ...projected]);
           this.yearEntries.set(entries);
           this.buildCharts(year, realized, projected, entries, prevRealized, prevEntries, categories);
           this.loading.set(false);
