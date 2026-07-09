@@ -100,15 +100,19 @@ export class TransactionService {
     const baseDate = new Date(payload.date + 'T00:00:00');
     const installmentAmount = Math.round((payload.amount / total) * 100) / 100;
 
+    const pad = (n: number) => String(n).padStart(2, '0');
+
     const rows = Array.from({ length: total }, (_, i) => {
       const installDate = new Date(baseDate);
       installDate.setMonth(installDate.getMonth() + i);
+      const num = i + 1;
+      const description = `${payload.description} - ${pad(num)}/${pad(total)}`;
       return {
         ...this.toRow(
-          { ...payload, amount: installmentAmount, totalInstallments: total },
+          { ...payload, description, amount: installmentAmount, totalInstallments: total },
           ownerId
         ),
-        installment_number: i + 1,
+        installment_number: num,
         total_installments: total,
         installment_group_id: groupId,
         date: installDate.toISOString().split('T')[0],
