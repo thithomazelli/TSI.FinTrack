@@ -20,6 +20,7 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { EntryService } from '../../core/services/entry.service';
 import { CategoryService } from '../../core/services/category.service';
 import { SavingsService } from '../../core/services/savings.service';
+import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
@@ -48,6 +49,16 @@ interface CategorySpend {
   monthlyAvg: number;
 }
 
+interface YearMonthRow {
+  month: number;
+  label: string;
+  income: number;
+  expense: number;
+  monthlyBalance: number;
+  runningBalance: number;
+  pct: number;
+}
+
 
 @Component({
     selector: 'tsi-reports',
@@ -61,6 +72,7 @@ export class ReportsComponent implements OnInit {
   private readonly entryService = inject(EntryService);
   private readonly categoryService = inject(CategoryService);
   private readonly savingsService = inject(SavingsService);
+  private readonly balanceService = inject(BalanceService);
   private readonly logger = inject(LoggingService);
   readonly themeService = inject(ThemeService);
   private readonly language = inject(LanguageService);
@@ -80,7 +92,9 @@ export class ReportsComponent implements OnInit {
   readonly now = new Date();
   readonly currentYear = this.now.getFullYear();
   readonly currentMonth = this.now.getMonth() + 1;
-  readonly availableYears = [this.currentYear, this.currentYear - 1, this.currentYear - 2];
+  readonly availableYears = Array.from({ length: this.currentYear - 2009 + 1 }, (_, i) => this.currentYear - i);
+
+  readonly activeTab = signal<'charts' | 'history'>('charts');
 
   readonly filterYear = signal(this.currentYear);
   readonly filterMonth = signal(this.currentMonth);
@@ -88,6 +102,8 @@ export class ReportsComponent implements OnInit {
   readonly incomeTarget = signal(80);
 
   readonly categories = signal<Category[]>([]);
+  readonly yearSummaryRows = signal<YearMonthRow[]>([]);
+  readonly loadingHistory = signal(false);
   readonly monthlyPoints = signal<MonthlyPoint[]>([]);
   readonly prevMonthlyPoints = signal<MonthlyPoint[]>([]);
   readonly categorySpend = signal<CategorySpend[]>([]);
@@ -405,7 +421,11 @@ export class ReportsComponent implements OnInit {
   }
 
   onYearChange(): void {
-    this.loadAll();
+    if (this.activeTab() === 'history') {
+      this.loadYearSummary();
+    } else {
+      this.loadAll();
+    }
   }
 
   onMonthChange(): void {
@@ -416,6 +436,58 @@ export class ReportsComponent implements OnInit {
     if (!this.filterCategoryId()) return;
     this.loadCategoryEvolution();
   }
+
+  onTabChange(tab: 'charts' | 'history'): void {
+    this.activeTab.set(tab);
+    if (tab === 'history') this.loadYearSummary();
+  }
+
+  loadYearSummary(): void {
+    const year = this.filterYear();
+    this.loadingHistory.set(true);
+
+    const prevYearEnd = `${year - 1}-12-31`;
+
+    forkJoin({
+      openingBalance: this.balanceService.getBalanceUpTo(prevYearEnd),
+      entries: forkJoin(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).pipe(map((r) => r.flat())),
+      transactions: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).pipe(map((r) => r.flat())),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ openingBalance, entries, transactions }) => {
+          let running = openingBalance;
+          const rows: YearMonthRow[] = ALL_MONTHS.map((m, i) => {
+            const income = entries.filter((e) => new Date(e.date).getMonth() + 1 === m).reduce((s, e) => s + e.amount, 0);
+            const expense = transactions.filter((t) => new Date(t.date).getMonth() + 1 === m).reduce((s, t) => s + t.amount, 0);
+            const monthlyBalance = income - expense;
+            running += monthlyBalance;
+            return {
+              month: m,
+              label: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][i],
+              income,
+              expense,
+              monthlyBalance,
+              runningBalance: running,
+              pct: income > 0 ? (expense / income) * 100 : 0,
+            };
+          });
+          this.yearSummaryRows.set(rows);
+          this.loadingHistory.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load year summary', err);
+          this.loadingHistory.set(false);
+        },
+      });
+  }
+
+  readonly yearSummaryTotals = computed(() => {
+    const rows = this.yearSummaryRows();
+    const income = rows.reduce((s, r) => s + r.income, 0);
+    const expense = rows.reduce((s, r) => s + r.expense, 0);
+    return { income, expense, balance: income - expense, pct: income > 0 ? (expense / income) * 100 : 0 };
+  });
 
   private loadAll(): void {
     this.loading.set(true);
