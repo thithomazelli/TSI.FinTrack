@@ -130,6 +130,7 @@ def row_status(year: int, month: int) -> str:
 def parse_sheet(ws, year: int, month: int):
     entries      = []
     transactions = []
+    savings      = []
     status       = row_status(year, month)
 
     in_income   = False
@@ -190,6 +191,16 @@ def parse_sheet(ws, year: int, month: int):
                 "position":    row_num,
             })
 
+            # Renda com item == "Poupança" → retirada da poupança para conta corrente
+            if item.strip().lower() == "poupança":
+                savings.append({
+                    "owner_id":    OWNER_ID,
+                    "description": item.strip(),
+                    "amount":      round(abs(float(amount)), 2),
+                    "date":        dt_str,
+                    "type":        "WITHDRAWAL",
+                })
+
         # ── Expense row ───────────────────────────────────────────────────
         if in_expense:
             tipo    = b                 # col B = tipo (card / Débito)
@@ -239,10 +250,7 @@ def parse_sheet(ws, year: int, month: int):
                 "position":         row_num,
             })
 
-    # ── Savings movements ──────────────────────────────────────────────────
-    # Despesas com categoria "Poupança" → DEPOSIT (dinheiro saindo da conta corrente para a poupança)
-    # Entradas com "poupan" na descrição   → WITHDRAWAL (dinheiro vindo da poupança para a conta)
-    savings = []
+    # ── Savings: despesas categoria "Poupança" → DEPOSIT ─────────────────
     for t in transactions:
         if (t.get("category_name") or "").lower() != "poupança":
             continue
@@ -252,21 +260,6 @@ def parse_sheet(ws, year: int, month: int):
             "amount":      round(abs(t["amount"]), 2),
             "date":        t.get("purchase_date") or t["date"],
             "type":        "DEPOSIT",
-        })
-
-    for e in entries:
-        desc_l = e["description"].strip().lower()
-        # Only plain "Poupança" income entries are genuine withdrawals from savings.
-        # Entries like "Nubank - Rendimentos Poupança" or "Nubank - Depósito Poupança"
-        # belong to the expense/savings-deposit flow and must not be double-counted.
-        if desc_l != "poupança" and not desc_l.startswith("poupança ") and not desc_l.startswith("resgate poupança"):
-            continue
-        savings.append({
-            "owner_id":    OWNER_ID,
-            "description": e["description"],
-            "amount":      round(abs(e["amount"]), 2),
-            "date":        e["date"],
-            "type":        "WITHDRAWAL",
         })
 
     return entries, transactions, savings
