@@ -89,6 +89,78 @@ const SEED_DOMAINS = [
   { code: 'bill_status', name: 'Paga', value: 'PAID', is_system: true, is_default: false, sort_order: 3 },
 ]
 
+// Recurring templates — category_name and credit_card_name resolved at runtime
+const SEED_RECURRING = [
+  // ── Entradas ──────────────────────────────────────────────────────────────
+  { description: 'Nicole - Pagto Contas',         amount: 2000.00,   type: 'ENTRY',       day_of_month:  5, frequency: 'monthly',  months: [],   is_active: true,  position:   8.125, category_name: null,             credit_card_name: null },
+  { description: 'RDI - Salário',                 amount: 17332.55,  type: 'ENTRY',       day_of_month:  5, frequency: 'monthly',  months: [],   is_active: true,  position:  18.125, category_name: null,             credit_card_name: null },
+  { description: 'Pagto Mãe - Convênio',          amount: 315.00,    type: 'ENTRY',       day_of_month:  5, frequency: 'monthly',  months: [],   is_active: true,  position:  30,     category_name: 'Convênio Médico', credit_card_name: null },
+  { description: 'RDI - Férias',                  amount: 10100.97,  type: 'ENTRY',       day_of_month:  5, frequency: 'sporadic', months: [3],  is_active: true,  position:  40,     category_name: null,             credit_card_name: null },
+  { description: 'RDI - 1/3 Férias',              amount: 3366.99,   type: 'ENTRY',       day_of_month:  5, frequency: 'sporadic', months: [3],  is_active: true,  position:  50,     category_name: null,             credit_card_name: null },
+  { description: 'RDI - Abono pecuniário',         amount: 6733.98,   type: 'ENTRY',       day_of_month:  5, frequency: 'sporadic', months: [3],  is_active: true,  position:  60,     category_name: null,             credit_card_name: null },
+  { description: 'RDI - 1/3 Abono pecuniário',    amount: 2244.65,   type: 'ENTRY',       day_of_month:  5, frequency: 'sporadic', months: [3],  is_active: true,  position:  70,     category_name: null,             credit_card_name: null },
+  { description: 'RDI - INSS (desconto férias)',   amount: -988.07,   type: 'ENTRY',       day_of_month:  5, frequency: 'sporadic', months: [3],  is_active: true,  position:  80,     category_name: null,             credit_card_name: null },
+  { description: 'RDI - IRRF (desconto férias)',   amount: -3088.38,  type: 'ENTRY',       day_of_month:  5, frequency: 'sporadic', months: [3],  is_active: true,  position:  90,     category_name: null,             credit_card_name: null },
+  { description: 'RDI - 13º Salário - 01/02',     amount: 10100.98,  type: 'ENTRY',       day_of_month: 20, frequency: 'sporadic', months: [6],  is_active: true,  position: 100,     category_name: null,             credit_card_name: null },
+  { description: 'FGTS - Saque Aniversário',       amount: 1130.68,   type: 'ENTRY',       day_of_month: 15, frequency: 'sporadic', months: [7],  is_active: true,  position: 110,     category_name: null,             credit_card_name: null },
+  { description: 'RDI - 13º Salário - 02/02',     amount: 4408.71,   type: 'ENTRY',       day_of_month: 20, frequency: 'sporadic', months: [12], is_active: true,  position: 120,     category_name: null,             credit_card_name: null },
+  // ── Transações ────────────────────────────────────────────────────────────
+  { description: 'Sem Parar',                      amount: 20.67,     type: 'TRANSACTION', day_of_month:  5, frequency: 'monthly',  months: [],   is_active: true,  position: 130,     category_name: null,             credit_card_name: null },
+  { description: 'Conta Água',                     amount: 200.00,    type: 'TRANSACTION', day_of_month: 10, frequency: 'monthly',  months: [],   is_active: true,  position: 140,     category_name: null,             credit_card_name: null },
+  { description: 'Conta Luz',                      amount: 500.00,    type: 'TRANSACTION', day_of_month: 10, frequency: 'monthly',  months: [],   is_active: true,  position: 150,     category_name: null,             credit_card_name: null },
+  { description: 'Conta Net',                      amount: 200.00,    type: 'TRANSACTION', day_of_month: 10, frequency: 'monthly',  months: [],   is_active: true,  position: 160,     category_name: null,             credit_card_name: null },
+  { description: 'English Class - Tatiana Elman',  amount: 1300.00,   type: 'TRANSACTION', day_of_month:  5, frequency: 'monthly',  months: [],   is_active: true,  position: 170,     category_name: 'Estudo',         credit_card_name: null },
+  { description: 'Financiamento Onix 2022',        amount: 2242.32,   type: 'TRANSACTION', day_of_month: 15, frequency: 'monthly',  months: [],   is_active: true,  position: 180,     category_name: null,             credit_card_name: null },
+  { description: 'Convênio Mãe',                   amount: 941.66,    type: 'TRANSACTION', day_of_month:  5, frequency: 'monthly',  months: [],   is_active: true,  position: 190,     category_name: 'Convênio Médico', credit_card_name: null },
+  { description: 'Casa Santo André - Aluguel',     amount: 2500.00,   type: 'TRANSACTION', day_of_month: 10, frequency: 'monthly',  months: [],   is_active: true,  position: 200,     category_name: null,             credit_card_name: null },
+  { description: 'Obra Maragogi - INSS',           amount: 267.69,    type: 'TRANSACTION', day_of_month: 20, frequency: 'monthly',  months: [],   is_active: true,  position: 210,     category_name: null,             credit_card_name: null },
+  { description: 'Anuidade Cartão Latam Pass',     amount: 100.00,    type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 220,     category_name: 'Tarifas/Juros',  credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Premiere - Assinatura',          amount: 29.90,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 230,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Ifood / Mercado / Comidas',      amount: 0.00,      type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 240,     category_name: null,             credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Ifood Club',                     amount: 7.95,      type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 250,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Apple iCloud+',                  amount: 66.90,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 260,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'ClaroFlex',                      amount: 49.99,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 270,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Amazon Prime',                   amount: 19.90,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 280,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Youtube Premium',                amount: 69.90,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 290,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Spotify',                        amount: 40.90,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 300,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Google Drive - Thiago',          amount: 9.99,      type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 310,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Google Drive - Nicole',          amount: 9.99,      type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 320,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Netflix',                        amount: 59.90,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 330,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Mercado Livre Plus',             amount: 14.99,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 340,     category_name: 'Assinaturas',    credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Auto Posto - Etanol',            amount: 500.00,    type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 350,     category_name: null,             credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Cobasi - Areia p/ Gatos',        amount: 105.89,    type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 360,     category_name: 'Pets',           credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Cobasi - Ração p/ Gatos',        amount: 180.70,    type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 370,     category_name: 'Pets',           credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Tokio Marine - Seguro Carro',    amount: 214.88,    type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 380,     category_name: null,             credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Tokio Marine - Seguro Residencial', amount: 57.18,  type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 390,     category_name: null,             credit_card_name: 'Crédito Latam Pass' },
+  { description: 'Petlove - Plano p/ Gatos',       amount: 36.06,     type: 'TRANSACTION', day_of_month: 17, frequency: 'monthly',  months: [],   is_active: true,  position: 400,     category_name: 'Pets',           credit_card_name: 'Crédito Latam Pass' },
+]
+
+async function seedRecurring(catMap, cardMap) {
+  const { count } = await supabase
+    .from('recurring_templates').select('id', { count: 'exact', head: true }).eq('owner_id', OWNER_ID)
+  if (count > 0) {
+    console.log(`  Templates já existem (${count}) — pulando ✓`)
+    return
+  }
+  const rows = SEED_RECURRING.map(r => ({
+    owner_id:      OWNER_ID,
+    description:   r.description,
+    amount:        r.amount,
+    type:          r.type,
+    day_of_month:  r.day_of_month,
+    frequency:     r.frequency,
+    months:        r.months,
+    is_active:     r.is_active,
+    position:      r.position,
+    category_id:   r.category_name ? (catMap[r.category_name.toLowerCase()] ?? null) : null,
+    credit_card_id: r.credit_card_name ? (cardMap[r.credit_card_name.toLowerCase()] ?? null) : null,
+    account_id:    null,
+  }))
+  const { error } = await supabase.from('recurring_templates').insert(rows)
+  if (error) { console.error('Erro ao inserir recorrentes:', error.message); process.exit(1) }
+  console.log(`  ${rows.length} templates recorrentes criados ✓`)
+}
+
 async function main() {
   console.log('=== TSI.FinTrack — Seed histórico ===\n')
 
@@ -237,7 +309,11 @@ async function main() {
 
   console.log('\n✅ Seed concluído!')
 
-  // 5. Backfill credit_card_bills
+  // 5. Recorrentes
+  console.log('\nInserindo templates recorrentes...')
+  await seedRecurring(catMap, cardMap)
+
+  // 6. Backfill credit_card_bills
   console.log('\nBackfill de faturas de cartão...')
   await backfillBills()
 
