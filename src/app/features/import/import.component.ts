@@ -254,6 +254,7 @@ export class ImportComponent implements OnInit {
         description: row.description,
         amount: row.amount,
         date: row.date,
+        purchaseDate: row.date,   // statement date = purchase date
         categoryId: row.categoryId || null,
         accountId: null,
         creditCardId: cardId,
