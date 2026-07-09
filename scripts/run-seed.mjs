@@ -311,17 +311,46 @@ async function main() {
     console.log(`   ${transactions.length} transações de despesa`)
   }
 
+  // 5. Movimentos de poupança
+  console.log('\nInserindo movimentos de poupança...')
+  const { count: savingsCount } = await supabase
+    .from('savings_movements').select('id', { count: 'exact', head: true }).eq('owner_id', OWNER_ID)
+  if (savingsCount > 0) {
+    console.log(`  Movimentos já existem (${savingsCount} registros) — pulando ✓`)
+  } else if ((data.savings ?? []).length === 0) {
+    console.log('  Nenhum movimento de poupança no seed — pulando ✓')
+  } else {
+    const { data: depositDomain }    = await supabase.from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'savings_movement_type').eq('value', 'DEPOSIT').maybeSingle()
+    const { data: withdrawalDomain } = await supabase.from('domain_lists').select('id').eq('owner_id', OWNER_ID).eq('code', 'savings_movement_type').eq('value', 'WITHDRAWAL').maybeSingle()
+    const { data: savingsAcct }      = await supabase.from('accounts').select('id').eq('owner_id', OWNER_ID).eq('name', 'Poupança Nubank').maybeSingle()
+
+    const depositTypeId    = depositDomain?.id ?? null
+    const withdrawalTypeId = withdrawalDomain?.id ?? null
+    const savingsAccountId = savingsAcct?.id ?? null
+
+    const rows = data.savings.map(s => ({
+      owner_id:   OWNER_ID,
+      description: s.description,
+      amount:      Math.abs(s.amount),
+      date:        s.date,
+      type_id:     s.type === 'WITHDRAWAL' ? withdrawalTypeId : depositTypeId,
+      account_id:  savingsAccountId,
+    }))
+    await batchInsert('savings_movements', rows, 'Poupança')
+    console.log(`   ${rows.length} movimentos de poupança`)
+  }
+
   console.log('\n✅ Seed concluído!')
 
-  // 5. Recorrentes
+  // 7. Recorrentes
   console.log('\nInserindo templates recorrentes...')
   await seedRecurring(catMap, cardMap)
 
-  // 6. Backfill credit_card_bills
+  // 8. Backfill credit_card_bills
   console.log('\nBackfill de faturas de cartão...')
   await backfillBills()
 
-  // 6. Marcar faturas até Jun/2026 como PAID
+  // 9. Marcar faturas até Jun/2026 como PAID
   console.log('\nMarcando faturas históricas como PAID...')
   await settleHistoricalBills()
 
