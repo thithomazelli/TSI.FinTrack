@@ -160,11 +160,43 @@
   position: absolute;
   top: .25rem;
   left: 0;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
   font-size: .65rem;
   font-weight: 600;
   color: var(--color-text-2);
   text-transform: uppercase;
   letter-spacing: .05em;
+}
+
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--color-text-2);
+  border-radius: 3px;
+  &:hover { color: var(--color-text); }
+}
+
+// Animated collapsible wrapper for the 3 summary cards
+.sm-collapsible {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  align-items: stretch;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .3s ease, opacity .25s ease;
+
+  &--open {
+    max-height: 200px;
+    opacity: 1;
+  }
 }
 
 .sm-card {
@@ -317,12 +349,27 @@ tr:hover td { background: var(--color-surface-2); }
   border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
 }
 .pie-header {
-  display: flex; align-items: baseline; justify-content: space-between;
-  margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem; user-select: none;
 }
+.pie-header-right { display: flex; align-items: center; gap: .5rem; }
 .pie-title { font-size: 1rem; font-weight: 700; color: var(--color-text); margin: 0; }
 .pie-total { font-size: .875rem; font-weight: 600; color: #ef4444; }
-.pie-body { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+
+.pie-collapsible {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  transition: max-height .35s ease, opacity .3s ease, margin-top .3s ease;
+  display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;
+
+  &--open {
+    max-height: 400px;
+    opacity: 1;
+    margin-top: 1rem;
+  }
+}
 .pie-chart-wrap { width: 220px; height: 220px; flex-shrink: 0; }
 .pie-legend {
   flex: 1; min-width: 220px; display: grid;

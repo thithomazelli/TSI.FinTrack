@@ -1,5 +1,6 @@
 <div class="top-section">
   <div class="filter-bar">
+    <span class="filter-bar-label">{{ 'movimentos.periodLabel' | translate }}</span>
     <div class="filter-section filter-section--period">
       @if (showModeTabs) {
         <div class="period-toggle">
@@ -29,5 +30,5 @@
   </div>
 
   <tsi-savings-balance-card [year]="year" [month]="month" />
-  <tsi-balance-card [year]="year" [month]="month" />
+  <tsi-balance-card [year]="year" [month]="month" [preloaded]="preloadedBalance" />
 </div>

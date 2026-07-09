@@ -18,13 +18,14 @@
     </div>
   </div>
 
-  <!-- Top section: period picker + balance card side by side -->
+  <!-- Top section: period picker + balance cards -->
   <tsi-period-bar
     [year]="year()"
     [month]="month()"
     [periodMode]="periodMode()"
     [dateFrom]="dateFrom()"
     [dateTo]="dateTo()"
+    [preloadedBalance]="preloadedBalance()"
     (monthChanged)="onMonthChanged($event)"
     (periodModeChange)="setPeriodMode($event)"
     (dateFromChange)="dateFrom.set($event); onDateChange()"
@@ -33,7 +34,15 @@
 
   <!-- Summary bar (período selecionado) -->
   <div class="summary-bar">
-    <div class="sm-period-label">{{ 'movimentos.periodLabel' | translate }}</div>
+    <div class="sm-period-label">
+      {{ 'movimentos.periodLabel' | translate }}
+      <button class="collapse-btn" (click)="summaryExpanded.set(!summaryExpanded())" [attr.aria-expanded]="summaryExpanded()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="12" height="12" [style.transform]="summaryExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)'" style="transition: transform .25s ease">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+    </div>
+    <div class="sm-collapsible" [class.sm-collapsible--open]="summaryExpanded()">
 
     <!-- Card 1: Entradas e Saídas – Conta Corrente -->
     <div class="sm-card sm-card--cc">
@@ -88,16 +97,22 @@
         </div>
       </div>
     </div>
+    </div><!-- /.sm-collapsible -->
   </div>
 
   <!-- Gráfico de pizza por categoria -->
   @if (!loading() && categorySpend().length > 0) {
     <div class="pie-card">
-      <div class="pie-header">
+      <div class="pie-header" (click)="pieExpanded.set(!pieExpanded())" style="cursor:pointer">
         <h3 class="pie-title">{{ 'movimentos.expensesByCategory' | translate }}</h3>
-        <span class="pie-total">{{ 'common.total' | translate }}: R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+        <div class="pie-header-right">
+          <span class="pie-total">{{ 'common.total' | translate }}: R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="14" height="14" [style.transform]="pieExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)'" style="transition: transform .25s ease; color: var(--color-text-2)">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
       </div>
-      <div class="pie-body">
+      <div class="pie-body pie-collapsible" [class.pie-collapsible--open]="pieExpanded()">
         <div class="pie-chart-wrap">
           <canvas baseChart [data]="categoryPieData()" [options]="doughnutOptions()" type="doughnut"></canvas>
         </div>

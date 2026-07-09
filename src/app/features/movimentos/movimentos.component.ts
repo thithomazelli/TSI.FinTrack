@@ -202,7 +202,7 @@ export class MovimentosComponent implements OnInit {
 
     const all = [...entries, ...txs];
     return all.sort((a, b) => {
-      const dateCmp = sortDate(b).localeCompare(sortDate(a));
+      const dateCmp = sortDate(a).localeCompare(sortDate(b));
       if (dateCmp !== 0) return dateCmp;
       const ap = a.position, bp = b.position;
       if (ap != null && bp != null) return ap - bp;
@@ -229,6 +229,7 @@ export class MovimentosComponent implements OnInit {
   readonly periodTotals = signal<{ totalEntries: number; totalTransactions: number } | null>(null);
   readonly balanceInRange = signal<number>(0);
   readonly savingsPeriodTotals = signal<{ deposits: number; withdrawals: number }>({ deposits: 0, withdrawals: 0 });
+  readonly preloadedBalance = signal<{ available: number; projected: number } | null>(null);
 
   readonly totalEntradas = computed(() => this.periodTotals()?.totalEntries ?? 0);
   readonly totalSaidas   = computed(() => this.periodTotals()?.totalTransactions ?? 0);
@@ -236,6 +237,10 @@ export class MovimentosComponent implements OnInit {
   readonly totalSavingsDeposits    = computed(() => this.savingsPeriodTotals().deposits);
   readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
   readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
+
+  // UI state
+  readonly summaryExpanded = signal(true);
+  readonly pieExpanded     = signal(true);
 
 
   // Multi-seleção
@@ -512,7 +517,12 @@ export class MovimentosComponent implements OnInit {
     const to = this.dateTo();
 
     try {
-      const [entriesRes, txsRes, totalsRes, rangeBalanceRes, savingsTotals] = await Promise.all([
+      const now = new Date();
+      const isCurrent = +this.year() === now.getFullYear() && +this.month() === now.getMonth() + 1;
+      const endOfMonth = new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0];
+      const today = now.toISOString().split('T')[0];
+
+      const [entriesRes, txsRes, totalsRes, rangeBalanceRes, savingsTotals, availableRes, projectedRes] = await Promise.all([
         this.supabase.client
           .from('entries')
           .select('*')
@@ -532,6 +542,11 @@ export class MovimentosComponent implements OnInit {
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
         this.supabase.client.rpc('get_balance_in_range', { start_date: from, end_date: to }),
         this.savingsService.getPeriodTotals(from, to).toPromise(),
+        // Para o balance card: busca available e projected em paralelo com o resto
+        isCurrent
+          ? this.balanceService.getAvailableBalance().toPromise()
+          : this.balanceService.getBalanceUpTo(endOfMonth).toPromise(),
+        this.balanceService.getBalanceUpTo(isCurrent ? endOfMonth : endOfMonth).toPromise(),
       ]);
 
       if (entriesRes.error) throw entriesRes.error;
@@ -544,6 +559,7 @@ export class MovimentosComponent implements OnInit {
       });
       this.balanceInRange.set(Number(rangeBalanceRes.data ?? 0));
       this.savingsPeriodTotals.set(savingsTotals ?? { deposits: 0, withdrawals: 0 });
+      this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
 
       this.allEntries.set((entriesRes.data ?? []).map((r: any) => ({
         id: r.id, ownerId: r.owner_id, description: r.description,

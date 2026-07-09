@@ -22,6 +22,8 @@ export class PeriodBarComponent {
   @Input() dateTo: string = '';
   @Input() showModeTabs: boolean = true;
 
+  @Input() preloadedBalance: { available: number; projected: number } | null = null;
+
   @Output() monthChanged = new EventEmitter<{ year: number; month: number }>();
   @Output() periodModeChange = new EventEmitter<PeriodMode>();
   @Output() dateFromChange = new EventEmitter<string>();

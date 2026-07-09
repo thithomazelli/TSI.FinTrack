@@ -21,12 +21,13 @@ export class BalanceCardComponent implements OnChanges, OnDestroy {
 
   @Input() year: number  = new Date().getFullYear();
   @Input() month: number = new Date().getMonth() + 1;
+  /** Se fornecido pelo pai, usa esses valores e não faz queries próprias. */
+  @Input() preloaded: { available: number; projected: number } | null = null;
 
   available: number | null = null;
   projected: number | null = null;
 
   constructor() {
-    // Recarrega sempre que balanceService.invalidate() for chamado
     effect(() => {
       this.balanceService.version();
       untracked(() => this.fetch());
@@ -34,12 +35,19 @@ export class BalanceCardComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['preloaded'] && this.preloaded !== null) {
+      this.available = this.preloaded.available;
+      this.projected = this.preloaded.projected;
+      this.cdr.markForCheck();
+      return;
+    }
     if (changes['year'] || changes['month']) { this.fetch(); }
   }
 
   ngOnDestroy(): void { this.subs.forEach(s => s.unsubscribe()); }
 
   private fetch(): void {
+    if (this.preloaded !== null) return; // pai controla os valores
     this.subs.forEach(s => s.unsubscribe());
     this.subs = [];
 

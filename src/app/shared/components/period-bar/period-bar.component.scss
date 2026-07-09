@@ -11,7 +11,19 @@
   @media (max-width: 640px) { flex-direction: column; }
 }
 
+.filter-bar-label {
+  position: absolute;
+  top: .45rem;
+  left: 1.25rem;
+  font-size: .65rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
 .filter-bar {
+  position: relative;
   display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: flex-end;
   justify-content: space-between;
   background: var(--color-surface);
