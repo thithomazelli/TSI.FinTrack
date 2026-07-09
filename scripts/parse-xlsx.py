@@ -249,8 +249,8 @@ def main():
         m = re.search(r"(\d{4})\.xlsx$", f.name)
         if not m: continue
         year = int(m.group(1))
-        # keep last uploaded (highest prefix) for each year
-        if year not in year_files or f.name > year_files[year].name:
+        # keep most recently modified file for each year
+        if year not in year_files or f.stat().st_mtime > year_files[year].stat().st_mtime:
             year_files[year] = f
 
     # Also check Orc_amento variant
@@ -258,7 +258,7 @@ def main():
         m = re.search(r"(\d{4})\.xlsx$", f.name)
         if not m: continue
         year = int(m.group(1))
-        if year not in year_files or f.name > year_files[year].name:
+        if year not in year_files or f.stat().st_mtime > year_files[year].stat().st_mtime:
             year_files[year] = f
 
     print(f"Encontrados {len(year_files)} arquivos: {sorted(year_files)}\n")
