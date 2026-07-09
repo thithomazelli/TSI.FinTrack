@@ -1,6 +1,7 @@
 {
   "meta": {
-    "opening_balance": 0
+    "opening_balance": -305,
+    "opened_at": "2009-05-01"
   },
   "entries": [
     {
