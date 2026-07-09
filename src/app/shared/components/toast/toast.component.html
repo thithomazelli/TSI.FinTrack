@@ -1,12 +1,17 @@
 <div class="toast-container">
   @for (toast of toastService.toasts(); track toast.id) {
-    <div class="toast toast--{{ toast.type }}" (click)="toastService.dismiss(toast.id)">
+    <div class="toast toast--{{ toast.type }}">
       <span class="toast-icon">
         @if (toast.type === 'success') { ✓ }
         @else if (toast.type === 'error') { ✕ }
         @else { ℹ }
       </span>
       <span class="toast-msg">{{ toast.message }}</span>
+      <button class="toast-close" (click)="toastService.dismiss(toast.id)" aria-label="Fechar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
     </div>
   }
 </div>

@@ -49,6 +49,23 @@
   flex: 1;
 }
 
+.toast-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: rgba(255,255,255,.2);
+  border-radius: 4px;
+  cursor: pointer;
+  color: #fff;
+  padding: 0;
+  transition: background .15s;
+  &:hover { background: rgba(255,255,255,.35); }
+}
+
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(-12px) scale(0.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }

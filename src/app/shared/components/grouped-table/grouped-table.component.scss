@@ -225,6 +225,12 @@
 
 // ── Data rows ─────────────────────────────────────────────────────────────────
 .gt-data-row {
+  animation: rowIn .22s ease both;
+  // Stagger up to 10 rows; beyond that they appear instantly
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 30}ms; }
+  }
+
   &:last-child td { border-bottom: none; }
   &:hover { background: var(--color-surface-2); }
   &.drag-over {
@@ -233,6 +239,11 @@
     outline-offset: -2px;
   }
   &[draggable="true"] { cursor: grab; }
+}
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 // Drag handle
