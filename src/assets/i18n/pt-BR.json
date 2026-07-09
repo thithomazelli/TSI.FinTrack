@@ -337,6 +337,7 @@
     "totalExpenses": "Saída",
     "balance": "Saldo",
     "periodLabel": "Período selecionado",
+    "periodTitle": "Período",
     "periodBalance": "Período",
     "expensesByCategory": "Saídas por categoria",
     "search": "Buscar movimentos...",

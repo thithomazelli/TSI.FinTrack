@@ -337,6 +337,7 @@
     "totalExpenses": "Expenses",
     "balance": "Balance",
     "periodLabel": "Selected period",
+    "periodTitle": "Period",
     "periodBalance": "Period",
     "expensesByCategory": "Expenses by category",
     "search": "Search movements...",

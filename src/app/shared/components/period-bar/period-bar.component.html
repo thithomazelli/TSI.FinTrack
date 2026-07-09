@@ -1,6 +1,9 @@
 <div class="top-section">
-  <div class="filter-bar">
-    <div class="fb-controls">
+  <div class="sm-card sm-card--period">
+    <div class="sm-left">
+      <span class="sm-title">{{ 'movimentos.periodTitle' | translate }}</span>
+    </div>
+    <div class="period-controls">
       @if (showModeTabs) {
         <div class="period-toggle">
           <button type="button" class="period-tab" [class.is-active]="periodMode === 'month'"
