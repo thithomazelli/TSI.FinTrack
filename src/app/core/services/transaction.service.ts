@@ -57,7 +57,8 @@ export class TransactionService {
       .eq('owner_id', this.ownerId)
       .gte('date', startDate)
       .lte('date', endDate)
-      .order('date', { ascending: true });
+      .order('date', { ascending: true })
+      .order('position', { ascending: true, nullsFirst: false });
 
     if (filter.categoryId) query = query.eq('category_id', filter.categoryId);
     if (filter.accountId) query = query.eq('account_id', filter.accountId);
