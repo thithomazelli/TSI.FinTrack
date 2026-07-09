@@ -235,13 +235,30 @@ def parse_sheet(ws, year: int, month: int):
                 "labels":           [],
             })
 
-    return entries, transactions
+    # ── Savings movements (category "Poupança") ───────────────────────────
+    savings = []
+    WITHDRAWAL_KEYWORDS = ("devolução", "resgate", "restituição", "retirada")
+    for t in transactions:
+        if (t.get("category_name") or "").lower() != "poupança":
+            continue
+        desc_l = t["description"].lower()
+        mv_type = "WITHDRAWAL" if any(k in desc_l for k in WITHDRAWAL_KEYWORDS) else "DEPOSIT"
+        savings.append({
+            "owner_id":    OWNER_ID,
+            "description": t["description"],
+            "amount":      t["amount"],
+            "date":        t["date"],
+            "type":        mv_type,
+        })
+
+    return entries, transactions, savings
 
 
 def parse_workbook(path: Path, year: int):
     wb = open_xlsx(path)
     all_entries      = []
     all_transactions = []
+    all_savings      = []
 
     for sheet_name in wb.sheetnames:
         m = MONTH_RE.match(sheet_name)
@@ -249,12 +266,13 @@ def parse_workbook(path: Path, year: int):
             continue
         month = int(m.group(1))
         ws = wb[sheet_name]
-        e, t = parse_sheet(ws, year, month)
+        e, t, s = parse_sheet(ws, year, month)
         all_entries.extend(e)
         all_transactions.extend(t)
-        print(f"  {year}/{month:02d} {sheet_name}: {len(e)} entries, {len(t)} transactions")
+        all_savings.extend(s)
+        print(f"  {year}/{month:02d} {sheet_name}: {len(e)} entries, {len(t)} transactions, {len(s)} savings")
 
-    return all_entries, all_transactions
+    return all_entries, all_transactions, all_savings
 
 
 # ── main ─────────────────────────────────────────────────────────────────────
@@ -282,23 +300,26 @@ def main():
 
     all_entries      = []
     all_transactions = []
+    all_savings      = []
 
     for year in sorted(year_files):
         path = year_files[year]
         print(f"Processando {year} ({path.name})…")
-        e, t = parse_workbook(path, year)
+        e, t, s = parse_workbook(path, year)
         all_entries.extend(e)
         all_transactions.extend(t)
-        print(f"  → subtotal: {len(e)} entries, {len(t)} transactions\n")
+        all_savings.extend(s)
+        print(f"  → subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
 
     result = {
         "meta": {"opening_balance": -305, "opened_at": "2009-05-01"},
         "entries":      all_entries,
         "transactions": all_transactions,
+        "savings":      all_savings,
     }
 
     OUT_FILE.write_text(json.dumps(result, ensure_ascii=False, indent=2))
-    print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions → {OUT_FILE}")
+    print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions + {len(all_savings)} savings → {OUT_FILE}")
 
 
 if __name__ == "__main__":

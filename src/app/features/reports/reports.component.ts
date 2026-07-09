@@ -116,6 +116,19 @@ export class ReportsComponent implements OnInit {
   readonly realizedTransactions = signal<Transaction[]>([]);
   readonly yearEntries = signal<Entry[]>([]);
 
+  // Category table sorting
+  readonly sortColIdx = signal<number>(12); // 0-11 = month, 12 = total, -1 = name
+  readonly sortDir = signal<'asc' | 'desc'>('desc');
+
+  toggleSort(col: number): void {
+    if (this.sortColIdx() === col) {
+      this.sortDir.set(this.sortDir() === 'desc' ? 'asc' : 'desc');
+    } else {
+      this.sortColIdx.set(col);
+      this.sortDir.set(col === -1 ? 'asc' : 'desc');
+    }
+  }
+
   private gridColor(): string {
     return this.themeService.isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
   }
@@ -152,9 +165,18 @@ export class ReportsComponent implements OnInit {
     };
   }
 
-  readonly evolutionChartData = computed<ChartData<'line'>>(() => ({
-    labels: this.monthlyPoints().map((p) => p.label),
-    datasets: [
+  readonly monthlySavings = computed<number[]>(() => {
+    const year = this.filterYear();
+    const movements = this.savingsMovements().filter((m) => m.date.startsWith(String(year)));
+    return ALL_MONTHS.map((month) =>
+      movements.filter((m) => +m.date.substring(5, 7) === month).reduce((s, m) => s + m.amount, 0)
+    );
+  });
+
+  readonly evolutionChartData = computed<ChartData<'line'>>(() => {
+    const savings = this.monthlySavings();
+    const hasSavings = savings.some((v) => v > 0);
+    const datasets: ChartData<'line'>['datasets'] = [
       {
         label: 'Entradas',
         data: this.monthlyPoints().map((p) => p.income),
@@ -183,8 +205,21 @@ export class ReportsComponent implements OnInit {
         pointRadius: 4,
         borderDash: [4, 4],
       },
-    ],
-  }));
+    ];
+    if (hasSavings) {
+      datasets.push({
+        label: 'Poupança',
+        data: savings,
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.07)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        borderDash: [6, 3],
+      });
+    }
+    return { labels: this.monthlyPoints().map((p) => p.label), datasets };
+  });
 
   readonly incomeRatioChartData = computed<ChartData<'bar'>>(() => {
     const points = this.monthlyPoints();
@@ -491,6 +526,8 @@ export class ReportsComponent implements OnInit {
     const realized = this.realizedTransactions();
     const entries = this.yearEntries();
     const cats = this.categories();
+    const sortCol = this.sortColIdx();
+    const dir = this.sortDir();
 
     // Build category rows
     const catMap: Record<string, { name: string; months: number[]; total: number }> = {};
@@ -504,7 +541,14 @@ export class ReportsComponent implements OnInit {
       catMap[t.categoryId].total += t.amount;
     }
 
-    const rows = Object.values(catMap).sort((a, b) => b.total - a.total);
+    const rows = Object.values(catMap).sort((a, b) => {
+      let va: number | string, vb: number | string;
+      if (sortCol === -1) { va = a.name; vb = b.name; }
+      else if (sortCol === 12) { va = a.total; vb = b.total; }
+      else { va = a.months[sortCol]; vb = b.months[sortCol]; }
+      if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb as string) : (vb as string).localeCompare(va);
+      return dir === 'asc' ? (va as number) - (vb as number) : (vb as number) - (va as number);
+    });
 
     // Monthly totals and income
     const monthTotals = Array(12).fill(0);

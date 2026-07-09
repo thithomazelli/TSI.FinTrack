@@ -199963,5 +199963,1218 @@
       "status": "PROJECTED",
       "labels": []
     }
+  ],
+  "savings": [
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 0.89,
+      "date": "2020-03-27T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 800.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 200.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 300.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 380.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 570.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 190.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 380.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 570.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Devolução Poupança - 2015",
+      "amount": 190.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança",
+      "amount": 7420.0,
+      "date": "2020-03-27T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 7.27,
+      "date": "2020-04-13T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 18.18,
+      "date": "2020-04-29T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança",
+      "amount": 1000.0,
+      "date": "2020-04-29T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 24.03,
+      "date": "2020-05-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 19.12,
+      "date": "2020-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Restituição Poupança",
+      "amount": 2845.65,
+      "date": "2020-07-10T00:00:00",
+      "type": "WITHDRAWAL"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 15.89,
+      "date": "2020-07-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 14.14,
+      "date": "2020-08-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 14.15,
+      "date": "2020-09-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 3496.5,
+      "date": "2020-10-26T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 13.12,
+      "date": "2020-10-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 13650.0,
+      "date": "2020-11-09T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança",
+      "amount": 2500.0,
+      "date": "2020-11-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Viagem Nordeste - Gabs e Léo",
+      "amount": 647.04,
+      "date": "2020-11-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 5.31,
+      "date": "2020-11-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Viagem Nordeste - Família Vado",
+      "amount": 750.0,
+      "date": "2020-12-11T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Déposito Poupança",
+      "amount": 2053.03,
+      "date": "2020-12-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 0.77,
+      "date": "2021-01-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança - Extorno Fotos Maragogi",
+      "amount": 70.0,
+      "date": "2021-02-02T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança",
+      "amount": 4.2,
+      "date": "2021-02-10T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 0.14,
+      "date": "2021-02-28T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 5000.0,
+      "date": "2021-03-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 0.52,
+      "date": "2021-03-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança - Pagto Tata - Compra teste Mercado Livre",
+      "amount": 240.0,
+      "date": "2021-04-17T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 3200.0,
+      "date": "2021-04-23T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 6.4,
+      "date": "2021-04-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Rael ML",
+      "amount": 29.0,
+      "date": "2021-05-09T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Tata",
+      "amount": 125.0,
+      "date": "2021-05-13T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Nicole - Nestlé - 01/04",
+      "amount": 150.0,
+      "date": "2021-05-13T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Nicole - Impressora",
+      "amount": 107.0,
+      "date": "2021-05-13T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1226.16,
+      "date": "2021-05-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Samara / Léo - Praia",
+      "amount": 228.33,
+      "date": "2021-05-29T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Teste Nubank",
+      "amount": 1.0,
+      "date": "2021-05-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 5.22,
+      "date": "2021-05-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagamento Nicole",
+      "amount": 155.0,
+      "date": "2021-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 6928.25,
+      "date": "2021-06-18T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 769.32,
+      "date": "2021-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Purificador - 01/10",
+      "amount": 120.0,
+      "date": "2021-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 7.87,
+      "date": "2021-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Viagem Nordeste - Samara / Léo",
+      "amount": 810.72,
+      "date": "2021-07-03T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Garagem - Nicole",
+      "amount": 30.0,
+      "date": "2021-07-11T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Nestlé - 03/04",
+      "amount": 100.0,
+      "date": "2021-07-15T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1564.81,
+      "date": "2021-07-23T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Gabs - Posto Castelo",
+      "amount": 30.0,
+      "date": "2021-07-28T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Purificador - 02/10",
+      "amount": 120.0,
+      "date": "2021-07-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 22.36,
+      "date": "2021-07-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Venda Ar Cond. Philco - Maycon Guerra",
+      "amount": 1500.0,
+      "date": "2021-08-01T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Tata - Compra ML",
+      "amount": 80.0,
+      "date": "2021-08-10T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Nestlé - 04/04",
+      "amount": 100.0,
+      "date": "2021-08-13T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 6077.35,
+      "date": "2021-08-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Purificador - 03/10",
+      "amount": 120.0,
+      "date": "2021-08-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Nicole - Consultoria Recrutamento",
+      "amount": 110.0,
+      "date": "2021-08-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 24.29,
+      "date": "2021-08-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Purificador - 04/10",
+      "amount": 120.0,
+      "date": "2021-09-15T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 2199.0,
+      "date": "2021-09-24T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 14.68,
+      "date": "2021-09-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 6842.85,
+      "date": "2021-10-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 14.53,
+      "date": "2021-10-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1355.22,
+      "date": "2021-11-26T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 40.02,
+      "date": "2021-11-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 2567.92,
+      "date": "2021-12-17T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 49.67,
+      "date": "2021-12-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Ana Paula",
+      "amount": 185.0,
+      "date": "2022-01-23T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - FGTS Aniversário - Nicole",
+      "amount": 1110.0,
+      "date": "2022-01-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - FGTS Aniversário - Thiago",
+      "amount": 5000.0,
+      "date": "2022-01-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - FGTS Aniversário - Thiago",
+      "amount": 1040.0,
+      "date": "2022-01-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 41.96,
+      "date": "2022-01-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 100.0,
+      "date": "2022-02-08T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Tata - Churrasco",
+      "amount": 120.0,
+      "date": "2022-02-12T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Venda Onix LT 2014 - 1.4 Aut",
+      "amount": 44610.0,
+      "date": "2022-02-18T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 6000.0,
+      "date": "2022-02-22T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 17.39,
+      "date": "2022-02-28T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Robô Aspirador",
+      "amount": 500.0,
+      "date": "2022-03-09T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Ana Paula - Spotify",
+      "amount": 34.9,
+      "date": "2022-03-14T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - RDI - Participação nos Lucros",
+      "amount": 829.87,
+      "date": "2022-03-16T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 4000.0,
+      "date": "2022-03-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 119.74,
+      "date": "2022-03-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Nicole - Robo Aspirador",
+      "amount": 600.0,
+      "date": "2022-04-08T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 15000.0,
+      "date": "2022-04-16T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 8000.0,
+      "date": "2022-04-18T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Ana Paula - Mc Donalds",
+      "amount": 67.7,
+      "date": "2022-04-17T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 800.0,
+      "date": "2022-04-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Léo - Fifa 22",
+      "amount": 50.0,
+      "date": "2022-04-28T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 50.89,
+      "date": "2022-04-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Nicole FGTS",
+      "amount": 1000.0,
+      "date": "2022-05-04T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1000.0,
+      "date": "2022-05-26T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Léo - Presente Mãe",
+      "amount": 150.0,
+      "date": "2022-05-28T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 70.19,
+      "date": "2022-05-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 4000.0,
+      "date": "2022-06-17T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Estorno Nubank",
+      "amount": 15.69,
+      "date": "2022-06-20T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança",
+      "amount": 1306.5,
+      "date": "2022-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança - Pagto Léo",
+      "amount": 300.0,
+      "date": "2022-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 20.31,
+      "date": "2022-06-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Ana Paula - Livro Amazon",
+      "amount": 27.93,
+      "date": "2022-07-23T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 3800.0,
+      "date": "2022-07-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Léo - Convênio Mãe",
+      "amount": 200.0,
+      "date": "2022-07-27T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 22.18,
+      "date": "2022-07-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 2300.0,
+      "date": "2022-08-13T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1248.0,
+      "date": "2022-08-19T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 2000.0,
+      "date": "2022-08-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Léo - Convênio Mãe",
+      "amount": 200.0,
+      "date": "2022-08-25T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 10.23,
+      "date": "2022-08-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 500.0,
+      "date": "2022-09-08T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1000.0,
+      "date": "2022-09-22T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 2000.0,
+      "date": "2022-09-23T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 200.0,
+      "date": "2022-09-23T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 8.31,
+      "date": "2022-09-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 150.0,
+      "date": "2022-10-06T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Léo - Jantar Pizza",
+      "amount": 34.89,
+      "date": "2022-10-18T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Léo - Convênio Mãe",
+      "amount": 200.0,
+      "date": "2022-10-18T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 4.87,
+      "date": "2022-10-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 269.0,
+      "date": "2022-11-04T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pedro - Venda 02 Xiaomi ReadMe 9s",
+      "amount": 1200.0,
+      "date": "2022-11-16T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 200.0,
+      "date": "2022-11-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 428.0,
+      "date": "2022-11-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Rendimentos Poupança",
+      "amount": 4.01,
+      "date": "2022-11-30T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 2100.0,
+      "date": "2022-12-01T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 241.0,
+      "date": "2022-12-01T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 27.0,
+      "date": "2022-12-03T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 700.0,
+      "date": "2022-12-06T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank -Pagto Tata - Compra Teste Shopee",
+      "amount": 19.0,
+      "date": "2022-12-06T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1122.66,
+      "date": "2022-12-08T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1396.0,
+      "date": "2022-12-08T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 800.0,
+      "date": "2022-12-14T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 225.6,
+      "date": "2022-12-18T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 2104.0,
+      "date": "2022-12-18T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 800.0,
+      "date": "2022-12-21T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 441.32,
+      "date": "2022-12-21T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 5035.0,
+      "date": "2022-12-22T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 233.0,
+      "date": "2022-12-22T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Tata - Compras ML",
+      "amount": 192.0,
+      "date": "2023-01-02T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Tata e Bea - Casa Maragogi",
+      "amount": 1460.0,
+      "date": "2023-01-04T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1222.0,
+      "date": "2023-01-14T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 52.32,
+      "date": "2023-01-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 200.0,
+      "date": "2023-01-24T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 100.0,
+      "date": "2023-01-28T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1200.0,
+      "date": "2023-02-04T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Léo - Convênio",
+      "amount": 200.0,
+      "date": "2023-02-16T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Tata - Despesas Gera",
+      "amount": 1200.0,
+      "date": "2023-02-24T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Investimento Casa Maragogi",
+      "amount": 5000.0,
+      "date": "2023-03-14T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Investimento Casa Maragogi",
+      "amount": 3000.0,
+      "date": "2023-03-17T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Pagto Tata - Roupa Renner",
+      "amount": 160.0,
+      "date": "2023-03-17T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Investimento Casa Maragogi",
+      "amount": 2000.0,
+      "date": "2023-03-20T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Reembolso Poupança - Transporte Publico + Estacionamento Show Skank",
+      "amount": 110.0,
+      "date": "2023-03-27T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Tata e Bea - Investimento Casa (Sobra)",
+      "amount": 75.1,
+      "date": "2023-03-27T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 200.0,
+      "date": "2023-03-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 1000.0,
+      "date": "2023-04-05T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Investimento Casa Maragogi",
+      "amount": 1900.0,
+      "date": "2023-04-13T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 6.9,
+      "date": "2023-04-14T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Pagto Tata - Mc Donalds",
+      "amount": 0.2,
+      "date": "2023-04-14T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 3.0,
+      "date": "2023-05-01T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 49.96,
+      "date": "2023-05-08T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 5000.0,
+      "date": "2023-05-17T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 20.0,
+      "date": "2023-05-29T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 5000.0,
+      "date": "2023-06-07T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 5000.0,
+      "date": "2023-07-27T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 3000.0,
+      "date": "2023-07-28T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança - Investimento Bea e Tata",
+      "amount": 5000.0,
+      "date": "2023-08-15T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 12100.0,
+      "date": "2023-11-07T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 74.22,
+      "date": "2024-01-31T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Depósito Poupança",
+      "amount": 100.0,
+      "date": "2024-03-07T00:00:00",
+      "type": "DEPOSIT"
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Nubank - Depósito Poupança",
+      "amount": 0.68,
+      "date": "2024-03-25T00:00:00",
+      "type": "DEPOSIT"
+    }
   ]
 }

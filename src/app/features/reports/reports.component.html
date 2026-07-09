@@ -146,11 +146,20 @@
         <table class="cat-matrix-table">
           <thead>
             <tr>
-              <th class="cat-col">Categoria</th>
-              @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
-                <th class="num-col">{{ monthAbbr(m) }}</th>
+              <th class="cat-col sort-th" (click)="toggleSort(-1)">
+                Categoria
+                <span class="sort-icon">{{ sortColIdx() === -1 ? (sortDir() === 'asc' ? '↑' : '↓') : '↕' }}</span>
+              </th>
+              @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m; let i = $index) {
+                <th class="num-col sort-th" (click)="toggleSort(i)">
+                  {{ monthAbbr(m) }}
+                  <span class="sort-icon">{{ sortColIdx() === i ? (sortDir() === 'asc' ? '↑' : '↓') : '' }}</span>
+                </th>
               }
-              <th class="num-col total-col">Total</th>
+              <th class="num-col total-col sort-th" (click)="toggleSort(12)">
+                Total
+                <span class="sort-icon">{{ sortColIdx() === 12 ? (sortDir() === 'asc' ? '↑' : '↓') : '↕' }}</span>
+              </th>
             </tr>
           </thead>
           <tbody>

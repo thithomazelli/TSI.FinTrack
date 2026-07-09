@@ -303,6 +303,18 @@
     background: var(--color-surface-2, var(--color-border));
   }
 
+  .sort-th {
+    cursor: pointer;
+    user-select: none;
+    &:hover { color: var(--color-primary); }
+  }
+
+  .sort-icon {
+    font-size: 0.65rem;
+    margin-left: 3px;
+    opacity: 0.6;
+  }
+
   .num-col {
     text-align: right;
     font-variant-numeric: tabular-nums;
