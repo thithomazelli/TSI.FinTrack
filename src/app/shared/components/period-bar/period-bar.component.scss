@@ -1,24 +1,5 @@
-.top-section {
-  display: flex;
-  gap: 1rem;
-  align-items: stretch;
-  margin-bottom: 1.25rem;
-
-  tsi-savings-balance-card,
-  tsi-balance-card {
-    flex: 1;
-    min-width: 200px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  @media (max-width: 640px) { flex-direction: column; }
-}
-
-// Identical structure to savings-balance-card
-.balance-card {
-  flex: 1;
-  min-width: 200px;
+// The host element IS the card — same geometry as tsi-savings-balance-card and tsi-balance-card
+:host {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -32,13 +13,15 @@
 }
 
 .bc-info { display: flex; flex-direction: column; gap: 2px; }
-.bc-label { font-size: .7rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
+.bc-label {
+  font-size: .7rem; font-weight: 700; color: var(--color-text-2);
+  text-transform: uppercase; letter-spacing: .05em;
+}
 
 .bc-controls {
   display: flex;
   align-items: center;
   gap: .75rem;
-  flex-shrink: 0;
 }
 
 .period-toggle {

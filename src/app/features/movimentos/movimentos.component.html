@@ -18,19 +18,22 @@
     </div>
   </div>
 
-  <!-- Top section: period picker + balance cards -->
-  <tsi-period-bar
-    [year]="year()"
-    [month]="month()"
-    [periodMode]="periodMode()"
-    [dateFrom]="dateFrom()"
-    [dateTo]="dateTo()"
-    [preloadedBalance]="preloadedBalance()"
-    (monthChanged)="onMonthChanged($event)"
-    (periodModeChange)="setPeriodMode($event)"
-    (dateFromChange)="dateFrom.set($event); onDateChange()"
-    (dateToChange)="dateTo.set($event); onDateChange()"
-  />
+  <!-- Top section: period picker + balance cards (three peer components) -->
+  <div class="top-row">
+    <tsi-period-bar
+      [year]="year()"
+      [month]="month()"
+      [periodMode]="periodMode()"
+      [dateFrom]="dateFrom()"
+      [dateTo]="dateTo()"
+      (monthChanged)="onMonthChanged($event)"
+      (periodModeChange)="setPeriodMode($event)"
+      (dateFromChange)="dateFrom.set($event); onDateChange()"
+      (dateToChange)="dateTo.set($event); onDateChange()"
+    />
+    <tsi-savings-balance-card [year]="year()" [month]="month()" />
+    <tsi-balance-card [year]="year()" [month]="month()" [preloaded]="preloadedBalance()" />
+  </div>
 
   <!-- Summary bar (período selecionado) -->
   <div class="summary-bar">

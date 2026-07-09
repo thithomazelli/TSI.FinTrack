@@ -12,15 +12,21 @@
   &--saida   { background: rgba(239,68,68,.12);  color: #ef4444; border-color: rgba(239,68,68,.3);  &:hover { background: rgba(239,68,68,.2);  } }
 }
 
-/* Top section: filter bar (2/3) + balance card (1/3) */
-.top-section {
+/* Top row: three peer card components */
+.top-row {
   display: flex;
   gap: 1rem;
   align-items: stretch;
   margin-bottom: 1.25rem;
 
-  .filter-bar { flex: 2; margin-bottom: 0; min-width: 0; }
-  tsi-balance-card { flex: 1; min-width: 200px; }
+  tsi-period-bar,
+  tsi-savings-balance-card,
+  tsi-balance-card {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+  }
 
   @media (max-width: 720px) { flex-direction: column; }
 }
