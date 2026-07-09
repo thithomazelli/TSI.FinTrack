@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MonthPickerComponent } from '../month-picker/month-picker.component';
 import { BalanceCardComponent } from '../balance-card/balance-card.component';
+import { SavingsBalanceCardComponent } from '../savings-balance-card/savings-balance-card.component';
 
 export type PeriodMode = 'month' | 'range';
 
 @Component({
   selector: 'tsi-period-bar',
-  imports: [FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent],
+  imports: [FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent, SavingsBalanceCardComponent],
   templateUrl: './period-bar.component.html',
   styleUrls: ['./period-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

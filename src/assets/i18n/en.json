@@ -463,6 +463,8 @@
     "balanceProjected": "Projected",
     "balanceRealizedShort": "Current",
     "balanceProjectedShort": "Projected",
+    "checkingAccount": "Checking Account",
+    "savingsBalance": "Savings Balance",
     "cumulative": "Cumulative",
     "showValues": "Show values",
     "hideValues": "Hide values",

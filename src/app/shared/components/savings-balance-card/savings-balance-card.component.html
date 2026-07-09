@@ -1,0 +1,13 @@
+@if (balance !== null) {
+  <div class="balance-card">
+    <div class="bc-info">
+      <span class="bc-label">{{ 'widget.savingsBalance' | translate }}</span>
+    </div>
+    <div class="bc-values">
+      <div class="bc-row">
+        <span class="bc-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
+        <span class="bc-value" [class.bc-pos]="balance >= 0" [class.bc-neg]="balance < 0">R$ {{ balance | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+}

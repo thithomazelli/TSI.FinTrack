@@ -513,14 +513,16 @@ export class MovimentosComponent implements OnInit {
           .eq('owner_id', uid)
           .gte('date', from)
           .lte('date', to)
-          .order('date', { ascending: false }),
+          .order('date', { ascending: true })
+          .order('position', { ascending: true, nullsFirst: false }),
         this.supabase.client
           .from('transactions')
           .select('*')
           .eq('owner_id', uid)
           .gte('date', from)
           .lte('date', to)
-          .order('date', { ascending: false }),
+          .order('date', { ascending: true })
+          .order('position', { ascending: true, nullsFirst: false }),
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
         this.supabase.client.rpc('get_balance_in_range', { start_date: from, end_date: to }),
       ]);

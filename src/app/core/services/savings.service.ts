@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from } from 'rxjs';
+import { Observable, from, map } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { LoggingService } from './logging.service';
 import { AuthService } from '../auth/auth.service';
@@ -84,6 +84,24 @@ export class SavingsService {
       createdAt: r.created_at,
       updatedAt: r.updated_at,
     };
+  }
+
+  /** Saldo atual da poupança: soma de depósitos menos retiradas (todos os registros). */
+  getBalance(): Observable<number> {
+    return from(
+      this.supabase.client
+        .from('savings_movements')
+        .select('amount, domain_lists(value)')
+        .eq('owner_id', this.ownerId)
+        .range(0, 9999)
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []).reduce((sum: number, r: any) => {
+            const isDeposit = (r.domain_lists?.value ?? '') === 'DEPOSIT';
+            return sum + (isDeposit ? Number(r.amount) : -Number(r.amount));
+          }, 0);
+        })
+    );
   }
 
   delete(id: string): Observable<void> {
