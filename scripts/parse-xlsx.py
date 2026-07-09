@@ -176,7 +176,7 @@ def parse_sheet(ws, year: int, month: int):
             if not amount:
                 continue
 
-            dt_str = to_date_str(dt_val, year, month, enforce_month=True) or date(year, month, 1).isoformat()
+            dt_str = to_date_str(dt_val, year, month, enforce_month=True) or date(year, month, calendar.monthrange(year, month)[1]).isoformat()
 
             entries.append({
                 "owner_id":    OWNER_ID,
@@ -217,7 +217,7 @@ def parse_sheet(ws, year: int, month: int):
             else:
                 # Debit: date must belong to the sheet's month — enforce it
                 purchase_dt = to_date_str(dt_val, year, month, enforce_month=True)
-                bill_dt  = purchase_dt or date(year, month, 1).isoformat()
+                bill_dt  = purchase_dt or date(year, month, calendar.monthrange(year, month)[1]).isoformat()
                 purch    = None
 
             cat_str = (cat or "").strip() if isinstance(cat, str) else ""
