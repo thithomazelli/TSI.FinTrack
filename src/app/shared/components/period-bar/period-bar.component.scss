@@ -40,10 +40,9 @@ tsi-balance-card {
 // Period controls on the right side
 .period-controls {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: .75rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: .5rem;
 }
 
 .period-toggle {
