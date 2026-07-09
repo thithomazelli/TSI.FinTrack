@@ -203,15 +203,20 @@ async function main() {
   if (txCount > 0) {
     console.log(`  Transações já existem (${txCount} registros) — pulando ✓`)
   } else {
-    const transactions = data.transactions.map(t => ({
-      owner_id: t.owner_id, description: t.description,
-      amount: t.amount, date: t.date, labels: t.labels ?? [], status: t.status,
-      category_id: catMap[t.category_name?.toLowerCase()] ?? null,
-      credit_card_id: cardMap[(t.credit_card_name ?? 'Débito Itaú').toLowerCase()] ?? null,
-      account_id: null,
-      installment_number: t.installment_number ?? null,
-      total_installments: t.total_installments ?? null,
-    }))
+    const transactions = data.transactions.map(t => {
+      const creditCardId = cardMap[(t.credit_card_name ?? 'Débito Itaú').toLowerCase()] ?? null
+      return {
+        owner_id: t.owner_id, description: t.description,
+        amount: t.amount, date: t.date, labels: t.labels ?? [], status: t.status,
+        // For credit card rows the statement date is the purchase date; for debit leave null
+        purchase_date: creditCardId ? (t.purchase_date ?? t.date) : null,
+        category_id: catMap[t.category_name?.toLowerCase()] ?? null,
+        credit_card_id: creditCardId,
+        account_id: null,
+        installment_number: t.installment_number ?? null,
+        total_installments: t.total_installments ?? null,
+      }
+    })
     await batchInsert('transactions', transactions, 'Transações')
     console.log(`   ${transactions.length} transações de despesa`)
   }
