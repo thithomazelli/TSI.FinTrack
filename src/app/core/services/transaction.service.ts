@@ -72,6 +72,22 @@ export class TransactionService {
     );
   }
 
+  getByYear(year: number, status?: string): Observable<Transaction[]> {
+    let query = this.supabase.client
+      .from(TABLE)
+      .select('id, date, amount, category_id, status')
+      .eq('owner_id', this.ownerId)
+      .gte('date', `${year}-01-01`)
+      .lte('date', `${year}-12-31`);
+    if (status) query = query.eq('status', status);
+    return from(
+      query.then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      })
+    );
+  }
+
   create(payload: CreateTransactionPayload): Observable<Transaction[]> {
     this.logger.info('Creating transaction', payload.description);
     const ownerId = this.ownerId;

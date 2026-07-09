@@ -114,6 +114,12 @@ export class ReportsComponent implements OnInit {
   readonly paymentTypeSpend = signal<{ label: string; amount: number; color: string }[]>([]);
   readonly catEvolPoints = signal<{ label: string; amount: number }[]>([]);
   readonly realizedTransactions = signal<Transaction[]>([]);
+
+  // Multi-year category evolution
+  readonly multiYearCatData = signal<{ year: number; catTotals: Record<string, number> }[]>([]);
+  readonly loadingMultiYear = signal(false);
+  readonly multiYearTopN = signal(8);
+  readonly multiYearLoaded = signal(false);
   readonly yearEntries = signal<Entry[]>([]);
 
   // Category table sorting
@@ -446,6 +452,27 @@ export class ReportsComponent implements OnInit {
     },
   } as ChartConfiguration<'bar'>['options']));
 
+  readonly multiYearOptions = computed<ChartConfiguration<'line'>['options']>(() => ({
+    ...(this.baseOptions() as object),
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: this.textColor(), font: { size: 11 }, padding: 10, boxWidth: 12 } },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      x: { grid: { color: this.gridColor() }, ticks: { color: this.textColor() } },
+      y: {
+        beginAtZero: true,
+        grid: { color: this.gridColor() },
+        ticks: {
+          color: this.textColor(),
+          callback: (v: number | string) =>
+            'R$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
+        },
+      },
+    },
+  } as ChartConfiguration<'line'>['options']));
+
   readonly yoyOptions = computed<ChartConfiguration<'bar'>['options']>(() => ({
     ...(this.baseOptions() as object),
     indexAxis: 'y' as const,
@@ -745,6 +772,76 @@ export class ReportsComponent implements OnInit {
     ].filter((t) => t.amount > 0);
 
     this.paymentTypeSpend.set(types);
+  }
+
+  private readonly CHART_COLORS = [
+    '#6366f1','#ef4444','#f59e0b','#22c55e','#06b6d4',
+    '#ec4899','#84cc16','#f97316','#a855f7','#14b8a6',
+    '#e11d48','#0ea5e9',
+  ];
+
+  readonly multiYearChartData = computed<ChartData<'line'>>(() => {
+    const rows = this.multiYearCatData();
+    const cats = this.categories();
+    const topN = this.multiYearTopN();
+    if (!rows.length) return { labels: [], datasets: [] };
+
+    // Sum totals per category across all years to determine top N
+    const catTotalAll: Record<string, number> = {};
+    for (const row of rows) {
+      for (const [id, amt] of Object.entries(row.catTotals)) {
+        catTotalAll[id] = (catTotalAll[id] ?? 0) + amt;
+      }
+    }
+    const topCatIds = Object.entries(catTotalAll)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, topN)
+      .map(([id]) => id);
+
+    const labels = rows.map((r) => String(r.year));
+    const datasets = topCatIds.map((catId, i) => {
+      const cat = cats.find((c) => c.id === catId);
+      return {
+        label: cat?.name ?? catId,
+        data: rows.map((r) => r.catTotals[catId] ?? 0),
+        borderColor: cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length],
+        backgroundColor: (cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length]) + '18',
+        fill: false,
+        tension: 0.3,
+        pointRadius: 4,
+      };
+    });
+    return { labels, datasets };
+  });
+
+  loadMultiYearCatEvolution(): void {
+    if (this.multiYearLoaded()) return;
+    this.loadingMultiYear.set(true);
+    const years = [...this.availableYears].reverse(); // oldest first
+
+    forkJoin(
+      years.map((y) => this.transactionService.getByYear(y, TransactionStatus.Realized))
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (results) => {
+          const rows = results.map((txList, i) => {
+            const catTotals: Record<string, number> = {};
+            for (const t of txList) {
+              if (!t.categoryId) continue;
+              catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
+            }
+            return { year: years[i], catTotals };
+          });
+          this.multiYearCatData.set(rows);
+          this.loadingMultiYear.set(false);
+          this.multiYearLoaded.set(true);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load multi-year data', err);
+          this.loadingMultiYear.set(false);
+        },
+      });
   }
 
   private loadCategoryEvolution(): void {

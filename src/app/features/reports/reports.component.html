@@ -354,6 +354,33 @@
       <h3 class="section-title">{{ 'reports.comparisons' | translate }}</h3>
       <div class="charts-grid">
 
+        <!-- Chart: Evolução histórica por categoria (todos os anos) -->
+        <div class="chart-card chart-wide animate-fade-up stagger-1">
+          <div class="chart-header">
+            <span class="chart-title">Evolução de Gastos por Categoria — Histórico Completo</span>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+              <span class="filter-label">Top</span>
+              <select class="form-select filter-select" [value]="multiYearTopN()"
+                (change)="multiYearTopN.set(+$any($event.target).value)">
+                @for (n of [5,8,10,12]; track n) { <option [value]="n">{{ n }}</option> }
+              </select>
+              <span class="filter-label">categorias</span>
+              @if (!multiYearLoaded()) {
+                <button class="btn btn-sm btn-secondary" (click)="loadMultiYearCatEvolution()" [disabled]="loadingMultiYear()">
+                  {{ loadingMultiYear() ? 'Carregando…' : 'Carregar' }}
+                </button>
+              }
+            </div>
+          </div>
+          @if (loadingMultiYear()) {
+            <div class="skeleton" style="height:260px;border-radius:var(--radius-md)"></div>
+          } @else if (multiYearCatData().length > 0) {
+            <div class="chart-wrap" style="height:280px"><canvas baseChart [data]="multiYearChartData()" [options]="multiYearOptions()" type="line"></canvas></div>
+          } @else {
+            <p class="chart-empty">Clique em "Carregar" para buscar o histórico completo de todas as categorias.</p>
+          }
+        </div>
+
         <!-- Chart 6: Ano a ano por categoria -->
         <div class="chart-card chart-wide animate-fade-up stagger-1">
           <div class="chart-header">
