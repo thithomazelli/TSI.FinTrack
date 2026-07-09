@@ -166,7 +166,7 @@ def parse_sheet(ws, year: int, month: int):
             if not amount:
                 continue
 
-            dt_str = to_date_str(dt_val, year, month) or date(year, month, 1).isoformat()
+            dt_str = to_date_str(dt_val, year, month, enforce_month=True) or date(year, month, 1).isoformat()
 
             entries.append({
                 "owner_id":    OWNER_ID,
