@@ -243,10 +243,12 @@ def parse_sheet(ws, year: int, month: int):
             continue
         desc_l = t["description"].lower()
         mv_type = "WITHDRAWAL" if any(k in desc_l for k in WITHDRAWAL_KEYWORDS) else "DEPOSIT"
+        # Withdrawals are negative so the running balance decreases
+        amount = -t["amount"] if mv_type == "WITHDRAWAL" else t["amount"]
         savings.append({
             "owner_id":    OWNER_ID,
             "description": t["description"],
-            "amount":      t["amount"],
+            "amount":      round(amount, 2),
             "date":        t["date"],
             "type":        mv_type,
         })

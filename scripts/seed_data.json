@@ -199975,63 +199975,63 @@
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 800.0,
+      "amount": -800.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 200.0,
+      "amount": -200.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 300.0,
+      "amount": -300.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 380.0,
+      "amount": -380.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 570.0,
+      "amount": -570.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 190.0,
+      "amount": -190.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 380.0,
+      "amount": -380.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 570.0,
+      "amount": -570.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Devolução Poupança - 2015",
-      "amount": 190.0,
+      "amount": -190.0,
       "date": "2020-03-27T00:00:00",
       "type": "WITHDRAWAL"
     },
@@ -200080,7 +200080,7 @@
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Restituição Poupança",
-      "amount": 2845.65,
+      "amount": -2845.65,
       "date": "2020-07-10T00:00:00",
       "type": "WITHDRAWAL"
     },
