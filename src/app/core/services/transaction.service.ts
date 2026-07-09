@@ -179,24 +179,6 @@ export class TransactionService {
     );
   }
 
-  getByYear(year: number, status?: string): Observable<Transaction[]> {
-    const startDate = `${year}-01-01`;
-    const endDate = `${year}-12-31`;
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .select('id, date, amount, category_id, status')
-        .eq('owner_id', this.ownerId)
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .eq('status', status ?? TransactionStatus.Realized)
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => ({ ...this.toModel(r) }));
-        })
-    );
-  }
-
   getAllCreditCard(): Observable<Transaction[]> {
     return from(
       this.supabase.client
