@@ -14,7 +14,7 @@ from datetime import date, datetime
 
 PASSWORD    = "l#p01091910"
 OWNER_ID    = "69f852bc-af5a-4f11-b293-37bf2f809018"
-UPLOADS_DIR = Path("/root/.claude/uploads/2908ed1e-2b65-5b58-952d-703f6003d118")
+UPLOADS_DIR = Path(r"D:\Google Drive\Arquivos Thiago\Meus Gastos\Orçamentos encerrados")
 OUT_FILE    = Path(__file__).parent / "seed_data.json"
 
 # ── Card metadata (name → due_day) ───────────────────────────────────────────
@@ -291,21 +291,13 @@ def parse_workbook(path: Path, year: int):
 # ── main ─────────────────────────────────────────────────────────────────────
 
 def main():
-    # Find all xlsx files and deduplicate (keep newest by mtime per year)
+    # Find all xlsx files with a 4-digit year anywhere in the name
     year_files: dict[int, Path] = {}
-    for f in sorted(UPLOADS_DIR.glob("*-Or_amento_Anual__*.xlsx")):
-        m = re.search(r"(\d{4})\.xlsx$", f.name)
+    for f in sorted(UPLOADS_DIR.glob("*.xlsx")):
+        m = re.search(r"(\d{4})", f.name)
         if not m: continue
         year = int(m.group(1))
-        # keep most recently modified file for each year
-        if year not in year_files or f.stat().st_mtime > year_files[year].stat().st_mtime:
-            year_files[year] = f
-
-    # Also check Orc_amento variant
-    for f in sorted(UPLOADS_DIR.glob("*-Orc_amento_Anual__*.xlsx")):
-        m = re.search(r"(\d{4})\.xlsx$", f.name)
-        if not m: continue
-        year = int(m.group(1))
+        if year < 2000 or year > 2100: continue
         if year not in year_files or f.stat().st_mtime > year_files[year].stat().st_mtime:
             year_files[year] = f
 
