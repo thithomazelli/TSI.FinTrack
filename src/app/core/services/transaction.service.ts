@@ -57,7 +57,7 @@ export class TransactionService {
       .eq('owner_id', this.ownerId)
       .gte('date', startDate)
       .lte('date', endDate)
-      .order('date', { ascending: false });
+      .order('date', { ascending: true });
 
     if (filter.categoryId) query = query.eq('category_id', filter.categoryId);
     if (filter.accountId) query = query.eq('account_id', filter.accountId);
@@ -163,6 +163,24 @@ export class TransactionService {
     );
   }
 
+  getByYear(year: number, status?: string): Observable<Transaction[]> {
+    const startDate = `${year}-01-01`;
+    const endDate = `${year}-12-31`;
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .select('id, date, amount, category_id, status')
+        .eq('owner_id', this.ownerId)
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .eq('status', status ?? TransactionStatus.Realized)
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []).map((r: any) => ({ ...this.toModel(r) }));
+        })
+    );
+  }
+
   getAllCreditCard(): Observable<Transaction[]> {
     return from(
       this.supabase.client
@@ -170,7 +188,7 @@ export class TransactionService {
         .select('*')
         .eq('owner_id', this.ownerId)
         .not('credit_card_id', 'is', null)
-        .order('date', { ascending: false })
+        .order('date', { ascending: true })
         .then(({ data, error }) => {
           if (error) throw error;
           return (data ?? []).map((r: any) => this.toModel(r));

@@ -55,11 +55,17 @@ export class SavingsComponent implements OnInit {
   readonly formAccountId = signal('');
 
   readonly cumulativeBalance = computed(() =>
-    this.allMovements().reduce((sum, m) => {
-      const code = this.types().find((t) => t.id === m.typeId)?.code ?? '';
-      return code === 'WITHDRAWAL' ? sum - m.amount : sum + m.amount;
-    }, 0)
+    this.allMovements().reduce((sum, m) =>
+      m.typeCode === 'WITHDRAWAL' ? sum - m.amount : sum + m.amount, 0)
   );
+
+  readonly balanceUpToMonth = computed(() => {
+    const y = this.year(), mo = this.month();
+    const endDate = `${y}-${String(mo).padStart(2, '0')}-31`;
+    return this.allMovements()
+      .filter((m) => m.date <= endDate)
+      .reduce((sum, m) => m.typeCode === 'WITHDRAWAL' ? sum - m.amount : sum + m.amount, 0);
+  });
 
   readonly filteredMovements = computed(() => {
     const typeId = this.filterTypeId();
@@ -67,17 +73,15 @@ export class SavingsComponent implements OnInit {
   });
 
   readonly monthDeposits = computed(() =>
-    this.filteredMovements().reduce((sum, m) => {
-      const code = this.types().find((t) => t.id === m.typeId)?.code ?? '';
-      return code !== 'WITHDRAWAL' ? sum + m.amount : sum;
-    }, 0)
+    this.filteredMovements()
+      .filter((m) => m.typeCode !== 'WITHDRAWAL')
+      .reduce((sum, m) => sum + m.amount, 0)
   );
 
   readonly monthWithdrawals = computed(() =>
-    this.filteredMovements().reduce((sum, m) => {
-      const code = this.types().find((t) => t.id === m.typeId)?.code ?? '';
-      return code === 'WITHDRAWAL' ? sum + m.amount : sum;
-    }, 0)
+    this.filteredMovements()
+      .filter((m) => m.typeCode === 'WITHDRAWAL')
+      .reduce((sum, m) => sum + m.amount, 0)
   );
 
   readonly monthNet = computed(() => this.monthDeposits() - this.monthWithdrawals());

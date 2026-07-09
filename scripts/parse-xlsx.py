@@ -46,6 +46,14 @@ SKIP_B = {
 
 MONTH_RE = re.compile(r"^(\d{2})\.")  # "01. Janeiro" → group 1 = "01"
 
+# Months from which 2026 entries become PROJECTED
+PROJECTED_FROM = (2026, 7)  # July 2026 onwards
+
+def row_status(year: int, month: int) -> str:
+    if (year, month) >= PROJECTED_FROM:
+        return "PROJECTED"
+    return "REALIZED"
+
 # Normalise category names that changed over the years
 CAT_ALIAS = {
     "jogos":      "Games",
@@ -73,7 +81,7 @@ def open_xlsx(path: Path):
     return openpyxl.load_workbook(buf, data_only=True)
 
 
-def to_date_str(val, fallback_year: int, fallback_month: int) -> str | None:
+def to_date_str(val, fallback_year: int = 0, fallback_month: int = 0, enforce_month: bool = False) -> str | None:
     if isinstance(val, (datetime, date)):
         return val.strftime("%Y-%m-%d")
     return None
@@ -152,14 +160,14 @@ def parse_sheet(ws, year: int, month: int):
             if not amount:
                 continue
 
-            dt_str = to_date_str(dt_val, year, month) or date(year, month, 1).isoformat()
+            dt_str = to_date_str(dt_val, year, month, enforce_month=True) or date(year, month, calendar.monthrange(year, month)[1]).isoformat()
 
             entries.append({
                 "owner_id":    OWNER_ID,
                 "description": item.strip(),
                 "amount":      round(float(amount), 2),
                 "date":        dt_str,
-                "status":      "REALIZED",
+                "status":      row_status(year, month),
                 "labels":      [],
             })
 
@@ -191,7 +199,7 @@ def parse_sheet(ws, year: int, month: int):
                 purch    = purchase_dt or bill_dt
             else:
                 # Debit: date = purchase date, no purchase_date field
-                bill_dt  = purchase_dt or date(year, month, 1).isoformat()
+                bill_dt  = purchase_dt or date(year, month, calendar.monthrange(year, month)[1]).isoformat()
                 purch    = None
 
             cat_str = (cat or "").strip() if isinstance(cat, str) else ""
@@ -205,17 +213,48 @@ def parse_sheet(ws, year: int, month: int):
                 "purchase_date":    purch,
                 "category_name":    cat_str,
                 "credit_card_name": card_name,
-                "status":           "REALIZED",
+                "status":           row_status(year, month),
                 "labels":           [],
             })
 
-    return entries, transactions
+    # ── Extract savings movements ─────────────────────────────────────────────
+    # Poupança category in expenses → DEPOSIT into savings
+    # Description containing "resgate" / "retirada" → WITHDRAWAL
+    savings = []
+    WITHDRAWAL_KW = {"resgate", "retirada", "saque"}
+    for t in transactions:
+        if t.get("category_name", "").strip().lower() == "poupança":
+            desc_l = t["description"].lower()
+            type_code = "WITHDRAWAL" if any(kw in desc_l for kw in WITHDRAWAL_KW) else "DEPOSIT"
+            savings.append({
+                "owner_id":   OWNER_ID,
+                "description": t["description"],
+                "amount":      t["amount"],
+                "date":        t["purchase_date"] or t["date"],
+                "type_code":   type_code,
+                "status":      t["status"],
+            })
+
+    # Income entries with "poupan" in description → WITHDRAWAL (transfer out of savings)
+    for e in entries:
+        if "poupan" in e["description"].lower():
+            savings.append({
+                "owner_id":   OWNER_ID,
+                "description": e["description"],
+                "amount":      e["amount"],
+                "date":        e["date"],
+                "type_code":   "WITHDRAWAL",
+                "status":      e["status"],
+            })
+
+    return entries, transactions, savings
 
 
 def parse_workbook(path: Path, year: int):
     wb = open_xlsx(path)
     all_entries      = []
     all_transactions = []
+    all_savings      = []
 
     for sheet_name in wb.sheetnames:
         m = MONTH_RE.match(sheet_name)
@@ -223,12 +262,13 @@ def parse_workbook(path: Path, year: int):
             continue
         month = int(m.group(1))
         ws = wb[sheet_name]
-        e, t = parse_sheet(ws, year, month)
+        e, t, s = parse_sheet(ws, year, month)
         all_entries.extend(e)
         all_transactions.extend(t)
-        print(f"  {year}/{month:02d} {sheet_name}: {len(e)} entries, {len(t)} transactions")
+        all_savings.extend(s)
+        print(f"  {year}/{month:02d} {sheet_name}: {len(e)} entries, {len(t)} transactions, {len(s)} savings")
 
-    return all_entries, all_transactions
+    return all_entries, all_transactions, all_savings
 
 
 # ── main ─────────────────────────────────────────────────────────────────────
@@ -257,22 +297,26 @@ def main():
     all_entries      = []
     all_transactions = []
 
+    all_savings      = []
+
     for year in sorted(year_files):
         path = year_files[year]
         print(f"Processando {year} ({path.name})…")
-        e, t = parse_workbook(path, year)
+        e, t, s = parse_workbook(path, year)
         all_entries.extend(e)
         all_transactions.extend(t)
-        print(f"  → subtotal: {len(e)} entries, {len(t)} transactions\n")
+        all_savings.extend(s)
+        print(f"  → subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
 
     result = {
         "meta": {"opening_balance": 0},
         "entries":      all_entries,
         "transactions": all_transactions,
+        "savings":      all_savings,
     }
 
     OUT_FILE.write_text(json.dumps(result, ensure_ascii=False, indent=2))
-    print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions → {OUT_FILE}")
+    print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions + {len(all_savings)} savings → {OUT_FILE}")
 
 
 if __name__ == "__main__":

@@ -236,8 +236,10 @@
   "savings": {
     "title": "Poupança",
     "add": "Novo Movimento",
-    "balance": "Saldo em Poupança",
+    "balance": "Saldo Total em Poupança",
     "balanceHint": "Acumulado de todos os meses",
+    "balanceMonth": "Saldo Poupança até este mês",
+    "balanceMonthHint": "Acumulado até o fim do mês selecionado",
     "allTypes": "Todos os tipos",
     "deposits": "Aportes",
     "withdrawals": "Resgates",

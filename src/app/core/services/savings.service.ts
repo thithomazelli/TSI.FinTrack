@@ -21,7 +21,7 @@ export class SavingsService {
     return from(
       this.supabase.client
         .from(TABLE)
-        .select('*')
+        .select('*, domain_lists!type_id(value)')
         .eq('owner_id', this.ownerId)
         .order('date', { ascending: false })
         .then(({ data, error }) => {
@@ -37,7 +37,7 @@ export class SavingsService {
     return from(
       this.supabase.client
         .from(TABLE)
-        .select('*')
+        .select('*, domain_lists!type_id(value)')
         .eq('owner_id', this.ownerId)
         .gte('date', start)
         .lte('date', end)
@@ -79,6 +79,7 @@ export class SavingsService {
       amount: Number(r.amount),
       date: r.date,
       typeId: r.type_id,
+      typeCode: r.domain_lists?.value ?? '',
       accountId: r.account_id,
       createdAt: r.created_at,
       updatedAt: r.updated_at,

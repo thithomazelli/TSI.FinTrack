@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 import { LanguageService } from '../../core/services/language.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
@@ -20,6 +21,7 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { EntryService } from '../../core/services/entry.service';
 import { CategoryService } from '../../core/services/category.service';
 import { SavingsService } from '../../core/services/savings.service';
+import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
@@ -48,6 +50,19 @@ interface CategorySpend {
   monthlyAvg: number;
 }
 
+interface YearMonthRow {
+  month: number;
+  label: string;
+  income: number;
+  expense: number;
+  monthlyBalance: number;
+  runningBalance: number;
+  pct: number;
+  savingsDeposit: number;
+  savingsWithdrawal: number;
+  savingsBalance: number;
+}
+
 
 @Component({
     selector: 'tsi-reports',
@@ -61,6 +76,8 @@ export class ReportsComponent implements OnInit {
   private readonly entryService = inject(EntryService);
   private readonly categoryService = inject(CategoryService);
   private readonly savingsService = inject(SavingsService);
+  private readonly balanceService = inject(BalanceService);
+  private readonly router = inject(Router);
   private readonly logger = inject(LoggingService);
   readonly themeService = inject(ThemeService);
   private readonly language = inject(LanguageService);
@@ -80,7 +97,9 @@ export class ReportsComponent implements OnInit {
   readonly now = new Date();
   readonly currentYear = this.now.getFullYear();
   readonly currentMonth = this.now.getMonth() + 1;
-  readonly availableYears = [this.currentYear, this.currentYear - 1, this.currentYear - 2];
+  readonly availableYears = Array.from({ length: this.currentYear - 2009 + 1 }, (_, i) => this.currentYear - i);
+
+  readonly activeTab = signal<'charts' | 'history' | 'categories'>('charts');
 
   readonly filterYear = signal(this.currentYear);
   readonly filterMonth = signal(this.currentMonth);
@@ -88,6 +107,8 @@ export class ReportsComponent implements OnInit {
   readonly incomeTarget = signal(80);
 
   readonly categories = signal<Category[]>([]);
+  readonly yearSummaryRows = signal<YearMonthRow[]>([]);
+  readonly loadingHistory = signal(false);
   readonly monthlyPoints = signal<MonthlyPoint[]>([]);
   readonly prevMonthlyPoints = signal<MonthlyPoint[]>([]);
   readonly categorySpend = signal<CategorySpend[]>([]);
@@ -95,6 +116,27 @@ export class ReportsComponent implements OnInit {
   readonly savingsMovements = signal<SavingsMovement[]>([]);
   readonly paymentTypeSpend = signal<{ label: string; amount: number; color: string }[]>([]);
   readonly catEvolPoints = signal<{ label: string; amount: number }[]>([]);
+  readonly realizedTransactions = signal<Transaction[]>([]);
+  readonly yearEntries = signal<Entry[]>([]);
+
+  // Multi-year category evolution
+  readonly multiYearCatData = signal<{ year: number; catTotals: Record<string, number> }[]>([]);
+  readonly loadingMultiYear = signal(false);
+  readonly multiYearTopN = signal(8);
+  readonly multiYearLoaded = signal(false);
+
+  // Category table sorting
+  readonly sortColIdx = signal<number>(12); // 0-11 = month, 12 = total, -1 = name
+  readonly sortDir = signal<'asc' | 'desc'>('desc');
+
+  toggleSort(col: number): void {
+    if (this.sortColIdx() === col) {
+      this.sortDir.set(this.sortDir() === 'desc' ? 'asc' : 'desc');
+    } else {
+      this.sortColIdx.set(col);
+      this.sortDir.set(col === -1 ? 'asc' : 'desc');
+    }
+  }
 
   private gridColor(): string {
     return this.themeService.isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
@@ -132,9 +174,18 @@ export class ReportsComponent implements OnInit {
     };
   }
 
-  readonly evolutionChartData = computed<ChartData<'line'>>(() => ({
-    labels: this.monthlyPoints().map((p) => p.label),
-    datasets: [
+  readonly monthlySavings = computed<number[]>(() => {
+    const year = this.filterYear();
+    const movements = this.savingsMovements().filter((m) => m.date.startsWith(String(year)));
+    return ALL_MONTHS.map((month) =>
+      movements.filter((m) => +m.date.substring(5, 7) === month).reduce((s, m) => s + m.amount, 0)
+    );
+  });
+
+  readonly evolutionChartData = computed<ChartData<'line'>>(() => {
+    const savings = this.monthlySavings();
+    const hasSavings = savings.some((v) => v > 0);
+    const datasets: ChartData<'line'>['datasets'] = [
       {
         label: 'Entradas',
         data: this.monthlyPoints().map((p) => p.income),
@@ -163,8 +214,21 @@ export class ReportsComponent implements OnInit {
         pointRadius: 4,
         borderDash: [4, 4],
       },
-    ],
-  }));
+    ];
+    if (hasSavings) {
+      datasets.push({
+        label: 'Poupança',
+        data: savings,
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.07)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        borderDash: [6, 3],
+      });
+    }
+    return { labels: this.monthlyPoints().map((p) => p.label), datasets };
+  });
 
   readonly incomeRatioChartData = computed<ChartData<'bar'>>(() => {
     const points = this.monthlyPoints();
@@ -243,7 +307,6 @@ export class ReportsComponent implements OnInit {
   readonly yoyChartData = computed<ChartData<'bar'>>(() => {
     const year = this.filterYear();
     const curr = this.categorySpend().slice(0, 8);
-    const prev = this.prevMonthlyPoints();
     const prevCatMap: Record<string, number> = {};
     return {
       labels: curr.map((c) => c.name),
@@ -300,7 +363,7 @@ export class ReportsComponent implements OnInit {
     );
     let balance = 0;
     const points = movements.map((m) => {
-      balance += m.amount;
+      balance += m.typeCode === 'WITHDRAWAL' ? -m.amount : m.amount;
       return { label: m.date.slice(0, 7), balance };
     });
     return {
@@ -391,6 +454,27 @@ export class ReportsComponent implements OnInit {
     },
   } as ChartConfiguration<'bar'>['options']));
 
+  readonly multiYearOptions = computed<ChartConfiguration<'line'>['options']>(() => ({
+    ...(this.baseOptions() as object),
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: this.textColor(), font: { size: 11 }, padding: 10, boxWidth: 12 } },
+      tooltip: { mode: 'index', intersect: false },
+    },
+    scales: {
+      x: { grid: { color: this.gridColor() }, ticks: { color: this.textColor() } },
+      y: {
+        beginAtZero: true,
+        grid: { color: this.gridColor() },
+        ticks: {
+          color: this.textColor(),
+          callback: (v: number | string) =>
+            'R$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
+        },
+      },
+    },
+  } as ChartConfiguration<'line'>['options']));
+
   readonly yoyOptions = computed<ChartConfiguration<'bar'>['options']>(() => ({
     ...(this.baseOptions() as object),
     indexAxis: 'y' as const,
@@ -405,7 +489,11 @@ export class ReportsComponent implements OnInit {
   }
 
   onYearChange(): void {
-    this.loadAll();
+    if (this.activeTab() === 'history') {
+      this.loadYearSummary();
+    } else {
+      this.loadAll();
+    }
   }
 
   onMonthChange(): void {
@@ -415,6 +503,181 @@ export class ReportsComponent implements OnInit {
   onCategoryChange(): void {
     if (!this.filterCategoryId()) return;
     this.loadCategoryEvolution();
+  }
+
+  onTabChange(tab: 'charts' | 'history' | 'categories'): void {
+    this.activeTab.set(tab);
+    if (tab === 'history') this.loadYearSummary();
+    if (tab === 'categories' && this.realizedTransactions().length === 0) this.loadAll();
+  }
+
+  loadYearSummary(): void {
+    const year = this.filterYear();
+    this.loadingHistory.set(true);
+
+    const prevYearEnd = `${year - 1}-12-31`;
+
+    forkJoin({
+      openingBalance: this.balanceService.getBalanceUpTo(prevYearEnd),
+      entries: forkJoin(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).pipe(map((r) => r.flat())),
+      realized: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).pipe(map((r) => r.flat())),
+      projected: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).pipe(map((r) => r.flat())),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ openingBalance, entries, realized, projected }) => {
+          const transactions = [...realized, ...projected];
+          const allSavings = this.savingsMovements();
+          let running = openingBalance;
+          let savingsRunning = 0;
+          const rows: YearMonthRow[] = ALL_MONTHS.map((m, i) => {
+            const income = entries.filter((e) => +e.date.substring(5, 7) === m).reduce((s, e) => s + e.amount, 0);
+            const expense = transactions.filter((t) => +t.date.substring(5, 7) === m).reduce((s, t) => s + t.amount, 0);
+            const monthlyBalance = income - expense;
+            running += monthlyBalance;
+            const monthPrefix = `${year}-${String(m).padStart(2, '0')}`;
+            const monthSavings = allSavings.filter((s) => s.date.startsWith(monthPrefix));
+            const savingsDeposit = monthSavings.filter((s) => s.typeCode !== 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
+            const savingsWithdrawal = monthSavings.filter((s) => s.typeCode === 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
+            savingsRunning += savingsDeposit - savingsWithdrawal;
+            return {
+              month: m,
+              label: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][i],
+              income,
+              expense,
+              monthlyBalance,
+              runningBalance: running,
+              pct: income > 0 ? (expense / income) * 100 : 0,
+              savingsDeposit,
+              savingsWithdrawal,
+              savingsBalance: savingsRunning,
+            };
+          });
+          this.yearSummaryRows.set(rows);
+          this.loadingHistory.set(false);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load year summary', err);
+          this.loadingHistory.set(false);
+        },
+      });
+  }
+
+  readonly categoryMonthMatrix = computed(() => {
+    const realized = this.realizedTransactions();
+    const entries = this.yearEntries();
+    const cats = this.categories();
+    const sortCol = this.sortColIdx();
+    const dir = this.sortDir();
+
+    const catMap: Record<string, { name: string; months: number[]; total: number }> = {};
+    for (const t of realized) {
+      if (!t.categoryId) continue;
+      const cat = cats.find((c) => c.id === t.categoryId);
+      const name = cat?.name ?? t.categoryId;
+      if (!catMap[t.categoryId]) catMap[t.categoryId] = { name, months: Array(12).fill(0), total: 0 };
+      const m = +t.date.substring(5, 7) - 1;
+      catMap[t.categoryId].months[m] += t.amount;
+      catMap[t.categoryId].total += t.amount;
+    }
+
+    const rows = Object.values(catMap).sort((a, b) => {
+      let va: number | string, vb: number | string;
+      if (sortCol === -1) { va = a.name; vb = b.name; }
+      else if (sortCol === 12) { va = a.total; vb = b.total; }
+      else { va = a.months[sortCol]; vb = b.months[sortCol]; }
+      if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb as string) : (vb as string).localeCompare(va);
+      return dir === 'asc' ? (va as number) - (vb as number) : (vb as number) - (va as number);
+    });
+
+    const monthTotals = Array(12).fill(0);
+    for (const row of rows) row.months.forEach((v, i) => (monthTotals[i] += v));
+    const grandTotal = monthTotals.reduce((s, v) => s + v, 0);
+
+    const monthIncome = Array(12).fill(0);
+    for (const e of entries) {
+      const m = +e.date.substring(5, 7) - 1;
+      monthIncome[m] += e.amount;
+    }
+    const totalIncome = monthIncome.reduce((s, v) => s + v, 0);
+
+    return { rows, monthTotals, grandTotal, monthIncome, totalIncome };
+  });
+
+  readonly yearSummaryTotals = computed(() => {
+    const rows = this.yearSummaryRows();
+    const income = rows.reduce((s, r) => s + r.income, 0);
+    const expense = rows.reduce((s, r) => s + r.expense, 0);
+    return { income, expense, balance: income - expense, pct: income > 0 ? (expense / income) * 100 : 0 };
+  });
+
+  private readonly CHART_COLORS = [
+    '#6366f1','#ef4444','#f59e0b','#22c55e','#06b6d4',
+    '#ec4899','#84cc16','#f97316','#a855f7','#14b8a6',
+    '#e11d48','#0ea5e9',
+  ];
+
+  readonly multiYearChartData = computed<ChartData<'line'>>(() => {
+    const rows = this.multiYearCatData();
+    const cats = this.categories();
+    const topN = this.multiYearTopN();
+    if (!rows.length) return { labels: [], datasets: [] };
+
+    const catTotalAll: Record<string, number> = {};
+    for (const row of rows) {
+      for (const [id, amt] of Object.entries(row.catTotals)) {
+        catTotalAll[id] = (catTotalAll[id] ?? 0) + amt;
+      }
+    }
+    const topCatIds = Object.entries(catTotalAll)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, topN)
+      .map(([id]) => id);
+
+    const labels = rows.map((r) => String(r.year));
+    const datasets = topCatIds.map((catId, i) => {
+      const cat = cats.find((c) => c.id === catId);
+      return {
+        label: cat?.name ?? catId,
+        data: rows.map((r) => r.catTotals[catId] ?? 0),
+        borderColor: cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length],
+        backgroundColor: (cat?.color ?? this.CHART_COLORS[i % this.CHART_COLORS.length]) + '18',
+        fill: false,
+        tension: 0.3,
+        pointRadius: 4,
+      };
+    });
+    return { labels, datasets };
+  });
+
+  loadMultiYearCatEvolution(): void {
+    if (this.multiYearLoaded()) return;
+    this.loadingMultiYear.set(true);
+    const years = [...this.availableYears].reverse();
+
+    forkJoin(
+      years.map((y) => this.transactionService.getByYear(y, TransactionStatus.Realized))
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (results) => {
+          const rows = results.map((txList, i) => {
+            const catTotals: Record<string, number> = {};
+            for (const t of txList) {
+              if (!t.categoryId) continue;
+              catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
+            }
+            return { year: years[i], catTotals };
+          });
+          this.multiYearCatData.set(rows);
+          this.loadingMultiYear.set(false);
+          this.multiYearLoaded.set(true);
+        },
+        error: (err) => {
+          this.logger.error('Failed to load multi-year data', err);
+          this.loadingMultiYear.set(false);
+        },
+      });
   }
 
   private loadAll(): void {
@@ -452,6 +715,8 @@ export class ReportsComponent implements OnInit {
         next: ({ realized, projected, entries, prevRealized, prevEntries, savings, categories }) => {
           this.categories.set(categories);
           this.savingsMovements.set(savings);
+          this.realizedTransactions.set([...realized, ...projected]);
+          this.yearEntries.set(entries);
           this.buildCharts(year, realized, projected, entries, prevRealized, prevEntries, categories);
           this.loading.set(false);
         },
@@ -473,10 +738,10 @@ export class ReportsComponent implements OnInit {
   ): void {
     const points = ALL_MONTHS.map((m, i) => {
       const income = entries
-        .filter((e) => new Date(e.date).getMonth() + 1 === m)
+        .filter((e) => +e.date.substring(5, 7) === m)
         .reduce((s, e) => s + e.amount, 0);
       const expense = realized
-        .filter((t) => new Date(t.date).getMonth() + 1 === m)
+        .filter((t) => +t.date.substring(5, 7) === m)
         .reduce((s, t) => s + t.amount, 0);
       return { label: MONTHS_PT[i], income, expense, balance: income - expense };
     });
@@ -484,17 +749,16 @@ export class ReportsComponent implements OnInit {
 
     const prevPoints = ALL_MONTHS.map((m, i) => {
       const income = prevEntries
-        .filter((e) => new Date(e.date).getMonth() + 1 === m)
+        .filter((e) => +e.date.substring(5, 7) === m)
         .reduce((s, e) => s + e.amount, 0);
       const expense = prevRealized
-        .filter((t) => new Date(t.date).getMonth() + 1 === m)
+        .filter((t) => +t.date.substring(5, 7) === m)
         .reduce((s, t) => s + t.amount, 0);
       return { label: MONTHS_PT[i], income, expense, balance: income - expense };
     });
     this.prevMonthlyPoints.set(prevPoints);
 
     const catMap: Record<string, CategorySpend> = {};
-    const monthsWithData = new Set<string>();
 
     for (const t of realized) {
       if (!t.categoryId) continue;
@@ -509,7 +773,6 @@ export class ReportsComponent implements OnInit {
         };
       }
       catMap[t.categoryId].amount += t.amount;
-      monthsWithData.add(`${t.categoryId}-${new Date(t.date).getMonth()}`);
     }
 
     const totalMonthsInYear = Math.min(
@@ -618,6 +881,10 @@ export class ReportsComponent implements OnInit {
           this.loadingCatEvol.set(false);
         },
       });
+  }
+
+  goToMovimentos(year: number, month: number): void {
+    this.router.navigate(['/movimentos'], { queryParams: { year, month } });
   }
 
   readonly toIncome = (acc: number, p: MonthlyPoint) => acc + p.income;
