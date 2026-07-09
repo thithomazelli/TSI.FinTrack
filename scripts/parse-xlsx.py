@@ -118,9 +118,19 @@ def payment_date(year: int, month: int, due_day: int) -> str:
 
 # ── parser ───────────────────────────────────────────────────────────────────
 
+# Months after which 2026 entries/transactions become PROJECTED
+PROJECTED_FROM = (2026, 7)  # July 2026 onwards
+
+def row_status(year: int, month: int) -> str:
+    if (year, month) >= PROJECTED_FROM:
+        return "PROJECTED"
+    return "REALIZED"
+
+
 def parse_sheet(ws, year: int, month: int):
     entries      = []
     transactions = []
+    status       = row_status(year, month)
 
     in_income   = False
     in_expense  = False
@@ -173,7 +183,7 @@ def parse_sheet(ws, year: int, month: int):
                 "description": item.strip(),
                 "amount":      round(float(amount), 2),
                 "date":        dt_str,
-                "status":      "REALIZED",
+                "status":      status,
                 "labels":      [],
             })
 
@@ -221,7 +231,7 @@ def parse_sheet(ws, year: int, month: int):
                 "purchase_date":    purch,
                 "category_name":    cat_str,
                 "credit_card_name": card_name,
-                "status":           "REALIZED",
+                "status":           status,
                 "labels":           [],
             })
 

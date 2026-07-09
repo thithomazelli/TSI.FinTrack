@@ -22329,7 +22329,7 @@
       "description": "Pagto Ana - Figurinhas - 01/03",
       "amount": 183.98,
       "date": "2026-07-01T00:00:00",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22337,7 +22337,7 @@
       "description": "FGTS - Saque Aniversário",
       "amount": 1130.68,
       "date": "2026-07-01T00:00:00",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22345,7 +22345,7 @@
       "description": "Empréstimo Nubank",
       "amount": 5000.0,
       "date": "2026-07-02T00:00:00",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22353,7 +22353,7 @@
       "description": "Pagto Ana - Esfirras Jogo Brasil",
       "amount": 50.0,
       "date": "2026-07-06T00:00:00",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22361,7 +22361,7 @@
       "description": "Pagto Mãe - Convênio",
       "amount": 315.0,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22369,7 +22369,7 @@
       "description": "Pagto Ana - Perfumes - 10/10",
       "amount": 137.7,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22377,7 +22377,7 @@
       "description": "Pagto Ana - Concerto Cobalt - 05/06",
       "amount": 203.0,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22385,7 +22385,7 @@
       "description": "Pagto Emeric - Polo Ar - 09/10",
       "amount": 623.9,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22393,7 +22393,7 @@
       "description": "Pagto Ana - Notebook III - 06/12",
       "amount": 233.07,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22401,7 +22401,7 @@
       "description": "Pagto Ana - Notebook II - 06/10",
       "amount": 191.14,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22409,7 +22409,7 @@
       "description": "RDI - Salário",
       "amount": 17332.55,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22417,7 +22417,7 @@
       "description": "Pagto Ana - Mario Galaxy - 08/10",
       "amount": 25.0,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22425,7 +22425,7 @@
       "description": "Pagto Ana - Carrinho Bebe - 12/12",
       "amount": 180.39,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22433,7 +22433,7 @@
       "description": "Pagto Ana - Monitor - 07/10",
       "amount": 79.9,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22441,7 +22441,7 @@
       "description": "Pagto Ana - Notebook I - 07/10",
       "amount": 184.9,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22449,7 +22449,7 @@
       "description": "Pagto Ana - Mercado Livre - Gelo - 04/10",
       "amount": 57.99,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22457,7 +22457,7 @@
       "description": "Pagto Ana - Camisa Futebol - 03/03",
       "amount": 70.18,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22465,7 +22465,7 @@
       "description": "Pagto Ana - Marhava Perfumes - 03/10",
       "amount": 29.9,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22473,7 +22473,7 @@
       "description": "Pagto Ana - Figurinhas - 02/03",
       "amount": 183.99,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22481,7 +22481,7 @@
       "description": "Pagto Ana - Toy Story 5",
       "amount": 280.0,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22489,7 +22489,7 @@
       "description": "Nicole - Pagto Contas",
       "amount": 2000.0,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22497,7 +22497,7 @@
       "description": "Nicole - Compra Fabiana - 05/10",
       "amount": 288.85,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22505,7 +22505,7 @@
       "description": "Pagto Mãe - Convênio",
       "amount": 315.0,
       "date": "2026-07-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22513,7 +22513,7 @@
       "description": "Pagto Ana - Concerto Cobalt - 06/06",
       "amount": 203.0,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22521,7 +22521,7 @@
       "description": "Pagto Emeric - Polo Ar - 10/10",
       "amount": 623.9,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22529,7 +22529,7 @@
       "description": "Pagto Ana - Notebook III - 07/12",
       "amount": 233.07,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22537,7 +22537,7 @@
       "description": "Pagto Ana - Notebook II - 07/10",
       "amount": 191.14,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22545,7 +22545,7 @@
       "description": "RDI - Salário",
       "amount": 17332.55,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22553,7 +22553,7 @@
       "description": "Pagto Ana - Mario Galaxy - 09/10",
       "amount": 25.0,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22561,7 +22561,7 @@
       "description": "Pagto Ana - Monitor - 08/10",
       "amount": 79.9,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22569,7 +22569,7 @@
       "description": "Pagto Ana - Notebook I - 08/10",
       "amount": 184.9,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22577,7 +22577,7 @@
       "description": "Pagto Ana - Mercado Livre - Gelo - 05/10",
       "amount": 57.99,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22585,7 +22585,7 @@
       "description": "Pagto Ana - Marhava Perfumes - 04/10",
       "amount": 29.9,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22593,7 +22593,7 @@
       "description": "Pagto Ana - Figurinhas - 03/03",
       "amount": 183.99,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22601,7 +22601,7 @@
       "description": "Nicole - Pagto Contas",
       "amount": 2000.0,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22609,7 +22609,7 @@
       "description": "Nicole - Compra Fabiana - 06/10",
       "amount": 288.85,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22617,7 +22617,7 @@
       "description": "Pagto Mãe - Convênio",
       "amount": 315.0,
       "date": "2026-08-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22625,7 +22625,7 @@
       "description": "Pagto Ana - Notebook III - 08/12",
       "amount": 233.07,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22633,7 +22633,7 @@
       "description": "Pagto Ana - Notebook II - 08/10",
       "amount": 191.14,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22641,7 +22641,7 @@
       "description": "RDI - Salário",
       "amount": 17332.55,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22649,7 +22649,7 @@
       "description": "Pagto Ana - Mario Galaxy - 10/10",
       "amount": 25.0,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22657,7 +22657,7 @@
       "description": "Pagto Ana - Monitor - 09/10",
       "amount": 79.9,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22665,7 +22665,7 @@
       "description": "Pagto Ana - Notebook I - 09/10",
       "amount": 184.9,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22673,7 +22673,7 @@
       "description": "Pagto Ana - Mercado Livre - Gelo - 06/10",
       "amount": 57.99,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22681,7 +22681,7 @@
       "description": "Pagto Ana - Marhava Perfumes - 05/10",
       "amount": 29.9,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22689,7 +22689,7 @@
       "description": "Nicole - Pagto Contas",
       "amount": 2000.0,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22697,7 +22697,7 @@
       "description": "Nicole - Compra Fabiana - 07/10",
       "amount": 288.85,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22705,7 +22705,7 @@
       "description": "Pagto Mãe - Convênio",
       "amount": 315.0,
       "date": "2026-09-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22713,7 +22713,7 @@
       "description": "Pagto Ana - Notebook III - 09/12",
       "amount": 233.07,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22721,7 +22721,7 @@
       "description": "Pagto Ana - Notebook II - 09/10",
       "amount": 191.14,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22729,7 +22729,7 @@
       "description": "RDI - Salário",
       "amount": 17332.55,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22737,7 +22737,7 @@
       "description": "Pagto Ana - Monitor - 10/10",
       "amount": 79.9,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22745,7 +22745,7 @@
       "description": "Pagto Ana - Notebook I - 10/10",
       "amount": 184.9,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22753,7 +22753,7 @@
       "description": "Pagto Ana - Mercado Livre - Gelo - 07/10",
       "amount": 57.99,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22761,7 +22761,7 @@
       "description": "Pagto Ana - Marhava Perfumes - 06/10",
       "amount": 29.9,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22769,7 +22769,7 @@
       "description": "Nicole - Pagto Contas",
       "amount": 2000.0,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22777,7 +22777,7 @@
       "description": "Nicole - Compra Fabiana - 08/10",
       "amount": 288.85,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22785,7 +22785,7 @@
       "description": "Pagto Mãe - Convênio",
       "amount": 315.0,
       "date": "2026-10-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22793,7 +22793,7 @@
       "description": "Pagto Ana - Notebook III - 10/12",
       "amount": 233.07,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22801,7 +22801,7 @@
       "description": "Pagto Ana - Notebook II - 10/10",
       "amount": 191.14,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22809,7 +22809,7 @@
       "description": "RDI - Salário",
       "amount": 17332.55,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22817,7 +22817,7 @@
       "description": "Pagto Ana - Mercado Livre - Gelo - 08/10",
       "amount": 57.99,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22825,7 +22825,7 @@
       "description": "Pagto Ana - Marhava Perfumes - 07/10",
       "amount": 29.9,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22833,7 +22833,7 @@
       "description": "Nicole - Pagto Contas",
       "amount": 2000.0,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22841,7 +22841,7 @@
       "description": "Nicole - Compra Fabiana - 09/10",
       "amount": 288.85,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22849,7 +22849,7 @@
       "description": "Pagto Mãe - Convênio",
       "amount": 315.0,
       "date": "2026-11-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22857,7 +22857,7 @@
       "description": "Pagto Ana - Notebook III - 11/12",
       "amount": 233.07,
       "date": "2026-12-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22865,7 +22865,7 @@
       "description": "RDI - Salário",
       "amount": 17332.55,
       "date": "2026-12-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22873,7 +22873,7 @@
       "description": "RDI - 13º Salário - 02/02",
       "amount": 4408.71,
       "date": "2026-12-05",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22881,7 +22881,7 @@
       "description": "Pagto Ana - Mercado Livre - Gelo - 09/10",
       "amount": 57.99,
       "date": "2026-12-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22889,7 +22889,7 @@
       "description": "Pagto Ana - Marhava Perfumes - 08/10",
       "amount": 29.9,
       "date": "2026-12-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22897,7 +22897,7 @@
       "description": "Nicole - Pagto Contas",
       "amount": 2000.0,
       "date": "2026-12-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22905,7 +22905,7 @@
       "description": "Nicole - Compra Fabiana - 10/10",
       "amount": 288.85,
       "date": "2026-12-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -22913,7 +22913,7 @@
       "description": "Pagto Mãe - Convênio",
       "amount": 315.0,
       "date": "2026-12-01",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     }
   ],
@@ -181309,6 +181309,17 @@
     },
     {
       "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Bet365 - Depósito p/ assistir jogos Basquete",
+      "amount": 5.0,
+      "date": "2025-11-24T00:00:00",
+      "purchase_date": null,
+      "category_name": "Lazer",
+      "credit_card_name": null,
+      "status": "REALIZED",
+      "labels": []
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
       "description": "Itaú - Financiamento Onix 2022 - Parcela 40/60",
       "amount": 2242.32,
       "date": "2025-11-25T00:00:00",
@@ -196110,7 +196121,7 @@
       "purchase_date": null,
       "category_name": "Alimentação/Mercado",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196121,7 +196132,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196132,7 +196143,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196143,7 +196154,7 @@
       "purchase_date": null,
       "category_name": "Tarifas/Juros",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196154,7 +196165,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196165,7 +196176,7 @@
       "purchase_date": "2025-10-29T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196176,7 +196187,7 @@
       "purchase_date": "2026-02-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196187,7 +196198,7 @@
       "purchase_date": "2026-02-16T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196198,7 +196209,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196209,7 +196220,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196220,7 +196231,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196231,7 +196242,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196242,7 +196253,7 @@
       "purchase_date": "2026-02-27T00:00:00",
       "category_name": "Enxoval",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196253,7 +196264,7 @@
       "purchase_date": "2026-03-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196264,7 +196275,7 @@
       "purchase_date": "2026-03-20T00:00:00",
       "category_name": "Médico",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196275,7 +196286,7 @@
       "purchase_date": "2026-04-01T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196286,7 +196297,7 @@
       "purchase_date": "2026-04-03T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196297,7 +196308,7 @@
       "purchase_date": "2026-04-22T00:00:00",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196308,7 +196319,7 @@
       "purchase_date": "2026-05-02T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196319,7 +196330,7 @@
       "purchase_date": "2026-05-02T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196330,7 +196341,7 @@
       "purchase_date": "2026-05-04T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196341,7 +196352,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196352,7 +196363,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196363,7 +196374,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196374,7 +196385,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196385,7 +196396,7 @@
       "purchase_date": "2026-05-12T00:00:00",
       "category_name": "Despesas Terreno",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196396,7 +196407,7 @@
       "purchase_date": "2026-05-13T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196407,7 +196418,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196418,7 +196429,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196429,7 +196440,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196440,7 +196451,7 @@
       "purchase_date": "2026-05-19T00:00:00",
       "category_name": "Médico",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196451,7 +196462,7 @@
       "purchase_date": "2026-05-24T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196462,7 +196473,7 @@
       "purchase_date": "2026-06-03T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196473,7 +196484,7 @@
       "purchase_date": "2026-06-05T00:00:00",
       "category_name": "Médico",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196484,7 +196495,7 @@
       "purchase_date": "2026-06-07T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196495,7 +196506,7 @@
       "purchase_date": "2026-06-12T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196506,7 +196517,7 @@
       "purchase_date": "2026-06-18T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196517,7 +196528,7 @@
       "purchase_date": "2026-06-18T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196528,7 +196539,7 @@
       "purchase_date": "2026-06-18T00:00:00",
       "category_name": "Uber/99",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196539,7 +196550,7 @@
       "purchase_date": "2026-06-18T00:00:00",
       "category_name": "Farmácia",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196550,7 +196561,7 @@
       "purchase_date": "2026-06-18T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196561,7 +196572,7 @@
       "purchase_date": "2026-06-19T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196572,7 +196583,7 @@
       "purchase_date": "2026-06-19T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196583,7 +196594,7 @@
       "purchase_date": "2026-06-19T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196594,7 +196605,7 @@
       "purchase_date": "2026-06-20T00:00:00",
       "category_name": "Farmácia",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196605,7 +196616,7 @@
       "purchase_date": "2026-06-20T00:00:00",
       "category_name": "Farmácia",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196616,7 +196627,7 @@
       "purchase_date": "2026-06-20T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196627,7 +196638,7 @@
       "purchase_date": "2026-06-22T00:00:00",
       "category_name": "Celular",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196638,7 +196649,7 @@
       "purchase_date": "2026-06-22T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196649,7 +196660,7 @@
       "purchase_date": "2026-06-23T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196660,7 +196671,7 @@
       "purchase_date": "2026-06-24T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196671,7 +196682,7 @@
       "purchase_date": "2026-06-25T00:00:00",
       "category_name": "Farmácia",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196682,7 +196693,7 @@
       "purchase_date": "2026-06-25T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196693,7 +196704,7 @@
       "purchase_date": "2026-06-25T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196704,7 +196715,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196715,7 +196726,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "TI",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196726,7 +196737,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196737,7 +196748,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196748,7 +196759,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196759,7 +196770,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196770,7 +196781,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196781,7 +196792,7 @@
       "purchase_date": "2026-06-28T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196792,7 +196803,7 @@
       "purchase_date": "2026-06-28T00:00:00",
       "category_name": "Uber/99",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196803,7 +196814,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196814,7 +196825,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Celular",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196825,7 +196836,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196836,7 +196847,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196847,7 +196858,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196858,7 +196869,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196869,7 +196880,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196880,7 +196891,7 @@
       "purchase_date": "2026-06-30T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196891,7 +196902,7 @@
       "purchase_date": "2026-07-01T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196902,7 +196913,7 @@
       "purchase_date": "2026-07-01T00:00:00",
       "category_name": "Farmácia",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196913,7 +196924,7 @@
       "purchase_date": "2026-07-01T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196924,7 +196935,7 @@
       "purchase_date": "2026-07-02T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196935,7 +196946,7 @@
       "purchase_date": "2026-07-02T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196946,7 +196957,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196957,7 +196968,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196968,7 +196979,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196979,7 +196990,7 @@
       "purchase_date": "2026-07-04T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -196990,7 +197001,7 @@
       "purchase_date": "2026-07-04T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197001,7 +197012,7 @@
       "purchase_date": "2026-07-05T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197012,7 +197023,7 @@
       "purchase_date": "2026-07-06T00:00:00",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197023,7 +197034,7 @@
       "purchase_date": "2026-07-06T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197034,7 +197045,7 @@
       "purchase_date": "2026-07-07T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197045,7 +197056,7 @@
       "purchase_date": "2026-07-07T00:00:00",
       "category_name": "Farmácia",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197056,7 +197067,7 @@
       "purchase_date": "2025-07-01T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197067,7 +197078,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197078,7 +197089,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197089,7 +197100,7 @@
       "purchase_date": "2026-06-22T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197100,7 +197111,7 @@
       "purchase_date": "2026-06-28T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197111,7 +197122,7 @@
       "purchase_date": "2026-06-28T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197122,7 +197133,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197133,7 +197144,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197144,7 +197155,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Estudo",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197155,7 +197166,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Alimentação/Mercado",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197166,7 +197177,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197177,7 +197188,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Convênio Médico",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197188,7 +197199,7 @@
       "purchase_date": "2026-06-29T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197199,7 +197210,7 @@
       "purchase_date": "2026-06-30T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197210,7 +197221,7 @@
       "purchase_date": "2026-06-27T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197221,7 +197232,7 @@
       "purchase_date": "2026-07-29",
       "category_name": "Empréstimo bancário",
       "credit_card_name": "Crédito Nubank",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197232,7 +197243,7 @@
       "purchase_date": "2026-07-27",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197243,7 +197254,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197254,7 +197265,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197265,7 +197276,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197276,7 +197287,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197287,7 +197298,7 @@
       "purchase_date": null,
       "category_name": "Estudo",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197298,7 +197309,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197309,7 +197320,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197320,7 +197331,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197331,7 +197342,7 @@
       "purchase_date": "2023-06-24T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197342,7 +197353,7 @@
       "purchase_date": "2025-10-29T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197353,7 +197364,7 @@
       "purchase_date": "2026-02-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197364,7 +197375,7 @@
       "purchase_date": "2026-02-16T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197375,7 +197386,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197386,7 +197397,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197397,7 +197408,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197408,7 +197419,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197419,7 +197430,7 @@
       "purchase_date": "2026-02-27T00:00:00",
       "category_name": "Enxoval",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197430,7 +197441,7 @@
       "purchase_date": "2026-03-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197441,7 +197452,7 @@
       "purchase_date": "2026-03-20T00:00:00",
       "category_name": "Médico",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197452,7 +197463,7 @@
       "purchase_date": "2026-04-01T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197463,7 +197474,7 @@
       "purchase_date": "2026-04-03T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197474,7 +197485,7 @@
       "purchase_date": "2026-04-22T00:00:00",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197485,7 +197496,7 @@
       "purchase_date": "2026-05-04T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197496,7 +197507,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197507,7 +197518,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197518,7 +197529,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197529,7 +197540,7 @@
       "purchase_date": "2026-05-13T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197540,7 +197551,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197551,7 +197562,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197562,7 +197573,7 @@
       "purchase_date": "2026-05-19T00:00:00",
       "category_name": "Médico",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197573,7 +197584,7 @@
       "purchase_date": "2026-05-24T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197584,7 +197595,7 @@
       "purchase_date": "2026-06-03T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197595,7 +197606,7 @@
       "purchase_date": "2026-06-05T00:00:00",
       "category_name": "Médico",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197606,7 +197617,7 @@
       "purchase_date": "2026-06-07T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197617,7 +197628,7 @@
       "purchase_date": "2026-06-12T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197628,7 +197639,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197639,7 +197650,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197650,7 +197661,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197661,7 +197672,7 @@
       "purchase_date": "2026-07-25T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197672,7 +197683,7 @@
       "purchase_date": "2026-07-25T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197683,7 +197694,7 @@
       "purchase_date": "2026-07-25T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197694,7 +197705,7 @@
       "purchase_date": "2026-07-25T00:00:00",
       "category_name": "Estudo",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197705,7 +197716,7 @@
       "purchase_date": "2026-07-27T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197716,7 +197727,7 @@
       "purchase_date": "2026-07-26T00:00:00",
       "category_name": "Convênio Médico",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197727,7 +197738,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197738,7 +197749,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197749,7 +197760,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Celular",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197760,7 +197771,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197771,7 +197782,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197782,7 +197793,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197793,7 +197804,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197804,7 +197815,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197815,7 +197826,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197826,7 +197837,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197837,7 +197848,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197848,7 +197859,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197859,7 +197870,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197870,7 +197881,7 @@
       "purchase_date": "2026-07-30T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197881,7 +197892,7 @@
       "purchase_date": "2026-08-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197892,7 +197903,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197903,7 +197914,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197914,7 +197925,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197925,7 +197936,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197936,7 +197947,7 @@
       "purchase_date": null,
       "category_name": "Estudo",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197947,7 +197958,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197958,7 +197969,7 @@
       "purchase_date": null,
       "category_name": "Convênio Médico",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197969,7 +197980,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197980,7 +197991,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -197991,7 +198002,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198002,7 +198013,7 @@
       "purchase_date": "2023-06-24T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198013,7 +198024,7 @@
       "purchase_date": "2026-02-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198024,7 +198035,7 @@
       "purchase_date": "2026-02-16T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198035,7 +198046,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198046,7 +198057,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198057,7 +198068,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198068,7 +198079,7 @@
       "purchase_date": "2026-02-27T00:00:00",
       "category_name": "Enxoval",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198079,7 +198090,7 @@
       "purchase_date": "2026-03-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198090,7 +198101,7 @@
       "purchase_date": "2026-04-01T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198101,7 +198112,7 @@
       "purchase_date": "2026-04-03T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198112,7 +198123,7 @@
       "purchase_date": "2026-04-22T00:00:00",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198123,7 +198134,7 @@
       "purchase_date": "2026-05-04T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198134,7 +198145,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198145,7 +198156,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198156,7 +198167,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198167,7 +198178,7 @@
       "purchase_date": "2026-05-13T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198178,7 +198189,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198189,7 +198200,7 @@
       "purchase_date": "2026-06-12T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198200,7 +198211,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198211,7 +198222,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198222,7 +198233,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198233,7 +198244,7 @@
       "purchase_date": "2026-08-26T00:00:00",
       "category_name": "Convênio Médico",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198244,7 +198255,7 @@
       "purchase_date": "2026-08-27T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198255,7 +198266,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198266,7 +198277,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198277,7 +198288,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Celular",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198288,7 +198299,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198299,7 +198310,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198310,7 +198321,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198321,7 +198332,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198332,7 +198343,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198343,7 +198354,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198354,7 +198365,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198365,7 +198376,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198376,7 +198387,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198387,7 +198398,7 @@
       "purchase_date": "2026-08-30T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198398,7 +198409,7 @@
       "purchase_date": "2026-09-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198409,7 +198420,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198420,7 +198431,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198431,7 +198442,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198442,7 +198453,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198453,7 +198464,7 @@
       "purchase_date": null,
       "category_name": "Estudo",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198464,7 +198475,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198475,7 +198486,7 @@
       "purchase_date": null,
       "category_name": "Convênio Médico",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198486,7 +198497,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198497,7 +198508,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198508,7 +198519,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198519,7 +198530,7 @@
       "purchase_date": "2023-06-24T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198530,7 +198541,7 @@
       "purchase_date": "2026-02-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198541,7 +198552,7 @@
       "purchase_date": "2026-02-16T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198552,7 +198563,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198563,7 +198574,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198574,7 +198585,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198585,7 +198596,7 @@
       "purchase_date": "2026-02-27T00:00:00",
       "category_name": "Enxoval",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198596,7 +198607,7 @@
       "purchase_date": "2026-03-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198607,7 +198618,7 @@
       "purchase_date": "2026-04-01T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198618,7 +198629,7 @@
       "purchase_date": "2026-04-03T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198629,7 +198640,7 @@
       "purchase_date": "2026-04-22T00:00:00",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198640,7 +198651,7 @@
       "purchase_date": "2026-05-04T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198651,7 +198662,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198662,7 +198673,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198673,7 +198684,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198684,7 +198695,7 @@
       "purchase_date": "2026-05-13T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198695,7 +198706,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198706,7 +198717,7 @@
       "purchase_date": "2026-06-12T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198717,7 +198728,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198728,7 +198739,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198739,7 +198750,7 @@
       "purchase_date": "2026-01-05T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Itaú Multi Pontos",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198750,7 +198761,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198761,7 +198772,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198772,7 +198783,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Celular",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198783,7 +198794,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198794,7 +198805,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198805,7 +198816,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198816,7 +198827,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198827,7 +198838,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198838,7 +198849,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198849,7 +198860,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198860,7 +198871,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198871,7 +198882,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198882,7 +198893,7 @@
       "purchase_date": "2026-09-30T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198893,7 +198904,7 @@
       "purchase_date": "2026-10-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198904,7 +198915,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198915,7 +198926,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198926,7 +198937,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198937,7 +198948,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198948,7 +198959,7 @@
       "purchase_date": null,
       "category_name": "Estudo",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198959,7 +198970,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198970,7 +198981,7 @@
       "purchase_date": null,
       "category_name": "Convênio Médico",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198981,7 +198992,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -198992,7 +199003,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199003,7 +199014,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199014,7 +199025,7 @@
       "purchase_date": "2023-06-24T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199025,7 +199036,7 @@
       "purchase_date": "2024-12-20T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199036,7 +199047,7 @@
       "purchase_date": "2026-02-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199047,7 +199058,7 @@
       "purchase_date": "2026-02-16T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199058,7 +199069,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199069,7 +199080,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199080,7 +199091,7 @@
       "purchase_date": "2026-02-27T00:00:00",
       "category_name": "Enxoval",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199091,7 +199102,7 @@
       "purchase_date": "2026-03-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199102,7 +199113,7 @@
       "purchase_date": "2026-04-01T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199113,7 +199124,7 @@
       "purchase_date": "2026-04-03T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199124,7 +199135,7 @@
       "purchase_date": "2026-05-04T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199135,7 +199146,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199146,7 +199157,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199157,7 +199168,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199168,7 +199179,7 @@
       "purchase_date": "2026-05-13T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199179,7 +199190,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199190,7 +199201,7 @@
       "purchase_date": "2026-06-12T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199201,7 +199212,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199212,7 +199223,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199223,7 +199234,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199234,7 +199245,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Celular",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199245,7 +199256,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199256,7 +199267,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199267,7 +199278,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199278,7 +199289,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199289,7 +199300,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199300,7 +199311,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199311,7 +199322,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199322,7 +199333,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199333,7 +199344,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199344,7 +199355,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199355,7 +199366,7 @@
       "purchase_date": "2026-10-30T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199366,7 +199377,7 @@
       "purchase_date": "2026-11-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199377,7 +199388,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199388,7 +199399,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199399,7 +199410,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199410,7 +199421,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199421,7 +199432,7 @@
       "purchase_date": null,
       "category_name": "Estudo",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199432,7 +199443,7 @@
       "purchase_date": null,
       "category_name": "Despesas Carro",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199443,7 +199454,7 @@
       "purchase_date": null,
       "category_name": "Convênio Médico",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199454,7 +199465,7 @@
       "purchase_date": null,
       "category_name": "Despesas Casa",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199465,7 +199476,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199476,7 +199487,7 @@
       "purchase_date": null,
       "category_name": "Despesas Terreno",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199487,7 +199498,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199498,7 +199509,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199509,7 +199520,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199520,7 +199531,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199531,7 +199542,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199542,7 +199553,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199553,7 +199564,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199564,7 +199575,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199575,7 +199586,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199586,7 +199597,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199597,7 +199608,7 @@
       "purchase_date": null,
       "category_name": "Empréstimo bancário",
       "credit_card_name": null,
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199608,7 +199619,7 @@
       "purchase_date": "2023-06-24T00:00:00",
       "category_name": "Tarifas/Juros",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199619,7 +199630,7 @@
       "purchase_date": "2024-12-20T00:00:00",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199630,7 +199641,7 @@
       "purchase_date": "2026-02-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199641,7 +199652,7 @@
       "purchase_date": "2026-02-16T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199652,7 +199663,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199663,7 +199674,7 @@
       "purchase_date": "2026-02-26T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199674,7 +199685,7 @@
       "purchase_date": "2026-02-27T00:00:00",
       "category_name": "Enxoval",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199685,7 +199696,7 @@
       "purchase_date": "2026-03-13T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199696,7 +199707,7 @@
       "purchase_date": "2026-04-01T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199707,7 +199718,7 @@
       "purchase_date": "2026-04-03T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199718,7 +199729,7 @@
       "purchase_date": "2026-05-04T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199729,7 +199740,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199740,7 +199751,7 @@
       "purchase_date": "2026-05-09T00:00:00",
       "category_name": "Empréstimo pessoal",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199751,7 +199762,7 @@
       "purchase_date": "2026-05-13T00:00:00",
       "category_name": "Lazer",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199762,7 +199773,7 @@
       "purchase_date": "2026-05-15T00:00:00",
       "category_name": "Roupas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199773,7 +199784,7 @@
       "purchase_date": "2026-07-03T00:00:00",
       "category_name": "Presente",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199784,7 +199795,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199795,7 +199806,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199806,7 +199817,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Celular",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199817,7 +199828,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199828,7 +199839,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199839,7 +199850,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199850,7 +199861,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199861,7 +199872,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199872,7 +199883,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199883,7 +199894,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199894,7 +199905,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Combustível",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199905,7 +199916,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199916,7 +199927,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199927,7 +199938,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Despesas Carro",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199938,7 +199949,7 @@
       "purchase_date": "2026-11-30T00:00:00",
       "category_name": "Despesas Casa",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     },
     {
@@ -199949,7 +199960,7 @@
       "purchase_date": "2026-12-27",
       "category_name": "Assinaturas",
       "credit_card_name": "Crédito Latam Pass",
-      "status": "REALIZED",
+      "status": "PROJECTED",
       "labels": []
     }
   ]
