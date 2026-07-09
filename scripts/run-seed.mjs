@@ -33,8 +33,12 @@ async function batchInsert(table, rows, label) {
 }
 
 const SEED_CARDS = [
-  "Crédito Nubank", "Crédito Latam Pass", "Crédito Itaú Multi Pontos",
-  "Crédito Mastercard", "Crédito Visa", "Débito Itaú",
+  { name: 'Crédito Nubank',           last_four_digits: '1998', credit_limit: 15450,  closing_day: 21, due_day: 29, is_archived: false },
+  { name: 'Crédito Latam Pass',       last_four_digits: '2550', credit_limit: 83820,  closing_day: 19, due_day: 27, is_archived: false },
+  { name: 'Crédito Itaú Multi Pontos',last_four_digits: '9367', credit_limit: 15000,  closing_day: 21, due_day: 27, is_archived: false },
+  { name: 'Crédito Mastercard',       last_four_digits: '0000', credit_limit: 0,      closing_day:  1, due_day: 10, is_archived: true  },
+  { name: 'Crédito Visa',             last_four_digits: '0000', credit_limit: 0,      closing_day:  1, due_day: 10, is_archived: true  },
+  { name: 'Débito Itaú',             last_four_digits: '9367', credit_limit: 0,      closing_day:  1, due_day: 10, is_archived: false },
 ]
 
 // Mapeia o nome original do seed para o nome novo do cartão
@@ -144,13 +148,23 @@ async function main() {
   console.log(`  Cartões existentes (${existingCards.length}):`, existingCards.map(c => c.name).join(', ') || 'nenhum')
 
   const existingCardNames = new Set(existingCards.map(c => c.name.toLowerCase()))
-  for (const name of SEED_CARDS) {
-    if (existingCardNames.has(name.toLowerCase())) continue
+  for (const card of SEED_CARDS) {
+    if (existingCardNames.has(card.name.toLowerCase())) {
+      // Update real metadata in case it was created with placeholder values
+      await supabase.from('credit_cards').update({
+        last_four_digits: card.last_four_digits,
+        credit_limit: card.credit_limit,
+        closing_day: card.closing_day,
+        due_day: card.due_day,
+        is_archived: card.is_archived,
+      }).eq('owner_id', OWNER_ID).ilike('name', card.name)
+      continue
+    }
     const { error: insErr } = await supabase.from('credit_cards').insert({
-      owner_id: OWNER_ID, name, last_four_digits: '0000', credit_limit: 0, closing_day: 1, due_day: 10,
+      owner_id: OWNER_ID, ...card,
     })
-    if (insErr) { console.error(`Erro ao criar cartão "${name}":`, JSON.stringify(insErr)); process.exit(1) }
-    console.log(`  Cartão criado: ${name} ✓`)
+    if (insErr) { console.error(`Erro ao criar cartão "${card.name}":`, JSON.stringify(insErr)); process.exit(1) }
+    console.log(`  Cartão criado: ${card.name} ✓`)
   }
 
   const { data: cards, error: cardSelErr2 } = await supabase
