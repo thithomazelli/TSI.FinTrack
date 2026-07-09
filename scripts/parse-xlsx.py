@@ -41,18 +41,10 @@ TIPO_MAP = {
 SKIP_B = {
     "resumo anual", "saldo atual", "renda mensal", "item", "total",
     "despesas mensais", "tipo", "porcentagem da renda gasta",
-    "rótulos de linha", "resumo", "grand total", "salário mensal",
+    "rótulos de linha", "resumo", "grand total",
 }
 
 MONTH_RE = re.compile(r"^(\d{2})\.")  # "01. Janeiro" → group 1 = "01"
-
-# Months from which 2026 entries become PROJECTED
-PROJECTED_FROM = (2026, 7)  # July 2026 onwards
-
-def row_status(year: int, month: int) -> str:
-    if (year, month) >= PROJECTED_FROM:
-        return "PROJECTED"
-    return "REALIZED"
 
 # Normalise category names that changed over the years
 CAT_ALIAS = {
@@ -81,9 +73,23 @@ def open_xlsx(path: Path):
     return openpyxl.load_workbook(buf, data_only=True)
 
 
-def to_date_str(val, fallback_year: int = 0, fallback_month: int = 0, enforce_month: bool = False) -> str | None:
+def to_date_str(val, fallback_year: int, fallback_month: int, enforce_month: bool = False) -> str | None:
+    """Convert a cell value to an ISO date string.
+
+    enforce_month=True: force the result into fallback_year/fallback_month (used for
+    debit transactions whose date must belong to the sheet's month).
+    """
     if isinstance(val, (datetime, date)):
-        return val.strftime("%Y-%m-%d")
+        d = val if isinstance(val, date) else val.date()
+        # Dates before 2000 almost certainly have the wrong year due to a cell
+        # storing only the day number (e.g. 19 → 1900-01-19 instead of 2020-01-19).
+        if d.year < 2000:
+            last = calendar.monthrange(fallback_year, fallback_month)[1]
+            return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
+        if enforce_month and (d.year != fallback_year or d.month != fallback_month):
+            last = calendar.monthrange(fallback_year, fallback_month)[1]
+            return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
+        return d.isoformat()
     return None
 
 
@@ -112,9 +118,19 @@ def payment_date(year: int, month: int, due_day: int) -> str:
 
 # ── parser ───────────────────────────────────────────────────────────────────
 
+# Months after which 2026 entries/transactions become PROJECTED
+PROJECTED_FROM = (2026, 7)  # July 2026 onwards
+
+def row_status(year: int, month: int) -> str:
+    if (year, month) >= PROJECTED_FROM:
+        return "PROJECTED"
+    return "REALIZED"
+
+
 def parse_sheet(ws, year: int, month: int):
     entries      = []
     transactions = []
+    status       = row_status(year, month)
 
     in_income   = False
     in_expense  = False
@@ -167,7 +183,7 @@ def parse_sheet(ws, year: int, month: int):
                 "description": item.strip(),
                 "amount":      round(float(amount), 2),
                 "date":        dt_str,
-                "status":      row_status(year, month),
+                "status":      status,
                 "labels":      [],
             })
 
@@ -191,14 +207,16 @@ def parse_sheet(ws, year: int, month: int):
                 continue
 
             card_name = TIPO_MAP[tipo_l]   # None = debit
-            purchase_dt = to_date_str(dt_val, year, month)
 
             if card_name:
+                # Credit: purchase date may be from previous month (normal for CC billing)
+                purchase_dt = to_date_str(dt_val, year, month)
                 due_day = CARD_DUE.get(card_name.lower(), 10)
                 bill_dt  = payment_date(year, month, due_day)
                 purch    = purchase_dt or bill_dt
             else:
-                # Debit: date = purchase date, no purchase_date field
+                # Debit: date must belong to the sheet's month — enforce it
+                purchase_dt = to_date_str(dt_val, year, month, enforce_month=True)
                 bill_dt  = purchase_dt or date(year, month, calendar.monthrange(year, month)[1]).isoformat()
                 purch    = None
 
@@ -213,39 +231,27 @@ def parse_sheet(ws, year: int, month: int):
                 "purchase_date":    purch,
                 "category_name":    cat_str,
                 "credit_card_name": card_name,
-                "status":           row_status(year, month),
+                "status":           status,
                 "labels":           [],
             })
 
-    # ── Extract savings movements ─────────────────────────────────────────────
-    # Poupança category in expenses → DEPOSIT into savings
-    # Description containing "resgate" / "retirada" → WITHDRAWAL
+    # ── Savings movements (category "Poupança") ───────────────────────────
     savings = []
-    WITHDRAWAL_KW = {"resgate", "retirada", "saque"}
+    WITHDRAWAL_KEYWORDS = ("devolução", "resgate", "restituição", "retirada")
     for t in transactions:
-        if t.get("category_name", "").strip().lower() == "poupança":
-            desc_l = t["description"].lower()
-            type_code = "WITHDRAWAL" if any(kw in desc_l for kw in WITHDRAWAL_KW) else "DEPOSIT"
-            savings.append({
-                "owner_id":   OWNER_ID,
-                "description": t["description"],
-                "amount":      t["amount"],
-                "date":        t["purchase_date"] or t["date"],
-                "type_code":   type_code,
-                "status":      t["status"],
-            })
-
-    # Income entries with "poupan" in description → WITHDRAWAL (transfer out of savings)
-    for e in entries:
-        if "poupan" in e["description"].lower():
-            savings.append({
-                "owner_id":   OWNER_ID,
-                "description": e["description"],
-                "amount":      e["amount"],
-                "date":        e["date"],
-                "type_code":   "WITHDRAWAL",
-                "status":      e["status"],
-            })
+        if (t.get("category_name") or "").lower() != "poupança":
+            continue
+        desc_l = t["description"].lower()
+        mv_type = "WITHDRAWAL" if any(k in desc_l for k in WITHDRAWAL_KEYWORDS) else "DEPOSIT"
+        # Withdrawals are negative so the running balance decreases
+        amount = -t["amount"] if mv_type == "WITHDRAWAL" else t["amount"]
+        savings.append({
+            "owner_id":    OWNER_ID,
+            "description": t["description"],
+            "amount":      round(amount, 2),
+            "date":        t["date"],
+            "type":        mv_type,
+        })
 
     return entries, transactions, savings
 
@@ -280,8 +286,8 @@ def main():
         m = re.search(r"(\d{4})\.xlsx$", f.name)
         if not m: continue
         year = int(m.group(1))
-        # keep last uploaded (highest prefix) for each year
-        if year not in year_files or f.name > year_files[year].name:
+        # keep most recently modified file for each year
+        if year not in year_files or f.stat().st_mtime > year_files[year].stat().st_mtime:
             year_files[year] = f
 
     # Also check Orc_amento variant
@@ -289,14 +295,13 @@ def main():
         m = re.search(r"(\d{4})\.xlsx$", f.name)
         if not m: continue
         year = int(m.group(1))
-        if year not in year_files or f.name > year_files[year].name:
+        if year not in year_files or f.stat().st_mtime > year_files[year].stat().st_mtime:
             year_files[year] = f
 
     print(f"Encontrados {len(year_files)} arquivos: {sorted(year_files)}\n")
 
     all_entries      = []
     all_transactions = []
-
     all_savings      = []
 
     for year in sorted(year_files):
@@ -309,7 +314,7 @@ def main():
         print(f"  → subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
 
     result = {
-        "meta": {"opening_balance": 0},
+        "meta": {"opening_balance": -305, "opened_at": "2009-05-01"},
         "entries":      all_entries,
         "transactions": all_transactions,
         "savings":      all_savings,
