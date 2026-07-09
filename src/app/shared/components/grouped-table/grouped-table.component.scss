@@ -277,7 +277,6 @@
   .gt-insert-btn {
     display: none;
     position: absolute;
-    left: .75rem;
     top: 50%;
     transform: translateY(-50%);
     width: 18px;
@@ -297,11 +296,13 @@
       background: var(--color-accent);
       color: #fff;
     }
+
+    &--left  { left: .75rem; }
+    &--right { right: .75rem; }
   }
 
-  // Show on preceding data-row hover (CSS sibling trick)
-  &.gt-insert-zone--active,
-  &:hover {
+  // Show only when active (form open)
+  &.gt-insert-zone--active {
     height: 22px;
 
     .gt-insert-line {
@@ -313,18 +314,6 @@
   }
 }
 
-// Show insert zone when hovering the data row above it
-.gt-data-row:hover + .gt-insert-zone,
-.gt-group-row:hover + .gt-insert-zone {
-  height: 22px;
-
-  .gt-insert-line {
-    height: 22px;
-    &::before { background: var(--color-accent); opacity: .4; }
-  }
-
-  .gt-insert-btn { display: flex; }
-}
 
 // ── Inline form row ───────────────────────────────────────────────────────────
 .gt-inline-form-row {
