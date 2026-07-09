@@ -46,6 +46,17 @@ SKIP_B = {
 
 MONTH_RE = re.compile(r"^(\d{2})\.")  # "01. Janeiro" → group 1 = "01"
 
+# Normalise category names that changed over the years
+CAT_ALIAS = {
+    "jogos":      "Games",
+    "uber / 99":  "Uber/99",
+    "cuidados pessoais": "Cuidados Pessoais",
+    "despesas carro":    "Despesas Carro",
+    "despesas casa":     "Despesas Casa",
+    "despesas empresa":  "Despesas Empresa",
+    "despesas terreno":  "Despesas Terreno",
+}
+
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 def open_xlsx(path: Path):
@@ -159,13 +170,16 @@ def parse_sheet(ws, year: int, month: int):
                 bill_dt  = purchase_dt or date(year, month, 1).isoformat()
                 purch    = None
 
+            cat_str = (cat or "").strip() if isinstance(cat, str) else ""
+            cat_str = CAT_ALIAS.get(cat_str.lower(), cat_str)
+
             transactions.append({
                 "owner_id":         OWNER_ID,
                 "description":      (desc or cat or tipo).strip(),
                 "amount":           round(float(amount), 2),
                 "date":             bill_dt,
                 "purchase_date":    purch,
-                "category_name":    (cat or "").strip() if isinstance(cat, str) else "",
+                "category_name":    cat_str,
                 "credit_card_name": card_name,
                 "status":           "REALIZED",
                 "labels":           [],
