@@ -332,11 +332,17 @@ def main():
         "savings":      all_savings,
     }
 
-    total_dep = sum(1 for s in all_savings if s["type"] == "DEPOSIT")
-    total_wdw = sum(1 for s in all_savings if s["type"] == "WITHDRAWAL")
+    total_dep_n   = sum(1 for s in all_savings if s["type"] == "DEPOSIT")
+    total_wdw_n   = sum(1 for s in all_savings if s["type"] == "WITHDRAWAL")
+    total_dep_amt = sum(s["amount"] for s in all_savings if s["type"] == "DEPOSIT")
+    total_wdw_amt = sum(s["amount"] for s in all_savings if s["type"] == "WITHDRAWAL")
     OUT_FILE.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions")
-    print(f"   savings: {len(all_savings)} total — {total_dep} DEPOSIT, {total_wdw} WITHDRAWAL → {OUT_FILE}")
+    print(f"   savings: {len(all_savings)} total")
+    print(f"   DEPOSIT  : {total_dep_n:4d} movimentos  R$ {total_dep_amt:,.2f}")
+    print(f"   WITHDRAWAL: {total_wdw_n:4d} movimentos  R$ {total_wdw_amt:,.2f}")
+    print(f"   SALDO     :                  R$ {total_dep_amt - total_wdw_amt:,.2f}")
+    print(f"   → {OUT_FILE}")
 
 
 if __name__ == "__main__":
