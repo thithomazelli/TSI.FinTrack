@@ -488,12 +488,15 @@ export class MovimentosComponent implements OnInit {
     const qMonth = qp.get('month');
     if (qYear)  this.year.set(+qYear);
     if (qMonth) this.month.set(+qMonth);
-
     this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
     this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
     this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
     this.domainListService.getByCode('entry_type').subscribe({ next: d => this.entryTypes.set(d) });
-    this.load();
+    if (qYear || qMonth) {
+      this.applyMonth(this.year(), this.month());
+    } else {
+      this.load();
+    }
   }
 
   async load(silent = false): Promise<void> {
