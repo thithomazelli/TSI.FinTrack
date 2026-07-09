@@ -90,7 +90,7 @@ export class GroupedTableComponent {
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     const x = event.clientX - rect.left;
-    if (x <= this.EDGE_PX || x >= rect.width - this.EDGE_PX) {
+    if (x <= this.EDGE_PX) {
       this.edgeHoveredKey.set(`${groupId}:${itemId}`);
     } else {
       this.edgeHoveredKey.set(null);
