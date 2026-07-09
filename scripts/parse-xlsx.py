@@ -41,7 +41,7 @@ TIPO_MAP = {
 SKIP_B = {
     "resumo anual", "saldo atual", "renda mensal", "item", "total",
     "despesas mensais", "tipo", "porcentagem da renda gasta",
-    "rótulos de linha", "resumo", "grand total", "salário mensal",
+    "rótulos de linha", "resumo", "grand total",
 }
 
 MONTH_RE = re.compile(r"^(\d{2})\.")  # "01. Janeiro" → group 1 = "01"

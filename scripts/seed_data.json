@@ -1,7 +1,6 @@
 {
   "meta": {
-    "opening_balance": -305,
-    "opened_at": "2009-05-01"
+    "opening_balance": 0
   },
   "entries": [
     {
@@ -177,6 +176,14 @@
       "description": "1ª Parcela 13º Salário",
       "amount": 515.0,
       "date": "2009-11-20T00:00:00",
+      "status": "REALIZED",
+      "labels": []
+    },
+    {
+      "owner_id": "69f852bc-af5a-4f11-b293-37bf2f809018",
+      "description": "Salário Mensal",
+      "amount": 1136.58,
+      "date": "2009-12-05T00:00:00",
       "status": "REALIZED",
       "labels": []
     },
