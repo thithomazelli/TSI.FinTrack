@@ -73,17 +73,22 @@ def open_xlsx(path: Path):
     return openpyxl.load_workbook(buf, data_only=True)
 
 
-def to_date_str(val, fallback_year: int, fallback_month: int) -> str | None:
+def to_date_str(val, fallback_year: int, fallback_month: int, enforce_month: bool = False) -> str | None:
+    """Convert a cell value to an ISO date string.
+
+    enforce_month=True: force the result into fallback_year/fallback_month (used for
+    debit transactions whose date must belong to the sheet's month).
+    """
     if isinstance(val, (datetime, date)):
         d = val if isinstance(val, date) else val.date()
         # Dates before 2000 almost certainly have the wrong year due to a cell
         # storing only the day number (e.g. 19 → 1900-01-19 instead of 2020-01-19).
-        # Replace year and month with the sheet's fallback values.
         if d.year < 2000:
-            import calendar
             last = calendar.monthrange(fallback_year, fallback_month)[1]
-            day = min(d.day, last)
-            return date(fallback_year, fallback_month, day).isoformat()
+            return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
+        if enforce_month and (d.year != fallback_year or d.month != fallback_month):
+            last = calendar.monthrange(fallback_year, fallback_month)[1]
+            return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
         return d.isoformat()
     return None
 
@@ -192,14 +197,16 @@ def parse_sheet(ws, year: int, month: int):
                 continue
 
             card_name = TIPO_MAP[tipo_l]   # None = debit
-            purchase_dt = to_date_str(dt_val, year, month)
 
             if card_name:
+                # Credit: purchase date may be from previous month (normal for CC billing)
+                purchase_dt = to_date_str(dt_val, year, month)
                 due_day = CARD_DUE.get(card_name.lower(), 10)
                 bill_dt  = payment_date(year, month, due_day)
                 purch    = purchase_dt or bill_dt
             else:
-                # Debit: date = purchase date, no purchase_date field
+                # Debit: date must belong to the sheet's month — enforce it
+                purchase_dt = to_date_str(dt_val, year, month, enforce_month=True)
                 bill_dt  = purchase_dt or date(year, month, 1).isoformat()
                 purch    = None
 
