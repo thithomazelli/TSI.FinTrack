@@ -81,6 +81,30 @@ export class GroupedTableComponent {
   dragFromIndex = -1;
   readonly dragOverIndex = signal(-1);
 
+  // Edge-hover state: key = "groupId:itemId|null", value = true when mouse is near left/right edge
+  readonly edgeHoveredKey = signal<string | null>(null);
+
+  private readonly EDGE_PX = 48;
+
+  onRowMouseMove(groupId: string, itemId: string | null, event: MouseEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    if (x <= this.EDGE_PX || x >= rect.width - this.EDGE_PX) {
+      this.edgeHoveredKey.set(`${groupId}:${itemId}`);
+    } else {
+      this.edgeHoveredKey.set(null);
+    }
+  }
+
+  onRowMouseLeave(): void {
+    this.edgeHoveredKey.set(null);
+  }
+
+  isEdgeHovered(groupId: string, itemId: string | null): boolean {
+    return this.edgeHoveredKey() === `${groupId}:${itemId}`;
+  }
+
   private readonly cdr = inject(ChangeDetectorRef);
 
   constructor() {
