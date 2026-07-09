@@ -75,7 +75,16 @@ def open_xlsx(path: Path):
 
 def to_date_str(val, fallback_year: int, fallback_month: int) -> str | None:
     if isinstance(val, (datetime, date)):
-        return val.strftime("%Y-%m-%d")
+        d = val if isinstance(val, date) else val.date()
+        # Dates before 2000 almost certainly have the wrong year due to a cell
+        # storing only the day number (e.g. 19 → 1900-01-19 instead of 2020-01-19).
+        # Replace year and month with the sheet's fallback values.
+        if d.year < 2000:
+            import calendar
+            last = calendar.monthrange(fallback_year, fallback_month)[1]
+            day = min(d.day, last)
+            return date(fallback_year, fallback_month, day).isoformat()
+        return d.isoformat()
     return None
 
 
