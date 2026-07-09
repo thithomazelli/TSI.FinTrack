@@ -338,17 +338,14 @@ async function main() {
     const withdrawalTypeId = withdrawalDomain?.id ?? null
 
     // Garante que a conta Poupança Nubank existe
-    const savingsOpeningBalance = data.meta?.savings_opening_balance ?? 0
     let { data: savingsAcct } = await supabase.from('accounts').select('id').eq('owner_id', OWNER_ID).eq('name', 'Poupança Nubank').maybeSingle()
     if (!savingsAcct) {
       const { data: created, error: accErr } = await supabase.from('accounts')
-        .insert({ owner_id: OWNER_ID, name: 'Poupança Nubank', type_id: savingsDomain?.id ?? null, balance: savingsOpeningBalance })
+        .insert({ owner_id: OWNER_ID, name: 'Poupança Nubank', type_id: savingsDomain?.id ?? null, balance: 0 })
         .select('id').single()
       if (accErr) { console.error('Erro ao criar conta Poupança Nubank:', accErr.message); process.exit(1) }
       savingsAcct = created
       console.log('  Conta Poupança Nubank criada ✓')
-    } else {
-      await supabase.from('accounts').update({ balance: savingsOpeningBalance }).eq('id', savingsAcct.id)
     }
     const savingsAccountId = savingsAcct?.id ?? null
 

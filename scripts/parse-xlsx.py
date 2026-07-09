@@ -121,6 +121,9 @@ def payment_date(year: int, month: int, due_day: int) -> str:
 # Months after which 2026 entries/transactions become PROJECTED
 PROJECTED_FROM = (2026, 7)  # July 2026 onwards
 
+# Savings movements before this year are ignored (data histórica incompleta)
+SAVINGS_MIN_YEAR = 2015
+
 def row_status(year: int, month: int) -> str:
     if (year, month) >= PROJECTED_FROM:
         return "PROJECTED"
@@ -191,15 +194,17 @@ def parse_sheet(ws, year: int, month: int):
                 "position":    row_num,
             })
 
-            # Renda com item == "Poupança" → retirada da poupança para conta corrente
+            # Renda com item == "Poupança" → renomeia descrição e registra retirada
             if item.strip().lower() == "poupança":
-                savings.append({
-                    "owner_id":    OWNER_ID,
-                    "description": item.strip(),
-                    "amount":      round(abs(float(amount)), 2),
-                    "date":        dt_str,
-                    "type":        "WITHDRAWAL",
-                })
+                entries[-1]["description"] = "Resgate Poupança"
+                if year >= SAVINGS_MIN_YEAR:
+                    savings.append({
+                        "owner_id":    OWNER_ID,
+                        "description": "Resgate Poupança",
+                        "amount":      round(abs(float(amount)), 2),
+                        "date":        dt_str,
+                        "type":        "WITHDRAWAL",
+                    })
 
         # ── Expense row ───────────────────────────────────────────────────
         if in_expense:
@@ -250,17 +255,18 @@ def parse_sheet(ws, year: int, month: int):
                 "position":         row_num,
             })
 
-    # ── Savings: despesas categoria "Poupança" → DEPOSIT ─────────────────
-    for t in transactions:
-        if (t.get("category_name") or "").lower() != "poupança":
-            continue
-        savings.append({
-            "owner_id":    OWNER_ID,
-            "description": t["description"],
-            "amount":      round(abs(t["amount"]), 2),
-            "date":        t.get("purchase_date") or t["date"],
-            "type":        "DEPOSIT",
-        })
+    # ── Savings: despesas categoria "Poupança" → DEPOSIT (apenas >= 2015) ───
+    if year >= SAVINGS_MIN_YEAR:
+        for t in transactions:
+            if (t.get("category_name") or "").lower() != "poupança":
+                continue
+            savings.append({
+                "owner_id":    OWNER_ID,
+                "description": t["description"],
+                "amount":      round(abs(t["amount"]), 2),
+                "date":        t.get("purchase_date") or t["date"],
+                "type":        "DEPOSIT",
+            })
 
     return entries, transactions, savings
 
@@ -326,7 +332,7 @@ def main():
         print(f"  → subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
 
     result = {
-        "meta": {"opening_balance": -305, "opened_at": "2009-05-01", "savings_opening_balance": -2.28},
+        "meta": {"opening_balance": -305, "opened_at": "2009-05-01"},
         "entries":      all_entries,
         "transactions": all_transactions,
         "savings":      all_savings,
