@@ -1,9 +1,9 @@
 <div class="top-section">
-  <div class="sm-card sm-card--period">
-    <div class="sm-left">
-      <span class="sm-title">{{ 'movimentos.periodTitle' | translate }}</span>
+  <div class="balance-card balance-card--period">
+    <div class="bc-info">
+      <span class="bc-label">{{ 'movimentos.periodTitle' | translate }}</span>
     </div>
-    <div class="period-controls">
+    <div class="bc-controls">
       @if (showModeTabs) {
         <div class="period-toggle">
           <button type="button" class="period-tab" [class.is-active]="periodMode === 'month'"

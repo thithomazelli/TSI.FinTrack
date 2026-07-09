@@ -4,16 +4,24 @@
   align-items: stretch;
   margin-bottom: 1.25rem;
 
+  tsi-savings-balance-card,
+  tsi-balance-card {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+
   @media (max-width: 640px) { flex-direction: column; }
 }
 
-// Period card — same visual pattern as .sm-card in movimentos
-.sm-card {
+// Identical structure to savings-balance-card
+.balance-card {
   flex: 1;
+  min-width: 200px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  align-self: stretch;
   gap: 1rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -23,24 +31,10 @@
   box-sizing: border-box;
 }
 
-.sm-card--period { border-left-color: var(--color-border); }
+.bc-info { display: flex; flex-direction: column; gap: 2px; }
+.bc-label { font-size: .7rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .05em; }
 
-.sm-left { display: flex; flex-direction: column; gap: 2px; }
-.sm-title {
-  font-size: .7rem; font-weight: 700; color: var(--color-text-2);
-  text-transform: uppercase; letter-spacing: .05em;
-}
-
-tsi-savings-balance-card,
-tsi-balance-card {
-  flex: 1;
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
-}
-
-// Period controls on the right side
-.period-controls {
+.bc-controls {
   display: flex;
   align-items: center;
   gap: .75rem;
@@ -61,7 +55,6 @@ tsi-balance-card {
   &.is-active { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); }
 }
 
-// Compact month-picker to match card height
 tsi-month-picker ::ng-deep .month-picker {
   padding: 4px 10px;
   font-size: .8rem;
