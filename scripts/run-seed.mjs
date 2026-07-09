@@ -259,11 +259,11 @@ async function main() {
   const acct = (existingAccts ?? []).find(a => a.name === 'Conta Corrente')
   if (!acct) {
     const { error } = await supabase.from('accounts')
-      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', balance: opening, opened_at: openedAt })
+      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', type: 'CHECKING', balance: opening, opened_at: openedAt })
     if (error) { console.error('Erro ao criar conta:', error.message); process.exit(1) }
     console.log(`  Conta Corrente criada (saldo ${opening}, abertura ${openedAt}) ✓`)
   } else {
-    const { error: updErr } = await supabase.from('accounts').update({ balance: opening, opened_at: openedAt }).eq('id', acct.id)
+    const { error: updErr } = await supabase.from('accounts').update({ type: 'CHECKING', balance: opening, opened_at: openedAt }).eq('id', acct.id)
     if (updErr) { console.error('Erro ao atualizar conta:', updErr.message); process.exit(1) }
     console.log(`  Conta Corrente saldo atualizado p/ ${opening} (abertura ${openedAt}) ✓`)
   }
