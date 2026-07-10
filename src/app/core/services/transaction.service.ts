@@ -188,6 +188,7 @@ export class TransactionService {
         .eq('owner_id', this.ownerId)
         .not('installment_group_id', 'is', null)
         .order('date', { ascending: true })
+        .range(0, 9999)
         .then(({ data, error }) => {
           if (error) throw error;
           return (data ?? []).map((r: any) => this.toModel(r));
