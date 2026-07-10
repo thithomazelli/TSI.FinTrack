@@ -31,11 +31,11 @@
     </ng-template>
 
     <ng-template #row let-t>
-      <td [class.col-inactive]="!t.isActive">{{ t.description }}</td>
-      <td class="col-muted col-freq">{{ frequencyLabel(t) }}</td>
-      <td class="col-muted">dia {{ t.dayOfMonth }}</td>
-      <td class="col-muted">{{ categoryName(t.categoryId) }}</td>
-      <td class="col-amount" [class.amount-positive]="t.amount > 0" [class.amount-negative]="t.amount < 0">
+      <td [class.col-inactive]="!t.isActive" (dblclick)="openEdit(t)">{{ t.description }}</td>
+      <td class="col-muted col-freq" (dblclick)="openEdit(t)">{{ frequencyLabel(t) }}</td>
+      <td class="col-muted" (dblclick)="openEdit(t)">dia {{ t.dayOfMonth }}</td>
+      <td class="col-muted" (dblclick)="openEdit(t)">{{ categoryName(t.categoryId) }}</td>
+      <td class="col-amount" [class.amount-positive]="t.amount > 0" [class.amount-negative]="t.amount < 0" (dblclick)="openEdit(t)">
         R$ {{ t.amount | number:'1.2-2' }}
       </td>
       <td>

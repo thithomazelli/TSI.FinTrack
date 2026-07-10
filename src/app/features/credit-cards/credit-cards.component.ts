@@ -56,6 +56,11 @@ export class CreditCardsComponent implements OnInit {
   readonly updatingId   = signal<string | null>(null);
   readonly expandedBillIds = signal<Set<string>>(new Set());
 
+  // ── Drag state ───────────────────────────────────────────────────────────────
+  private dragBillId: string | null = null;
+  private dragFromIdx = -1;
+  readonly dragOverIdx = signal(-1);
+
   readonly year  = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
 
@@ -360,5 +365,58 @@ export class CreditCardsComponent implements OnInit {
         this.toast.error('Erro ao remover lançamento.');
       },
     });
+  }
+
+  // ── Drag & drop ──────────────────────────────────────────────────────────────
+  onDragStart(bill: BillWithCard, idx: number, event: DragEvent): void {
+    this.dragBillId = bill.id;
+    this.dragFromIdx = idx;
+    this.dragOverIdx.set(idx);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(idx));
+    }
+  }
+
+  onDragOver(bill: BillWithCard, idx: number, event: DragEvent): void {
+    if (bill.id !== this.dragBillId) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    this.dragOverIdx.set(idx);
+  }
+
+  onDrop(bill: BillWithCard, toIdx: number, event: DragEvent): void {
+    event.preventDefault();
+    const fromIdx = this.dragFromIdx;
+    if (bill.id !== this.dragBillId || fromIdx === -1 || fromIdx === toIdx) {
+      this.dragOverIdx.set(-1);
+      return;
+    }
+    const txs = this.billTransactions(bill);
+    const reordered = [...txs];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    reordered.forEach((tx, i) => {
+      this.txService.updatePosition(tx.id, i).subscribe({
+        error: err => this.logger.error('Failed to update position', err),
+      });
+    });
+    this.transactions.update(list => {
+      const others = list.filter(t => t.creditCardId !== bill.creditCardId);
+      return [...others, ...reordered.map((t, i) => ({ ...t, position: i }))];
+    });
+    this.dragOverIdx.set(-1);
+    this.dragFromIdx = -1;
+    this.dragBillId = null;
+  }
+
+  onDragEnd(): void {
+    this.dragOverIdx.set(-1);
+    this.dragFromIdx = -1;
+    this.dragBillId = null;
+  }
+
+  isDragOver(bill: BillWithCard, idx: number): boolean {
+    return this.dragBillId === bill.id && this.dragOverIdx() === idx && this.dragFromIdx !== idx;
   }
 }

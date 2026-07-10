@@ -167,6 +167,11 @@
 .td-actions { white-space: nowrap; }
 .th-actions { white-space: nowrap; }
 
+.th-drag { width: 28px; padding: 0 !important; }
+.td-drag { width: 28px; padding: 0 4px !important; cursor: grab; text-align: center; }
+.drag-handle { color: var(--color-text-2); font-size: .9rem; user-select: none; opacity: .5; }
+tr.is-drag-over td { background: rgba(99,102,241,.08); border-top: 2px solid var(--color-accent); }
+
 .installment-badge {
   display: inline-block; font-size: .68rem; font-weight: 700;
   background: rgba(99,102,241,.1); color: var(--color-accent);

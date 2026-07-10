@@ -76,6 +76,7 @@
                 <table class="tx-table">
                   <thead>
                     <tr>
+                      <th class="th-drag"></th>
                       <th>{{ 'bills.colPurchaseDate' | translate }}</th>
                       <th>{{ 'common.description' | translate }}</th>
                       <th>{{ 'common.category' | translate }}</th>
@@ -85,22 +86,30 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (tx of billTransactions(bill); track tx.id) {
-                      <tr>
-                        <td class="td-date">{{ (tx.purchaseDate ?? tx.date) | date:'dd/MM' }}</td>
-                        <td class="td-desc">
+                    @for (tx of billTransactions(bill); track tx.id; let i = $index) {
+                      <tr [class.is-drag-over]="isDragOver(bill, i)"
+                          draggable="true"
+                          (dragstart)="onDragStart(bill, i, $event)"
+                          (dragover)="onDragOver(bill, i, $event)"
+                          (drop)="onDrop(bill, i, $event)"
+                          (dragend)="onDragEnd()">
+                        <td class="td-drag" (click)="$event.stopPropagation()">
+                          <span class="drag-handle">⠿</span>
+                        </td>
+                        <td class="td-date" (dblclick)="openEditTx(tx)">{{ (tx.purchaseDate ?? tx.date) | date:'dd/MM' }}</td>
+                        <td class="td-desc" (dblclick)="openEditTx(tx)">
                           {{ tx.description }}
                           @if (tx.installmentNumber && tx.totalInstallments) {
                             <span class="installment-badge">{{ tx.installmentNumber }}/{{ tx.totalInstallments }}</span>
                           }
                         </td>
-                        <td>
+                        <td (dblclick)="openEditTx(tx)">
                           <span class="cat-cell">
                             <span class="cat-dot" [style.background]="categoryColor(tx.categoryId)"></span>
                             {{ categoryName(tx.categoryId) }}
                           </span>
                         </td>
-                        <td class="td-amount">R$ {{ tx.amount | number:'1.2-2' }}</td>
+                        <td class="td-amount" (dblclick)="openEditTx(tx)">R$ {{ tx.amount | number:'1.2-2' }}</td>
                         <td class="td-status" (click)="$event.stopPropagation()">
                           <select class="status-select"
                             [class.status-select--realized]="tx.status === 'REALIZED'"

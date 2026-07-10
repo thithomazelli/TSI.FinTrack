@@ -357,15 +357,15 @@
         <td class="col-check" (click)="$event.stopPropagation()">
           <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" class="row-check" />
         </td>
-        <td class="col-date">
+        <td class="col-date" (dblclick)="openEdit(item)">
           {{ (item.purchaseDate ?? item.date) | date:'dd/MM/yyyy' }}
         </td>
-        <td class="col-tipo">
+        <td class="col-tipo" (dblclick)="openEdit(item)">
           <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry'" [class.tipo-badge--saida]="item.kind === 'transaction'">
             {{ item.kind === 'entry' ? 'Entrada' : 'Saída' }}
           </span>
         </td>
-        <td>
+        <td (dblclick)="openEdit(item)">
           <div class="desc-cell">
             <span>{{ item.description }}</span>
             @if (item.kind === 'transaction' && $any(item.raw).totalInstallments > 1) {
@@ -373,7 +373,7 @@
             }
           </div>
         </td>
-        <td>
+        <td (dblclick)="openEdit(item)">
           @if (item.kind === 'transaction') {
             <div class="cat-cell">
               <span class="cat-dot" [style.background]="categoryColor(item.categoryId)"></span>
@@ -383,8 +383,8 @@
             <span class="col-muted">{{ typeName(item.typeId) }}</span>
           }
         </td>
-        <td class="col-muted">{{ payerName(item) }}</td>
-        <td class="col-amount text-right" [class.amount-positivo]="item.amount > 0" [class.amount-negativo]="item.amount < 0">
+        <td class="col-muted" (dblclick)="openEdit(item)">{{ payerName(item) }}</td>
+        <td class="col-amount text-right" [class.amount-positivo]="item.amount > 0" [class.amount-negativo]="item.amount < 0" (dblclick)="openEdit(item)">
           R$ {{ item.amount | number:'1.2-2' }}
         </td>
         <td (click)="$event.stopPropagation()">
