@@ -183,31 +183,32 @@ export class TransactionService {
   getAllInstallments(): Observable<Transaction[]> {
     const PAGE = 1000;
     const fetchPage = (offset: number): Promise<Transaction[]> =>
-      this.supabase.client
-        .from(TABLE)
-        .select('*')
-        .eq('owner_id', this.ownerId)
-        .gt('total_installments', 1)
-        .order('date', { ascending: true })
-        .range(offset, offset + PAGE - 1)
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        });
+      Promise.resolve(
+        this.supabase.client
+          .from(TABLE)
+          .select('*')
+          .eq('owner_id', this.ownerId)
+          .gt('total_installments', 1)
+          .order('date', { ascending: true })
+          .range(offset, offset + PAGE - 1)
+      ).then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
 
-    const loadAll = async (): Promise<Transaction[]> => {
-      const all: Transaction[] = [];
-      let offset = 0;
-      while (true) {
-        const page = await fetchPage(offset);
-        all.push(...page);
-        if (page.length < PAGE) break;
-        offset += PAGE;
-      }
-      return all;
-    };
-
-    return from(loadAll());
+    return from(
+      (async () => {
+        const all: Transaction[] = [];
+        let offset = 0;
+        while (true) {
+          const page = await fetchPage(offset);
+          all.push(...page);
+          if (page.length < PAGE) break;
+          offset += PAGE;
+        }
+        return all;
+      })()
+    );
   }
 
   getAllCreditCard(): Observable<Transaction[]> {
