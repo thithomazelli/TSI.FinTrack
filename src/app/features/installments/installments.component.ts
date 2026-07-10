@@ -66,29 +66,31 @@ export class InstallmentsComponent implements OnInit {
     const groups: InstallmentGroup[] = [];
     for (const [groupId, txs] of byGroup) {
       const sorted = [...txs].sort((a, b) => a.date.localeCompare(b.date));
-      const first = sorted[0];
-      const totalInstallments = first.totalInstallments ?? sorted.length;
-      const unitValue = Number(first.amount);
 
-      const paid = sorted.filter(t => t.date <= end).length;
+      // Only show this group if it has a transaction in the selected month
+      const thisMonthTxs = sorted.filter(t => t.date >= start && t.date <= end);
+      if (thisMonthTxs.length === 0) continue;
+
+      const totalInstallments = sorted[0].totalInstallments ?? sorted.length;
+      const unitValue = Number(thisMonthTxs[0].amount);
+
+      // Paid = installments before the selected month
+      const paid = sorted.filter(t => t.date < start).length;
       const pending = totalInstallments - paid;
-      const hasInstallmentThisMonth = sorted.some(t => t.date >= start && t.date <= end);
-      const monthlyValue = hasInstallmentThisMonth ? unitValue : 0;
-      const totalToPayOff = pending * unitValue;
+      const monthlyValue = thisMonthTxs.reduce((s, t) => s + Number(t.amount), 0);
+      const totalToPayOff = sorted.filter(t => t.date >= start).reduce((s, t) => s + Number(t.amount), 0);
 
-      if (pending > 0 || hasInstallmentThisMonth) {
-        groups.push({
-          groupId,
-          description: first.description,
-          totalInstallments,
-          paid,
-          pending,
-          unitValue,
-          monthlyValue,
-          totalToPayOff,
-          hasInstallmentThisMonth,
-        });
-      }
+      groups.push({
+        groupId,
+        description: sorted[0].description,
+        totalInstallments,
+        paid,
+        pending,
+        unitValue,
+        monthlyValue,
+        totalToPayOff,
+        hasInstallmentThisMonth: true,
+      });
     }
 
     return groups.sort((a, b) => b.totalToPayOff - a.totalToPayOff);
