@@ -7,13 +7,14 @@
 }
 
 .summary-card {
+  flex: 1; min-width: 220px;
   background: var(--color-surface); border: 1px solid var(--color-border);
   border-radius: var(--radius-lg); padding: 1rem 1.25rem;
   display: flex; flex-direction: column; gap: .5rem;
 
-  &--picker { flex: 0 0 auto; justify-content: center; }
-  &--month { flex: 1; min-width: 200px; border-left: 4px solid #ef4444; }
-  &--payoff { flex: 1; min-width: 200px; border-left: 4px solid #6366f1; }
+  &--picker { justify-content: center; }
+  &--month { border-left: 4px solid #ef4444; }
+  &--payoff { border-left: 4px solid #6366f1; }
 }
 
 .summary-label { font-size: .75rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .04em; }

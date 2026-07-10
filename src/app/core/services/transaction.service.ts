@@ -186,7 +186,7 @@ export class TransactionService {
         .from(TABLE)
         .select('*')
         .eq('owner_id', this.ownerId)
-        .gt('total_installments', 1)
+        .not('installment_group_id', 'is', null)
         .order('date', { ascending: true })
         .then(({ data, error }) => {
           if (error) throw error;
