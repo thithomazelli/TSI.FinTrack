@@ -714,12 +714,16 @@ export class MovimentosComponent implements OnInit {
       : this.entryService.create(payload);
 
     op$.subscribe({
-      next: () => {
+      next: (saved: Entry) => {
         this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
         this.saving.set(false);
         this.closeModal();
+        if (id) {
+          this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
+        } else {
+          this.allEntries.update(list => [...list, saved]);
+        }
         this.balanceService.invalidate();
-        this.load();
       },
       error: err => {
         this.logger.error('Failed to save entry', err);
@@ -754,12 +758,12 @@ export class MovimentosComponent implements OnInit {
 
     if (id) {
       this.transactionService.update(id, payload).subscribe({
-        next: () => {
+        next: (saved: Transaction) => {
           this.toast.success(this.tr('movimentos.toast.txUpdated'));
           this.saving.set(false);
           this.closeModal();
+          this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
           this.balanceService.invalidate();
-          this.load();
         },
         error: err => {
           this.logger.error('Failed to update transaction', err);
@@ -769,12 +773,12 @@ export class MovimentosComponent implements OnInit {
       });
     } else {
       this.transactionService.create(payload).subscribe({
-        next: () => {
+        next: (created: Transaction[]) => {
           this.toast.success(this.tr('movimentos.toast.txAdded'));
           this.saving.set(false);
           this.closeModal();
+          this.allTransactions.update(list => [...list, ...created]);
           this.balanceService.invalidate();
-          this.load();
         },
         error: err => {
           this.logger.error('Failed to create transaction', err);
