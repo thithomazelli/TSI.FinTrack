@@ -604,7 +604,7 @@ export class MovimentosComponent implements OnInit {
   setPeriodMode(mode: 'month' | 'range'): void {
     this.periodMode.set(mode);
     if (mode === 'month') {
-      this.applyMonth(this.year(), this.month());
+      this.applyMonth(this.year(), this.month(), true);
     }
   }
 
@@ -614,13 +614,13 @@ export class MovimentosComponent implements OnInit {
     this.applyMonth(e.year, e.month);
   }
 
-  private applyMonth(year: number, month: number): void {
+  private applyMonth(year: number, month: number, silent = false): void {
     const from = `${year}-${String(month).padStart(2, '0')}-01`;
     const last = new Date(year, month, 0).getDate();
     const to = `${year}-${String(month).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
     this.dateFrom.set(from);
     this.dateTo.set(to);
-    this.load();
+    this.load(silent);
   }
 
   // Modal helpers
