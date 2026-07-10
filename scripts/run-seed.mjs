@@ -307,8 +307,9 @@ async function main() {
         category_id: catMap[t.category_name?.toLowerCase()] ?? null,
         credit_card_id: creditCardId,
         account_id: null,
-        installment_number: t.installment_number ?? null,
-        total_installments: t.total_installments ?? null,
+        installment_number:   t.installment_number   ?? null,
+        total_installments:   t.total_installments   ?? null,
+        installment_group_id: t.installment_group_id ?? null,
         position: t.position ?? null,
       }
     })

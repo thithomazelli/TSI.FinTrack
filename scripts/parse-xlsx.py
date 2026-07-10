@@ -7,7 +7,7 @@ Uso:
 Requer: pip install openpyxl msoffcrypto-tool
 """
 
-import msoffcrypto, io, json, re, calendar
+import msoffcrypto, io, json, re, calendar, uuid
 from pathlib import Path
 import openpyxl
 from datetime import date, datetime
@@ -45,6 +45,19 @@ SKIP_B = {
 }
 
 MONTH_RE = re.compile(r"^(\d{2})\.")  # "01. Janeiro" → group 1 = "01"
+
+# "Descrição 3/12" → (base, installment_num, total)
+INSTALLMENT_RE = re.compile(r"^(.*?)\s+(\d{1,2})/(\d{1,2})$")
+
+def parse_installment(description: str):
+    """Return (base, num, total) if description matches 'Base X/Y', else None."""
+    m = INSTALLMENT_RE.match(description.strip())
+    if not m:
+        return None
+    num, total = int(m.group(2)), int(m.group(3))
+    if num < 1 or total < 2 or num > total:
+        return None
+    return m.group(1).strip(), num, total
 
 # Normalise category names that changed over the years
 CAT_ALIAS = {
@@ -267,6 +280,31 @@ def parse_sheet(ws, year: int, month: int):
                 "date":        t.get("purchase_date") or t["date"],
                 "type":        "DEPOSIT",
             })
+
+    # ── Installment detection ────────────────────────────────────────────────
+    # Group transactions that match "Descrição X/Y" by (base, card, total)
+    # so each group shares an installment_group_id.
+    _inst_buckets: dict[tuple, list] = {}
+    for t in transactions:
+        parsed = parse_installment(t["description"])
+        if not parsed:
+            continue
+        base, num, total = parsed
+        key = (base.lower(), t.get("credit_card_name") or "", total)
+        _inst_buckets.setdefault(key, []).append((t, num))
+
+    for (base_key, card_key, total), items in _inst_buckets.items():
+        # Sort by installment number; split into complete groups of `total` items
+        items.sort(key=lambda x: x[1])
+        for chunk_start in range(0, len(items), total):
+            chunk = items[chunk_start : chunk_start + total]
+            if len(chunk) < 2:
+                continue
+            group_id = str(uuid.uuid4())
+            for t, num in chunk:
+                t["installment_number"]   = num
+                t["total_installments"]   = total
+                t["installment_group_id"] = group_id
 
     return entries, transactions, savings
 
