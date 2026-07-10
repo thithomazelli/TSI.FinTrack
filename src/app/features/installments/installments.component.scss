@@ -43,8 +43,13 @@ tr.row-this-month:hover td { background: rgba(239,68,68,.08); }
 .text-right { text-align: right; }
 .col-muted { color: var(--color-text-2); }
 
-.col-desc { display: flex; align-items: center; gap: .5rem; }
+.col-desc { display: flex; flex-direction: column; gap: .2rem; }
+.desc-main { display: flex; align-items: center; gap: .5rem; }
 .desc-text { flex: 1; }
+.desc-last-date {
+  font-size: .72rem; color: var(--color-text-3, var(--color-text-2));
+  cursor: default; text-decoration: none;
+}
 .installment-badge {
   flex-shrink: 0; display: inline-block; padding: .15rem .5rem; border-radius: 999px;
   font-size: .68rem; font-weight: 700; background: rgba(99,102,241,.15); color: #6366f1;

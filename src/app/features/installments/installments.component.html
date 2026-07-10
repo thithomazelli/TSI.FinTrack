@@ -66,7 +66,6 @@
             <th class="text-right th-sort" (click)="sort('unitValue')">{{ 'installments.unitValue' | translate }} <span class="sort-icon">{{ sortIcon('unitValue') }}</span></th>
             <th class="text-right th-sort" (click)="sort('monthlyValue')">{{ 'installments.monthlyValue' | translate }} <span class="sort-icon">{{ sortIcon('monthlyValue') }}</span></th>
             <th class="text-right th-sort" (click)="sort('totalToPayOff')">{{ 'installments.totalPayoffCol' | translate }} <span class="sort-icon">{{ sortIcon('totalToPayOff') }}</span></th>
-            <th class="text-right th-sort" (click)="sort('lastInstallmentDate')">{{ 'installments.lastInstallment' | translate }} <span class="sort-icon">{{ sortIcon('lastInstallmentDate') }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -76,8 +75,13 @@
                 <input type="checkbox" [checked]="selectedIds().has(g.groupId)" (change)="toggleRow(g.groupId)" />
               </td>
               <td class="col-desc">
-                <span class="desc-text">{{ g.description }}</span>
-                <span class="installment-badge">{{ g.paid }}/{{ g.totalInstallments }}</span>
+                <div class="desc-main">
+                  <span class="desc-text">{{ g.description }}</span>
+                  <span class="installment-badge">{{ g.paid }}/{{ g.totalInstallments }}</span>
+                </div>
+                <a class="desc-last-date" (click)="$event.stopPropagation()">
+                  {{ 'installments.lastInstallment' | translate }}: {{ g.lastInstallmentDate | date:'MM/yyyy' }}
+                </a>
               </td>
               <td class="col-muted col-card">{{ g.creditCardName }}</td>
               <td class="text-center col-num">{{ g.totalInstallments }}</td>
@@ -92,12 +96,11 @@
                 }
               </td>
               <td class="text-right col-amount col-payoff">R$ {{ g.totalToPayOff | number:'1.2-2' }}</td>
-              <td class="text-right col-muted col-date">{{ g.lastInstallmentDate | date:'MM/yyyy' }}</td>
             </tr>
           }
           @if (installmentGroups().length === 0) {
             <tr>
-              <td colspan="10" class="state-msg">{{ 'common.noResults' | translate }}</td>
+              <td colspan="9" class="state-msg">{{ 'common.noResults' | translate }}</td>
             </tr>
           }
         </tbody>
@@ -109,7 +112,6 @@
               <td colspan="5"></td>
               <td class="text-right totals-value">R$ {{ selectionTotals().monthlyValue | number:'1.2-2' }}</td>
               <td class="text-right totals-value">R$ {{ selectionTotals().totalToPayOff | number:'1.2-2' }}</td>
-              <td></td>
             </tr>
           </tfoot>
         }
