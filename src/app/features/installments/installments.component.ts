@@ -91,6 +91,7 @@ export class InstallmentsComponent implements OnInit {
       // Paid = installments before the selected month
       const paid = sorted.filter(t => d(t.date) < start).length;
       const pending = totalInstallments - paid;
+      if (pending <= 0) continue;
       const monthlyValue = thisMonthTxs.reduce((s, t) => s + Number(t.amount), 0);
       const totalToPayOff = sorted.filter(t => d(t.date) >= start).reduce((s, t) => s + Number(t.amount), 0);
 
