@@ -127,6 +127,29 @@ export class SavingsService {
     );
   }
 
+  update(id: string, payload: Pick<SavingsMovement, 'description' | 'amount' | 'date' | 'typeId' | 'accountId'>): Observable<SavingsMovement> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update({
+          description: payload.description,
+          amount: payload.amount,
+          date: payload.date,
+          type_id: payload.typeId,
+          account_id: payload.accountId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .select('*, domain_lists(value)')
+        .single()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return this.toModel(data);
+        })
+    );
+  }
+
   delete(id: string): Observable<void> {
     return from(
       this.supabase.client

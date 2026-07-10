@@ -83,19 +83,23 @@
         <tbody>
           @for (m of filteredMovements(); track m.id) {
             <tr>
-              <td class="col-date">{{ m.date | slice:0:10 }}</td>
-              <td>{{ m.description }}</td>
-              <td class="col-muted">
+              <td class="col-date" (dblclick)="openEdit(m)">{{ m.date | slice:0:10 }}</td>
+              <td (dblclick)="openEdit(m)">{{ m.description }}</td>
+              <td class="col-muted" (dblclick)="openEdit(m)">
                 <span class="tipo-badge" [class.tipo-badge--deposit]="m.typeCode !== 'WITHDRAWAL'" [class.tipo-badge--withdrawal]="m.typeCode === 'WITHDRAWAL'">
                   {{ typeLabel(m.typeId) }}
                 </span>
               </td>
-              <td class="col-muted">{{ accountName(m.accountId) }}</td>
-              <td class="text-right col-amount" [class.amount-deposit]="m.typeCode !== 'WITHDRAWAL'" [class.amount-withdrawal]="m.typeCode === 'WITHDRAWAL'">
+              <td class="col-muted" (dblclick)="openEdit(m)">{{ accountName(m.accountId) }}</td>
+              <td class="text-right col-amount" [class.amount-deposit]="m.typeCode !== 'WITHDRAWAL'" [class.amount-withdrawal]="m.typeCode === 'WITHDRAWAL'" (dblclick)="openEdit(m)">
                 {{ m.typeCode === 'WITHDRAWAL' ? '−' : '+' }}R$ {{ m.amount | number:'1.2-2' }}
               </td>
               <td>
-                <div class="action-btns">
+                <div class="action-btns" (click)="$event.stopPropagation()">
+                  <button class="action-btn action-btn--edit" (click)="openEdit(m)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                    {{ 'common.edit' | translate }}
+                  </button>
                   <button class="action-btn action-btn--delete" [disabled]="deletingId() === m.id" (click)="deleteMovement(m.id)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
                     {{ 'common.delete' | translate }}
@@ -130,7 +134,7 @@
 @if (showForm()) {
   <div class="modal-backdrop" (click)="closeForm()">
     <div class="modal modal--sm" (click)="$event.stopPropagation()">
-      <h3 class="modal-title">{{ 'savings.add' | translate }}</h3>
+      <h3 class="modal-title">{{ (editingId() ? 'common.edit' : 'savings.add') | translate }}</h3>
 
       <div class="form-field">
         <label class="form-label">{{ 'common.type' | translate }}</label>

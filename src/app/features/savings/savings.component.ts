@@ -44,6 +44,7 @@ export class SavingsComponent implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly showForm = signal(false);
+  readonly editingId = signal<string | null>(null);
   readonly deletingId = signal<string | null>(null);
 
   readonly filterTypeId = signal('');
@@ -130,6 +131,7 @@ export class SavingsComponent implements OnInit {
   }
 
   openForm(): void {
+    this.editingId.set(null);
     this.formDescription.set('');
     this.formAmount.set(null);
     this.formDate.set(new Date().toISOString().split('T')[0]);
@@ -139,7 +141,17 @@ export class SavingsComponent implements OnInit {
     this.showForm.set(true);
   }
 
-  closeForm(): void { this.showForm.set(false); }
+  openEdit(m: SavingsMovement): void {
+    this.editingId.set(m.id);
+    this.formDescription.set(m.description);
+    this.formAmount.set(m.amount);
+    this.formDate.set(m.date);
+    this.formTypeId.set(m.typeId);
+    this.formAccountId.set(m.accountId ?? '');
+    this.showForm.set(true);
+  }
+
+  closeForm(): void { this.showForm.set(false); this.editingId.set(null); }
 
   saveMovement(): void {
     const description = this.formDescription();
@@ -149,12 +161,28 @@ export class SavingsComponent implements OnInit {
     if (!description || !amount || !date || !typeId) return;
 
     this.saving.set(true);
-    this.savingsService
-      .create({ description, amount, date, typeId, accountId: this.formAccountId() })
-      .subscribe({
+    const id = this.editingId();
+    const payload = { description, amount, date, typeId, accountId: this.formAccountId() };
+
+    if (id) {
+      this.savingsService.update(id, payload).subscribe({
+        next: (saved) => {
+          this.allMovements.update(list => list.map(m => m.id === id ? saved : m));
+          this.monthMovements.update(list => list.map(m => m.id === id ? saved : m));
+          this.saving.set(false);
+          this.closeForm();
+          this.toast.success('Movimentação atualizada.');
+        },
+        error: (err) => {
+          this.logger.error('Failed to update movement', err);
+          this.saving.set(false);
+          this.toast.error('Erro ao atualizar movimentação.');
+        },
+      });
+    } else {
+      this.savingsService.create(payload).subscribe({
         next: (movement) => {
           this.allMovements.update((list) => [movement, ...list]);
-          // Add to month list if in current month view
           const d = new Date(movement.date + 'T12:00:00');
           if (d.getFullYear() === this.year() && d.getMonth() + 1 === this.month()) {
             this.monthMovements.update((list) => [movement, ...list]);
@@ -169,6 +197,7 @@ export class SavingsComponent implements OnInit {
           this.toast.error('Erro ao registrar movimentação.');
         },
       });
+    }
   }
 
   deleteMovement(id: string): void {

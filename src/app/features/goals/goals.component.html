@@ -12,7 +12,7 @@
   } @else {
     <div class="goals-list">
       @for (row of goalRows(); track row.goal.id) {
-        <div class="goal-item" [class.exceeded]="row.exceeded">
+        <div class="goal-item" [class.exceeded]="row.exceeded" (dblclick)="openEditForm(row)">
           <div class="goal-top">
             <div class="goal-category">
               @if (row.category?.color) {
