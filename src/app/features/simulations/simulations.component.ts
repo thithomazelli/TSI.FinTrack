@@ -352,7 +352,7 @@ export class SimulationsComponent implements OnInit {
   setPeriodMode(mode: 'month' | 'range'): void {
     this.periodMode.set(mode);
     if (mode === 'month') {
-      this.applyMonth(this.year(), this.month());
+      this.applyMonth(this.year(), this.month(), true);
     }
   }
 
@@ -362,14 +362,14 @@ export class SimulationsComponent implements OnInit {
     this.applyMonth(e.year, e.month);
   }
 
-  private applyMonth(year: number, month: number): void {
+  private applyMonth(year: number, month: number, silent = false): void {
     const from = `${year}-${String(month).padStart(2, '0')}-01`;
     const last = new Date(year, month, 0).getDate();
     const to = `${year}-${String(month).padStart(2, '0')}-${String(last).padStart(2, '0')}`;
     this.dateFrom.set(from);
     this.dateTo.set(to);
     this.resetSim();
-    this.load();
+    this.load(silent);
   }
 
   onDateChange(): void {
@@ -377,8 +377,8 @@ export class SimulationsComponent implements OnInit {
     this.load();
   }
 
-  async load(): Promise<void> {
-    this.loading.set(true);
+  async load(silent = false): Promise<void> {
+    if (!silent) this.loading.set(true);
     const uid = this.auth.currentUser!.id;
     const from = this.dateFrom();
     const to = this.dateTo();
@@ -592,7 +592,7 @@ export class SimulationsComponent implements OnInit {
       }
       this.toast.success(this.tr('simulations.applied', { count: changes.length }));
       this.resetSim();
-      this.load();
+      this.load(true);
       this.balanceService.invalidate();
     } catch (err) {
       this.logger.error('Simulation apply failed', err);

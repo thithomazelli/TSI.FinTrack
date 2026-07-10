@@ -135,10 +135,10 @@ export class CreditCardsSettingsComponent implements OnInit {
     this.saving.set(true);
     this.cardService.archive(card.id).subscribe({
       next: () => {
+        this.cards.update(list => list.filter(c => c.id !== card.id));
         this.toast.success('Cartão arquivado.');
         this.deletingItem.set(null);
         this.saving.set(false);
-        this.load();
       },
       error: err => {
         this.logger.error('Failed to archive card', err);
@@ -151,8 +151,8 @@ export class CreditCardsSettingsComponent implements OnInit {
   restore(card: CreditCard): void {
     this.cardService.restore(card.id).subscribe({
       next: () => {
+        this.cards.update(list => list.filter(c => c.id !== card.id));
         this.toast.success('Cartão restaurado com sucesso!');
-        this.load();
       },
       error: err => {
         this.logger.error('Failed to restore card', err);

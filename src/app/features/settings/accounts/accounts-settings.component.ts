@@ -133,10 +133,10 @@ export class AccountsSettingsComponent implements OnInit {
     this.saving.set(true);
     this.accountService.archive(account.id).subscribe({
       next: () => {
+        this.accounts.update(list => list.filter(a => a.id !== account.id));
         this.toast.success('Conta arquivada.');
         this.deletingItem.set(null);
         this.saving.set(false);
-        this.load();
       },
       error: err => {
         this.logger.error('Failed to archive account', err);
@@ -149,8 +149,8 @@ export class AccountsSettingsComponent implements OnInit {
   restore(account: Account): void {
     this.accountService.restore(account.id).subscribe({
       next: () => {
+        this.accounts.update(list => list.filter(a => a.id !== account.id));
         this.toast.success('Conta restaurada com sucesso!');
-        this.load();
       },
       error: err => {
         this.logger.error('Failed to restore account', err);
