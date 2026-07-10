@@ -56,9 +56,19 @@ export class InstallmentsComponent implements OnInit {
     const start = this.startOfMonth();
     const all = this.allInstallments();
 
+    // Group by installmentGroupId when set; otherwise derive key from description pattern
+    const instRe = /^(.*?)\s+(\d{1,2})\/(\d{1,2})$/;
     const byGroup = new Map<string, Transaction[]>();
     for (const tx of all) {
-      const gid = tx.installmentGroupId ?? tx.id;
+      let gid: string;
+      if (tx.installmentGroupId) {
+        gid = tx.installmentGroupId;
+      } else {
+        const m = instRe.exec(tx.description?.trim() ?? '');
+        if (!m) continue;
+        const total = parseInt(m[3], 10);
+        gid = `${m[1].trim().toLowerCase()}|${tx.creditCardId ?? ''}|${total}`;
+      }
       if (!byGroup.has(gid)) byGroup.set(gid, []);
       byGroup.get(gid)!.push(tx);
     }
