@@ -1,0 +1,85 @@
+<div class="page">
+  <div class="page-header">
+    <h2 class="page-title">{{ 'installments.title' | translate }}</h2>
+  </div>
+
+  <div class="summary-row">
+    <!-- Card 1: Month picker -->
+    <div class="summary-card summary-card--picker">
+      <span class="summary-label">{{ 'common.period' | translate }}</span>
+      <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+    </div>
+
+    <!-- Card 2: Month totals -->
+    <div class="summary-card summary-card--month">
+      <div class="card-kpi">
+        <span class="kpi-label">{{ 'installments.monthTotal' | translate }}</span>
+        <span class="kpi-value kpi-value--negative">R$ {{ monthTotal() | number:'1.2-2' }}</span>
+      </div>
+      <div class="card-kpi-row">
+        <div class="mini-kpi">
+          <span class="mini-label">{{ 'installments.countThisMonth' | translate }}</span>
+          <span class="mini-value">{{ countThisMonth() }}</span>
+        </div>
+        <div class="mini-kpi">
+          <span class="mini-label">{{ 'installments.groupsPending' | translate }}</span>
+          <span class="mini-value">{{ countPending() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Total to pay off -->
+    <div class="summary-card summary-card--payoff">
+      <span class="kpi-label">{{ 'installments.totalPayoff' | translate }}</span>
+      <span class="kpi-value kpi-value--negative">R$ {{ totalToPayOff() | number:'1.2-2' }}</span>
+      <span class="kpi-hint">{{ 'installments.totalPayoffHint' | translate }}</span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="state-msg">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'common.description' | translate }}</th>
+            <th class="text-center">{{ 'installments.totalInstallments' | translate }}</th>
+            <th class="text-center">{{ 'installments.paid' | translate }}</th>
+            <th class="text-center">{{ 'installments.pending' | translate }}</th>
+            <th class="text-right">{{ 'installments.unitValue' | translate }}</th>
+            <th class="text-right">{{ 'installments.monthlyValue' | translate }}</th>
+            <th class="text-right">{{ 'installments.totalPayoffCol' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (g of installmentGroups(); track g.groupId) {
+            <tr [class.row-this-month]="g.hasInstallmentThisMonth">
+              <td class="col-desc">
+                <span class="desc-text">{{ g.description }}</span>
+                <span class="installment-badge">{{ g.paid }}/{{ g.totalInstallments }}</span>
+              </td>
+              <td class="text-center col-num">{{ g.totalInstallments }}</td>
+              <td class="text-center col-num col-paid">{{ g.paid }}</td>
+              <td class="text-center col-num col-pending">{{ g.pending }}</td>
+              <td class="text-right col-amount">R$ {{ g.unitValue | number:'1.2-2' }}</td>
+              <td class="text-right col-amount" [class.col-amount--month]="g.hasInstallmentThisMonth">
+                @if (g.hasInstallmentThisMonth) {
+                  R$ {{ g.monthlyValue | number:'1.2-2' }}
+                } @else {
+                  <span class="col-muted">—</span>
+                }
+              </td>
+              <td class="text-right col-amount col-payoff">R$ {{ g.totalToPayOff | number:'1.2-2' }}</td>
+            </tr>
+          }
+          @if (installmentGroups().length === 0) {
+            <tr>
+              <td colspan="7" class="state-msg">{{ 'common.noResults' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

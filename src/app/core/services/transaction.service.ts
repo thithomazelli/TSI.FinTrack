@@ -180,6 +180,21 @@ export class TransactionService {
     );
   }
 
+  getAllInstallments(): Observable<Transaction[]> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .select('*')
+        .eq('owner_id', this.ownerId)
+        .gt('total_installments', 1)
+        .order('date', { ascending: true })
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []).map((r: any) => this.toModel(r));
+        })
+    );
+  }
+
   getAllCreditCard(): Observable<Transaction[]> {
     return from(
       this.supabase.client

@@ -50,7 +50,8 @@
     "email": "Email",
     "confirmDeleteTitle": "Confirm deletion",
     "confirmDeleteMsg": "Delete \"{{ name }}\"? This action cannot be undone.",
-    "confirmDeleteSimple": "Delete this record? This action cannot be undone."
+    "confirmDeleteSimple": "Delete this record? This action cannot be undone.",
+    "period": "Period"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -66,7 +67,8 @@
     "bills": "Bills",
     "recurring": "Recurring",
     "notifications": "Notifications",
-    "simulations": "Simulations"
+    "simulations": "Simulations",
+    "installments": "Installments"
   },
   "auth": {
     "signIn": "Sign In",
@@ -502,5 +504,19 @@
     "search": "Search simulations...",
     "empty": "No records in this period.",
     "bulkDeleteMsg": "Remove {{count}} item(s) from simulation?"
+  },
+  "installments": {
+    "title": "Pending Installments",
+    "monthTotal": "Month Total",
+    "countThisMonth": "Installments This Month",
+    "groupsPending": "Pending Groups",
+    "totalPayoff": "Total to Pay Off",
+    "totalPayoffHint": "Sum of all remaining pending installments",
+    "totalInstallments": "Total Installments",
+    "paid": "Paid",
+    "pending": "Pending",
+    "unitValue": "Unit Value",
+    "monthlyValue": "Monthly Value",
+    "totalPayoffCol": "Total to Pay Off"
   }
 }

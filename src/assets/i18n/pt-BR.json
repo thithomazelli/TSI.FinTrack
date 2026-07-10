@@ -50,7 +50,8 @@
     "email": "E-mail",
     "confirmDeleteTitle": "Confirmar exclusão",
     "confirmDeleteMsg": "Deseja excluir \"{{ name }}\"? Esta ação não pode ser desfeita.",
-    "confirmDeleteSimple": "Deseja excluir este registro? Esta ação não pode ser desfeita."
+    "confirmDeleteSimple": "Deseja excluir este registro? Esta ação não pode ser desfeita.",
+    "period": "Período"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -66,7 +67,8 @@
     "bills": "Faturas",
     "recurring": "Recorrentes",
     "notifications": "Notificações",
-    "simulations": "Simulações"
+    "simulations": "Simulações",
+    "installments": "Parcelas"
   },
   "auth": {
     "signIn": "Entrar",
@@ -502,5 +504,19 @@
     "search": "Buscar simulações...",
     "empty": "Nenhum lançamento neste período.",
     "bulkDeleteMsg": "Remover {{count}} item(s) da simulação?"
+  },
+  "installments": {
+    "title": "Parcelas Pendentes",
+    "monthTotal": "Total no Mês",
+    "countThisMonth": "Parcelas no Mês",
+    "groupsPending": "Grupos Pendentes",
+    "totalPayoff": "Total para Quitação",
+    "totalPayoffHint": "Soma de todas as parcelas ainda pendentes",
+    "totalInstallments": "Total Parcelas",
+    "paid": "Pagas",
+    "pending": "Pendentes",
+    "unitValue": "Valor Unitário",
+    "monthlyValue": "Valor Mensal",
+    "totalPayoffCol": "Total p/ Quitação"
   }
 }

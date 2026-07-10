@@ -1,0 +1,59 @@
+.page { padding: 1.5rem; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.page-title { font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin: 0; }
+
+.summary-row {
+  display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: stretch;
+}
+
+.summary-card {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+  display: flex; flex-direction: column; gap: .5rem;
+
+  &--picker { flex: 0 0 auto; justify-content: center; }
+  &--month { flex: 1; min-width: 200px; border-left: 4px solid #ef4444; }
+  &--payoff { flex: 1; min-width: 200px; border-left: 4px solid #6366f1; }
+}
+
+.summary-label { font-size: .75rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .04em; }
+
+.card-kpi { display: flex; flex-direction: column; gap: .25rem; }
+.card-kpi-row { display: flex; gap: 1.5rem; margin-top: .25rem; }
+
+.kpi-label { font-size: .75rem; font-weight: 700; color: var(--color-text-2); text-transform: uppercase; letter-spacing: .04em; }
+.kpi-value { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; &--negative { color: #ef4444; } &--accent { color: #6366f1; } }
+.kpi-hint { font-size: .72rem; color: var(--color-text-3, var(--color-text-2)); font-style: italic; }
+
+.mini-kpi { display: flex; flex-direction: column; gap: 2px; }
+.mini-label { font-size: .7rem; color: var(--color-text-2); }
+.mini-value { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
+
+.table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: .875rem; min-width: 700px; }
+th { background: var(--color-surface-2); color: var(--color-text-2); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--color-border); }
+td { padding: .875rem 1rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--color-surface-2); }
+tr.row-this-month td { background: rgba(239,68,68,.04); }
+tr.row-this-month:hover td { background: rgba(239,68,68,.08); }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.col-muted { color: var(--color-text-2); }
+
+.col-desc { display: flex; align-items: center; gap: .5rem; }
+.desc-text { flex: 1; }
+.installment-badge {
+  flex-shrink: 0; display: inline-block; padding: .15rem .5rem; border-radius: 999px;
+  font-size: .68rem; font-weight: 700; background: rgba(99,102,241,.15); color: #6366f1;
+}
+
+.col-num { font-variant-numeric: tabular-nums; font-weight: 600; }
+.col-paid { color: #22c55e; }
+.col-pending { color: #ef4444; }
+.col-amount { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.col-amount--month { color: #ef4444; font-weight: 700; }
+.col-payoff { color: #6366f1; font-weight: 700; }
+
+.state-msg { text-align: center; color: var(--color-text-2); padding: 3rem 0; }
