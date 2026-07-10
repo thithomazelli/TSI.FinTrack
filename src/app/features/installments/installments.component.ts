@@ -104,7 +104,7 @@ export class InstallmentsComponent implements OnInit {
       const monthlyValue = thisMonthTxs.reduce((s, t) => s + Number(t.amount), 0);
       const totalToPayOff = remaining.reduce((s, t) => s + Number(t.amount), 0);
       const lastInstallmentDate = sorted[sorted.length - 1].date.slice(0, 10);
-      const creditCardId = sorted[0].creditCardId ?? thisMonthTxs[0].creditCardId;
+      const creditCardId = thisMonthTxs[0].creditCardId ?? sorted[sorted.length - 1].creditCardId;
       const creditCardName = (creditCardId ? ccMap.get(creditCardId) : null) ?? '—';
 
       groups.push({
