@@ -519,6 +519,7 @@
     "monthlyValue": "Valor Mensal",
     "totalPayoffCol": "Total p/ Quitação",
     "creditCard": "Cartão",
-    "lastInstallment": "Última Parcela"
+    "lastInstallment": "Última Parcela",
+    "search": "Buscar por descrição ou cartão..."
   }
 }

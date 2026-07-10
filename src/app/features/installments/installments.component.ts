@@ -7,6 +7,7 @@ import {
   computed,
 } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionService } from '../../core/services/transaction.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
@@ -33,7 +34,7 @@ interface InstallmentGroup {
 
 @Component({
   selector: 'tsi-installments',
-  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, DatePipe],
+  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, DatePipe, FormsModule],
   templateUrl: './installments.component.html',
   styleUrls: ['./installments.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -177,11 +178,19 @@ export class InstallmentsComponent implements OnInit {
 
   readonly sortCol = signal<SortCol>('totalToPayOff');
   readonly sortAsc = signal(false);
+  readonly searchQuery = signal('');
 
   readonly sortedGroups = computed(() => {
     const col = this.sortCol();
     const asc = this.sortAsc();
-    return [...this.installmentGroups()].sort((a, b) => {
+    const q = this.searchQuery().trim().toLowerCase();
+    const groups = q
+      ? this.installmentGroups().filter(g =>
+          g.description.toLowerCase().includes(q) ||
+          g.creditCardName.toLowerCase().includes(q)
+        )
+      : this.installmentGroups();
+    return [...groups].sort((a, b) => {
       const va = a[col], vb = b[col];
       const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
       return asc ? cmp : -cmp;

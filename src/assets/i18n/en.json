@@ -519,6 +519,7 @@
     "monthlyValue": "Monthly Value",
     "totalPayoffCol": "Total to Pay Off",
     "creditCard": "Card",
-    "lastInstallment": "Last Installment"
+    "lastInstallment": "Last Installment",
+    "search": "Search by description or card..."
   }
 }

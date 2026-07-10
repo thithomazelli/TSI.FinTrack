@@ -33,6 +33,21 @@
     </div>
   </div>
 
+  @if (!loading()) {
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input
+        class="search-input"
+        type="text"
+        [(ngModel)]="searchQuery"
+        [placeholder]="'installments.search' | translate"
+      />
+      @if (searchQuery()) {
+        <button class="search-clear" (click)="searchQuery.set('')">✕</button>
+      }
+    </div>
+  }
+
   @if (loading()) {
     <p class="state-msg">{{ 'common.loading' | translate }}</p>
   } @else {
