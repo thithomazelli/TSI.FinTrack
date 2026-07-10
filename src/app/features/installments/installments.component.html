@@ -43,17 +43,17 @@
       <table>
         <thead>
           <tr>
-            <th>{{ 'common.description' | translate }}</th>
-            <th class="text-center">{{ 'installments.totalInstallments' | translate }}</th>
-            <th class="text-center">{{ 'installments.paid' | translate }}</th>
-            <th class="text-center">{{ 'installments.pending' | translate }}</th>
-            <th class="text-right">{{ 'installments.unitValue' | translate }}</th>
-            <th class="text-right">{{ 'installments.monthlyValue' | translate }}</th>
-            <th class="text-right">{{ 'installments.totalPayoffCol' | translate }}</th>
+            <th class="th-sort" (click)="sort('description')">{{ 'common.description' | translate }} <span class="sort-icon">{{ sortIcon('description') }}</span></th>
+            <th class="text-center th-sort" (click)="sort('totalInstallments')">{{ 'installments.totalInstallments' | translate }} <span class="sort-icon">{{ sortIcon('totalInstallments') }}</span></th>
+            <th class="text-center th-sort" (click)="sort('paid')">{{ 'installments.paid' | translate }} <span class="sort-icon">{{ sortIcon('paid') }}</span></th>
+            <th class="text-center th-sort" (click)="sort('pending')">{{ 'installments.pending' | translate }} <span class="sort-icon">{{ sortIcon('pending') }}</span></th>
+            <th class="text-right th-sort" (click)="sort('unitValue')">{{ 'installments.unitValue' | translate }} <span class="sort-icon">{{ sortIcon('unitValue') }}</span></th>
+            <th class="text-right th-sort" (click)="sort('monthlyValue')">{{ 'installments.monthlyValue' | translate }} <span class="sort-icon">{{ sortIcon('monthlyValue') }}</span></th>
+            <th class="text-right th-sort" (click)="sort('totalToPayOff')">{{ 'installments.totalPayoffCol' | translate }} <span class="sort-icon">{{ sortIcon('totalToPayOff') }}</span></th>
           </tr>
         </thead>
         <tbody>
-          @for (g of installmentGroups(); track g.groupId) {
+          @for (g of sortedGroups(); track g.groupId) {
             <tr [class.row-this-month]="g.hasInstallmentThisMonth">
               <td class="col-desc">
                 <span class="desc-text">{{ g.description }}</span>

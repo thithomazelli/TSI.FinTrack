@@ -13,6 +13,8 @@ import { LoggingService } from '../../core/services/logging.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 
+type SortCol = 'description' | 'totalInstallments' | 'paid' | 'pending' | 'unitValue' | 'monthlyValue' | 'totalToPayOff';
+
 interface InstallmentGroup {
   groupId: string;
   description: string;
@@ -121,6 +123,33 @@ export class InstallmentsComponent implements OnInit {
   readonly countThisMonth = computed(() =>
     this.installmentGroups().filter(g => g.hasInstallmentThisMonth).length
   );
+
+  readonly sortCol = signal<SortCol>('totalToPayOff');
+  readonly sortAsc = signal(false);
+
+  readonly sortedGroups = computed(() => {
+    const col = this.sortCol();
+    const asc = this.sortAsc();
+    return [...this.installmentGroups()].sort((a, b) => {
+      const va = a[col], vb = b[col];
+      const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
+      return asc ? cmp : -cmp;
+    });
+  });
+
+  sort(col: SortCol): void {
+    if (this.sortCol() === col) {
+      this.sortAsc.update(v => !v);
+    } else {
+      this.sortCol.set(col);
+      this.sortAsc.set(col === 'description');
+    }
+  }
+
+  sortIcon(col: SortCol): string {
+    if (this.sortCol() !== col) return '↕';
+    return this.sortAsc() ? '↑' : '↓';
+  }
 
   readonly countPending = computed(() =>
     this.installmentGroups().filter(g => g.pending > 0).length
