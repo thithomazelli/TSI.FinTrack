@@ -46,22 +46,24 @@ async function main() {
 
   const instRe = INST_RE
 
-  // Build a map: groupKey -> { groupId, total, records[] }
-  // from transactions that already have a group ID
-  const groupedMap = new Map() // groupKey -> { groupId, total }
+  // Build two maps from transactions that already have a group ID:
+  //   exact: (base, card, account, total)  — preferred
+  //   loose: (base, total)                 — fallback when card differs
+  const exactMap = new Map()
+  const looseMap = new Map()
   for (const tx of all) {
     if (!tx.installment_group_id) continue
     const m = instRe.exec(tx.description?.trim() ?? '')
     if (!m) continue
     const base = m[1].trim().toLowerCase()
     const total = parseInt(m[3], 10)
-    const key = `${base}|${tx.credit_card_id ?? ''}|${tx.account_id ?? ''}|${total}`
-    if (!groupedMap.has(key)) {
-      groupedMap.set(key, { groupId: tx.installment_group_id, total })
-    }
+    const exactKey = `${base}|${tx.credit_card_id ?? ''}|${tx.account_id ?? ''}|${total}`
+    if (!exactMap.has(exactKey)) exactMap.set(exactKey, { groupId: tx.installment_group_id, total })
+    const looseKey = `${base}|${total}`
+    if (!looseMap.has(looseKey)) looseMap.set(looseKey, { groupId: tx.installment_group_id, total })
   }
 
-  // Find orphans (no group ID) that match a known group
+  // Find orphans (no group ID) that match a known group — exact first, loose fallback
   const toFix = []
   for (const tx of all) {
     if (tx.installment_group_id) continue
@@ -70,10 +72,12 @@ async function main() {
     const base = m[1].trim().toLowerCase()
     const num = parseInt(m[2], 10)
     const total = parseInt(m[3], 10)
-    const key = `${base}|${tx.credit_card_id ?? ''}|${tx.account_id ?? ''}|${total}`
-    if (groupedMap.has(key)) {
-      const { groupId } = groupedMap.get(key)
-      toFix.push({ id: tx.id, description: tx.description, date: tx.date, num, total, groupId })
+    const exactKey = `${base}|${tx.credit_card_id ?? ''}|${tx.account_id ?? ''}|${total}`
+    const looseKey = `${base}|${total}`
+    const match = exactMap.get(exactKey) ?? looseMap.get(looseKey)
+    if (match) {
+      const matchType = exactMap.has(exactKey) ? '' : ' (loose match — cartão diferente)'
+      toFix.push({ id: tx.id, description: tx.description, date: tx.date, num, total, groupId: match.groupId, matchType })
     }
   }
 
@@ -84,7 +88,7 @@ async function main() {
 
   console.log(`\n  ${toFix.length} registro(s) órfão(s) encontrado(s):`)
   for (const t of toFix) {
-    console.log(`    [${t.date}] ${t.description}  →  grupo ${t.groupId}`)
+    console.log(`    [${t.date}] ${t.description}  →  grupo ${t.groupId}${t.matchType}`)
   }
 
   if (DRY_RUN) {
