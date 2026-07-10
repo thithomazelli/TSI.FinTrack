@@ -517,6 +517,8 @@
     "pending": "Pending",
     "unitValue": "Unit Value",
     "monthlyValue": "Monthly Value",
-    "totalPayoffCol": "Total to Pay Off"
+    "totalPayoffCol": "Total to Pay Off",
+    "creditCard": "Card",
+    "lastInstallment": "Last Installment"
   }
 }

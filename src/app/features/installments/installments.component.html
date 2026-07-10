@@ -28,8 +28,8 @@
 
     <div class="summary-card summary-card--payoff">
       <span class="kpi-label">{{ 'installments.totalPayoff' | translate }}</span>
-      <span class="kpi-value kpi-value--negative">R$ {{ totalToPayOff() | number:'1.2-2' }}</span>
-      <span class="kpi-hint">{{ 'installments.totalPayoffHint' | translate }}</span>
+      <span class="kpi-value kpi-value--accent">R$ {{ selectionTotals().totalToPayOff | number:'1.2-2' }}</span>
+      <span class="kpi-hint">{{ selectionTotals().count }} de {{ installmentGroups().length }} selecionado(s)</span>
     </div>
   </div>
 
@@ -44,12 +44,14 @@
               <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" />
             </th>
             <th class="th-sort" (click)="sort('description')">{{ 'common.description' | translate }} <span class="sort-icon">{{ sortIcon('description') }}</span></th>
+            <th class="th-sort" (click)="sort('creditCardName')">{{ 'installments.creditCard' | translate }} <span class="sort-icon">{{ sortIcon('creditCardName') }}</span></th>
             <th class="text-center th-sort" (click)="sort('totalInstallments')">{{ 'installments.totalInstallments' | translate }} <span class="sort-icon">{{ sortIcon('totalInstallments') }}</span></th>
             <th class="text-center th-sort" (click)="sort('paid')">{{ 'installments.paid' | translate }} <span class="sort-icon">{{ sortIcon('paid') }}</span></th>
             <th class="text-center th-sort" (click)="sort('pending')">{{ 'installments.pending' | translate }} <span class="sort-icon">{{ sortIcon('pending') }}</span></th>
             <th class="text-right th-sort" (click)="sort('unitValue')">{{ 'installments.unitValue' | translate }} <span class="sort-icon">{{ sortIcon('unitValue') }}</span></th>
             <th class="text-right th-sort" (click)="sort('monthlyValue')">{{ 'installments.monthlyValue' | translate }} <span class="sort-icon">{{ sortIcon('monthlyValue') }}</span></th>
             <th class="text-right th-sort" (click)="sort('totalToPayOff')">{{ 'installments.totalPayoffCol' | translate }} <span class="sort-icon">{{ sortIcon('totalToPayOff') }}</span></th>
+            <th class="text-right th-sort" (click)="sort('lastInstallmentDate')">{{ 'installments.lastInstallment' | translate }} <span class="sort-icon">{{ sortIcon('lastInstallmentDate') }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -62,6 +64,7 @@
                 <span class="desc-text">{{ g.description }}</span>
                 <span class="installment-badge">{{ g.paid }}/{{ g.totalInstallments }}</span>
               </td>
+              <td class="col-muted col-card">{{ g.creditCardName }}</td>
               <td class="text-center col-num">{{ g.totalInstallments }}</td>
               <td class="text-center col-num col-paid">{{ g.paid }}</td>
               <td class="text-center col-num col-pending">{{ g.pending }}</td>
@@ -74,11 +77,12 @@
                 }
               </td>
               <td class="text-right col-amount col-payoff">R$ {{ g.totalToPayOff | number:'1.2-2' }}</td>
+              <td class="text-right col-muted col-date">{{ g.lastInstallmentDate | date:'MM/yyyy' }}</td>
             </tr>
           }
           @if (installmentGroups().length === 0) {
             <tr>
-              <td colspan="8" class="state-msg">{{ 'common.noResults' | translate }}</td>
+              <td colspan="10" class="state-msg">{{ 'common.noResults' | translate }}</td>
             </tr>
           }
         </tbody>
@@ -87,9 +91,10 @@
             <tr class="totals-row">
               <td></td>
               <td class="totals-label">{{ selectionTotals().count }} selecionado(s)</td>
-              <td colspan="4"></td>
+              <td colspan="5"></td>
               <td class="text-right totals-value">R$ {{ selectionTotals().monthlyValue | number:'1.2-2' }}</td>
               <td class="text-right totals-value">R$ {{ selectionTotals().totalToPayOff | number:'1.2-2' }}</td>
+              <td></td>
             </tr>
           </tfoot>
         }

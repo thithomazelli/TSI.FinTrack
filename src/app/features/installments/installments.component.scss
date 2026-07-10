@@ -31,7 +31,7 @@
 .mini-value { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
 
 .table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; font-size: .875rem; min-width: 700px; }
+table { width: 100%; border-collapse: collapse; font-size: .875rem; min-width: 960px; }
 th { background: var(--color-surface-2); color: var(--color-text-2); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: .75rem 1rem; text-align: left; border-bottom: 1px solid var(--color-border); }
 td { padding: .875rem 1rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
@@ -56,6 +56,8 @@ tr.row-this-month:hover td { background: rgba(239,68,68,.08); }
 .col-amount { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .col-amount--month { color: #ef4444; font-weight: 700; }
 .col-payoff { color: #6366f1; font-weight: 700; }
+.col-card { font-size: .8rem; white-space: nowrap; }
+.col-date { white-space: nowrap; font-variant-numeric: tabular-nums; font-size: .85rem; }
 
 .th-check, .td-check { width: 2.25rem; padding: .5rem .75rem; }
 input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--color-accent); }

@@ -517,6 +517,8 @@
     "pending": "Pendentes",
     "unitValue": "Valor Unitário",
     "monthlyValue": "Valor Mensal",
-    "totalPayoffCol": "Total p/ Quitação"
+    "totalPayoffCol": "Total p/ Quitação",
+    "creditCard": "Cartão",
+    "lastInstallment": "Última Parcela"
   }
 }

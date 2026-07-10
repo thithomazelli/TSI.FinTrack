@@ -6,14 +6,16 @@ import {
   signal,
   computed,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionService } from '../../core/services/transaction.service';
+import { CreditCardService } from '../../core/services/credit-card.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
+import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 
-type SortCol = 'description' | 'totalInstallments' | 'paid' | 'pending' | 'unitValue' | 'monthlyValue' | 'totalToPayOff';
+type SortCol = 'description' | 'totalInstallments' | 'paid' | 'pending' | 'unitValue' | 'monthlyValue' | 'totalToPayOff' | 'lastInstallmentDate' | 'creditCardName';
 
 interface InstallmentGroup {
   groupId: string;
@@ -25,23 +27,27 @@ interface InstallmentGroup {
   monthlyValue: number;
   totalToPayOff: number;
   hasInstallmentThisMonth: boolean;
+  lastInstallmentDate: string;
+  creditCardName: string;
 }
 
 @Component({
   selector: 'tsi-installments',
-  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent],
+  imports: [DecimalPipe, TranslatePipe, MonthPickerComponent, DatePipe],
   templateUrl: './installments.component.html',
   styleUrls: ['./installments.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InstallmentsComponent implements OnInit {
   private readonly txService = inject(TransactionService);
+  private readonly ccService = inject(CreditCardService);
   private readonly logger = inject(LoggingService);
 
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
   readonly loading = signal(false);
   readonly allInstallments = signal<Transaction[]>([]);
+  readonly creditCards = signal<CreditCard[]>([]);
 
   readonly endOfMonth = computed(() => {
     const y = this.year(), m = this.month();
@@ -57,6 +63,7 @@ export class InstallmentsComponent implements OnInit {
     const end = this.endOfMonth();
     const start = this.startOfMonth();
     const all = this.allInstallments();
+    const ccMap = new Map(this.creditCards().map(c => [c.id, c.name]));
 
     // Group by installmentGroupId when set; otherwise derive key from description pattern
     const instRe = /^(.*?)\s+(\d{1,2})\/(\d{1,2})$/;
@@ -95,6 +102,9 @@ export class InstallmentsComponent implements OnInit {
       if (pending <= 0) continue;
       const monthlyValue = thisMonthTxs.reduce((s, t) => s + Number(t.amount), 0);
       const totalToPayOff = remaining.reduce((s, t) => s + Number(t.amount), 0);
+      const lastInstallmentDate = sorted[sorted.length - 1].date.slice(0, 10);
+      const creditCardId = sorted[0].creditCardId ?? thisMonthTxs[0].creditCardId;
+      const creditCardName = (creditCardId ? ccMap.get(creditCardId) : null) ?? '—';
 
       groups.push({
         groupId,
@@ -106,6 +116,8 @@ export class InstallmentsComponent implements OnInit {
         monthlyValue,
         totalToPayOff,
         hasInstallmentThisMonth: true,
+        lastInstallmentDate,
+        creditCardName,
       });
     }
 
@@ -127,6 +139,10 @@ export class InstallmentsComponent implements OnInit {
   );
 
   readonly selectedIds = signal<Set<string>>(new Set());
+
+  private syncSelectionToAll(): void {
+    this.selectedIds.set(new Set(this.sortedGroups().map(g => g.groupId)));
+  }
 
   readonly selectionTotals = computed(() => {
     const ids = this.selectedIds();
@@ -191,12 +207,14 @@ export class InstallmentsComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    this.ccService.getAll(true).subscribe(cards => this.creditCards.set(cards));
     this.load();
   }
 
   onMonthChanged(event: { year: number; month: number }): void {
     this.year.set(event.year);
     this.month.set(event.month);
+    this.syncSelectionToAll();
   }
 
   private load(): void {
@@ -205,6 +223,7 @@ export class InstallmentsComponent implements OnInit {
       next: (txs) => {
         this.allInstallments.set(txs);
         this.loading.set(false);
+        this.syncSelectionToAll();
       },
       error: (err) => {
         this.logger.error('Failed to load installments', err);
