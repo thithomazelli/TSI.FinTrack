@@ -4,13 +4,11 @@
   </div>
 
   <div class="summary-row">
-    <!-- Card 1: Month picker -->
     <div class="summary-card summary-card--picker">
       <span class="summary-label">{{ 'common.period' | translate }}</span>
       <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
     </div>
 
-    <!-- Card 2: Month totals -->
     <div class="summary-card summary-card--month">
       <div class="card-kpi">
         <span class="kpi-label">{{ 'installments.monthTotal' | translate }}</span>
@@ -28,7 +26,6 @@
       </div>
     </div>
 
-    <!-- Card 3: Total to pay off -->
     <div class="summary-card summary-card--payoff">
       <span class="kpi-label">{{ 'installments.totalPayoff' | translate }}</span>
       <span class="kpi-value kpi-value--negative">R$ {{ totalToPayOff() | number:'1.2-2' }}</span>
@@ -43,6 +40,9 @@
       <table>
         <thead>
           <tr>
+            <th class="th-check">
+              <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" />
+            </th>
             <th class="th-sort" (click)="sort('description')">{{ 'common.description' | translate }} <span class="sort-icon">{{ sortIcon('description') }}</span></th>
             <th class="text-center th-sort" (click)="sort('totalInstallments')">{{ 'installments.totalInstallments' | translate }} <span class="sort-icon">{{ sortIcon('totalInstallments') }}</span></th>
             <th class="text-center th-sort" (click)="sort('paid')">{{ 'installments.paid' | translate }} <span class="sort-icon">{{ sortIcon('paid') }}</span></th>
@@ -54,7 +54,10 @@
         </thead>
         <tbody>
           @for (g of sortedGroups(); track g.groupId) {
-            <tr [class.row-this-month]="g.hasInstallmentThisMonth">
+            <tr [class.row-this-month]="g.hasInstallmentThisMonth" [class.row-selected]="selectedIds().has(g.groupId)" (click)="toggleRow(g.groupId)">
+              <td class="td-check" (click)="$event.stopPropagation()">
+                <input type="checkbox" [checked]="selectedIds().has(g.groupId)" (change)="toggleRow(g.groupId)" />
+              </td>
               <td class="col-desc">
                 <span class="desc-text">{{ g.description }}</span>
                 <span class="installment-badge">{{ g.paid }}/{{ g.totalInstallments }}</span>
@@ -75,10 +78,21 @@
           }
           @if (installmentGroups().length === 0) {
             <tr>
-              <td colspan="7" class="state-msg">{{ 'common.noResults' | translate }}</td>
+              <td colspan="8" class="state-msg">{{ 'common.noResults' | translate }}</td>
             </tr>
           }
         </tbody>
+        @if (selectionTotals().count > 0) {
+          <tfoot>
+            <tr class="totals-row">
+              <td></td>
+              <td class="totals-label">{{ selectionTotals().count }} selecionado(s)</td>
+              <td colspan="4"></td>
+              <td class="text-right totals-value">R$ {{ selectionTotals().monthlyValue | number:'1.2-2' }}</td>
+              <td class="text-right totals-value">R$ {{ selectionTotals().totalToPayOff | number:'1.2-2' }}</td>
+            </tr>
+          </tfoot>
+        }
       </table>
     </div>
   }

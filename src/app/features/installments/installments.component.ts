@@ -124,6 +124,39 @@ export class InstallmentsComponent implements OnInit {
     this.installmentGroups().filter(g => g.hasInstallmentThisMonth).length
   );
 
+  readonly selectedIds = signal<Set<string>>(new Set());
+
+  readonly selectionTotals = computed(() => {
+    const ids = this.selectedIds();
+    const sel = this.sortedGroups().filter(g => ids.has(g.groupId));
+    return {
+      count: sel.length,
+      monthlyValue: sel.reduce((s, g) => s + g.monthlyValue, 0),
+      totalToPayOff: sel.reduce((s, g) => s + g.totalToPayOff, 0),
+    };
+  });
+
+  readonly allSelected = computed(() => {
+    const groups = this.sortedGroups();
+    return groups.length > 0 && groups.every(g => this.selectedIds().has(g.groupId));
+  });
+
+  toggleRow(groupId: string): void {
+    this.selectedIds.update(set => {
+      const next = new Set(set);
+      next.has(groupId) ? next.delete(groupId) : next.add(groupId);
+      return next;
+    });
+  }
+
+  toggleAll(): void {
+    if (this.allSelected()) {
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectedIds.set(new Set(this.sortedGroups().map(g => g.groupId)));
+    }
+  }
+
   readonly sortCol = signal<SortCol>('totalToPayOff');
   readonly sortAsc = signal(false);
 
