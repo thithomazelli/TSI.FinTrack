@@ -164,6 +164,11 @@ export class TransactionService {
     if (payload.originalCurrency !== undefined) row['original_currency'] = payload.originalCurrency;
     if (payload.originalAmount !== undefined) row['original_amount'] = payload.originalAmount;
     if (payload.exchangeRate !== undefined) row['exchange_rate'] = payload.exchangeRate;
+    if (payload.totalInstallments !== undefined) {
+      row['total_installments'] = payload.totalInstallments ?? null;
+      row['installment_number'] = payload.totalInstallments ? 1 : null;
+      row['installment_group_id'] = null;
+    }
 
     return from(
       this.supabase.client
