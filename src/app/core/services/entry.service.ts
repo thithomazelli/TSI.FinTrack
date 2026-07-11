@@ -22,6 +22,9 @@ export interface CreateEntryPayload {
   accountId: string | null;
   labels: string[];
   status?: string;
+  totalInstallments?: number | null;
+  /** When true, `amount` is already the per-installment value — do not divide. */
+  installmentAmountIsFixed?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -63,6 +66,9 @@ export class EntryService {
 
   create(payload: CreateEntryPayload): Observable<Entry> {
     this.logger.info('Creating entry', payload.description);
+    if (payload.totalInstallments && payload.totalInstallments > 1) {
+      return this.createInstallments(payload);
+    }
     return from(
       this.supabase.client
         .from(TABLE)
@@ -76,6 +82,43 @@ export class EntryService {
           labels: payload.labels,
           status: payload.status ?? 'REALIZED',
         })
+        .select()
+        .single()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return this.toModel(data);
+        })
+    );
+  }
+
+  private createInstallments(payload: CreateEntryPayload): Observable<Entry> {
+    const total = payload.totalInstallments!;
+    const installmentAmount = payload.installmentAmountIsFixed
+      ? payload.amount
+      : Math.round((payload.amount / total) * 100) / 100;
+    const baseDate = new Date(payload.date + 'T00:00:00');
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const ownerId = this.ownerId;
+
+    const rows = Array.from({ length: total }, (_, i) => {
+      const d = new Date(baseDate);
+      d.setMonth(d.getMonth() + i);
+      return {
+        owner_id: ownerId,
+        description: `${payload.description} - ${pad(i + 1)}/${pad(total)}`,
+        amount: installmentAmount,
+        date: d.toISOString().split('T')[0],
+        type_id: payload.typeId,
+        account_id: payload.accountId,
+        labels: payload.labels,
+        status: payload.status ?? 'REALIZED',
+      };
+    });
+
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .insert(rows)
         .select()
         .single()
         .then(({ data, error }) => {

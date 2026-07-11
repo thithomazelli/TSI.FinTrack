@@ -27,6 +27,8 @@ export interface CreateTransactionPayload {
   creditCardId: string | null;
   status: TransactionStatus;
   totalInstallments: number | null;
+  /** When true, `amount` is already the per-installment value — do not divide. */
+  installmentAmountIsFixed?: boolean;
   recurringTemplateId: string | null;
   originalCurrency: string | null;
   originalAmount: number | null;
@@ -116,7 +118,9 @@ export class TransactionService {
     const groupId = crypto.randomUUID();
     const total = payload.totalInstallments!;
     const baseDate = new Date(payload.date + 'T00:00:00');
-    const installmentAmount = Math.round((payload.amount / total) * 100) / 100;
+    const installmentAmount = payload.installmentAmountIsFixed
+      ? payload.amount
+      : Math.round((payload.amount / total) * 100) / 100;
 
     const pad = (n: number) => String(n).padStart(2, '0');
 

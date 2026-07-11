@@ -559,6 +559,35 @@
       </div>
     </div>
 
+    <div class="form-toggles">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="formEntryIsInstallment" />
+        {{ 'movimentos.installment' | translate }}
+      </label>
+    </div>
+
+    @if (formEntryIsInstallment) {
+      <div class="form-row installment-row">
+        <div class="form-field form-field--sm">
+          <label>{{ 'movimentos.installmentsCount' | translate }}</label>
+          <input class="input" type="number" min="2" max="48" [(ngModel)]="formEntryInstallments" />
+        </div>
+        <div class="form-field">
+          <label>{{ 'movimentos.amountType' | translate }}</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="entryAmountType" value="total" [(ngModel)]="formEntryAmountType" />
+              {{ 'movimentos.amountTotal' | translate }}
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="entryAmountType" value="installment" [(ngModel)]="formEntryAmountType" />
+              {{ 'movimentos.amountInstallment' | translate }}
+            </label>
+          </div>
+        </div>
+      </div>
+    }
+
     <div class="form-field">
       <label>{{ 'movimentos.labels' | translate }}</label>
       <tsi-labels-input [(labels)]="formEntryLabels" />
@@ -653,9 +682,24 @@
     </div>
 
     @if (formTxIsInstallment) {
-      <div class="form-field">
-        <label>{{ 'movimentos.installmentsCount' | translate }}</label>
-        <input class="input" type="number" min="2" max="48" [(ngModel)]="formTxInstallments" />
+      <div class="form-row installment-row">
+        <div class="form-field form-field--sm">
+          <label>{{ 'movimentos.installmentsCount' | translate }}</label>
+          <input class="input" type="number" min="2" max="48" [(ngModel)]="formTxInstallments" />
+        </div>
+        <div class="form-field">
+          <label>{{ 'movimentos.amountType' | translate }}</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="txAmountType" value="total" [(ngModel)]="formTxAmountType" />
+              {{ 'movimentos.amountTotal' | translate }}
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="txAmountType" value="installment" [(ngModel)]="formTxAmountType" />
+              {{ 'movimentos.amountInstallment' | translate }}
+            </label>
+          </div>
+        </div>
       </div>
     }
 

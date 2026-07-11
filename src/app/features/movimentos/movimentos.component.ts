@@ -146,6 +146,9 @@ export class MovimentosComponent implements OnInit {
   formEntryTypeId = '';
   formEntryAccountId = '';
   formEntryLabels: string[] = [];
+  formEntryIsInstallment = false;
+  formEntryInstallments = 2;
+  formEntryAmountType: 'total' | 'installment' = 'total';
 
   // Transaction form fields
   formTxDescription = '';
@@ -157,7 +160,8 @@ export class MovimentosComponent implements OnInit {
   formTxCreditCardId = '';
   formTxPurchaseDate = '';
   formTxIsInstallment = false;
-  formTxInstallments = 1;
+  formTxInstallments = 2;
+  formTxAmountType: 'total' | 'installment' = 'total';
   formTxIsInternational = false;
   formTxOriginalCurrency = 'USD';
   formTxOriginalAmount = 0;
@@ -633,6 +637,9 @@ export class MovimentosComponent implements OnInit {
     this.formEntryTypeId = this.entryTypes()[0]?.id ?? '';
     this.formEntryAccountId = '';
     this.formEntryLabels = [];
+    this.formEntryIsInstallment = false;
+    this.formEntryInstallments = 2;
+    this.formEntryAmountType = 'total';
     this.modalMode.set('entry');
   }
 
@@ -647,7 +654,8 @@ export class MovimentosComponent implements OnInit {
     this.formTxCreditCardId = '';
     this.formTxPurchaseDate = '';
     this.formTxIsInstallment = false;
-    this.formTxInstallments = 1;
+    this.formTxInstallments = 2;
+    this.formTxAmountType = 'total';
     this.formTxIsInternational = false;
     this.formTxOriginalCurrency = 'USD';
     this.formTxOriginalAmount = 0;
@@ -706,6 +714,8 @@ export class MovimentosComponent implements OnInit {
       accountId: this.formEntryAccountId || null,
       labels: this.formEntryLabels,
       status: this.formEntryStatus,
+      totalInstallments: this.formEntryIsInstallment ? this.formEntryInstallments : null,
+      installmentAmountIsFixed: this.formEntryIsInstallment && this.formEntryAmountType === 'installment',
     };
 
     const id = this.editingId();
@@ -747,6 +757,7 @@ export class MovimentosComponent implements OnInit {
       creditCardId: this.formTxCreditCardId || null,
       status: this.formTxStatus,
       totalInstallments: this.formTxIsInstallment ? this.formTxInstallments : null,
+      installmentAmountIsFixed: this.formTxIsInstallment && this.formTxAmountType === 'installment',
       recurringTemplateId: null,
       originalCurrency: this.formTxIsInternational ? this.formTxOriginalCurrency : null,
       originalAmount: this.formTxIsInternational ? this.formTxOriginalAmount : null,
