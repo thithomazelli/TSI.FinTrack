@@ -102,7 +102,10 @@ export class EntryService {
 
     const rows = Array.from({ length: total }, (_, i) => {
       const d = new Date(baseDate);
-      d.setMonth(d.getMonth() + i);
+      d.setDate(1);
+      d.setMonth(baseDate.getMonth() + i);
+      const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      d.setDate(Math.min(baseDate.getDate(), lastDay));
       return {
         owner_id: ownerId,
         description: `${payload.description} - ${pad(i + 1)}/${pad(total)}`,

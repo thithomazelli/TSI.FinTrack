@@ -126,7 +126,10 @@ export class TransactionService {
 
     const rows = Array.from({ length: total }, (_, i) => {
       const installDate = new Date(baseDate);
-      installDate.setMonth(installDate.getMonth() + i);
+      installDate.setDate(1);
+      installDate.setMonth(baseDate.getMonth() + i);
+      const lastDay = new Date(installDate.getFullYear(), installDate.getMonth() + 1, 0).getDate();
+      installDate.setDate(Math.min(baseDate.getDate(), lastDay));
       const num = i + 1;
       const description = `${payload.description} - ${pad(num)}/${pad(total)}`;
       return {
