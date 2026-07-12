@@ -25,7 +25,7 @@
       </thead>
       <tbody>
         @for (acc of accounts(); track acc.id) {
-          <tr>
+          <tr (dblclick)="!acc.isArchived && openEdit(acc)" style="cursor: pointer">
             <td>
               {{ acc.name }}
               @if (acc.isArchived) {

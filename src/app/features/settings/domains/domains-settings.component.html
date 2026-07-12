@@ -35,7 +35,7 @@
       </thead>
       <tbody>
         @for (item of filteredItems(); track item.id) {
-          <tr>
+          <tr (dblclick)="openEdit(item)" style="cursor: pointer">
             <td><code class="code-chip">{{ item.code }}</code></td>
             <td>{{ item.name }}</td>
             <td>{{ item.value }}</td>

@@ -254,7 +254,8 @@ async function main() {
   if (unmatchedCards.length) console.warn('  ⚠ Cartões sem match:', unmatchedCards)
   else console.log('  Todos os cartões do seed têm match ✓')
 
-  // 2.5 Conta Corrente com saldo de abertura (reconciliação histórica)
+  // 2.5 Conta Corrente Itaú com saldo de abertura (reconciliação histórica)
+  const CHECKING_ACCOUNT_NAME = 'Conta Corrente Itaú'
   const opening = data.meta?.opening_balance ?? -305
   const openedAt = data.meta?.opened_at ?? '2009-05-01'
   const { data: checkingDomain } = await supabase
@@ -262,16 +263,21 @@ async function main() {
   const checkingTypeId = checkingDomain?.id ?? null
   const { data: existingAccts } = await supabase
     .from('accounts').select('id, name').eq('owner_id', OWNER_ID)
-  const acct = (existingAccts ?? []).find(a => a.name === 'Conta Corrente')
+  const acct = (existingAccts ?? []).find(a => a.name === CHECKING_ACCOUNT_NAME)
+    ?? (existingAccts ?? []).find(a => a.name === 'Conta Corrente')
+  let checkingAccountId
   if (!acct) {
-    const { error } = await supabase.from('accounts')
-      .insert({ owner_id: OWNER_ID, name: 'Conta Corrente', type_id: checkingTypeId, balance: opening, opened_at: openedAt })
+    const { data: created, error } = await supabase.from('accounts')
+      .insert({ owner_id: OWNER_ID, name: CHECKING_ACCOUNT_NAME, type_id: checkingTypeId, balance: opening, opened_at: openedAt })
+      .select('id').single()
     if (error) { console.error('Erro ao criar conta:', error.message); process.exit(1) }
-    console.log(`  Conta Corrente criada (saldo ${opening}, abertura ${openedAt}) ✓`)
+    checkingAccountId = created.id
+    console.log(`  ${CHECKING_ACCOUNT_NAME} criada (saldo ${opening}, abertura ${openedAt}) ✓`)
   } else {
-    const { error: updErr } = await supabase.from('accounts').update({ type_id: checkingTypeId, balance: opening, opened_at: openedAt }).eq('id', acct.id)
+    const { error: updErr } = await supabase.from('accounts').update({ name: CHECKING_ACCOUNT_NAME, type_id: checkingTypeId, balance: opening, opened_at: openedAt }).eq('id', acct.id)
     if (updErr) { console.error('Erro ao atualizar conta:', updErr.message); process.exit(1) }
-    console.log(`  Conta Corrente saldo atualizado p/ ${opening} (abertura ${openedAt}) ✓`)
+    checkingAccountId = acct.id
+    console.log(`  ${CHECKING_ACCOUNT_NAME} saldo atualizado p/ ${opening} (abertura ${openedAt}) ✓`)
   }
 
   // 3. Entradas de renda
@@ -285,6 +291,7 @@ async function main() {
       owner_id: e.owner_id, description: e.description,
       amount: e.amount, date: e.date, labels: e.labels ?? [], status: e.status,
       position: e.position ?? null,
+      account_id: checkingAccountId,
     }))
     await batchInsert('entries', entries, 'Entradas')
     console.log(`   ${entries.length} entradas de renda`)

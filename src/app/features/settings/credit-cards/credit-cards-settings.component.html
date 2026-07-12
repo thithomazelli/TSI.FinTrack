@@ -27,7 +27,7 @@
       </thead>
       <tbody>
         @for (card of cards(); track card.id) {
-          <tr>
+          <tr (dblclick)="!card.isArchived && openEdit(card)" style="cursor: pointer">
             <td>
               <span class="card-name-cell">
                 <span class="card-brand-icon">{{ cardBrandIcon(card.name) }}</span>

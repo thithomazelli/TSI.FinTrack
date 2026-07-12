@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       @for (cat of categories(); track cat.id) {
-        <tr>
+        <tr (dblclick)="openEdit(cat)" style="cursor: pointer">
           <td class="td-color">
             <span class="color-dot" [style.background]="cat.color"></span>
           </td>
