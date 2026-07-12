@@ -168,12 +168,15 @@ export class EntryService {
   }
 
   private toModel(r: any): Entry {
+    const installMatch = r.description?.match(/ - (\d+)\/(\d+)$/);
     return {
       id: r.id, ownerId: r.owner_id, description: r.description,
       amount: r.amount, date: r.date, status: r.status,
       typeId: r.type_id, accountId: r.account_id,
       recurringTemplateId: r.recurring_template_id,
       labels: r.labels ?? [], position: r.position ?? undefined,
+      installmentNumber: installMatch ? parseInt(installMatch[1]) : null,
+      totalInstallments: installMatch ? parseInt(installMatch[2]) : null,
       createdAt: r.created_at, updatedAt: r.updated_at,
     };
   }

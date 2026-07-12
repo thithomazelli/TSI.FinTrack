@@ -10,6 +10,8 @@ export interface Entry {
   labels: string[];
   status?: string;
   position?: number;
+  installmentNumber: number | null;
+  totalInstallments: number | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -368,7 +368,7 @@
         <td (dblclick)="openEdit(item)">
           <div class="desc-cell">
             <span>{{ item.description }}</span>
-            @if (item.kind === 'transaction' && $any(item.raw).totalInstallments > 1) {
+            @if ($any(item.raw).totalInstallments > 1) {
               <span class="sub-badge">{{ $any(item.raw).installmentNumber }}/{{ $any(item.raw).totalInstallments }}</span>
             }
           </div>
@@ -593,7 +593,7 @@
         <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formEntryAmount" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
-      <div class="field field--date">
+      <div class="field">
         <input class="field-input" type="date" placeholder=" " [(ngModel)]="formEntryDate" />
         <label class="field-label">{{ 'common.date' | translate }}</label>
       </div>
@@ -741,12 +741,12 @@
     </div>
 
     <div class="fields-row">
-      <div class="field field--date">
+      <div class="field">
         <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxDate" />
         <label class="field-label">{{ 'movimentos.paymentDate' | translate }}</label>
       </div>
       @if (formTxCreditCardId) {
-        <div class="field field--date">
+        <div class="field">
           <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxPurchaseDate" />
           <label class="field-label">{{ 'movimentos.purchaseDate' | translate }}</label>
         </div>
