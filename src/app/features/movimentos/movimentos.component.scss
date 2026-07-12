@@ -1,7 +1,41 @@
 .page { padding: 1.5rem; }
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+
+/* Sticky collapsible header */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--color-bg);
+  padding-bottom: .25rem;
+  margin: -1.5rem -1.5rem 0;
+  padding: 1.5rem 1.5rem 0;
+}
+
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
 .page-title { font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin: 0; }
-.header-actions { display: flex; gap: .75rem; }
+.header-actions { display: flex; gap: .75rem; align-items: center; }
+
+.btn-collapse {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border); background: var(--color-surface);
+  color: var(--color-text-2); cursor: pointer; transition: all var(--transition);
+  &:hover { border-color: var(--color-accent); color: var(--color-accent); }
+}
+
+/* Collapsible top-row */
+.top-row-wrap {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .3s ease, opacity .25s ease, margin-bottom .3s ease;
+  margin-bottom: 0;
+  &--open {
+    max-height: 200px;
+    opacity: 1;
+    margin-bottom: 1.25rem;
+  }
+}
 
 .btn-nova {
   display: inline-flex; align-items: center; gap: 0.5rem;
@@ -442,7 +476,11 @@ tr:hover td { background: var(--color-surface-2); }
 }
 
 /* Installments tab table */
-.installments-tab { padding-bottom: .5rem; }
+.installments-tab {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-bottom: .25rem;
+}
 .inst-table {
   width: 100%; border-collapse: collapse; font-size: .82rem;
   th, td {

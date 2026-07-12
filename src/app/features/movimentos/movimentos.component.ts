@@ -246,6 +246,7 @@ export class MovimentosComponent implements OnInit {
   readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
 
   // UI state
+  readonly headerExpanded  = signal(true);
   readonly summaryExpanded = signal(true);
   readonly pieExpanded     = signal(true);
 
@@ -632,13 +633,18 @@ export class MovimentosComponent implements OnInit {
       this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
       this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
 
-      this.allEntries.set((entriesRes.data ?? []).map((r: any) => ({
-        id: r.id, ownerId: r.owner_id, description: r.description,
-        amount: r.amount, date: r.date, status: r.status,
-        typeId: r.type_id, accountId: r.account_id,
-        labels: r.labels ?? [], position: r.position ?? undefined,
-        createdAt: r.created_at, updatedAt: r.updated_at,
-      }) as Entry));
+      this.allEntries.set((entriesRes.data ?? []).map((r: any) => {
+        const installMatch = r.description?.match(/ - (\d+)\/(\d+)$/);
+        return {
+          id: r.id, ownerId: r.owner_id, description: r.description,
+          amount: r.amount, date: r.date, status: r.status,
+          typeId: r.type_id, accountId: r.account_id,
+          labels: r.labels ?? [], position: r.position ?? undefined,
+          installmentNumber: installMatch ? parseInt(installMatch[1]) : null,
+          totalInstallments: installMatch ? parseInt(installMatch[2]) : null,
+          createdAt: r.created_at, updatedAt: r.updated_at,
+        } as Entry;
+      }));
 
       this.allTransactions.set((txsRes.data ?? []).map((r: any) => ({
         id: r.id, ownerId: r.owner_id, description: r.description,

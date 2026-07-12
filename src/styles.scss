@@ -454,6 +454,17 @@ body {
     color: var(--color-accent);
   }
 
+  /* Selects always have a visible value — always float the label */
+  &:has(select.field-input) .field-label {
+    transform: translateY(-50%);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-2);
+  }
+  &:has(select.field-input):focus-within .field-label {
+    color: var(--color-accent);
+  }
+
   /* For selects: parent gets .has-value from Angular binding */
   &.has-value .field-label {
     transform: translateY(-50%);
