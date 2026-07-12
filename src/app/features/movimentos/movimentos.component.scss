@@ -426,3 +426,50 @@ tr:hover td { background: var(--color-surface-2); }
   .pie-body { justify-content: center; }
   .pie-chart-wrap { width: 180px; height: 180px; }
 }
+
+/* Modal tabs */
+.modal-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--color-border);
+  margin: 0 -1.5rem .75rem; padding: 0 1.5rem;
+}
+.modal-tab {
+  padding: .5rem 1.1rem; font-size: .875rem; font-weight: 600;
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; color: var(--color-text-2); transition: color .15s, border-color .15s;
+  margin-bottom: -1px;
+  &:hover { color: var(--color-text); }
+  &.is-active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+}
+
+/* Installments tab table */
+.installments-tab { padding-bottom: .5rem; }
+.inst-table {
+  width: 100%; border-collapse: collapse; font-size: .82rem;
+  th, td {
+    padding: .5rem .65rem; text-align: left; border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+  th { font-weight: 600; color: var(--color-text-2); background: var(--color-surface); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+  td { color: var(--color-text); }
+  .text-center { text-align: center; }
+  .text-right { text-align: right; }
+}
+.inst-row--current td { background: color-mix(in srgb, var(--color-accent) 8%, transparent) !important; font-weight: 600; }
+
+.status-chip {
+  display: inline-block; padding: .15rem .5rem; border-radius: 999px; font-size: .72rem; font-weight: 700;
+  &--realized { background: rgba(16,185,129,.15); color: #059669; }
+  &--projected { background: rgba(245,158,11,.15); color: #b45309; }
+}
+
+.inst-pagination {
+  display: flex; align-items: center; justify-content: center; gap: .75rem;
+  padding: .75rem 0 .25rem; font-size: .82rem;
+}
+.inst-page-btn {
+  padding: .25rem .6rem; border-radius: var(--radius-sm); border: 1px solid var(--color-border);
+  background: var(--color-surface); cursor: pointer; font-size: 1rem; color: var(--color-text);
+  &:disabled { opacity: .35; cursor: default; }
+  &:not(:disabled):hover { background: var(--color-hover); }
+}
+.inst-page-info { color: var(--color-text-2); }

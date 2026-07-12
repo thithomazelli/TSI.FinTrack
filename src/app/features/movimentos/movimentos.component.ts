@@ -443,6 +443,22 @@ export class MovimentosComponent implements OnInit {
     return this.gridSumEntradas(items) - this.gridSumSaidas(items);
   }
 
+  // Edit modal tabs
+  readonly editModalTab = signal<'details' | 'installments'>('details');
+  readonly editInstallments = signal<(Entry | Transaction)[]>([]);
+  readonly installmentsLoading = signal(false);
+  readonly installmentsPage = signal(0);
+  readonly installmentsPageSize = 10;
+  readonly installmentsPageData = computed(() => {
+    const page = this.installmentsPage();
+    const size = this.installmentsPageSize;
+    return this.editInstallments().slice(page * size, (page + 1) * size);
+  });
+  readonly installmentsTotalPages = computed(() =>
+    Math.ceil(this.editInstallments().length / this.installmentsPageSize)
+  );
+  readonly editingHasInstallments = signal(false);
+
   // Single delete confirm
   readonly deletingItem = signal<MovimentoItem | null>(null);
 
@@ -666,6 +682,11 @@ export class MovimentosComponent implements OnInit {
 
   openEdit(item: MovimentoItem): void {
     this.editingId.set(item.id);
+    this.editModalTab.set('details');
+    this.editInstallments.set([]);
+    this.installmentsPage.set(0);
+    this.editingHasInstallments.set(false);
+
     if (item.kind === 'entry') {
       const e = item.raw as Entry;
       this.formEntryDescription = e.description;
@@ -676,6 +697,16 @@ export class MovimentosComponent implements OnInit {
       this.formEntryAccountId = e.accountId ?? '';
       this.formEntryLabels = [...e.labels];
       this.modalMode.set('entry');
+
+      if (e.totalInstallments && e.totalInstallments > 1) {
+        this.editingHasInstallments.set(true);
+        const base = e.description.replace(/ - \d+\/\d+$/, '');
+        this.installmentsLoading.set(true);
+        this.entryService.getByDescriptionPrefix(base).subscribe({
+          next: list => { this.editInstallments.set(list); this.installmentsLoading.set(false); this.cdr.markForCheck(); },
+          error: () => this.installmentsLoading.set(false),
+        });
+      }
     } else {
       const t = item.raw as Transaction;
       this.formTxDescription = t.description;
@@ -694,6 +725,15 @@ export class MovimentosComponent implements OnInit {
       this.formTxExchangeRate = t.exchangeRate ?? 0;
       this.formTxLabels = [...t.labels];
       this.modalMode.set('transaction');
+
+      if (t.installmentGroupId) {
+        this.editingHasInstallments.set(true);
+        this.installmentsLoading.set(true);
+        this.transactionService.getByInstallmentGroup(t.installmentGroupId).subscribe({
+          next: list => { this.editInstallments.set(list); this.installmentsLoading.set(false); this.cdr.markForCheck(); },
+          error: () => this.installmentsLoading.set(false),
+        });
+      }
     }
   }
 

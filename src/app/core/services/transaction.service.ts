@@ -264,6 +264,21 @@ export class TransactionService {
     );
   }
 
+  getByInstallmentGroup(groupId: string): Observable<Transaction[]> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .select('*')
+        .eq('owner_id', this.ownerId)
+        .eq('installment_group_id', groupId)
+        .order('installment_number', { ascending: true })
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []).map((r: any) => this.toModel(r));
+        })
+    );
+  }
+
   updatePosition(id: string, position: number): Observable<void> {
     return from(
       this.supabase.client

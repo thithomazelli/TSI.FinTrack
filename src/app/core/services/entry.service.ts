@@ -176,6 +176,21 @@ export class EntryService {
     };
   }
 
+  getByDescriptionPrefix(baseDescription: string): Observable<Entry[]> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .select('*')
+        .eq('owner_id', this.ownerId)
+        .like('description', `${baseDescription} - %/%`)
+        .order('date', { ascending: true })
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return (data ?? []).map((r: any) => this.toModel(r));
+        })
+    );
+  }
+
   delete(id: string): Observable<void> {
     this.logger.info('Deleting entry', id);
     return from(

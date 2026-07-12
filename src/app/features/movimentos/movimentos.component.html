@@ -533,6 +533,56 @@
       <button class="modal-close" (click)="closeModal()">✕</button>
     </div>
 
+    @if (editingId() && editingHasInstallments()) {
+      <div class="modal-tabs">
+        <button class="modal-tab" [class.is-active]="editModalTab() === 'details'" (click)="editModalTab.set('details')">Detalhes</button>
+        <button class="modal-tab" [class.is-active]="editModalTab() === 'installments'" (click)="editModalTab.set('installments')">Parcelas</button>
+      </div>
+    }
+
+    @if (editModalTab() === 'installments' && editingId()) {
+      <div class="installments-tab">
+        @if (installmentsLoading()) {
+          <p class="state-msg">Carregando...</p>
+        } @else {
+          <table class="inst-table">
+            <thead>
+              <tr>
+                <th>Descrição</th>
+                <th>Vencimento</th>
+                <th class="text-center">Parcela</th>
+                <th>Status</th>
+                <th class="text-right">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inst of installmentsPageData(); track $any(inst).id) {
+                <tr [class.inst-row--current]="$any(inst).id === editingId()">
+                  <td>{{ $any(inst).description }}</td>
+                  <td>{{ $any(inst).date | date:'dd/MM/yyyy' }}</td>
+                  <td class="text-center">{{ $any(inst).installmentNumber }}/{{ $any(inst).totalInstallments }}</td>
+                  <td>
+                    <span class="status-chip" [class.status-chip--realized]="$any(inst).status === 'REALIZED'" [class.status-chip--projected]="$any(inst).status === 'PROJECTED'">
+                      {{ $any(inst).status === 'REALIZED' ? 'Realizado' : 'Projetado' }}
+                    </span>
+                  </td>
+                  <td class="text-right">R$ {{ $any(inst).amount | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          @if (installmentsTotalPages() > 1) {
+            <div class="inst-pagination">
+              <button class="inst-page-btn" [disabled]="installmentsPage() === 0" (click)="installmentsPage.set(installmentsPage() - 1)">‹</button>
+              <span class="inst-page-info">{{ installmentsPage() + 1 }} / {{ installmentsTotalPages() }}</span>
+              <button class="inst-page-btn" [disabled]="installmentsPage() >= installmentsTotalPages() - 1" (click)="installmentsPage.set(installmentsPage() + 1)">›</button>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    @if (!editingId() || editModalTab() === 'details') {
     <div class="field">
       <input class="field-input" placeholder=" " [(ngModel)]="formEntryDescription" />
       <label class="field-label">{{ 'common.description' | translate }}</label>
@@ -616,6 +666,7 @@
         {{ 'common.save' | translate }}
       </button>
     </div>
+    } <!-- end @if details -->
   </div>
 }
 
@@ -628,6 +679,56 @@
       <button class="modal-close" (click)="closeModal()">✕</button>
     </div>
 
+    @if (editingId() && editingHasInstallments()) {
+      <div class="modal-tabs">
+        <button class="modal-tab" [class.is-active]="editModalTab() === 'details'" (click)="editModalTab.set('details')">Detalhes</button>
+        <button class="modal-tab" [class.is-active]="editModalTab() === 'installments'" (click)="editModalTab.set('installments')">Parcelas</button>
+      </div>
+    }
+
+    @if (editModalTab() === 'installments' && editingId()) {
+      <div class="installments-tab">
+        @if (installmentsLoading()) {
+          <p class="state-msg">Carregando...</p>
+        } @else {
+          <table class="inst-table">
+            <thead>
+              <tr>
+                <th>Descrição</th>
+                <th>Vencimento</th>
+                <th class="text-center">Parcela</th>
+                <th>Status</th>
+                <th class="text-right">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inst of installmentsPageData(); track $any(inst).id) {
+                <tr [class.inst-row--current]="$any(inst).id === editingId()">
+                  <td>{{ $any(inst).description }}</td>
+                  <td>{{ $any(inst).date | date:'dd/MM/yyyy' }}</td>
+                  <td class="text-center">{{ $any(inst).installmentNumber }}/{{ $any(inst).totalInstallments }}</td>
+                  <td>
+                    <span class="status-chip" [class.status-chip--realized]="$any(inst).status === 'REALIZED'" [class.status-chip--projected]="$any(inst).status === 'PROJECTED'">
+                      {{ $any(inst).status === 'REALIZED' ? 'Realizado' : 'Projetado' }}
+                    </span>
+                  </td>
+                  <td class="text-right">R$ {{ $any(inst).amount | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          @if (installmentsTotalPages() > 1) {
+            <div class="inst-pagination">
+              <button class="inst-page-btn" [disabled]="installmentsPage() === 0" (click)="installmentsPage.set(installmentsPage() - 1)">‹</button>
+              <span class="inst-page-info">{{ installmentsPage() + 1 }} / {{ installmentsTotalPages() }}</span>
+              <button class="inst-page-btn" [disabled]="installmentsPage() >= installmentsTotalPages() - 1" (click)="installmentsPage.set(installmentsPage() + 1)">›</button>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    @if (!editingId() || editModalTab() === 'details') {
     <div class="fields-row">
       <div class="field">
         <input class="field-input" placeholder=" " [(ngModel)]="formTxDescription" />
@@ -750,5 +851,6 @@
         {{ 'common.save' | translate }}
       </button>
     </div>
+    } <!-- end @if details -->
   </div>
 }
