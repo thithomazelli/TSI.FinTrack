@@ -123,10 +123,9 @@ export class EntryService {
         .from(TABLE)
         .insert(rows)
         .select()
-        .single()
         .then(({ data, error }) => {
           if (error) throw error;
-          return this.toModel(data);
+          return this.toModel((data as any[])[0]);
         })
     );
   }
