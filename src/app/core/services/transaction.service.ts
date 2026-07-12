@@ -34,6 +34,7 @@ export interface CreateTransactionPayload {
   originalAmount: number | null;
   exchangeRate: number | null;
   labels: string[];
+  position?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -330,6 +331,7 @@ export class TransactionService {
       original_amount: payload.originalAmount,
       exchange_rate: payload.exchangeRate,
       labels: payload.labels,
+      position: payload.position ?? null,
     };
   }
 }

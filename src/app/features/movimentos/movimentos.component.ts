@@ -142,7 +142,7 @@ export class MovimentosComponent implements OnInit {
   formEntryDescription = '';
   formEntryAmount = 0;
   formEntryDate = new Date().toISOString().split('T')[0];
-  formEntryStatus = 'REALIZED';
+  formEntryStatus = 'PROJECTED';
   formEntryTypeId = '';
   formEntryAccountId = '';
   formEntryLabels: string[] = [];
@@ -154,7 +154,7 @@ export class MovimentosComponent implements OnInit {
   formTxDescription = '';
   formTxAmount = 0;
   formTxDate = new Date().toISOString().split('T')[0];
-  formTxStatus: TransactionStatus = TransactionStatus.Realized;
+  formTxStatus: TransactionStatus = TransactionStatus.Projected;
   formTxCategoryId = '';
   formTxAccountId = '';
   formTxCreditCardId = '';
@@ -351,17 +351,53 @@ export class MovimentosComponent implements OnInit {
     this.dndMode.update(v => !v);
   }
 
+  private pendingInsertAfter: string | null = null;
+
   onInsertRequested(event: GroupInsertEvent): void {
+    this.pendingInsertAfter = event.afterItemId;
     if (event.groupId === '__entries') {
       this.openCreateEntry();
     } else if (event.groupId.startsWith('__debit_')) {
       this.openCreateTransaction();
-      const accountId = event.groupId.replace('__debit_', '');
+      const accountId = event.groupId.replace('__debit_', '').replace('card_', '');
       if (accountId !== '__no_account') this.formTxAccountId = accountId;
     } else {
       this.openCreateTransaction();
       this.formTxCreditCardId = event.groupId;
+      this.applyCardDates(event.groupId);
     }
+  }
+
+  private applyCardDates(cardId: string): void {
+    const card = this.cards().find(c => c.id === cardId);
+    if (!card) return;
+    const today = new Date();
+    // Data da compra = hoje
+    this.formTxPurchaseDate = today.toISOString().split('T')[0];
+    // Data de pagamento = próxima data de vencimento do cartão
+    let dueYear = today.getFullYear();
+    let dueMonth = today.getMonth() + 1;
+    // If today is already past the due day this month, next month
+    if (today.getDate() > card.dueDay) dueMonth++;
+    if (dueMonth > 12) { dueMonth = 1; dueYear++; }
+    const dueDay = String(card.dueDay).padStart(2, '0');
+    this.formTxDate = `${dueYear}-${String(dueMonth).padStart(2, '0')}-${dueDay}`;
+  }
+
+  private computeInsertPosition(items: MovimentoItem[]): number | undefined {
+    const afterId = this.pendingInsertAfter;
+    this.pendingInsertAfter = null;
+    if (!afterId) return undefined;
+    const posOf = (item: MovimentoItem | undefined) =>
+      item ? (item.position ?? (items.indexOf(item) + 1) * 1000) : null;
+    const afterIdx = items.findIndex(i => i.id === afterId);
+    const above = items[afterIdx];
+    const below = items[afterIdx + 1];
+    const posAbove = posOf(above);
+    const posBelow = posOf(below);
+    if (posAbove === null) return undefined;
+    if (posBelow === null) return posAbove + 1000;
+    return (posAbove + posBelow) / 2;
   }
 
   onRowReordered(event: GroupReorderEvent): void {
@@ -649,7 +685,7 @@ export class MovimentosComponent implements OnInit {
     this.formEntryDescription = '';
     this.formEntryAmount = 0;
     this.formEntryDate = new Date().toISOString().split('T')[0];
-    this.formEntryStatus = 'REALIZED';
+    this.formEntryStatus = 'PROJECTED';
     this.formEntryTypeId = this.entryTypes()[0]?.id ?? '';
     this.formEntryAccountId = '';
     this.formEntryLabels = [];
@@ -664,11 +700,11 @@ export class MovimentosComponent implements OnInit {
     this.formTxDescription = '';
     this.formTxAmount = 0;
     this.formTxDate = new Date().toISOString().split('T')[0];
-    this.formTxStatus = TransactionStatus.Realized;
+    this.formTxStatus = TransactionStatus.Projected;
     this.formTxCategoryId = '';
     this.formTxAccountId = '';
     this.formTxCreditCardId = '';
-    this.formTxPurchaseDate = '';
+    this.formTxPurchaseDate = new Date().toISOString().split('T')[0];
     this.formTxIsInstallment = false;
     this.formTxInstallments = 2;
     this.formTxAmountType = 'total';
@@ -746,6 +782,8 @@ export class MovimentosComponent implements OnInit {
     if (!this.formEntryDescription.trim() || this.formEntryAmount <= 0) return;
     this.saving.set(true);
 
+    const insertPosition = this.computeInsertPosition(this.allItems());
+
     const payload: CreateEntryPayload = {
       description: this.formEntryDescription.trim(),
       amount: this.formEntryAmount,
@@ -756,6 +794,7 @@ export class MovimentosComponent implements OnInit {
       status: this.formEntryStatus,
       totalInstallments: this.formEntryIsInstallment ? this.formEntryInstallments : null,
       installmentAmountIsFixed: this.formEntryIsInstallment && this.formEntryAmountType === 'installment',
+      position: insertPosition ?? null,
     };
 
     const id = this.editingId();
@@ -765,15 +804,18 @@ export class MovimentosComponent implements OnInit {
 
     op$.subscribe({
       next: (saved: Entry) => {
-        this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
-        this.saving.set(false);
-        this.closeModal();
-        if (id) {
-          this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
-        } else {
-          this.allEntries.update(list => [...list, saved]);
-        }
-        this.balanceService.invalidate();
+        this.zone.run(() => {
+          this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
+          this.saving.set(false);
+          this.closeModal();
+          if (id) {
+            this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
+          } else {
+            this.allEntries.update(list => [...list, saved]);
+          }
+          this.balanceService.invalidate();
+          this.cdr.markForCheck();
+        });
       },
       error: err => {
         this.logger.error('Failed to save entry', err);
@@ -786,6 +828,8 @@ export class MovimentosComponent implements OnInit {
   saveTransaction(): void {
     if (!this.formTxDescription.trim() || this.formTxAmount <= 0) return;
     this.saving.set(true);
+
+    const insertPosition = this.computeInsertPosition(this.allItems());
 
     const payload: CreateTransactionPayload = {
       description: this.formTxDescription.trim(),
@@ -803,6 +847,7 @@ export class MovimentosComponent implements OnInit {
       originalAmount: this.formTxIsInternational ? this.formTxOriginalAmount : null,
       exchangeRate: this.formTxIsInternational ? this.formTxExchangeRate : null,
       labels: this.formTxLabels,
+      position: insertPosition ?? null,
     };
 
     const id = this.editingId();
@@ -825,11 +870,17 @@ export class MovimentosComponent implements OnInit {
     } else {
       this.transactionService.create(payload).subscribe({
         next: (created: Transaction[]) => {
-          this.toast.success(this.tr('movimentos.toast.txAdded'));
-          this.saving.set(false);
-          this.closeModal();
-          this.allTransactions.update(list => [...list, ...created]);
-          this.balanceService.invalidate();
+          this.zone.run(() => {
+            this.toast.success(this.tr('movimentos.toast.txAdded'));
+            this.saving.set(false);
+            this.closeModal();
+            const from = this.dateFrom();
+            const to = this.dateTo();
+            const inRange = created.filter(t => t.date >= from && t.date <= to);
+            this.allTransactions.update(list => [...list, ...inRange]);
+            this.balanceService.invalidate();
+            this.cdr.markForCheck();
+          });
         },
         error: err => {
           this.logger.error('Failed to create transaction', err);

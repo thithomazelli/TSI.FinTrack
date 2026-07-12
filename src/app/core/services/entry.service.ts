@@ -25,6 +25,7 @@ export interface CreateEntryPayload {
   totalInstallments?: number | null;
   /** When true, `amount` is already the per-installment value — do not divide. */
   installmentAmountIsFixed?: boolean;
+  position?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -81,6 +82,7 @@ export class EntryService {
           account_id: payload.accountId,
           labels: payload.labels,
           status: payload.status ?? 'REALIZED',
+          position: payload.position ?? null,
         })
         .select()
         .single()
