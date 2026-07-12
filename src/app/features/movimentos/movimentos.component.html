@@ -742,13 +742,14 @@
 
     <div class="fields-row">
       <div class="field">
-        <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxDate" />
-        <label class="field-label">{{ 'movimentos.paymentDate' | translate }}</label>
+        <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxPurchaseDate"
+          (ngModelChange)="!selectedCardIsCredit() && (formTxDate = $event)" />
+        <label class="field-label">{{ 'movimentos.purchaseDate' | translate }}</label>
       </div>
-      @if (formTxCreditCardId) {
+      @if (selectedCardIsCredit()) {
         <div class="field">
-          <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxPurchaseDate" />
-          <label class="field-label">{{ 'movimentos.purchaseDate' | translate }}</label>
+          <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxDate" />
+          <label class="field-label">{{ 'movimentos.paymentDate' | translate }}</label>
         </div>
       }
       <div class="field" [class.has-value]="formTxStatus">

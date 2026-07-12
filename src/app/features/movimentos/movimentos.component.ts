@@ -370,14 +370,17 @@ export class MovimentosComponent implements OnInit {
 
   private applyCardDates(cardId: string): void {
     const card = this.cards().find(c => c.id === cardId);
-    if (!card) return;
     const today = new Date();
-    // Data da compra = hoje
-    this.formTxPurchaseDate = today.toISOString().split('T')[0];
-    // Data de pagamento = próxima data de vencimento do cartão
+    const todayStr = today.toISOString().split('T')[0];
+    this.formTxPurchaseDate = todayStr;
+    if (!card || /^d[eé]bito/i.test(card.name)) {
+      // Debit: payment date = purchase date
+      this.formTxDate = todayStr;
+      return;
+    }
+    // Credit: payment date = next card due date
     let dueYear = today.getFullYear();
     let dueMonth = today.getMonth() + 1;
-    // If today is already past the due day this month, next month
     if (today.getDate() > card.dueDay) dueMonth++;
     if (dueMonth > 12) { dueMonth = 1; dueYear++; }
     const dueDay = String(card.dueDay).padStart(2, '0');
@@ -451,6 +454,12 @@ export class MovimentosComponent implements OnInit {
       next: () => this.load(true),
       error: err => this.logger.error('Failed to update position', err),
     });
+  }
+
+  selectedCardIsCredit(): boolean {
+    if (!this.formTxCreditCardId) return false;
+    const card = this.cards().find(c => c.id === this.formTxCreditCardId);
+    return !!card && !/^d[eé]bito/i.test(card.name);
   }
 
   toggleFilterTipo(kind: string): void {
@@ -834,8 +843,8 @@ export class MovimentosComponent implements OnInit {
     const payload: CreateTransactionPayload = {
       description: this.formTxDescription.trim(),
       amount: this.formTxAmount,
-      date: this.formTxDate,
-      purchaseDate: this.formTxCreditCardId ? (this.formTxPurchaseDate || null) : null,
+      date: this.selectedCardIsCredit() ? this.formTxDate : this.formTxPurchaseDate,
+      purchaseDate: this.selectedCardIsCredit() ? (this.formTxPurchaseDate || null) : null,
       categoryId: this.formTxCategoryId || null,
       accountId: this.formTxCreditCardId ? null : (this.formTxAccountId || null),
       creditCardId: this.formTxCreditCardId || null,
