@@ -422,7 +422,10 @@
 @if (deletingItem()) {
   <div class="modal-backdrop" (click)="cancelDelete()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+      <button class="modal-close" (click)="cancelDelete()">✕</button>
+    </div>
     <p class="modal-text">{{ 'common.confirmDeleteMsg' | translate: { name: deletingItem()!.description } }}</p>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="cancelDelete()">{{ 'common.cancel' | translate }}</button>
@@ -435,7 +438,10 @@
 @if (bulkActionOpen() === 'delete') {
   <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'movimentos.bulk.confirmDelete' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'movimentos.bulk.confirmDelete' | translate }}</h3>
+      <button class="modal-close" (click)="bulkActionOpen.set(null)">✕</button>
+    </div>
     <p class="modal-text">{{ 'movimentos.bulk.confirmDeleteMsg' | translate: { count: selectionCount() } }}</p>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
@@ -450,7 +456,10 @@
 @if (bulkActionOpen() === 'status') {
   <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'movimentos.bulk.confirmToggleStatus' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'movimentos.bulk.confirmToggleStatus' | translate }}</h3>
+      <button class="modal-close" (click)="bulkActionOpen.set(null)">✕</button>
+    </div>
     <p class="modal-text">{{ 'movimentos.bulk.confirmToggleStatusMsg' | translate: { count: selectionCount() } }}</p>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
@@ -465,11 +474,14 @@
 @if (bulkActionOpen() === 'amount') {
   <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'movimentos.bulk.editAmountTitle' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'movimentos.bulk.editAmountTitle' | translate }}</h3>
+      <button class="modal-close" (click)="bulkActionOpen.set(null)">✕</button>
+    </div>
     <p class="modal-text">{{ 'movimentos.bulk.editAmountMsg' | translate: { count: selectionCount() } }}</p>
-    <div class="form-field">
-      <label>{{ 'common.amount' | translate }}</label>
-      <input class="input" type="number" min="0.01" step="0.01" [(ngModel)]="bulkNewAmount" />
+    <div class="field">
+      <input class="field-input" type="number" min="0.01" step="0.01" placeholder=" " [(ngModel)]="bulkNewAmount" />
+      <label class="field-label">{{ 'common.amount' | translate }}</label>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
@@ -484,20 +496,23 @@
 @if (bulkActionOpen() === 'move') {
   <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'movimentos.bulk.moveTitle' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'movimentos.bulk.moveTitle' | translate }}</h3>
+      <button class="modal-close" (click)="bulkActionOpen.set(null)">✕</button>
+    </div>
     <p class="modal-text">{{ 'movimentos.bulk.moveMsg' | translate: { count: selectionCount() } }}</p>
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'common.month' | translate }}</label>
-        <select class="input" [(ngModel)]="bulkTargetMonth">
+    <div class="fields-row">
+      <div class="field" [class.has-value]="bulkTargetMonth">
+        <select class="field-input" [(ngModel)]="bulkTargetMonth">
           @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
             <option [value]="m">{{ m }}</option>
           }
         </select>
+        <label class="field-label">{{ 'common.month' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'common.year' | translate }}</label>
-        <input class="input" type="number" [(ngModel)]="bulkTargetYear" min="2000" max="2100" />
+      <div class="field field--sm">
+        <input class="field-input" type="number" placeholder=" " [(ngModel)]="bulkTargetYear" min="2000" max="2100" />
+        <label class="field-label">{{ 'common.year' | translate }}</label>
       </div>
     </div>
     <div class="modal-footer">
@@ -513,49 +528,52 @@
 @if (modalMode() === 'entry') {
   <div class="modal-backdrop" (click)="closeModal()"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ (editingId() ? 'movimentos.editEntry' : 'movimentos.newEntry') | translate }}</h3>
-
-    <div class="form-field">
-      <label>{{ 'common.description' | translate }}</label>
-      <input class="input" [(ngModel)]="formEntryDescription" [placeholder]="'common.description' | translate" />
+    <div class="modal-header">
+      <h3 class="modal-title">{{ (editingId() ? 'movimentos.editEntry' : 'movimentos.newEntry') | translate }}</h3>
+      <button class="modal-close" (click)="closeModal()">✕</button>
     </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'common.amount' | translate }}</label>
-        <input class="input" type="text" inputmode="numeric" tsiCurrencyMask [(ngModel)]="formEntryAmount" />
+    <div class="field">
+      <input class="field-input" placeholder=" " [(ngModel)]="formEntryDescription" />
+      <label class="field-label">{{ 'common.description' | translate }}</label>
+    </div>
+
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formEntryAmount" />
+        <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
-      <div class="form-field form-field--date">
-        <label>{{ 'common.date' | translate }}</label>
-        <input class="input" type="date" [(ngModel)]="formEntryDate" />
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [(ngModel)]="formEntryDate" />
+        <label class="field-label">{{ 'common.date' | translate }}</label>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-field form-field--sm">
-        <label>{{ 'common.status' | translate }}</label>
-        <select class="input" [(ngModel)]="formEntryStatus">
+    <div class="fields-row">
+      <div class="field field--sm" [class.has-value]="formEntryStatus">
+        <select class="field-input" [(ngModel)]="formEntryStatus">
           <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
           <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
         </select>
+        <label class="field-label">{{ 'common.status' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'common.type' | translate }}</label>
-        <select class="input" [(ngModel)]="formEntryTypeId">
+      <div class="field" [class.has-value]="formEntryTypeId">
+        <select class="field-input" [(ngModel)]="formEntryTypeId">
           <option value="">—</option>
           @for (type of entryTypes(); track type.id) {
             <option [value]="type.id">{{ type.name }}</option>
           }
         </select>
+        <label class="field-label">{{ 'common.type' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'common.account' | translate }}</label>
-        <select class="input" [(ngModel)]="formEntryAccountId">
+      <div class="field" [class.has-value]="formEntryAccountId">
+        <select class="field-input" [(ngModel)]="formEntryAccountId">
           <option value="">—</option>
           @for (acc of accounts(); track acc.id) {
             <option [value]="acc.id">{{ acc.name }}</option>
           }
         </select>
+        <label class="field-label">{{ 'common.account' | translate }}</label>
       </div>
     </div>
 
@@ -567,14 +585,13 @@
     </div>
 
     @if (formEntryIsInstallment) {
-      <div class="form-row installment-row">
-        <div class="form-field form-field--sm">
-          <label>{{ 'movimentos.installmentsCount' | translate }}</label>
-          <input class="input" type="number" min="2" max="48" [(ngModel)]="formEntryInstallments" />
+      <div class="fields-row installment-row">
+        <div class="field field--sm">
+          <input class="field-input" type="number" min="2" max="48" placeholder=" " [(ngModel)]="formEntryInstallments" />
+          <label class="field-label">{{ 'movimentos.installmentsCount' | translate }}</label>
         </div>
-        <div class="form-field">
-          <label>{{ 'movimentos.amountType' | translate }}</label>
-          <div class="radio-group">
+        <div class="field">
+          <div class="radio-group" style="padding: 0.6rem 0">
             <label class="radio-label">
               <input type="radio" name="entryAmountType" value="total" [(ngModel)]="formEntryAmountType" />
               {{ 'movimentos.amountTotal' | translate }}
@@ -606,67 +623,70 @@
 @if (modalMode() === 'transaction') {
   <div class="modal-backdrop" (click)="closeModal()"></div>
   <div class="modal modal-lg">
-    <h3 class="modal-title">{{ (editingId() ? 'movimentos.editTransaction' : 'movimentos.newTransaction') | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ (editingId() ? 'movimentos.editTransaction' : 'movimentos.newTransaction') | translate }}</h3>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'common.description' | translate }}</label>
-        <input class="input" [(ngModel)]="formTxDescription" [placeholder]="'common.description' | translate" />
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" placeholder=" " [(ngModel)]="formTxDescription" />
+        <label class="field-label">{{ 'common.description' | translate }}</label>
       </div>
-      <div class="form-field form-field--sm">
-        <label>{{ 'common.amount' | translate }}</label>
-        <input class="input" type="text" inputmode="numeric" tsiCurrencyMask [(ngModel)]="formTxAmount" />
+      <div class="field field--sm">
+        <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formTxAmount" />
+        <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'movimentos.paymentDate' | translate }}</label>
-        <input class="input" type="date" [(ngModel)]="formTxDate" />
+    <div class="fields-row">
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxDate" />
+        <label class="field-label">{{ 'movimentos.paymentDate' | translate }}</label>
       </div>
       @if (formTxCreditCardId) {
-        <div class="form-field">
-          <label>{{ 'movimentos.purchaseDate' | translate }}</label>
-          <input class="input" type="date" [(ngModel)]="formTxPurchaseDate" />
+        <div class="field field--date">
+          <input class="field-input" type="date" placeholder=" " [(ngModel)]="formTxPurchaseDate" />
+          <label class="field-label">{{ 'movimentos.purchaseDate' | translate }}</label>
         </div>
       }
-      <div class="form-field">
-        <label>{{ 'common.status' | translate }}</label>
-        <select class="input" [(ngModel)]="formTxStatus">
+      <div class="field field--sm" [class.has-value]="formTxStatus">
+        <select class="field-input" [(ngModel)]="formTxStatus">
           <option [value]="TransactionStatus.Realized">{{ 'movimentos.realized' | translate }}</option>
           <option [value]="TransactionStatus.Projected">{{ 'movimentos.projected' | translate }}</option>
         </select>
+        <label class="field-label">{{ 'common.status' | translate }}</label>
       </div>
     </div>
 
-    <div class="form-field">
-      <label>{{ 'common.category' | translate }}</label>
-      <select class="input" [(ngModel)]="formTxCategoryId">
+    <div class="field" [class.has-value]="formTxCategoryId">
+      <select class="field-input" [(ngModel)]="formTxCategoryId">
         <option value="">—</option>
         @for (cat of categories(); track cat.id) {
           <option [value]="cat.id">{{ cat.name }}</option>
         }
       </select>
+      <label class="field-label">{{ 'common.category' | translate }}</label>
     </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'common.account' | translate }}</label>
-        <select class="input" [(ngModel)]="formTxAccountId" [disabled]="!!formTxCreditCardId">
+    <div class="fields-row">
+      <div class="field" [class.has-value]="formTxAccountId">
+        <select class="field-input" [(ngModel)]="formTxAccountId" [disabled]="!!formTxCreditCardId">
           <option value="">—</option>
           @for (acc of accounts(); track acc.id) {
             <option [value]="acc.id">{{ acc.name }}</option>
           }
         </select>
+        <label class="field-label">{{ 'common.account' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'movimentos.creditCard' | translate }}</label>
-        <select class="input" [(ngModel)]="formTxCreditCardId">
+      <div class="field" [class.has-value]="formTxCreditCardId">
+        <select class="field-input" [(ngModel)]="formTxCreditCardId">
           <option value="">—</option>
           @for (card of cards(); track card.id) {
             <option [value]="card.id">{{ card.name }}</option>
           }
         </select>
+        <label class="field-label">{{ 'movimentos.creditCard' | translate }}</label>
       </div>
     </div>
 
@@ -682,14 +702,13 @@
     </div>
 
     @if (formTxIsInstallment) {
-      <div class="form-row installment-row">
-        <div class="form-field form-field--sm">
-          <label>{{ 'movimentos.installmentsCount' | translate }}</label>
-          <input class="input" type="number" min="2" max="48" [(ngModel)]="formTxInstallments" />
+      <div class="fields-row installment-row">
+        <div class="field field--sm">
+          <input class="field-input" type="number" min="2" max="48" placeholder=" " [(ngModel)]="formTxInstallments" />
+          <label class="field-label">{{ 'movimentos.installmentsCount' | translate }}</label>
         </div>
-        <div class="form-field">
-          <label>{{ 'movimentos.amountType' | translate }}</label>
-          <div class="radio-group">
+        <div class="field">
+          <div class="radio-group" style="padding: 0.6rem 0">
             <label class="radio-label">
               <input type="radio" name="txAmountType" value="total" [(ngModel)]="formTxAmountType" />
               {{ 'movimentos.amountTotal' | translate }}
@@ -704,18 +723,18 @@
     }
 
     @if (formTxIsInternational) {
-      <div class="form-row">
-        <div class="form-field">
-          <label>{{ 'movimentos.currency' | translate }}</label>
-          <input class="input" [(ngModel)]="formTxOriginalCurrency" maxlength="3" />
+      <div class="fields-row">
+        <div class="field field--xs">
+          <input class="field-input" placeholder=" " [(ngModel)]="formTxOriginalCurrency" maxlength="3" />
+          <label class="field-label">{{ 'movimentos.currency' | translate }}</label>
         </div>
-        <div class="form-field">
-          <label>{{ 'movimentos.originalAmount' | translate }}</label>
-          <input class="input" type="number" min="0" step="0.01" [(ngModel)]="formTxOriginalAmount" />
+        <div class="field">
+          <input class="field-input" type="number" min="0" step="0.01" placeholder=" " [(ngModel)]="formTxOriginalAmount" />
+          <label class="field-label">{{ 'movimentos.originalAmount' | translate }}</label>
         </div>
-        <div class="form-field">
-          <label>{{ 'movimentos.exchangeRate' | translate }}</label>
-          <input class="input" type="number" min="0" step="0.0001" [(ngModel)]="formTxExchangeRate" />
+        <div class="field">
+          <input class="field-input" type="number" min="0" step="0.0001" placeholder=" " [(ngModel)]="formTxExchangeRate" />
+          <label class="field-label">{{ 'movimentos.exchangeRate' | translate }}</label>
         </div>
       </div>
     }

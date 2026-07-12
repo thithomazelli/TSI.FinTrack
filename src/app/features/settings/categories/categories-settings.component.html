@@ -39,17 +39,20 @@
 }
 
 @if (showForm()) {
-  <div class="backdrop" (click)="closeForm()"></div>
+  <div class="modal-backdrop" (click)="closeForm()"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ (editingId() ? 'settings.editCategory' : 'settings.newCategory') | translate }}</h3>
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'common.name' | translate }}</label>
-        <input class="input" [(ngModel)]="formName" [placeholder]="'settings.categoryNamePlaceholder' | translate" />
+    <div class="modal-header">
+      <h3 class="modal-title">{{ (editingId() ? 'settings.editCategory' : 'settings.newCategory') | translate }}</h3>
+      <button class="modal-close" (click)="closeForm()">✕</button>
+    </div>
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" placeholder=" " [(ngModel)]="formName" />
+        <label class="field-label">{{ 'common.name' | translate }}</label>
       </div>
-      <div class="form-field form-field--sm">
-        <label>{{ 'common.color' | translate }}</label>
-        <input class="input input--color" type="color" [(ngModel)]="formColor" />
+      <div class="field field--xs">
+        <input class="field-input" type="color" placeholder=" " [(ngModel)]="formColor" style="padding: 0.5rem 0.5rem; cursor: pointer" />
+        <label class="field-label">{{ 'common.color' | translate }}</label>
       </div>
     </div>
     <div class="modal-actions">
@@ -62,9 +65,12 @@
 }
 
 @if (deletingCat()) {
-  <div class="backdrop" (click)="cancelDelete()"></div>
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'settings.deleteCategory' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'settings.deleteCategory' | translate }}</h3>
+      <button class="modal-close" (click)="cancelDelete()">✕</button>
+    </div>
     <p class="confirm-msg">
       {{ 'settings.deleteCategoryConfirm' | translate }} <strong>{{ deletingCat()!.name }}</strong>?
       {{ 'settings.irreversible' | translate }}

@@ -64,33 +64,32 @@
 </div>
 
 @if (showForm()) {
-  <div class="backdrop" (click)="closeForm()"></div>
+  <div class="modal-backdrop" (click)="closeForm()"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ 'settings.editDomain' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'settings.editDomain' | translate }}</h3>
+      <button class="modal-close" (click)="closeForm()">✕</button>
+    </div>
     @if (editingId()) {
       <p class="system-hint">{{ 'settings.systemHint' | translate }}</p>
     }
-    <div class="form-field">
-      <label>{{ 'common.name' | translate }}</label>
-      <input class="input" [(ngModel)]="formName" />
+    <div class="field">
+      <input class="field-input" placeholder=" " [(ngModel)]="formName" />
+      <label class="field-label">{{ 'common.name' | translate }}</label>
     </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'common.color' | translate }}</label>
-        <input class="input input-color" type="color" [(ngModel)]="formColor" />
+    <div class="fields-row">
+      <div class="field field--xs">
+        <input class="field-input" type="color" placeholder=" " [(ngModel)]="formColor" style="padding: 0.5rem 0.5rem; cursor: pointer" />
+        <label class="field-label">{{ 'common.color' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'settings.order' | translate }}</label>
-        <input class="input" type="number" [(ngModel)]="formSortOrder" />
+      <div class="field field--xs">
+        <input class="field-input" type="number" placeholder=" " [(ngModel)]="formSortOrder" />
+        <label class="field-label">{{ 'settings.order' | translate }}</label>
       </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
-      <button
-        class="btn btn-primary"
-        (click)="save()"
-        [disabled]="saving() || !formName.trim()"
-      >
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving() || !formName.trim()">
         {{ (saving() ? 'common.saving' : 'common.save') | translate }}
       </button>
     </div>
@@ -98,9 +97,12 @@
 }
 
 @if (deletingItem()) {
-  <div class="backdrop" (click)="cancelDelete()"></div>
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'settings.deleteDomain' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'settings.deleteDomain' | translate }}</h3>
+      <button class="modal-close" (click)="cancelDelete()">✕</button>
+    </div>
     <p class="confirm-msg">
       {{ 'settings.deleteCategoryConfirm' | translate }} <strong>{{ deletingItem()!.name }}</strong>?
       {{ 'settings.irreversible' | translate }}

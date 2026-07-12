@@ -95,44 +95,44 @@
 @if (editingTemplate()) {
   <div class="modal-backdrop" (click)="closeEdit()"></div>
   <div class="modal">
-    <h3 class="modal-title">Editar recorrente</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">Editar recorrente</h3>
+      <button class="modal-close" (click)="closeEdit()">✕</button>
+    </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>Descrição</label>
-        <input class="input" type="text" [(ngModel)]="formDescription" />
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" type="text" placeholder=" " [(ngModel)]="formDescription" />
+        <label class="field-label">Descrição</label>
       </div>
-      <div class="form-field form-field--sm">
-        <label>Tipo</label>
-        <select class="input" [(ngModel)]="formType">
+      <div class="field field--sm" [class.has-value]="formType">
+        <select class="field-input" [(ngModel)]="formType">
           <option value="TRANSACTION">Despesa</option>
           <option value="ENTRY">Entrada</option>
         </select>
+        <label class="field-label">Tipo</label>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>Valor (R$)</label>
-        <input class="input" type="text" inputmode="decimal" [(ngModel)]="formAmount" tsiCurrencyMask />
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" type="text" inputmode="decimal" placeholder=" " [(ngModel)]="formAmount" tsiCurrencyMask />
+        <label class="field-label">Valor (R$)</label>
       </div>
-      <div class="form-field form-field--sm">
-        <label>Dia do mês</label>
-        <select class="input" [(ngModel)]="formDayOfMonth">
+      <div class="field field--sm" [class.has-value]="formDayOfMonth">
+        <select class="field-input" [(ngModel)]="formDayOfMonth">
           @for (d of days; track d) {
             <option [value]="d">{{ d }}</option>
           }
         </select>
+        <label class="field-label">Dia do mês</label>
       </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-field">
-        <label>Frequência</label>
-        <select class="input" [(ngModel)]="formFrequency">
+      <div class="field field--sm" [class.has-value]="formFrequency">
+        <select class="field-input" [(ngModel)]="formFrequency">
           <option value="monthly">Mensal</option>
           <option value="sporadic">Esporádico</option>
         </select>
+        <label class="field-label">Frequência</label>
       </div>
     </div>
 
@@ -149,36 +149,34 @@
       </div>
     }
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>Categoria</label>
-        <select class="input" [(ngModel)]="formCategoryId">
-          <option value="">Nenhuma</option>
-          @for (c of categories(); track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
-          }
-        </select>
-      </div>
+    <div class="field" [class.has-value]="formCategoryId">
+      <select class="field-input" [(ngModel)]="formCategoryId">
+        <option value="">Nenhuma</option>
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+      <label class="field-label">Categoria</label>
     </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>Conta</label>
-        <select class="input" [(ngModel)]="formAccountId" [disabled]="!!formCreditCardId">
+    <div class="fields-row">
+      <div class="field" [class.has-value]="formAccountId">
+        <select class="field-input" [(ngModel)]="formAccountId" [disabled]="!!formCreditCardId">
           <option value="">Nenhuma</option>
           @for (a of accounts(); track a.id) {
             <option [value]="a.id">{{ a.name }}</option>
           }
         </select>
+        <label class="field-label">Conta</label>
       </div>
-      <div class="form-field">
-        <label>Cartão de crédito</label>
-        <select class="input" [(ngModel)]="formCreditCardId">
+      <div class="field" [class.has-value]="formCreditCardId">
+        <select class="field-input" [(ngModel)]="formCreditCardId">
           <option value="">Nenhum</option>
           @for (c of cards(); track c.id) {
             <option [value]="c.id">{{ c.name }}</option>
           }
         </select>
+        <label class="field-label">Cartão de crédito</label>
       </div>
     </div>
 
@@ -195,7 +193,10 @@
 @if (deletingTemplate()) {
   <div class="modal-backdrop" (click)="cancelDelete()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">Confirmar exclusão</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">Confirmar exclusão</h3>
+      <button class="modal-close" (click)="cancelDelete()">✕</button>
+    </div>
     <p class="modal-text">Excluir <strong>{{ deletingTemplate()!.description }}</strong>?</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
@@ -210,20 +211,23 @@
 @if (showProjectModal()) {
   <div class="modal-backdrop" (click)="closeProjectModal()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">Projetar período</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">Projetar período</h3>
+      <button class="modal-close" (click)="closeProjectModal()">✕</button>
+    </div>
     <p class="modal-text">Serão criados lançamentos projetados para todos os templates ativos neste mês.</p>
-    <div class="form-row">
-      <div class="form-field">
-        <label>Mês</label>
-        <select class="input" [(ngModel)]="projectMonth">
+    <div class="fields-row">
+      <div class="field" [class.has-value]="projectMonth">
+        <select class="field-input" [(ngModel)]="projectMonth">
           @for (m of allMonths; track m) {
             <option [value]="m">{{ monthLabel(m) }}</option>
           }
         </select>
+        <label class="field-label">Mês</label>
       </div>
-      <div class="form-field form-field--sm">
-        <label>Ano</label>
-        <input class="input" type="number" [(ngModel)]="projectYear" min="2020" max="2099" />
+      <div class="field field--sm">
+        <input class="field-input" type="number" placeholder=" " [(ngModel)]="projectYear" min="2020" max="2099" />
+        <label class="field-label">Ano</label>
       </div>
     </div>
     <div class="modal-actions">

@@ -160,15 +160,18 @@
 @if (billModalOpen()) {
   <div class="modal-backdrop" (click)="billModalOpen.set(false)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">Nova Fatura</h3>
-    <div class="form-field">
-      <label>Cartão de crédito</label>
-      <select class="input" [ngModel]="formBillCardId()" (ngModelChange)="formBillCardId.set($event)">
+    <div class="modal-header">
+      <h3 class="modal-title">Nova Fatura</h3>
+      <button class="modal-close" (click)="billModalOpen.set(false)">✕</button>
+    </div>
+    <div class="field" [class.has-value]="formBillCardId()">
+      <select class="field-input" [ngModel]="formBillCardId()" (ngModelChange)="formBillCardId.set($event)">
         <option value="">— Selecione —</option>
         @for (card of cards(); track card.id) {
           <option [value]="card.id">{{ card.name }}</option>
         }
       </select>
+      <label class="field-label">Cartão de crédito</label>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" (click)="billModalOpen.set(false)">{{ 'common.cancel' | translate }}</button>
@@ -183,7 +186,10 @@
 @if (deletingBill()) {
   <div class="modal-backdrop" (click)="deletingBill.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+      <button class="modal-close" (click)="deletingBill.set(null)">✕</button>
+    </div>
     <p class="modal-text">Remover a fatura de <strong>{{ deletingBill()!.credit_cards?.name ?? 'cartão' }}</strong>? Os lançamentos associados não serão removidos.</p>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="deletingBill.set(null)">{{ 'common.cancel' | translate }}</button>
@@ -196,46 +202,49 @@
 @if (txModalOpen()) {
   <div class="modal-backdrop" (click)="txModalOpen.set(false)"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ editingTxId() ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
-
-    <div class="form-field">
-      <label>{{ 'common.description' | translate }}</label>
-      <input class="input" [ngModel]="formTxDescription()" (ngModelChange)="formTxDescription.set($event)" [placeholder]="'common.description' | translate" />
+    <div class="modal-header">
+      <h3 class="modal-title">{{ editingTxId() ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
+      <button class="modal-close" (click)="txModalOpen.set(false)">✕</button>
     </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'common.amount' | translate }}</label>
-        <input class="input" type="number" min="0.01" step="0.01" [ngModel]="formTxAmount()" (ngModelChange)="formTxAmount.set(+$event)" />
+    <div class="field">
+      <input class="field-input" placeholder=" " [ngModel]="formTxDescription()" (ngModelChange)="formTxDescription.set($event)" />
+      <label class="field-label">{{ 'common.description' | translate }}</label>
+    </div>
+
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" type="number" min="0.01" step="0.01" placeholder=" " [ngModel]="formTxAmount()" (ngModelChange)="formTxAmount.set(+$event)" />
+        <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
-      <div class="form-field form-field--sm">
-        <label>{{ 'common.status' | translate }}</label>
-        <select class="input" [ngModel]="formTxStatus()" (ngModelChange)="formTxStatus.set($event)">
+      <div class="field field--sm" [class.has-value]="formTxStatus()">
+        <select class="field-input" [ngModel]="formTxStatus()" (ngModelChange)="formTxStatus.set($event)">
           <option [value]="TransactionStatus.Realized">{{ 'movimentos.realized' | translate }}</option>
           <option [value]="TransactionStatus.Projected">{{ 'movimentos.projected' | translate }}</option>
         </select>
+        <label class="field-label">{{ 'common.status' | translate }}</label>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'movimentos.paymentDate' | translate }}</label>
-        <input class="input" type="date" [ngModel]="formTxDate()" (ngModelChange)="formTxDate.set($event)" />
+    <div class="fields-row">
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [ngModel]="formTxDate()" (ngModelChange)="formTxDate.set($event)" />
+        <label class="field-label">{{ 'movimentos.paymentDate' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'movimentos.purchaseDate' | translate }}</label>
-        <input class="input" type="date" [ngModel]="formTxPurchaseDate()" (ngModelChange)="formTxPurchaseDate.set($event)" />
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [ngModel]="formTxPurchaseDate()" (ngModelChange)="formTxPurchaseDate.set($event)" />
+        <label class="field-label">{{ 'movimentos.purchaseDate' | translate }}</label>
       </div>
     </div>
 
-    <div class="form-field">
-      <label>{{ 'common.category' | translate }}</label>
-      <select class="input" [ngModel]="formTxCategoryId()" (ngModelChange)="formTxCategoryId.set($event)">
+    <div class="field" [class.has-value]="formTxCategoryId()">
+      <select class="field-input" [ngModel]="formTxCategoryId()" (ngModelChange)="formTxCategoryId.set($event)">
         <option value="">—</option>
         @for (cat of categories(); track cat.id) {
           <option [value]="cat.id">{{ cat.name }}</option>
         }
       </select>
+      <label class="field-label">{{ 'common.category' | translate }}</label>
     </div>
 
     <div class="modal-actions">
@@ -251,7 +260,10 @@
 @if (deletingTx()) {
   <div class="modal-backdrop" (click)="deletingTx.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+      <button class="modal-close" (click)="deletingTx.set(null)">✕</button>
+    </div>
     <p class="modal-text">{{ 'common.confirmDeleteMsg' | translate: { name: deletingTx()!.description } }}</p>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="deletingTx.set(null)">{{ 'common.cancel' | translate }}</button>

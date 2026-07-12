@@ -77,40 +77,39 @@
 </div>
 
 @if (showForm()) {
-  <div class="backdrop" (click)="closeForm()"></div>
+  <div class="modal-backdrop" (click)="closeForm()"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ (editingId() ? 'settings.editCard' : 'settings.newCard') | translate }}</h3>
-    <div class="form-field" style="margin-bottom:1rem">
-      <label>{{ 'common.name' | translate }}</label>
-      <input class="input" [(ngModel)]="formName" />
+    <div class="modal-header">
+      <h3 class="modal-title">{{ (editingId() ? 'settings.editCard' : 'settings.newCard') | translate }}</h3>
+      <button class="modal-close" (click)="closeForm()">✕</button>
     </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'settings.last4Digits' | translate }}</label>
-        <input class="input" [(ngModel)]="formLastFour" maxlength="4" />
+    <div class="field">
+      <input class="field-input" placeholder=" " [(ngModel)]="formName" />
+      <label class="field-label">{{ 'common.name' | translate }}</label>
+    </div>
+    <div class="fields-row">
+      <div class="field field--xs">
+        <input class="field-input" placeholder=" " [(ngModel)]="formLastFour" maxlength="4" />
+        <label class="field-label">{{ 'settings.last4Digits' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'settings.creditLimit' | translate }}</label>
-        <input class="input" type="text" inputmode="numeric" tsiCurrencyMask [(ngModel)]="formLimit" />
+      <div class="field">
+        <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formLimit" />
+        <label class="field-label">{{ 'settings.creditLimit' | translate }}</label>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-field">
-        <label>{{ 'settings.closingDay' | translate }}</label>
-        <input class="input" type="number" min="1" max="31" [(ngModel)]="formClosingDay" />
+    <div class="fields-row">
+      <div class="field field--xs">
+        <input class="field-input" type="number" min="1" max="31" placeholder=" " [(ngModel)]="formClosingDay" />
+        <label class="field-label">{{ 'settings.closingDay' | translate }}</label>
       </div>
-      <div class="form-field">
-        <label>{{ 'settings.dueDay' | translate }}</label>
-        <input class="input" type="number" min="1" max="31" [(ngModel)]="formDueDay" />
+      <div class="field field--xs">
+        <input class="field-input" type="number" min="1" max="31" placeholder=" " [(ngModel)]="formDueDay" />
+        <label class="field-label">{{ 'settings.dueDay' | translate }}</label>
       </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
-      <button
-        class="btn btn-primary"
-        (click)="save()"
-        [disabled]="saving() || !formName.trim()"
-      >
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving() || !formName.trim()">
         {{ (saving() ? 'common.saving' : 'common.save') | translate }}
       </button>
     </div>
@@ -118,9 +117,12 @@
 }
 
 @if (deletingItem()) {
-  <div class="backdrop" (click)="cancelDelete()"></div>
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'settings.archiveCard' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'settings.archiveCard' | translate }}</h3>
+      <button class="modal-close" (click)="cancelDelete()">✕</button>
+    </div>
     <p class="confirm-msg">
       {{ 'settings.archiveConfirm' | translate }} <strong>{{ deletingItem()!.name }}</strong>?
     </p>

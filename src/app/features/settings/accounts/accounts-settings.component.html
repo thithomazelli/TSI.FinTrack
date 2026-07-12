@@ -61,36 +61,37 @@
 </div>
 
 @if (showForm()) {
-  <div class="backdrop" (click)="closeForm()"></div>
+  <div class="modal-backdrop" (click)="closeForm()"></div>
   <div class="modal">
-    <h3 class="modal-title">{{ (editingId() ? 'settings.editAccount' : 'settings.newAccount') | translate }}</h3>
-    <div class="form-field">
-      <label>{{ 'common.name' | translate }}</label>
-      <input class="input" [(ngModel)]="formName" />
+    <div class="modal-header">
+      <h3 class="modal-title">{{ (editingId() ? 'settings.editAccount' : 'settings.newAccount') | translate }}</h3>
+      <button class="modal-close" (click)="closeForm()">✕</button>
     </div>
-    <div class="form-field">
-      <label>{{ 'common.type' | translate }}</label>
-      <select class="input" [(ngModel)]="formTypeId">
+    <div class="field">
+      <input class="field-input" placeholder=" " [(ngModel)]="formName" />
+      <label class="field-label">{{ 'common.name' | translate }}</label>
+    </div>
+    <div class="field" [class.has-value]="formTypeId">
+      <select class="field-input" [(ngModel)]="formTypeId">
         @for (type of accountTypes(); track type.id) {
           <option [value]="type.id">{{ type.name }}</option>
         }
       </select>
+      <label class="field-label">{{ 'common.type' | translate }}</label>
     </div>
-    <div class="form-field">
-      <label>{{ 'settings.initialBalance' | translate }}</label>
-      <input class="input" type="number" [(ngModel)]="formBalance" />
-    </div>
-    <div class="form-field">
-      <label>{{ 'settings.openedAt' | translate }}</label>
-      <input class="input" type="date" [(ngModel)]="formOpenedAt" />
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" type="number" placeholder=" " [(ngModel)]="formBalance" />
+        <label class="field-label">{{ 'settings.initialBalance' | translate }}</label>
+      </div>
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [(ngModel)]="formOpenedAt" />
+        <label class="field-label">{{ 'settings.openedAt' | translate }}</label>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
-      <button
-        class="btn btn-primary"
-        (click)="save()"
-        [disabled]="saving() || !formName.trim()"
-      >
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving() || !formName.trim()">
         {{ (saving() ? 'common.saving' : 'common.save') | translate }}
       </button>
     </div>
@@ -98,9 +99,12 @@
 }
 
 @if (deletingItem()) {
-  <div class="backdrop" (click)="cancelDelete()"></div>
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'settings.archiveAccount' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'settings.archiveAccount' | translate }}</h3>
+      <button class="modal-close" (click)="cancelDelete()">✕</button>
+    </div>
     <p class="confirm-msg">
       {{ 'settings.archiveConfirm' | translate }} <strong>{{ deletingItem()!.name }}</strong>?
     </p>

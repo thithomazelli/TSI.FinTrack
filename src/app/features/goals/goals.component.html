@@ -52,7 +52,10 @@
 @if (deletingGoalId()) {
   <div class="modal-backdrop" (click)="deletingGoalId.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+      <button class="modal-close" (click)="deletingGoalId.set(null)">✕</button>
+    </div>
     <p class="modal-text">{{ 'common.confirmDeleteSimple' | translate }}</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="deletingGoalId.set(null)">{{ 'common.cancel' | translate }}</button>
@@ -62,35 +65,35 @@
 }
 
 @if (showForm()) {
-  <div class="modal-backdrop" (click)="closeForm()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <h3 class="modal-title">
-        {{ (editingId() ? 'goals.edit' : 'goals.add') | translate }}
-      </h3>
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ (editingId() ? 'goals.edit' : 'goals.add') | translate }}</h3>
+      <button class="modal-close" (click)="closeForm()">✕</button>
+    </div>
 
-      <div class="form-field">
-        <label>{{ 'common.category' | translate }}</label>
-        <select class="input" [value]="formCategoryId()" (change)="formCategoryId.set($any($event.target).value)" [disabled]="!!editingId()">
-          <option value="">--</option>
-          @for (cat of (editingId() ? categories() : categoriesWithoutGoal()); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
-          }
-        </select>
-      </div>
+    <div class="field" [class.has-value]="formCategoryId()">
+      <select class="field-input" [value]="formCategoryId()" (change)="formCategoryId.set($any($event.target).value)" [disabled]="!!editingId()">
+        <option value="">--</option>
+        @for (cat of (editingId() ? categories() : categoriesWithoutGoal()); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+      <label class="field-label">{{ 'common.category' | translate }}</label>
+    </div>
 
-      <div class="form-field">
-        <label>{{ 'goals.monthlyLimit' | translate }}</label>
-        <input class="input" type="number" min="0" step="0.01"
-          [value]="formMonthlyLimit()"
-          (input)="formMonthlyLimit.set(+$any($event.target).value)" />
-      </div>
+    <div class="field">
+      <input class="field-input" type="number" min="0" step="0.01" placeholder=" "
+        [value]="formMonthlyLimit()"
+        (input)="formMonthlyLimit.set(+$any($event.target).value)" />
+      <label class="field-label">{{ 'goals.monthlyLimit' | translate }}</label>
+    </div>
 
-      <div class="modal-actions">
-        <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
-        <button class="btn btn-primary" [disabled]="saving() || !formCategoryId() || !formMonthlyLimit()" (click)="saveGoal()">
-          {{ 'common.save' | translate }}
-        </button>
-      </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" [disabled]="saving() || !formCategoryId() || !formMonthlyLimit()" (click)="saveGoal()">
+        {{ 'common.save' | translate }}
+      </button>
     </div>
   </div>
 }

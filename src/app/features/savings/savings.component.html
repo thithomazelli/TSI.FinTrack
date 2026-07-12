@@ -122,7 +122,10 @@
 @if (deletingId()) {
   <div class="modal-backdrop" (click)="deletingId.set(null)"></div>
   <div class="modal modal--sm">
-    <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
+      <button class="modal-close" (click)="deletingId.set(null)">✕</button>
+    </div>
     <p class="modal-text">{{ 'common.confirmDeleteSimple' | translate }}</p>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="deletingId.set(null)">{{ 'common.cancel' | translate }}</button>
@@ -132,52 +135,55 @@
 }
 
 @if (showForm()) {
-  <div class="modal-backdrop" (click)="closeForm()">
-    <div class="modal modal--sm" (click)="$event.stopPropagation()">
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal modal--sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
       <h3 class="modal-title">{{ (editingId() ? 'common.edit' : 'savings.add') | translate }}</h3>
+      <button class="modal-close" (click)="closeForm()">✕</button>
+    </div>
 
-      <div class="form-field">
-        <label class="form-label">{{ 'common.type' | translate }}</label>
-        <select class="input" [ngModel]="formTypeId()" (ngModelChange)="formTypeId.set($event)">
-          @for (t of types(); track t.id) {
-            <option [value]="t.id">{{ t.value }}</option>
-          }
-        </select>
-      </div>
+    <div class="field" [class.has-value]="formTypeId()">
+      <select class="field-input" [ngModel]="formTypeId()" (ngModelChange)="formTypeId.set($event)">
+        @for (t of types(); track t.id) {
+          <option [value]="t.id">{{ t.value }}</option>
+        }
+      </select>
+      <label class="field-label">{{ 'common.type' | translate }}</label>
+    </div>
 
-      <div class="form-field">
-        <label class="form-label">{{ 'common.description' | translate }}</label>
-        <input class="input" type="text" [value]="formDescription()" (input)="formDescription.set($any($event.target).value)" />
-      </div>
+    <div class="field">
+      <input class="field-input" type="text" placeholder=" " [value]="formDescription()" (input)="formDescription.set($any($event.target).value)" />
+      <label class="field-label">{{ 'common.description' | translate }}</label>
+    </div>
 
-      <div class="form-field">
-        <label class="form-label">{{ 'common.amount' | translate }}</label>
-        <input class="input" type="number" min="0" step="0.01" [value]="formAmount()" (input)="formAmount.set(+$any($event.target).value)" />
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" type="number" min="0" step="0.01" placeholder=" " [value]="formAmount()" (input)="formAmount.set(+$any($event.target).value)" />
+        <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [value]="formDate()" (input)="formDate.set($any($event.target).value)" />
+        <label class="field-label">{{ 'common.date' | translate }}</label>
+      </div>
+    </div>
 
-      <div class="form-field">
-        <label class="form-label">{{ 'common.date' | translate }}</label>
-        <input class="input" type="date" [value]="formDate()" (input)="formDate.set($any($event.target).value)" />
-      </div>
+    <div class="field" [class.has-value]="formAccountId()">
+      <select class="field-input" [ngModel]="formAccountId()" (ngModelChange)="formAccountId.set($event)">
+        <option value="">--</option>
+        @for (a of accounts(); track a.id) {
+          <option [value]="a.id">{{ a.name }}</option>
+        }
+      </select>
+      <label class="field-label">{{ 'common.account' | translate }}</label>
+    </div>
 
-      <div class="form-field">
-        <label class="form-label">{{ 'common.account' | translate }}</label>
-        <select class="input" [ngModel]="formAccountId()" (ngModelChange)="formAccountId.set($event)">
-          <option value="">--</option>
-          @for (a of accounts(); track a.id) {
-            <option [value]="a.id">{{ a.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
-        <button class="btn btn-primary"
-          [disabled]="saving() || !formDescription() || !formAmount() || !formTypeId()"
-          (click)="saveMovement()">
-          {{ 'common.save' | translate }}
-        </button>
-      </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary"
+        [disabled]="saving() || !formDescription() || !formAmount() || !formTypeId()"
+        (click)="saveMovement()">
+        {{ 'common.save' | translate }}
+      </button>
     </div>
   </div>
 }

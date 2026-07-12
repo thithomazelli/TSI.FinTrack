@@ -298,13 +298,14 @@ body {
 
 /* ─── Modal ──────────────────────────────────────────────────────────────── */
 
-.modal-backdrop {
+.modal-backdrop,
+.backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(3px);
-  z-index: 200;
-  animation: fadeIn 0.2s ease both;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 400;
+  animation: fadeIn 0.18s ease both;
 }
 
 .modal {
@@ -314,7 +315,7 @@ body {
   right: 0;
   margin-inline: auto;
   transform: translateY(-50%);
-  z-index: 201;
+  z-index: 401;
   width: min(560px, calc(100vw - 2rem));
   max-height: calc(100dvh - 2rem);
   overflow-y: auto;
@@ -323,44 +324,63 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 1.75rem;
-  box-shadow: var(--shadow-lg);
-  animation: modalIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  animation: modalIn 0.22s cubic-bezier(0.4, 0, 0.2, 1) both;
   transition: background var(--transition), border-color var(--transition);
 
-  &.modal-lg {
-    width: min(720px, calc(100vw - 2rem));
-  }
+  &.modal-lg  { width: min(720px, calc(100vw - 2rem)); }
+  &.modal--sm { width: min(420px, calc(100vw - 2rem)); }
 
   @media (max-width: 768px) {
     left: 0;
-    top: env(safe-area-inset-top, 0.75rem);
-    transform: none;
-    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 1.5rem);
-    border-radius: var(--radius-lg);
-    animation: modalInMobile 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 2rem);
+    animation: modalIn 0.22s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
 
   @media (max-width: 480px) {
-    width: calc(100vw - 1.5rem);
     padding: 1.25rem;
   }
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: translateY(-50%) scale(0.96); }
+  from { opacity: 0; transform: translateY(calc(-50% + 12px)) scale(0.97); }
   to   { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
-@keyframes modalInMobile {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Modal header: title + close button */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
 }
 
 .modal-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-text);
-  margin: 0 0 1.5rem;
+  margin: 0;
+}
+
+.modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-2);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  flex-shrink: 0;
+
+  &:hover { background: var(--color-surface-2); color: var(--color-text); }
 }
 
 .modal-actions {
@@ -372,7 +392,108 @@ body {
   border-top: 1px solid var(--color-border);
 }
 
-/* ─── Form fields (used inside modals) ───────────────────────────────────── */
+/* ─── Floating label fields (used inside modals) ─────────────────────────── */
+
+.field {
+  position: relative;
+  flex: 1;
+
+  /* The input/select/textarea */
+  .field-input {
+    display: block;
+    width: 100%;
+    padding: 1.15rem 0.85rem 0.45rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    appearance: none;
+
+    &:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-soft);
+    }
+
+    &:disabled {
+      background: var(--color-surface-2);
+      color: var(--color-text-3);
+      cursor: not-allowed;
+    }
+  }
+
+  /* The floating label */
+  .field-label {
+    position: absolute;
+    left: 0.85rem;
+    top: 0;
+    transform: translateY(calc(50% + 0.35rem));
+    font-size: 0.875rem;
+    color: var(--color-text-3);
+    pointer-events: none;
+    transition: transform 0.15s ease, font-size 0.15s ease, color 0.15s ease;
+    background: var(--color-surface);
+    padding: 0 0.2rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Float label when input has content (placeholder=" " trick) */
+  .field-input:focus ~ .field-label,
+  .field-input:not(:placeholder-shown) ~ .field-label {
+    transform: translateY(-50%);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-2);
+  }
+
+  .field-input:focus ~ .field-label {
+    color: var(--color-accent);
+  }
+
+  /* For selects: parent gets .has-value from Angular binding */
+  &.has-value .field-label {
+    transform: translateY(-50%);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-2);
+  }
+
+  &.has-value:focus-within .field-label,
+  &:focus-within .field-label {
+    color: var(--color-accent);
+  }
+
+  /* Size variants */
+  &.field--sm { flex: 0 0 140px; }
+  &.field--xs { flex: 0 0 100px; }
+  &.field--date { flex: 0 0 170px; }
+}
+
+/* Row of floating-label fields */
+.fields-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+    .field--sm, .field--xs, .field--date { flex: 1; }
+  }
+}
+
+.field + .field,
+.fields-row + .field,
+.field + .fields-row,
+.fields-row + .fields-row {
+  margin-top: 1rem;
+}
+
+/* ─── Legacy form fields (kept for backward compat) ──────────────────────── */
 
 .form-field {
   display: flex;
@@ -421,12 +542,10 @@ body {
   margin-bottom: 1rem;
   align-items: flex-start;
 
-  /* Cancel the sibling margin rule (.form-field + .form-field) inside a row */
   > .form-field + .form-field { margin-top: 0; }
 
   @media (max-width: 480px) {
     flex-direction: column;
-
     .form-field--sm { max-width: 100%; }
     > .form-field + .form-field { margin-top: 1rem; }
   }
