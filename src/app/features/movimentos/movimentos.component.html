@@ -600,7 +600,7 @@
     </div>
 
     <div class="fields-row">
-      <div class="field field--sm" [class.has-value]="formEntryStatus">
+      <div class="field" [class.has-value]="formEntryStatus">
         <select class="field-input" [(ngModel)]="formEntryStatus">
           <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
           <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
@@ -635,8 +635,8 @@
     </div>
 
     @if (formEntryIsInstallment) {
-      <div class="fields-row installment-row">
-        <div class="field field--sm">
+      <div class="fields-row">
+        <div class="field field--xs">
           <input class="field-input" type="number" min="2" max="48" placeholder=" " [(ngModel)]="formEntryInstallments" />
           <label class="field-label">{{ 'movimentos.installmentsCount' | translate }}</label>
         </div>
@@ -655,8 +655,8 @@
       </div>
     }
 
-    <div class="form-field">
-      <label>{{ 'movimentos.labels' | translate }}</label>
+    <div class="field-labels-wrap">
+      <span class="field-section-label">{{ 'movimentos.labels' | translate }}</span>
       <tsi-labels-input [(labels)]="formEntryLabels" />
     </div>
 
@@ -751,7 +751,7 @@
           <label class="field-label">{{ 'movimentos.purchaseDate' | translate }}</label>
         </div>
       }
-      <div class="field field--sm" [class.has-value]="formTxStatus">
+      <div class="field" [class.has-value]="formTxStatus">
         <select class="field-input" [(ngModel)]="formTxStatus">
           <option [value]="TransactionStatus.Realized">{{ 'movimentos.realized' | translate }}</option>
           <option [value]="TransactionStatus.Projected">{{ 'movimentos.projected' | translate }}</option>
@@ -803,8 +803,8 @@
     </div>
 
     @if (formTxIsInstallment) {
-      <div class="fields-row installment-row">
-        <div class="field field--sm">
+      <div class="fields-row">
+        <div class="field field--xs">
           <input class="field-input" type="number" min="2" max="48" placeholder=" " [(ngModel)]="formTxInstallments" />
           <label class="field-label">{{ 'movimentos.installmentsCount' | translate }}</label>
         </div>
@@ -840,8 +840,8 @@
       </div>
     }
 
-    <div class="form-field">
-      <label>{{ 'movimentos.labels' | translate }}</label>
+    <div class="field-labels-wrap">
+      <span class="field-section-label">{{ 'movimentos.labels' | translate }}</span>
       <tsi-labels-input [(labels)]="formTxLabels" />
     </div>
 

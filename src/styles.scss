@@ -493,6 +493,20 @@ body {
   margin-top: 1rem;
 }
 
+/* Section label for non-floating components (e.g. labels/tags input) */
+.field-labels-wrap {
+  margin-top: 1rem;
+
+  .field-section-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-2);
+    margin-bottom: 0.35rem;
+    padding-left: 0.1rem;
+  }
+}
+
 /* ─── Legacy form fields (kept for backward compat) ──────────────────────── */
 
 .form-field {
