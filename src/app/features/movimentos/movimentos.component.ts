@@ -810,11 +810,11 @@ export class MovimentosComponent implements OnInit {
           this.closeModal();
           if (id) {
             this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
+            this.cdr.markForCheck();
           } else {
-            this.allEntries.update(list => [...list, saved]);
+            this.load(true);
           }
           this.balanceService.invalidate();
-          this.cdr.markForCheck();
         });
       },
       error: err => {
@@ -869,17 +869,13 @@ export class MovimentosComponent implements OnInit {
       });
     } else {
       this.transactionService.create(payload).subscribe({
-        next: (created: Transaction[]) => {
+        next: () => {
           this.zone.run(() => {
             this.toast.success(this.tr('movimentos.toast.txAdded'));
             this.saving.set(false);
             this.closeModal();
-            const from = this.dateFrom();
-            const to = this.dateTo();
-            const inRange = created.filter(t => t.date >= from && t.date <= to);
-            this.allTransactions.update(list => [...list, ...inRange]);
+            this.load(true);
             this.balanceService.invalidate();
-            this.cdr.markForCheck();
           });
         },
         error: err => {
