@@ -203,24 +203,13 @@ tsi-month-picker ::ng-deep .month-picker {
 .cb-value--projected { color: #3b82f6; &.is-negative { color: #ef4444; } }
 
 .summary-bar {
-  position: relative;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: .6rem;
   margin-bottom: 1.25rem;
-  flex-wrap: wrap;
-  align-items: stretch;
-  padding-top: 1.5rem;
-
-  @media (max-width: 720px) {
-    flex-direction: column;
-  }
 }
 
 .sm-period-label {
-  position: absolute;
-  top: .25rem;
-  left: 0;
-  right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -243,7 +232,6 @@ tsi-month-picker ::ng-deep .month-picker {
 .sm-collapsible {
   display: flex;
   gap: 1rem;
-  flex: 1;
   align-items: stretch;
   overflow: hidden;
   max-height: 0;
