@@ -1,0 +1,72 @@
+<div class="people-header">
+  <button class="btn btn-primary" (click)="openCreate()">+ Adicionar Pessoa</button>
+</div>
+
+@if (loading()) {
+  <p class="state-msg">Carregando...</p>
+} @else if (people().length === 0) {
+  <p class="state-msg">Nenhuma pessoa cadastrada. Adicione uma para usar como sugestão nos lançamentos.</p>
+} @else {
+  <table class="people-table">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th class="th-right td-actions">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (person of people(); track person.id) {
+        <tr (dblclick)="openEdit(person)" style="cursor: pointer">
+          <td class="person-name">{{ person.name }}</td>
+          <td class="td-actions">
+            <button class="btn-action" (click)="openEdit(person)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Editar
+            </button>
+            <button class="btn-action btn-action--danger" (click)="confirmDelete(person)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              Remover
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="closeForm()"></div>
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ editingId() ? 'Editar Pessoa' : 'Adicionar Pessoa' }}</h3>
+      <button class="modal-close" (click)="closeForm()">✕</button>
+    </div>
+    <div class="field">
+      <input class="field-input" placeholder=" " [(ngModel)]="formName" (keydown.enter)="save()" />
+      <label class="field-label">Nome</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving() || !formName.trim()">
+        {{ saving() ? 'Salvando…' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+}
+
+@if (deletingPerson()) {
+  <div class="modal-backdrop" (click)="cancelDelete()"></div>
+  <div class="modal modal--sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Remover Pessoa</h3>
+      <button class="modal-close" (click)="cancelDelete()">✕</button>
+    </div>
+    <p class="confirm-msg">
+      Remover <strong>{{ deletingPerson()!.name }}</strong> da lista de sugestões?
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="cancelDelete()">Cancelar</button>
+      <button class="btn-danger" (click)="deletePerson()" [disabled]="saving()">Remover</button>
+    </div>
+  </div>
+}

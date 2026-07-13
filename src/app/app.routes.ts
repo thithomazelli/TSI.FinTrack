@@ -91,6 +91,7 @@ export const routes: Routes = [
           { path: 'credit-cards', loadComponent: () => import('./features/settings/credit-cards/credit-cards-settings.component').then(m => m.CreditCardsSettingsComponent) },
           { path: 'categories', loadComponent: () => import('./features/settings/categories/categories-settings.component').then(m => m.CategoriesSettingsComponent) },
           { path: 'domains', loadComponent: () => import('./features/settings/domains/domains-settings.component').then(m => m.DomainsSettingsComponent) },
+          { path: 'people', loadComponent: () => import('./features/settings/people/people-settings.component').then(m => m.PeopleSettingsComponent) },
           { path: '', redirectTo: 'profile', pathMatch: 'full' },
         ],
       },

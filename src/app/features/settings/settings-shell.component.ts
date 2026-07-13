@@ -16,5 +16,6 @@ export class SettingsShellComponent {
     { path: '/settings/categories',   label: 'Categorias' },
     { path: '/settings/domains',      label: 'Domínios' },
     { path: '/settings/family',       label: 'Família' },
+    { path: '/settings/people',       label: 'Pessoas' },
   ];
 }

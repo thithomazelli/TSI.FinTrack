@@ -402,6 +402,8 @@ body {
   .field-input {
     display: block;
     width: 100%;
+    box-sizing: border-box;
+    height: 3.1rem;
     padding: 1.15rem 0.85rem 0.45rem;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -409,9 +411,11 @@ body {
     color: var(--color-text);
     font-size: 0.9rem;
     font-family: inherit;
+    line-height: 1.4;
     outline: none;
     transition: border-color var(--transition), box-shadow var(--transition);
     appearance: none;
+    -webkit-appearance: none;
 
     &:focus {
       border-color: var(--color-accent);
@@ -429,12 +433,12 @@ body {
   .field-label {
     position: absolute;
     left: 0.85rem;
-    top: 0;
-    transform: translateY(calc(50% + 0.35rem));
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 0.875rem;
     color: var(--color-text-3);
     pointer-events: none;
-    transition: transform 0.15s ease, font-size 0.15s ease, color 0.15s ease;
+    transition: top 0.15s ease, transform 0.15s ease, font-size 0.15s ease, color 0.15s ease;
     background: var(--color-surface);
     padding: 0 0.2rem;
     line-height: 1;
@@ -444,6 +448,7 @@ body {
   /* Float label when input has content (placeholder=" " trick) */
   .field-input:focus ~ .field-label,
   .field-input:not(:placeholder-shown) ~ .field-label {
+    top: 0;
     transform: translateY(-50%);
     font-size: 0.72rem;
     font-weight: 600;
@@ -456,6 +461,7 @@ body {
 
   /* Selects always have a visible value — always float the label */
   &:has(select.field-input) .field-label {
+    top: 0;
     transform: translateY(-50%);
     font-size: 0.72rem;
     font-weight: 600;
@@ -467,6 +473,7 @@ body {
 
   /* For selects: parent gets .has-value from Angular binding */
   &.has-value .field-label {
+    top: 0;
     transform: translateY(-50%);
     font-size: 0.72rem;
     font-weight: 600;

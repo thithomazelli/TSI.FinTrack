@@ -29,6 +29,35 @@ export class PeopleService {
     );
   }
 
+  update(id: string, name: string): Observable<People> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .update({ name })
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .select()
+        .single()
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return data as People;
+        })
+    );
+  }
+
+  delete(id: string): Observable<void> {
+    return from(
+      this.supabase.client
+        .from(TABLE)
+        .delete()
+        .eq('id', id)
+        .eq('owner_id', this.ownerId)
+        .then(({ error }) => {
+          if (error) throw error;
+        })
+    );
+  }
+
   upsertByName(name: string): Observable<People> {
     return from(
       this.supabase.client
