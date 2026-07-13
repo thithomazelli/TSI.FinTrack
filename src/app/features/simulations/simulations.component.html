@@ -1,30 +1,86 @@
 <div class="page">
-  <!-- Header -->
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">{{ 'simulations.title' | translate }}</h2>
-      <p class="subtitle">{{ 'simulations.subtitle' | translate }}</p>
+  <!-- Sticky collapsible header -->
+  <div class="sticky-header">
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">{{ 'simulations.title' | translate }}</h2>
+        <p class="subtitle">{{ 'simulations.subtitle' | translate }}</p>
+      </div>
+      <button class="btn-collapse" (click)="headerExpanded.set(!headerExpanded())" [attr.aria-expanded]="headerExpanded()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="14" height="14"
+             [style.transform]="headerExpanded() ? 'rotate(0deg)' : 'rotate(-180deg)'"
+             style="transition: transform .3s ease">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
     </div>
-  </div>
+
+    <div class="top-row-wrap" [class.top-row-wrap--open]="headerExpanded()">
+      <div class="top-row">
+        <!-- Card 1: period picker -->
+        <div class="sm-card sm-card--period">
+          <div class="sm-left">
+            <span class="sm-title">{{ 'movimentos.periodTitle' | translate }}</span>
+          </div>
+          <div class="tr-controls">
+            <div class="period-toggle">
+              <button type="button" class="period-tab" [class.is-active]="periodMode() === 'month'" (click)="setPeriodMode('month')">{{ 'movimentos.periodMonth' | translate }}</button>
+              <button type="button" class="period-tab" [class.is-active]="periodMode() === 'range'" (click)="setPeriodMode('range')">{{ 'movimentos.periodRange' | translate }}</button>
+            </div>
+            @if (periodMode() === 'month') {
+              <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+            } @else {
+              <div class="tr-range">
+                <div class="tr-group">
+                  <label class="sm-title">{{ 'movimentos.from' | translate }}</label>
+                  <input class="tr-input" type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event); onDateChange()" />
+                </div>
+                <div class="tr-group">
+                  <label class="sm-title">{{ 'movimentos.to' | translate }}</label>
+                  <input class="tr-input" type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event); onDateChange()" />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <!-- Card 2: entradas simuladas -->
+        <div class="sm-card sm-card--cc">
+          <div class="sm-left">
+            <span class="sm-title">{{ 'movimentos.totalIncome' | translate }}</span>
+            <span class="sm-account">{{ 'simulations.simulated' | translate }}</span>
+          </div>
+          <div class="sm-values">
+            <div class="sm-row">
+              <span class="sm-value sm-pos">R$ {{ simEntradas() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Card 3: saídas + saldo simulados -->
+        <div class="sm-card">
+          <div class="sm-left">
+            <span class="sm-title">{{ 'movimentos.balance' | translate }}</span>
+            <span class="sm-account">{{ 'simulations.simulated' | translate }}</span>
+          </div>
+          <div class="sm-values">
+            <div class="sm-row">
+              <span class="sm-sublabel">{{ 'movimentos.totalExpenses' | translate }}</span>
+              <span class="sm-value sm-neg">R$ {{ simSaidas() | number:'1.2-2' }}</span>
+            </div>
+            <div class="sm-row">
+              <span class="sm-sublabel">{{ 'movimentos.balance' | translate }}</span>
+              <span class="sm-value" [class.sm-pos]="simSaldo() >= 0" [class.sm-neg]="simSaldo() < 0">R$ {{ simSaldo() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /.sticky-header -->
 
   <!-- Simulation banner -->
   <div class="sim-banner">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
     {{ 'simulations.banner' | translate }}
   </div>
-
-  <!-- Top section: period picker + balance card side by side -->
-  <tsi-period-bar
-    [year]="year()"
-    [month]="month()"
-    [periodMode]="periodMode()"
-    [dateFrom]="dateFrom()"
-    [dateTo]="dateTo()"
-    (monthChanged)="onMonthChanged($event)"
-    (periodModeChange)="setPeriodMode($event)"
-    (dateFromChange)="dateFrom.set($event); onDateChange()"
-    (dateToChange)="dateTo.set($event); onDateChange()"
-  />
 
   <!-- Diff panel (changes summary) -->
   @if (hasChanges()) {
@@ -88,19 +144,51 @@
     </div>
   }
 
-  <!-- Summary bar -->
+  <!-- Summary bar (período selecionado) -->
   <div class="summary-bar">
-    <div class="summary-card summary-card--entrada">
-      <span class="summary-label">{{ 'movimentos.totalIncome' | translate }}</span>
-      <span class="summary-value">R$ {{ simEntradas() | number:'1.2-2' }}</span>
+    <div class="sm-period-label">
+      {{ 'movimentos.periodLabel' | translate }}
+      <button class="collapse-btn" (click)="summaryExpanded.set(!summaryExpanded())" [attr.aria-expanded]="summaryExpanded()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="12" height="12"
+             [style.transform]="summaryExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)'"
+             style="transition: transform .25s ease">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
     </div>
-    <div class="summary-card summary-card--saida">
-      <span class="summary-label">{{ 'movimentos.totalExpenses' | translate }}</span>
-      <span class="summary-value">R$ {{ simSaidas() | number:'1.2-2' }}</span>
-    </div>
-    <div class="summary-card" [class.summary-card--positivo]="simSaldo() >= 0" [class.summary-card--negativo]="simSaldo() < 0">
-      <span class="summary-label">{{ 'movimentos.balance' | translate }}</span>
-      <span class="summary-value">R$ {{ simSaldo() | number:'1.2-2' }}</span>
+    <div class="sm-collapsible" [class.sm-collapsible--open]="summaryExpanded()">
+      <div class="sm-card sm-card--cc">
+        <div class="sm-left">
+          <span class="sm-title">{{ 'movimentos.balance' | translate }}</span>
+          <span class="sm-account">{{ 'simulations.simulated' | translate }}</span>
+        </div>
+        <div class="sm-values">
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'movimentos.totalIncome' | translate }}</span>
+            <span class="sm-value sm-pos">R$ {{ simEntradas() | number:'1.2-2' }}</span>
+          </div>
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'movimentos.totalExpenses' | translate }}</span>
+            <span class="sm-value sm-neg">R$ {{ simSaidas() | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="sm-card">
+        <div class="sm-left">
+          <span class="sm-title">{{ 'movimentos.balance' | translate }}</span>
+          <span class="sm-account">{{ 'movimentos.periodBalance' | translate }}</span>
+        </div>
+        <div class="sm-values">
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'simulations.real' | translate }}</span>
+            <span class="sm-value" [class.sm-pos]="realSaldo() >= 0" [class.sm-neg]="realSaldo() < 0">R$ {{ realSaldo() | number:'1.2-2' }}</span>
+          </div>
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'simulations.simulated' | translate }}</span>
+            <span class="sm-value" [class.sm-pos]="simSaldo() >= 0" [class.sm-neg]="simSaldo() < 0">R$ {{ simSaldo() | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -337,6 +425,37 @@
         }
       </div>
     }
+  }
+
+  <!-- Gráfico de pizza por categoria -->
+  @if (!loading() && categorySpend().length > 0) {
+    <div class="pie-card">
+      <div class="pie-header" (click)="pieExpanded.set(!pieExpanded())" style="cursor:pointer">
+        <h3 class="pie-title">{{ 'movimentos.expensesByCategory' | translate }}</h3>
+        <div class="pie-header-right">
+          <span class="pie-total">{{ 'common.total' | translate }}: R$ {{ simSaidas() | number:'1.2-2' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="14" height="14"
+               [style.transform]="pieExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)'"
+               style="transition: transform .25s ease; color: var(--color-text-2)">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+      </div>
+      <div class="pie-body pie-collapsible" [class.pie-collapsible--open]="pieExpanded()">
+        <div class="pie-chart-wrap">
+          <canvas baseChart [data]="categoryPieData()" [options]="doughnutOptions()" type="doughnut"></canvas>
+        </div>
+        <div class="pie-legend">
+          @for (cat of categorySpend(); track cat.categoryId) {
+            <div class="pie-legend-row">
+              <span class="pie-dot" [style.background]="cat.color"></span>
+              <span class="pie-legend-name">{{ cat.name }}</span>
+              <span class="pie-legend-val">R$ {{ cat.amount | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
   }
 </div>
 

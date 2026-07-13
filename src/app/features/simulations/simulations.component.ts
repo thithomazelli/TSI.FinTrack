@@ -3,6 +3,8 @@ import {
 } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EntryService } from '../../core/services/entry.service';
 import { TransactionService } from '../../core/services/transaction.service';
@@ -14,14 +16,17 @@ import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { Entry } from '../../core/models/interfaces/entry.interface';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { Category } from '../../core/models/interfaces/category.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Account } from '../../core/models/interfaces/account.interface';
-import { PeriodBarComponent } from '../../shared/components/period-bar/period-bar.component';
+import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { GroupedTableComponent, TableGroup, GroupSearchFn, GroupReorderEvent } from '../../shared/components/grouped-table/grouped-table.component';
+
+Chart.register(...registerables);
 
 export interface SimItem {
   kind: 'entry' | 'transaction';
@@ -54,7 +59,7 @@ interface DiffEntry {
 
 @Component({
     selector: 'tsi-simulations',
-    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, PeriodBarComponent, GroupedTableComponent],
+    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BaseChartDirective, GroupedTableComponent],
     templateUrl: './simulations.component.html',
     styleUrls: ['./simulations.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -68,6 +73,7 @@ export class SimulationsComponent implements OnInit {
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
   private readonly balanceService = inject(BalanceService);
+  readonly themeService = inject(ThemeService);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
   private readonly t = inject(TranslateService);
@@ -111,6 +117,11 @@ export class SimulationsComponent implements OnInit {
     this.filterTipos().size + this.filterStatuses().size +
     (this.filterCategoryId() ? 1 : 0) + this.filterCardIds().size
   );
+
+  // UI state
+  readonly headerExpanded  = signal(true);
+  readonly summaryExpanded = signal(true);
+  readonly pieExpanded     = signal(true);
 
   // Overrides: id → {amount?, date?, deleted?}
   readonly overrides = signal<Map<string, SimOverride>>(new Map());
@@ -307,6 +318,53 @@ export class SimulationsComponent implements OnInit {
 
     return [...groups, ...cardGroups];
   });
+
+  // Gráfico de pizza: saídas por categoria (dados simulados)
+  readonly categorySpend = computed(() => {
+    const map = new Map<string, number>();
+    for (const item of this.filteredItems()) {
+      if (item.kind !== 'transaction') continue;
+      const key = item.categoryId || '__sem__';
+      map.set(key, (map.get(key) ?? 0) + item.amount);
+    }
+    return [...map.entries()]
+      .map(([categoryId, amount]) => ({
+        categoryId,
+        name: categoryId === '__sem__' ? 'Sem categoria' : this.categoryName(categoryId) || 'Sem categoria',
+        color: categoryId === '__sem__' ? '#9ca3af' : this.categoryColor(categoryId),
+        amount,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  });
+
+  readonly categoryPieData = computed<ChartData<'doughnut'>>(() => ({
+    labels: this.categorySpend().map(c => c.name),
+    datasets: [{
+      data: this.categorySpend().map(c => c.amount),
+      backgroundColor: this.categorySpend().map(c => c.color),
+      borderWidth: 2,
+      borderColor: this.themeService.isDark() ? '#1a1d27' : '#ffffff',
+    }],
+  }));
+
+  readonly doughnutOptions = computed<ChartConfiguration<'doughnut'>['options']>(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => {
+            const v = ctx.parsed as number;
+            const total = this.categorySpend().reduce((s, c) => s + c.amount, 0) || 1;
+            const pct = ((v / total) * 100).toFixed(1);
+            return ` ${ctx.label}: R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${pct}%)`;
+          },
+        },
+      },
+    },
+  } as ChartConfiguration<'doughnut'>['options']));
 
   toggleDndMode(): void { this.dndMode.update(v => !v); }
 
