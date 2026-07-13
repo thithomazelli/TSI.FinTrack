@@ -258,6 +258,15 @@
 }
 .td-drag { cursor: grab; }
 
+.btn-expand-all {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 4px;
+  border: none; background: transparent;
+  color: var(--color-text-2); cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+  &:hover { background: var(--color-hover, rgba(0,0,0,.06)); color: var(--color-accent); }
+}
+
 // ── Insert zones ──────────────────────────────────────────────────────────────
 .gt-insert-zone {
   height: 6px;

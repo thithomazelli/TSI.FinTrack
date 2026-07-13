@@ -191,8 +191,22 @@ export class GroupedTableComponent {
       next.set(groupId, !(next.get(groupId) ?? true));
       return next;
     });
-    // When collapsing/expanding, clamp to valid page range.
     this.currentPage.update(p => Math.min(p, this.totalPages() - 1));
+  }
+
+  readonly allExpanded = computed(() => {
+    const map = this._expanded();
+    return this.groups().every(g => map.get(g.id) !== false);
+  });
+
+  toggleAllGroups(): void {
+    const expand = !this.allExpanded();
+    this._expanded.update(() => {
+      const next = new Map<string, boolean>();
+      for (const g of this.groups()) next.set(g.id, expand);
+      return next;
+    });
+    if (!expand) this.currentPage.set(0);
   }
 
   onSearch(q: string): void {
