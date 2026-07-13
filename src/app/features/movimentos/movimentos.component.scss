@@ -220,9 +220,10 @@ tsi-month-picker ::ng-deep .month-picker {
   position: absolute;
   top: .25rem;
   left: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  gap: .35rem;
+  justify-content: space-between;
   font-size: .65rem;
   font-weight: 600;
   color: var(--color-text-2);
@@ -231,15 +232,11 @@ tsi-month-picker ::ng-deep .month-picker {
 }
 
 .collapse-btn {
-  display: inline-flex;
-  align-items: center;
-  background: none;
-  border: none;
-  padding: 2px;
-  cursor: pointer;
-  color: var(--color-text-2);
-  border-radius: 3px;
-  &:hover { color: var(--color-text); }
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border); background: var(--color-surface);
+  color: var(--color-text-2); cursor: pointer; transition: all var(--transition);
+  &:hover { border-color: var(--color-accent); color: var(--color-accent); }
 }
 
 // Animated collapsible wrapper for the 3 summary cards
@@ -447,8 +444,8 @@ tr:hover td { background: var(--color-surface-2); }
 }
 .pie-chart-wrap { width: 220px; height: 220px; flex-shrink: 0; }
 .pie-legend {
-  flex: 1; min-width: 220px; display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .35rem .75rem;
+  flex: 1; min-width: 200px; display: flex;
+  flex-direction: column; gap: .35rem;
   max-height: 220px; overflow-y: auto;
 }
 .pie-legend-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
