@@ -412,21 +412,29 @@ async function backfillInstallmentGroups() {
   for (const tx of txs) {
     const prefix = tx.description.replace(/ - \d+\/\d+$/, '')
     if (!groups.has(prefix)) groups.set(prefix, [])
-    groups.get(prefix).push(tx.id)
+    groups.get(prefix).push(tx)
   }
 
   let updated = 0
-  for (const [prefix, ids] of groups) {
-    if (ids.length < 2) continue // skip isolated records
+  for (const [prefix, members] of groups) {
+    if (members.length < 2) continue // skip isolated records
     const groupId = crypto.randomUUID()
-    const { error: upErr } = await supabase
-      .from('transactions')
-      .update({ installment_group_id: groupId })
-      .eq('owner_id', OWNER_ID)
-      .in('id', ids)
-    if (upErr) { console.error(`Erro ao agrupar "${prefix}":`, upErr.message); process.exit(1) }
-    updated += ids.length
-    console.log(`  "${prefix}": ${ids.length} parcelas agrupadas ✓`)
+    for (const tx of members) {
+      const match = tx.description.match(/ - (\d+)\/(\d+)$/)
+      const installmentNumber = match ? parseInt(match[1], 10) : null
+      const totalInstallments = match ? parseInt(match[2], 10) : null
+      const patch = { installment_group_id: groupId }
+      if (installmentNumber) patch.installment_number = installmentNumber
+      if (totalInstallments) patch.total_installments = totalInstallments
+      const { error: upErr } = await supabase
+        .from('transactions')
+        .update(patch)
+        .eq('owner_id', OWNER_ID)
+        .eq('id', tx.id)
+      if (upErr) { console.error(`Erro ao agrupar "${prefix}" id ${tx.id}:`, upErr.message); process.exit(1) }
+    }
+    updated += members.length
+    console.log(`  "${prefix}": ${members.length} parcelas agrupadas ✓`)
   }
 
   if (updated === 0) console.log('  Nenhum grupo com múltiplas parcelas encontrado ✓')

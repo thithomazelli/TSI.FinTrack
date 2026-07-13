@@ -275,7 +275,7 @@ export class TransactionService {
         .select('*')
         .eq('owner_id', this.ownerId)
         .eq('installment_group_id', groupId)
-        .order('installment_number', { ascending: true })
+        .order('date', { ascending: true })
         .then(({ data, error }) => {
           if (error) throw error;
           return (data ?? []).map((r: any) => this.toModel(r));
