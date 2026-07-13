@@ -502,6 +502,9 @@ body {
   margin-bottom: 1rem;
   align-items: stretch;
 
+  /* cancel the sibling margin that would push 2nd+ fields down inside a row */
+  > .field + .field { margin-top: 0; }
+
   @media (max-width: 520px) {
     flex-direction: column;
     .field--sm, .field--xs, .field--date { flex: 1; }
@@ -511,7 +514,8 @@ body {
 .field + .field,
 .fields-row + .field,
 .field + .fields-row,
-.fields-row + .fields-row {
+.fields-row + .fields-row,
+.form-toggles + .fields-row {
   margin-top: 1rem;
 }
 
