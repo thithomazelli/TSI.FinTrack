@@ -397,13 +397,17 @@ body {
 .field {
   position: relative;
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 
   /* The input/select/textarea */
   .field-input {
     display: block;
     width: 100%;
+    flex: 1;
     box-sizing: border-box;
-    height: 3.1rem;
+    min-height: 3.1rem;
     padding: 1.15rem 0.85rem 0.45rem;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -459,19 +463,20 @@ body {
     color: var(--color-accent);
   }
 
-  /* Selects always have a visible value — always float the label */
-  &:has(select.field-input) .field-label {
+  /* date inputs always show a value — always float the label */
+  &:has(input[type="date"].field-input) .field-label {
     top: 0;
     transform: translateY(-50%);
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--color-text-2);
   }
-  &:has(select.field-input):focus-within .field-label {
+  &:has(input[type="date"].field-input):focus-within .field-label {
     color: var(--color-accent);
   }
 
-  /* For selects: parent gets .has-value from Angular binding */
+  /* Selects always have a visible value — always float the label */
+  &:has(select.field-input) .field-label,
   &.has-value .field-label {
     top: 0;
     transform: translateY(-50%);
@@ -479,15 +484,15 @@ body {
     font-weight: 600;
     color: var(--color-text-2);
   }
-
+  &:has(select.field-input):focus-within .field-label,
   &.has-value:focus-within .field-label,
   &:focus-within .field-label {
     color: var(--color-accent);
   }
 
   /* Size variants */
-  &.field--sm { flex: 0 0 140px; }
-  &.field--xs { flex: 0 0 100px; }
+  &.field--sm  { flex: 0 0 140px; }
+  &.field--xs  { flex: 0 0 100px; }
   &.field--date { flex: 0 0 170px; }
 }
 
@@ -496,7 +501,7 @@ body {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
-  align-items: flex-start;
+  align-items: stretch;
 
   @media (max-width: 520px) {
     flex-direction: column;
