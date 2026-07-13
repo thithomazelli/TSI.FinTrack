@@ -324,6 +324,10 @@ async function main() {
     console.log(`   ${transactions.length} transações de despesa`)
   }
 
+  // 4.5 Backfill installment_group_id para parcelas sem grupo
+  console.log('\nBackfill de grupos de parcelas...')
+  await backfillInstallmentGroups()
+
   // 5. Movimentos de poupança
   console.log('\nInserindo movimentos de poupança...')
   if (RESET_SAVINGS) {
@@ -389,6 +393,44 @@ async function main() {
   await settleHistoricalBills()
 
   console.log('\n✅ Tudo pronto!')
+}
+
+async function backfillInstallmentGroups() {
+  // Fetch all installment transactions without a group
+  const { data: txs, error } = await supabase
+    .from('transactions')
+    .select('id, description, installment_number, total_installments')
+    .eq('owner_id', OWNER_ID)
+    .gt('total_installments', 1)
+    .is('installment_group_id', null)
+
+  if (error) { console.error('Erro ao buscar parcelas:', error.message); process.exit(1) }
+  if (!txs || txs.length === 0) { console.log('  Nenhuma parcela sem grupo ✓'); return }
+
+  // Group by description prefix (strip " - XX/YY" suffix)
+  const groups = new Map()
+  for (const tx of txs) {
+    const prefix = tx.description.replace(/ - \d+\/\d+$/, '')
+    if (!groups.has(prefix)) groups.set(prefix, [])
+    groups.get(prefix).push(tx.id)
+  }
+
+  let updated = 0
+  for (const [prefix, ids] of groups) {
+    if (ids.length < 2) continue // skip isolated records
+    const groupId = crypto.randomUUID()
+    const { error: upErr } = await supabase
+      .from('transactions')
+      .update({ installment_group_id: groupId })
+      .eq('owner_id', OWNER_ID)
+      .in('id', ids)
+    if (upErr) { console.error(`Erro ao agrupar "${prefix}":`, upErr.message); process.exit(1) }
+    updated += ids.length
+    console.log(`  "${prefix}": ${ids.length} parcelas agrupadas ✓`)
+  }
+
+  if (updated === 0) console.log('  Nenhum grupo com múltiplas parcelas encontrado ✓')
+  else console.log(`  ${updated} transações agrupadas no total ✓`)
 }
 
 async function backfillBills() {
