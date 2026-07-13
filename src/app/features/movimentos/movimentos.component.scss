@@ -444,11 +444,11 @@ tr:hover td { background: var(--color-surface-2); }
 }
 .pie-chart-wrap { width: 220px; height: 220px; flex-shrink: 0; }
 .pie-legend {
-  flex: 1; min-width: 200px; display: flex;
-  flex-direction: column; gap: .35rem;
+  flex: 1; min-width: 200px;
+  columns: 3; column-gap: .75rem;
   max-height: 220px; overflow-y: auto;
 }
-.pie-legend-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
+.pie-legend-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; margin-bottom: .35rem; break-inside: avoid; }
 .pie-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 .pie-legend-name { color: var(--color-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pie-legend-val { margin-left: auto; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
