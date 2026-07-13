@@ -788,13 +788,37 @@ export class MovimentosComponent implements OnInit {
     }
   }
 
+  // ── Field validation ──────────────────────────────────────────────────────
+  saveAttempted = false;
+  readonly touchedFields = new Set<string>();
+
+  markTouched(field: string): void {
+    this.touchedFields.add(field);
+    this.cdr.markForCheck();
+  }
+
+  fi(key: string, valid: boolean): boolean {
+    return (this.saveAttempted || this.touchedFields.has(key)) && !valid;
+  }
+
+  fv(key: string, valid: boolean): boolean {
+    return (this.saveAttempted || this.touchedFields.has(key)) && valid;
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
   closeModal(): void {
     this.modalMode.set(null);
     this.editingId.set(null);
+    this.saveAttempted = false;
+    this.touchedFields.clear();
   }
 
   saveEntry(): void {
-    if (!this.formEntryDescription.trim() || this.formEntryAmount <= 0) return;
+    if (!this.formEntryDescription.trim() || this.formEntryAmount <= 0) {
+      this.saveAttempted = true;
+      this.cdr.markForCheck();
+      return;
+    }
     this.saving.set(true);
 
     const insertPosition = this.computeInsertPosition(this.allItems());
@@ -841,7 +865,11 @@ export class MovimentosComponent implements OnInit {
   }
 
   saveTransaction(): void {
-    if (!this.formTxDescription.trim() || this.formTxAmount <= 0) return;
+    if (!this.formTxDescription.trim() || this.formTxAmount <= 0) {
+      this.saveAttempted = true;
+      this.cdr.markForCheck();
+      return;
+    }
     this.saving.set(true);
 
     const insertPosition = this.computeInsertPosition(this.allItems());

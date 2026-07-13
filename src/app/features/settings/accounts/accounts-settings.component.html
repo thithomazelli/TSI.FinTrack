@@ -67,8 +67,8 @@
       <h3 class="modal-title">{{ (editingId() ? 'settings.editAccount' : 'settings.newAccount') | translate }}</h3>
       <button class="modal-close" (click)="closeForm()">✕</button>
     </div>
-    <div class="field">
-      <input class="field-input" placeholder=" " [(ngModel)]="formName" />
+    <div class="field" [class.field--invalid]="fi('name', !!formName.trim())" [class.field--valid]="fv('name', !!formName.trim())">
+      <input class="field-input" placeholder=" " [(ngModel)]="formName" (blur)="markTouched('name')" />
       <label class="field-label">{{ 'common.name' | translate }}</label>
     </div>
     <div class="field" [class.has-value]="formTypeId">

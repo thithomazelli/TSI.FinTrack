@@ -284,8 +284,16 @@ export class CreditCardsComponent implements OnInit {
     this.txModalOpen.set(true);
   }
 
+  readonly saveAttempted = signal(false);
+  private readonly _touched = new Set<string>();
+  readonly touchedTick = signal(0);
+  markTouched(f: string): void { this._touched.add(f); this.touchedTick.update(n => n + 1); }
+  fi(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && !v; }
+  fv(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && v; }
+  closeTxModal(): void { this.txModalOpen.set(false); this.saveAttempted.set(false); this._touched.clear(); }
+
   saveTx(): void {
-    if (!this.formTxDescription().trim() || this.formTxAmount() <= 0) return;
+    if (!this.formTxDescription().trim() || this.formTxAmount() <= 0) { this.saveAttempted.set(true); return; }
     this.saving.set(true);
 
     const payload: Partial<CreateTransactionPayload> = {
@@ -306,7 +314,7 @@ export class CreditCardsComponent implements OnInit {
     };
 
     const id = this.editingTxId();
-    const done = () => { this.txModalOpen.set(false); this.saving.set(false); this.balanceService.invalidate(); };
+    const done = () => { this.txModalOpen.set(false); this.saving.set(false); this.balanceService.invalidate(); this.saveAttempted.set(false); this._touched.clear(); };
     const fail = (err: unknown) => { this.logger.error('Failed to save transaction', err); this.saving.set(false); this.toast.error('Erro ao salvar lançamento.'); };
 
     if (id) {

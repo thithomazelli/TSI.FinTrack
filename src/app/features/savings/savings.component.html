@@ -151,14 +151,14 @@
       <label class="field-label">{{ 'common.type' | translate }}</label>
     </div>
 
-    <div class="field">
-      <input class="field-input" type="text" placeholder=" " [value]="formDescription()" (input)="formDescription.set($any($event.target).value)" />
+    <div class="field" [class.field--invalid]="fi('desc', !!formDescription())" [class.field--valid]="fv('desc', !!formDescription())">
+      <input class="field-input" type="text" placeholder=" " [value]="formDescription()" (input)="formDescription.set($any($event.target).value)" (blur)="markTouched('desc')" />
       <label class="field-label">{{ 'common.description' | translate }}</label>
     </div>
 
     <div class="fields-row">
-      <div class="field">
-        <input class="field-input" type="number" min="0" step="0.01" placeholder=" " [value]="formAmount()" (input)="formAmount.set(+$any($event.target).value)" />
+      <div class="field" [class.field--invalid]="fi('amt', (formAmount() ?? 0) > 0)" [class.field--valid]="fv('amt', (formAmount() ?? 0) > 0)">
+        <input class="field-input" type="number" min="0" step="0.01" placeholder=" " [value]="formAmount()" (input)="formAmount.set(+$any($event.target).value)" (blur)="markTouched('amt')" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
       <div class="field field--date">

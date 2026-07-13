@@ -151,14 +151,26 @@ export class SavingsComponent implements OnInit {
     this.showForm.set(true);
   }
 
-  closeForm(): void { this.showForm.set(false); this.editingId.set(null); }
+  readonly saveAttempted = signal(false);
+  private readonly _touched = new Set<string>();
+  readonly touchedTick = signal(0);
+  markTouched(f: string): void { this._touched.add(f); this.touchedTick.update(n => n + 1); }
+  fi(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && !v; }
+  fv(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && v; }
+
+  closeForm(): void {
+    this.showForm.set(false);
+    this.editingId.set(null);
+    this.saveAttempted.set(false);
+    this._touched.clear();
+  }
 
   saveMovement(): void {
     const description = this.formDescription();
     const amount = this.formAmount();
     const date = this.formDate();
     const typeId = this.formTypeId();
-    if (!description || !amount || !date || !typeId) return;
+    if (!description || !amount || !date || !typeId) { this.saveAttempted.set(true); return; }
 
     this.saving.set(true);
     const id = this.editingId();

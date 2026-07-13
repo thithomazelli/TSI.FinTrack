@@ -137,15 +137,24 @@ export class GoalsComponent implements OnInit {
     this.showForm.set(true);
   }
 
+  readonly saveAttempted = signal(false);
+  private readonly _touched = new Set<string>();
+  readonly touchedTick = signal(0);
+  markTouched(f: string): void { this._touched.add(f); this.touchedTick.update(n => n + 1); }
+  fi(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && !v; }
+  fv(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && v; }
+
   closeForm(): void {
     this.showForm.set(false);
     this.editingId.set(null);
+    this.saveAttempted.set(false);
+    this._touched.clear();
   }
 
   saveGoal(): void {
     const categoryId = this.formCategoryId();
     const monthlyLimit = this.formMonthlyLimit();
-    if (!categoryId || !monthlyLimit) return;
+    if (!categoryId || !monthlyLimit) { this.saveAttempted.set(true); return; }
 
     this.saving.set(true);
     this.goalService

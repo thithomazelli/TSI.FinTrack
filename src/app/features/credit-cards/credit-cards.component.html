@@ -204,17 +204,17 @@
   <div class="modal">
     <div class="modal-header">
       <h3 class="modal-title">{{ editingTxId() ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
-      <button class="modal-close" (click)="txModalOpen.set(false)">✕</button>
+      <button class="modal-close" (click)="closeTxModal()">✕</button>
     </div>
 
-    <div class="field">
-      <input class="field-input" placeholder=" " [ngModel]="formTxDescription()" (ngModelChange)="formTxDescription.set($event)" />
+    <div class="field" [class.field--invalid]="fi('desc', !!formTxDescription().trim())" [class.field--valid]="fv('desc', !!formTxDescription().trim())">
+      <input class="field-input" placeholder=" " [ngModel]="formTxDescription()" (ngModelChange)="formTxDescription.set($event)" (blur)="markTouched('desc')" />
       <label class="field-label">{{ 'common.description' | translate }}</label>
     </div>
 
     <div class="fields-row">
-      <div class="field">
-        <input class="field-input" type="number" min="0.01" step="0.01" placeholder=" " [ngModel]="formTxAmount()" (ngModelChange)="formTxAmount.set(+$event)" />
+      <div class="field" [class.field--invalid]="fi('amt', formTxAmount() > 0)" [class.field--valid]="fv('amt', formTxAmount() > 0)">
+        <input class="field-input" type="number" min="0.01" step="0.01" placeholder=" " [ngModel]="formTxAmount()" (ngModelChange)="formTxAmount.set(+$event)" (blur)="markTouched('amt')" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
       <div class="field field--sm" [class.has-value]="formTxStatus()">
@@ -248,7 +248,7 @@
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-ghost" (click)="txModalOpen.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-ghost" (click)="closeTxModal()">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary" (click)="saveTx()" [disabled]="saving() || !formTxDescription().trim() || formTxAmount() <= 0">
         {{ saving() ? ('common.saving' | translate) : ('common.save' | translate) }}
       </button>

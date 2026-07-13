@@ -73,8 +73,8 @@
     @if (editingId()) {
       <p class="system-hint">{{ 'settings.systemHint' | translate }}</p>
     }
-    <div class="field">
-      <input class="field-input" placeholder=" " [(ngModel)]="formName" />
+    <div class="field" [class.field--invalid]="fi('name', !!formName.trim())" [class.field--valid]="fv('name', !!formName.trim())">
+      <input class="field-input" placeholder=" " [(ngModel)]="formName" (blur)="markTouched('name')" />
       <label class="field-label">{{ 'common.name' | translate }}</label>
     </div>
     <div class="fields-row">

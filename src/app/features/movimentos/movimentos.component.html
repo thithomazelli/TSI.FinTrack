@@ -594,14 +594,14 @@
     }
 
     @if (!editingId() || editModalTab() === 'details') {
-    <div class="field">
-      <input class="field-input" placeholder=" " [(ngModel)]="formEntryDescription" />
+    <div class="field" [class.field--invalid]="fi('eDesc', !!formEntryDescription.trim())" [class.field--valid]="fv('eDesc', !!formEntryDescription.trim())">
+      <input class="field-input" placeholder=" " [(ngModel)]="formEntryDescription" (blur)="markTouched('eDesc')" />
       <label class="field-label">{{ 'common.description' | translate }}</label>
     </div>
 
     <div class="fields-row">
-      <div class="field">
-        <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formEntryAmount" />
+      <div class="field" [class.field--invalid]="fi('eAmt', formEntryAmount > 0)" [class.field--valid]="fv('eAmt', formEntryAmount > 0)">
+        <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formEntryAmount" (blur)="markTouched('eAmt')" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
       <div class="field">
@@ -741,12 +741,12 @@
 
     @if (!editingId() || editModalTab() === 'details') {
     <div class="fields-row">
-      <div class="field">
-        <input class="field-input" placeholder=" " [(ngModel)]="formTxDescription" />
+      <div class="field" [class.field--invalid]="fi('tDesc', !!formTxDescription.trim())" [class.field--valid]="fv('tDesc', !!formTxDescription.trim())">
+        <input class="field-input" placeholder=" " [(ngModel)]="formTxDescription" (blur)="markTouched('tDesc')" />
         <label class="field-label">{{ 'common.description' | translate }}</label>
       </div>
-      <div class="field field--sm">
-        <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formTxAmount" />
+      <div class="field field--sm" [class.field--invalid]="fi('tAmt', formTxAmount > 0)" [class.field--valid]="fv('tAmt', formTxAmount > 0)">
+        <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formTxAmount" (blur)="markTouched('tAmt')" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
     </div>

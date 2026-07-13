@@ -41,8 +41,8 @@
       <h3 class="modal-title">{{ editingId() ? 'Editar Pessoa' : 'Adicionar Pessoa' }}</h3>
       <button class="modal-close" (click)="closeForm()">✕</button>
     </div>
-    <div class="field">
-      <input class="field-input" placeholder=" " [(ngModel)]="formName" (keydown.enter)="save()" />
+    <div class="field" [class.field--invalid]="fi('name', !!formName.trim())" [class.field--valid]="fv('name', !!formName.trim())">
+      <input class="field-input" placeholder=" " [(ngModel)]="formName" (blur)="markTouched('name')" (keydown.enter)="save()" />
       <label class="field-label">Nome</label>
     </div>
     <div class="modal-actions">

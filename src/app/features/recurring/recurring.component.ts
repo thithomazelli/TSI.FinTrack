@@ -196,15 +196,24 @@ export class RecurringComponent implements OnInit {
     this.formMonths = [...t.months];
   }
 
+  readonly saveAttempted = signal(false);
+  private readonly _touched = new Set<string>();
+  readonly touchedTick = signal(0);
+  markTouched(f: string): void { this._touched.add(f); this.touchedTick.update(n => n + 1); }
+  fi(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && !v; }
+  fv(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && v; }
+
   closeEdit(): void {
     this.editingTemplate.set(null);
     this.resetForm();
+    this.saveAttempted.set(false);
+    this._touched.clear();
   }
 
   // ── Save ────────────────────────────────────────────────────────────────────
 
   save(): void {
-    if (!this.formDescription.trim() || this.formAmount === 0) return;
+    if (!this.formDescription.trim() || this.formAmount === 0) { this.saveAttempted.set(true); return; }
     this.saving.set(true);
 
     const editingId = this.editingTemplate()?.id ?? null;

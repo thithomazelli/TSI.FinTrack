@@ -83,11 +83,12 @@
   <div class="modal" (click)="$event.stopPropagation()">
     <h3 class="modal-title">{{ 'settings.inviteMember' | translate }}</h3>
 
-    <div class="form-field">
-      <label>{{ 'common.email' | translate }}</label>
-      <input class="input" type="email" autocomplete="email"
+    <div class="field" [class.field--invalid]="fi('email', !!formEmail().trim())" [class.field--valid]="fv('email', !!formEmail().trim())">
+      <input class="field-input" type="email" autocomplete="email" placeholder=" "
         [value]="formEmail()"
-        (input)="formEmail.set($any($event.target).value)" />
+        (input)="formEmail.set($any($event.target).value)"
+        (blur)="markTouched('email')" />
+      <label class="field-label">{{ 'common.email' | translate }}</label>
     </div>
 
     <div class="form-field">
