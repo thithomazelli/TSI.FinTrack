@@ -519,41 +519,42 @@ export class ReportsComponent implements OnInit {
       Promise.all(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).then((r) => r.flat()),
       Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).then((r) => r.flat()),
       Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).then((r) => r.flat()),
-    ]).then(([openingBalance, entries, realized, projected]) => {
-          const transactions = [...realized, ...projected];
-          const allSavings = this.savingsMovements();
-          let running = openingBalance;
-          let savingsRunning = 0;
-          const rows: YearMonthRow[] = ALL_MONTHS.map((m, i) => {
-            const income = entries.filter((e) => +e.date.substring(5, 7) === m).reduce((s, e) => s + e.amount, 0);
-            const expense = transactions.filter((t) => +t.date.substring(5, 7) === m).reduce((s, t) => s + t.amount, 0);
-            const monthlyBalance = income - expense;
-            running += monthlyBalance;
-            const monthPrefix = `${year}-${String(m).padStart(2, '0')}`;
-            const monthSavings = allSavings.filter((s) => s.date.startsWith(monthPrefix));
-            const savingsDeposit = monthSavings.filter((s) => s.typeCode !== 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
-            const savingsWithdrawal = monthSavings.filter((s) => s.typeCode === 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
-            savingsRunning += savingsDeposit - savingsWithdrawal;
-            return {
-              month: m,
-              label: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][i],
-              income,
-              expense,
-              monthlyBalance,
-              runningBalance: running,
-              pct: income > 0 ? (expense / income) * 100 : 0,
-              savingsDeposit,
-              savingsWithdrawal,
-              savingsBalance: savingsRunning,
-            };
-          });
-          this.yearSummaryRows.set(rows);
-          this.loadingHistory.set(false);
-        })
-        .catch((err: unknown) => {
-          this.logger.error('Failed to load year summary', err);
-          this.loadingHistory.set(false);
+    ])
+      .then(([openingBalance, entries, realized, projected]) => {
+        const transactions = [...realized, ...projected];
+        const allSavings = this.savingsMovements();
+        let running = openingBalance;
+        let savingsRunning = 0;
+        const rows: YearMonthRow[] = ALL_MONTHS.map((m, i) => {
+          const income = entries.filter((e) => +e.date.substring(5, 7) === m).reduce((s, e) => s + e.amount, 0);
+          const expense = transactions.filter((t) => +t.date.substring(5, 7) === m).reduce((s, t) => s + t.amount, 0);
+          const monthlyBalance = income - expense;
+          running += monthlyBalance;
+          const monthPrefix = `${year}-${String(m).padStart(2, '0')}`;
+          const monthSavings = allSavings.filter((s) => s.date.startsWith(monthPrefix));
+          const savingsDeposit = monthSavings.filter((s) => s.typeCode !== 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
+          const savingsWithdrawal = monthSavings.filter((s) => s.typeCode === 'WITHDRAWAL').reduce((a, s) => a + s.amount, 0);
+          savingsRunning += savingsDeposit - savingsWithdrawal;
+          return {
+            month: m,
+            label: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][i],
+            income,
+            expense,
+            monthlyBalance,
+            runningBalance: running,
+            pct: income > 0 ? (expense / income) * 100 : 0,
+            savingsDeposit,
+            savingsWithdrawal,
+            savingsBalance: savingsRunning,
+          };
         });
+        this.yearSummaryRows.set(rows);
+        this.loadingHistory.set(false);
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed to load year summary', err);
+        this.loadingHistory.set(false);
+      });
   }
 
   readonly categoryMonthMatrix = computed(() => {
@@ -650,23 +651,24 @@ export class ReportsComponent implements OnInit {
 
     Promise.all(
       years.map((y) => this.transactionService.getByYear(y, TransactionStatus.Realized))
-    ).then((results) => {
-          const rows = results.map((txList, i) => {
-            const catTotals: Record<string, number> = {};
-            for (const t of txList) {
-              if (!t.categoryId) continue;
-              catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
-            }
-            return { year: years[i], catTotals };
-          });
-          this.multiYearCatData.set(rows);
-          this.loadingMultiYear.set(false);
-          this.multiYearLoaded.set(true);
-        })
-        .catch((err: unknown) => {
-          this.logger.error('Failed to load multi-year data', err);
-          this.loadingMultiYear.set(false);
+    )
+      .then((results) => {
+        const rows = results.map((txList, i) => {
+          const catTotals: Record<string, number> = {};
+          for (const t of txList) {
+            if (!t.categoryId) continue;
+            catTotals[t.categoryId] = (catTotals[t.categoryId] ?? 0) + t.amount;
+          }
+          return { year: years[i], catTotals };
         });
+        this.multiYearCatData.set(rows);
+        this.loadingMultiYear.set(false);
+        this.multiYearLoaded.set(true);
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed to load multi-year data', err);
+        this.loadingMultiYear.set(false);
+      });
   }
 
   private loadAll(): void {
@@ -675,25 +677,42 @@ export class ReportsComponent implements OnInit {
     const prevYear = year - 1;
 
     Promise.all([
-      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).then((r) => r.flat()),
-      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).then((r) => r.flat()),
-      Promise.all(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).then((r) => r.flat()),
-      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year: prevYear, month: m, status: TransactionStatus.Realized }))).then((r) => r.flat()),
-      Promise.all(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year: prevYear, month: m }))).then((r) => r.flat()),
+      Promise.all(
+        ALL_MONTHS.map((m) =>
+          this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized })
+        )
+      ).then((r) => r.flat()),
+      Promise.all(
+        ALL_MONTHS.map((m) =>
+          this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected })
+        )
+      ).then((r) => r.flat()),
+      Promise.all(
+        ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))
+      ).then((r) => r.flat()),
+      Promise.all(
+        ALL_MONTHS.map((m) =>
+          this.transactionService.getByMonth({ year: prevYear, month: m, status: TransactionStatus.Realized })
+        )
+      ).then((r) => r.flat()),
+      Promise.all(
+        ALL_MONTHS.map((m) => this.entryService.getByMonth({ year: prevYear, month: m }))
+      ).then((r) => r.flat()),
       this.savingsService.getAll(),
       this.categoryService.getAll(),
-    ]).then(([realized, projected, entries, prevRealized, prevEntries, savings, categories]) => {
-          this.categories.set(categories);
-          this.savingsMovements.set(savings);
-          this.realizedTransactions.set([...realized, ...projected]);
-          this.yearEntries.set(entries);
-          this.buildCharts(year, realized, projected, entries, prevRealized, prevEntries, categories);
-          this.loading.set(false);
-        })
-        .catch((err: unknown) => {
-          this.logger.error('Failed to load reports data', err);
-          this.loading.set(false);
-        });
+    ])
+      .then(([realized, projected, entries, prevRealized, prevEntries, savings, categories]) => {
+        this.categories.set(categories);
+        this.savingsMovements.set(savings);
+        this.realizedTransactions.set([...realized, ...projected]);
+        this.yearEntries.set(entries);
+        this.buildCharts(year, realized, projected, entries, prevRealized, prevEntries, categories);
+        this.loading.set(false);
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed to load reports data', err);
+        this.loading.set(false);
+      });
   }
 
   private buildCharts(
@@ -770,26 +789,26 @@ export class ReportsComponent implements OnInit {
     this.transactionService
       .getByMonth({ year, month, status: TransactionStatus.Realized })
       .then((transactions) => {
-          const monthCatMap: Record<string, CategorySpend> = {};
-          for (const t of transactions) {
-            if (!t.categoryId) continue;
-            const cat = cats.find((c) => c.id === t.categoryId);
-            if (!monthCatMap[t.categoryId]) {
-              monthCatMap[t.categoryId] = {
-                categoryId: t.categoryId,
-                name: cat?.name ?? t.categoryId,
-                color: cat?.color ?? '#6366f1',
-                amount: 0,
-                monthlyAvg: 0,
-              };
-            }
-            monthCatMap[t.categoryId].amount += t.amount;
+        const monthCatMap: Record<string, CategorySpend> = {};
+        for (const t of transactions) {
+          if (!t.categoryId) continue;
+          const cat = cats.find((c) => c.id === t.categoryId);
+          if (!monthCatMap[t.categoryId]) {
+            monthCatMap[t.categoryId] = {
+              categoryId: t.categoryId,
+              name: cat?.name ?? t.categoryId,
+              color: cat?.color ?? '#6366f1',
+              amount: 0,
+              monthlyAvg: 0,
+            };
           }
-          this.monthCategorySpend.set(
-            Object.values(monthCatMap).sort((a, b) => b.amount - a.amount)
-          );
-        })
-        .catch((err: unknown) => this.logger.error('Failed to load month categories', err));
+          monthCatMap[t.categoryId].amount += t.amount;
+        }
+        this.monthCategorySpend.set(
+          Object.values(monthCatMap).sort((a, b) => b.amount - a.amount)
+        );
+      })
+      .catch((err: unknown) => this.logger.error('Failed to load month categories', err));
   }
 
   private buildPaymentTypes(realized: Transaction[]): void {
@@ -830,19 +849,20 @@ export class ReportsComponent implements OnInit {
       monthsBack.map(({ year, month }) =>
         this.transactionService.getByMonth({ year, month, status: TransactionStatus.Realized, categoryId: catId })
       )
-    ).then((results) => {
-          const points = results.map((txList, i) => {
-            const { year, month } = monthsBack[i];
-            const amount = txList.reduce((s, t) => s + t.amount, 0);
-            return { label: `${MONTHS_PT[month - 1]}/${String(year).slice(2)}`, amount };
-          });
-          this.catEvolPoints.set(points);
-          this.loadingCatEvol.set(false);
-        })
-        .catch((err: unknown) => {
-          this.logger.error('Failed to load category evolution', err);
-          this.loadingCatEvol.set(false);
+    )
+      .then((results) => {
+        const points = results.map((txList, i) => {
+          const { year, month } = monthsBack[i];
+          const amount = txList.reduce((s, t) => s + t.amount, 0);
+          return { label: `${MONTHS_PT[month - 1]}/${String(year).slice(2)}`, amount };
         });
+        this.catEvolPoints.set(points);
+        this.loadingCatEvol.set(false);
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed to load category evolution', err);
+        this.loadingCatEvol.set(false);
+      });
   }
 
   goToMovimentos(year: number, month: number): void {
