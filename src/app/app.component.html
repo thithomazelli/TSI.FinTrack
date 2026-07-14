@@ -1,4 +1,4 @@
-@if (session$ | async) {
+@if (session()) {
   <tsi-sidebar [open]="menuOpen()" (close)="menuOpen.set(false)" />
 
   @if (menuOpen()) {

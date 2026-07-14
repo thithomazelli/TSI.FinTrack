@@ -121,8 +121,8 @@ export class BillsComponent implements OnInit {
   } as ChartConfiguration<'doughnut'>['options']));
 
   ngOnInit(): void {
-    this.cardService.getAll().subscribe({ next: c => this.cards.set(c) });
-    this.categoryService.getAll().subscribe({ next: c => this.categories.set(c) });
+    this.cardService.getAll().then(c => this.cards.set(c));
+    this.categoryService.getAll().then(c => this.categories.set(c));
     this.load();
   }
 
@@ -138,10 +138,9 @@ export class BillsComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.txService.getByMonth({ year: this.year(), month: this.month() }).subscribe({
-      next: data => { this.transactions.set(data); this.loading.set(false); },
-      error: err => { this.logger.error('Failed to load bills', err); this.loading.set(false); },
-    });
+    this.txService.getByMonth({ year: this.year(), month: this.month() })
+      .then(data => { this.transactions.set(data); this.loading.set(false); })
+      .catch((err: unknown) => { this.logger.error('Failed to load bills', err); this.loading.set(false); });
   }
 
   onMonthChanged(e: { year: number; month: number }): void {
@@ -220,9 +219,8 @@ export class BillsComponent implements OnInit {
       list.map(t => t.id === dragged.id ? { ...t, position: newPosition } : t)
     );
 
-    this.txService.updatePosition(dragged.id, newPosition).subscribe({
-      error: err => this.logger.error('Failed to update bill position', err),
-    });
+    this.txService.updatePosition(dragged.id, newPosition)
+      .catch((err: unknown) => this.logger.error('Failed to update bill position', err));
 
     this.dragOverIndex = -1;
     this.dragFromIndex = -1;

@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { LoggingService } from './logging.service';
 import { AuthService } from '../auth/auth.service';
@@ -18,38 +17,34 @@ export class CreditCardBillService {
     return this.auth.currentUser!.id;
   }
 
-  getByMonth(year: number, month: number): Observable<CreditCardBill[]> {
+  async getByMonth(year: number, month: number): Promise<CreditCardBill[]> {
     this.logger.debug('Fetching bills', year, month);
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .select('*, credit_cards(name, last_four_digits)')
-        .eq('owner_id', this.ownerId)
-        .eq('year', year)
-        .eq('month', month)
-        .order('created_at')
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .select('*, credit_cards(name, last_four_digits)')
+      .eq('owner_id', this.ownerId)
+      .eq('year', year)
+      .eq('month', month)
+      .order('created_at')
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
   }
 
-  getAll(): Observable<CreditCardBill[]> {
+  async getAll(): Promise<CreditCardBill[]> {
     this.logger.debug('Fetching all bills');
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .select('*, credit_cards(name, last_four_digits)')
-        .eq('owner_id', this.ownerId)
-        .order('year', { ascending: true })
-        .order('month', { ascending: true })
-        .order('created_at')
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .select('*, credit_cards(name, last_four_digits)')
+      .eq('owner_id', this.ownerId)
+      .order('year', { ascending: true })
+      .order('month', { ascending: true })
+      .order('created_at')
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
   }
 
   private toModel(r: any): CreditCardBill & { credit_cards?: { name: string; last_four_digits: string } } {
@@ -69,82 +64,72 @@ export class CreditCardBillService {
     };
   }
 
-  getByCard(creditCardId: string): Observable<CreditCardBill[]> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .select('*')
-        .eq('owner_id', this.ownerId)
-        .eq('credit_card_id', creditCardId)
-        .order('year', { ascending: true })
-        .order('month', { ascending: true })
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []) as CreditCardBill[];
-        })
-    );
+  async getByCard(creditCardId: string): Promise<CreditCardBill[]> {
+    return this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('owner_id', this.ownerId)
+      .eq('credit_card_id', creditCardId)
+      .order('year', { ascending: true })
+      .order('month', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []) as CreditCardBill[];
+      });
   }
 
-  upsert(payload: Pick<CreditCardBill, 'creditCardId' | 'year' | 'month'>): Observable<CreditCardBill> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .upsert(
-          {
-            owner_id: this.ownerId,
-            credit_card_id: payload.creditCardId,
-            year: payload.year,
-            month: payload.month,
-          },
-          { onConflict: 'credit_card_id,year,month' }
-        )
-        .select()
-        .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return this.toModel(data);
-        })
-    );
+  async upsert(payload: Pick<CreditCardBill, 'creditCardId' | 'year' | 'month'>): Promise<CreditCardBill> {
+    return this.supabase.client
+      .from(TABLE)
+      .upsert(
+        {
+          owner_id: this.ownerId,
+          credit_card_id: payload.creditCardId,
+          year: payload.year,
+          month: payload.month,
+        },
+        { onConflict: 'credit_card_id,year,month' }
+      )
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return this.toModel(data);
+      });
   }
 
   /** Mark all non-paid bills up to (and including) the given year/month with the target status. */
-  settleHistoricalBills(upToYear: number, upToMonth: number, targetStatus: BillStatus): Observable<void> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({ status: targetStatus, updated_at: new Date().toISOString() })
-        .eq('owner_id', this.ownerId)
-        .neq('status', BillStatus.Paid)
-        .or(`year.lt.${upToYear},and(year.eq.${upToYear},month.lte.${upToMonth})`)
-        .then(({ error }) => { if (error) throw error; })
-    );
+  async settleHistoricalBills(upToYear: number, upToMonth: number, targetStatus: BillStatus): Promise<void> {
+    return this.supabase.client
+      .from(TABLE)
+      .update({ status: targetStatus, updated_at: new Date().toISOString() })
+      .eq('owner_id', this.ownerId)
+      .neq('status', BillStatus.Paid)
+      .or(`year.lt.${upToYear},and(year.eq.${upToYear},month.lte.${upToMonth})`)
+      .then(({ error }) => { if (error) throw error; });
   }
 
-  delete(id: string): Observable<void> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .delete()
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .then(({ error }) => { if (error) throw error; })
-    );
+  async delete(id: string): Promise<void> {
+    return this.supabase.client
+      .from(TABLE)
+      .delete()
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .then(({ error }) => { if (error) throw error; });
   }
 
-  updateStatus(id: string, status: BillStatus): Observable<CreditCardBill> {
+  async updateStatus(id: string, status: BillStatus): Promise<CreditCardBill> {
     this.logger.info('Updating bill status', id, status);
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .select()
-        .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return this.toModel(data);
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return this.toModel(data);
+      });
   }
 }

@@ -132,10 +132,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    this.categoryService.getAll().subscribe({
-      next: (cats) => this.categories.set(cats),
-      error: (err) => this.logger.error('Failed to load categories', err),
-    });
+    this.categoryService.getAll()
+      .then((cats) => this.categories.set(cats))
+      .catch((err: unknown) => this.logger.error('Failed to load categories', err));
     this.loadData();
   }
 
@@ -185,35 +184,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const y = this.year();
     const m = this.month();
 
-    this.transactionService.getByMonth({ year: y, month: m }).subscribe({
-      next: (t) => this.transactions.set(t),
-      error: (err) => this.logger.error('Failed to load transactions', err),
-    });
+    this.transactionService.getByMonth({ year: y, month: m })
+      .then((t) => this.transactions.set(t))
+      .catch((err: unknown) => this.logger.error('Failed to load transactions', err));
 
-    this.entryService.getByMonth({ year: y, month: m }).subscribe({
-      next: (e) => this.entries.set(e),
-      error: (err) => this.logger.error('Failed to load entries', err),
-    });
+    this.entryService.getByMonth({ year: y, month: m })
+      .then((e) => this.entries.set(e))
+      .catch((err: unknown) => this.logger.error('Failed to load entries', err));
 
-    this.goalService.getByMonth(y, m).subscribe({
-      next: (g) => {
+    this.goalService.getByMonth(y, m)
+      .then((g) => {
         this.goals.set(g);
         this.loading.set(false);
-      },
-      error: (err) => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to load goals', err);
         this.loading.set(false);
-      },
-    });
+      });
 
-    this.alertService.getAlerts(y, m).subscribe({
-      next: (alerts) => {
+    this.alertService.getAlerts(y, m)
+      .then((alerts) => {
         this.alerts.set(alerts);
         this.carouselIndex.set(0);
         if (this.carouselTimer) clearInterval(this.carouselTimer);
         if (alerts.length > 1) this.startCarouselTimer();
-      },
-      error: (err) => this.logger.error('Failed to load alerts', err),
-    });
+      })
+      .catch((err: unknown) => this.logger.error('Failed to load alerts', err));
   }
 }

@@ -55,24 +55,18 @@ export class ProfileSettingsComponent implements OnInit {
     this.email.set(user.email ?? '');
     this.loading.set(true);
 
-    this.profileService.getById(user.id).subscribe({
-      next: (profile) => {
-        this.fullName.set(profile.fullName ?? '');
-        this.avatarUrl.set(profile.avatarUrl ?? null);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.profileService.getById(user.id).then((profile) => {
+      this.fullName.set(profile.fullName ?? '');
+      this.avatarUrl.set(profile.avatarUrl ?? null);
+      this.loading.set(false);
+    }).catch(() => this.loading.set(false));
 
     this.telegramLoading.set(true);
-    this.telegramService.getSubscription(user.id).subscribe({
-      next: (sub) => {
-        this.telegramSub.set(sub);
-        if (sub) this.telegramNotifications.set(sub.notificationsEnabled);
-        this.telegramLoading.set(false);
-      },
-      error: () => this.telegramLoading.set(false),
-    });
+    this.telegramService.getSubscription(user.id).then((sub) => {
+      this.telegramSub.set(sub);
+      if (sub) this.telegramNotifications.set(sub.notificationsEnabled);
+      this.telegramLoading.set(false);
+    }).catch(() => this.telegramLoading.set(false));
   }
 
   onAvatarFileChange(event: Event): void {
@@ -82,22 +76,16 @@ export class ProfileSettingsComponent implements OnInit {
     const user = this.auth.currentUser;
     if (!user) return;
     this.avatarUploading.set(true);
-    this.profileService.uploadAvatar(user.id, file).subscribe({
-      next: (url) => {
-        this.avatarUrl.set(url);
-        this.profileService.upsert({ id: user.id, avatarUrl: url, email: this.email(), fullName: this.fullName() }).subscribe({
-          next: () => {
-            this.avatarUploading.set(false);
-            this.toast.success('Foto atualizada!');
-          },
-          error: () => { this.avatarUploading.set(false); this.toast.error('Erro ao salvar avatar.'); },
-        });
-      },
-      error: (err) => {
-        this.logger.error('Avatar upload failed', err);
+    this.profileService.uploadAvatar(user.id, file).then((url) => {
+      this.avatarUrl.set(url);
+      this.profileService.upsert({ id: user.id, avatarUrl: url, email: this.email(), fullName: this.fullName() }).then(() => {
         this.avatarUploading.set(false);
-        this.toast.error('Erro ao fazer upload da foto.');
-      },
+        this.toast.success('Foto atualizada!');
+      }).catch(() => { this.avatarUploading.set(false); this.toast.error('Erro ao salvar avatar.'); });
+    }).catch((err: unknown) => {
+      this.logger.error('Avatar upload failed', err);
+      this.avatarUploading.set(false);
+      this.toast.error('Erro ao fazer upload da foto.');
     });
   }
 
@@ -105,18 +93,15 @@ export class ProfileSettingsComponent implements OnInit {
     const user = this.auth.currentUser;
     if (!user) return;
     this.saving.set(true);
-    this.profileService.upsert({ id: user.id, fullName: this.fullName(), email: user.email ?? '' }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.saved.set(true);
-        setTimeout(() => this.saved.set(false), 3000);
-        this.toast.success('Perfil salvo com sucesso!');
-      },
-      error: (err) => {
-        this.logger.error('Failed to save profile', err);
-        this.saving.set(false);
-        this.toast.error('Erro ao salvar perfil.');
-      },
+    this.profileService.upsert({ id: user.id, fullName: this.fullName(), email: user.email ?? '' }).then(() => {
+      this.saving.set(false);
+      this.saved.set(true);
+      setTimeout(() => this.saved.set(false), 3000);
+      this.toast.success('Perfil salvo com sucesso!');
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to save profile', err);
+      this.saving.set(false);
+      this.toast.error('Erro ao salvar perfil.');
     });
   }
 
@@ -124,18 +109,15 @@ export class ProfileSettingsComponent implements OnInit {
     const user = this.auth.currentUser;
     if (!user) return;
     this.telegramLoading.set(true);
-    this.telegramService.generateLinkToken(user.id, this.botUsername).subscribe({
-      next: ({ url, token }) => {
-        this.telegramLinkUrl.set(url);
-        this.telegramToken.set(token);
-        this.telegramError.set(null);
-        this.telegramLoading.set(false);
-      },
-      error: (err) => {
-        this.logger.error('Failed to generate Telegram link', err);
-        this.telegramError.set(err?.message ?? 'Erro ao gerar token. Verifique o console.');
-        this.telegramLoading.set(false);
-      },
+    this.telegramService.generateLinkToken(user.id, this.botUsername).then(({ url, token }) => {
+      this.telegramLinkUrl.set(url);
+      this.telegramToken.set(token);
+      this.telegramError.set(null);
+      this.telegramLoading.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to generate Telegram link', err);
+      this.telegramError.set((err as { message?: string })?.message ?? 'Erro ao gerar token. Verifique o console.');
+      this.telegramLoading.set(false);
     });
   }
 
@@ -143,17 +125,14 @@ export class ProfileSettingsComponent implements OnInit {
     const user = this.auth.currentUser;
     if (!user) return;
     this.telegramLoading.set(true);
-    this.telegramService.disconnect(user.id).subscribe({
-      next: () => {
-        this.telegramSub.set(null);
-        this.telegramLinkUrl.set(null);
-        this.telegramToken.set(null);
-        this.telegramLoading.set(false);
-      },
-      error: (err) => {
-        this.logger.error('Failed to disconnect Telegram', err);
-        this.telegramLoading.set(false);
-      },
+    this.telegramService.disconnect(user.id).then(() => {
+      this.telegramSub.set(null);
+      this.telegramLinkUrl.set(null);
+      this.telegramToken.set(null);
+      this.telegramLoading.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to disconnect Telegram', err);
+      this.telegramLoading.set(false);
     });
   }
 
@@ -172,11 +151,9 @@ export class ProfileSettingsComponent implements OnInit {
     if (!user || !sub) return;
     const newValue = !this.telegramNotifications();
     this.telegramNotifications.set(newValue);
-    this.telegramService.setNotifications(user.id, newValue).subscribe({
-      error: (err) => {
-        this.logger.error('Failed to update notifications', err);
-        this.telegramNotifications.set(!newValue);
-      },
+    this.telegramService.setNotifications(user.id, newValue).catch((err: unknown) => {
+      this.logger.error('Failed to update notifications', err);
+      this.telegramNotifications.set(!newValue);
     });
   }
 }

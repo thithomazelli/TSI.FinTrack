@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { LoggingService } from './logging.service';
 import { AuthService } from '../auth/auth.service';
@@ -32,7 +31,7 @@ export class AccountService {
     return this.auth.currentUser!.id;
   }
 
-  getAll(includeArchived = false): Observable<Account[]> {
+  async getAll(includeArchived = false): Promise<Account[]> {
     this.logger.debug('Fetching accounts');
     let query = this.supabase.client
       .from(TABLE)
@@ -42,82 +41,72 @@ export class AccountService {
     if (!includeArchived) {
       query = query.eq('is_archived', false);
     }
-    return from(
-      query.then(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map(fromDb);
-      })
-    );
+    return query.then(({ data, error }) => {
+      if (error) throw error;
+      return (data ?? []).map(fromDb);
+    });
   }
 
-  create(payload: Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>): Observable<Account> {
+  async create(payload: Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>): Promise<Account> {
     this.logger.info('Creating account', payload.name);
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .insert({
-          name: payload.name,
-          type_id: payload.typeId,
-          balance: payload.balance,
-          opened_at: payload.openedAt || null,
-          owner_id: this.ownerId,
-        })
-        .select()
-        .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return fromDb(data);
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .insert({
+        name: payload.name,
+        type_id: payload.typeId,
+        balance: payload.balance,
+        opened_at: payload.openedAt || null,
+        owner_id: this.ownerId,
+      })
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return fromDb(data);
+      });
   }
 
-  update(id: string, payload: Partial<Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>>): Observable<Account> {
+  async update(id: string, payload: Partial<Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>>): Promise<Account> {
     this.logger.info('Updating account', id);
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({
-          ...(payload.name !== undefined && { name: payload.name }),
-          ...(payload.typeId !== undefined && { type_id: payload.typeId }),
-          ...(payload.balance !== undefined && { balance: payload.balance }),
-          ...(payload.openedAt !== undefined && { opened_at: payload.openedAt || null }),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .select()
-        .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return fromDb(data);
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .update({
+        ...(payload.name !== undefined && { name: payload.name }),
+        ...(payload.typeId !== undefined && { type_id: payload.typeId }),
+        ...(payload.balance !== undefined && { balance: payload.balance }),
+        ...(payload.openedAt !== undefined && { opened_at: payload.openedAt || null }),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return fromDb(data);
+      });
   }
 
-  archive(id: string): Observable<void> {
+  async archive(id: string): Promise<void> {
     this.logger.info('Archiving account', id);
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({ is_archived: true, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .then(({ error }) => {
-          if (error) throw error;
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .update({ is_archived: true, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .then(({ error }) => {
+        if (error) throw error;
+      });
   }
 
-  restore(id: string): Observable<void> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({ is_archived: false, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .then(({ error }) => {
-          if (error) throw error;
-        })
-    );
+  async restore(id: string): Promise<void> {
+    return this.supabase.client
+      .from(TABLE)
+      .update({ is_archived: false, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .then(({ error }) => {
+        if (error) throw error;
+      });
   }
 }

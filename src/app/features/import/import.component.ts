@@ -98,28 +98,24 @@ export class ImportComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.cardService.getAll(false).subscribe({
-      next: (cards) => {
+    this.cardService.getAll(false)
+      .then((cards) => {
         this.cards.set(cards);
         if (cards.length > 0) this.selectedCardId.set(cards[0].id);
-      },
-      error: (err) => this.logger.error('Failed to load cards', err),
-    });
-    this.accountService.getAll(false).subscribe({
-      next: (accounts) => {
+      })
+      .catch((err: unknown) => this.logger.error('Failed to load cards', err));
+    this.accountService.getAll(false)
+      .then((accounts) => {
         this.accounts.set(accounts);
         if (accounts.length > 0) this.selectedAccountId.set(accounts[0].id);
-      },
-      error: (err) => this.logger.error('Failed to load accounts', err),
-    });
-    this.categoryService.getAll().subscribe({
-      next: (cats) => this.categories.set(cats),
-      error: (err) => this.logger.error('Failed to load categories', err),
-    });
-    this.domainService.getByCode('entry_type').subscribe({
-      next: (types) => this.entryTypes.set(types),
-      error: (err) => this.logger.error('Failed to load entry types', err),
-    });
+      })
+      .catch((err: unknown) => this.logger.error('Failed to load accounts', err));
+    this.categoryService.getAll()
+      .then((cats) => this.categories.set(cats))
+      .catch((err: unknown) => this.logger.error('Failed to load categories', err));
+    this.domainService.getByCode('entry_type')
+      .then((types) => this.entryTypes.set(types))
+      .catch((err: unknown) => this.logger.error('Failed to load entry types', err));
   }
 
   setMode(mode: ImportMode): void {
@@ -245,7 +241,7 @@ export class ImportComponent implements OnInit {
     const month = this.selectedMonth();
     if (!cardId) throw new Error('No card selected');
 
-    const bill = await this.billService.upsert({ creditCardId: cardId, year, month }).toPromise();
+    const bill = await this.billService.upsert({ creditCardId: cardId, year, month });
     const selected = this.creditRows().filter((r) => r.selected);
     let count = 0;
 
@@ -265,7 +261,7 @@ export class ImportComponent implements OnInit {
         originalAmount: row.originalAmount,
         exchangeRate: row.exchangeRate,
         labels: [],
-      }).toPromise();
+      });
       count++;
     }
     this.importedCount.set(count);
@@ -287,7 +283,7 @@ export class ImportComponent implements OnInit {
           typeId: row.entryTypeId || null,
           accountId,
           labels: [],
-        }).toPromise();
+        });
       } else {
         // Expense → Transaction
         await this.transactionService.create({
@@ -304,7 +300,7 @@ export class ImportComponent implements OnInit {
           originalAmount: null,
           exchangeRate: null,
           labels: [],
-        }).toPromise();
+        });
       }
       count++;
     }

@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { LoggingService } from './logging.service';
 import { AuthService } from '../auth/auth.service';
@@ -47,7 +46,7 @@ export class TransactionService {
     return this.auth.currentUser!.id;
   }
 
-  getByMonth(filter: TransactionFilter): Observable<Transaction[]> {
+  async getByMonth(filter: TransactionFilter): Promise<Transaction[]> {
     this.logger.debug('Fetching transactions', filter);
     const startDate = `${filter.year}-${String(filter.month).padStart(2, '0')}-01`;
     const endDate = new Date(filter.year, filter.month, 0)
@@ -68,15 +67,13 @@ export class TransactionService {
     if (filter.creditCardId) query = query.eq('credit_card_id', filter.creditCardId);
     if (filter.status) query = query.eq('status', filter.status);
 
-    return from(
-      query.then(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map((r: any) => this.toModel(r));
-      })
-    );
+    return query.then(({ data, error }) => {
+      if (error) throw error;
+      return (data ?? []).map((r: any) => this.toModel(r));
+    });
   }
 
-  getByYear(year: number, status?: string): Observable<Transaction[]> {
+  async getByYear(year: number, status?: string): Promise<Transaction[]> {
     let query = this.supabase.client
       .from(TABLE)
       .select('id, date, amount, category_id, status')
@@ -84,15 +81,13 @@ export class TransactionService {
       .gte('date', `${year}-01-01`)
       .lte('date', `${year}-12-31`);
     if (status) query = query.eq('status', status);
-    return from(
-      query.then(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map((r: any) => this.toModel(r));
-      })
-    );
+    return query.then(({ data, error }) => {
+      if (error) throw error;
+      return (data ?? []).map((r: any) => this.toModel(r));
+    });
   }
 
-  create(payload: CreateTransactionPayload): Observable<Transaction[]> {
+  async create(payload: CreateTransactionPayload): Promise<Transaction[]> {
     this.logger.info('Creating transaction', payload.description);
     const ownerId = this.ownerId;
 
@@ -100,22 +95,20 @@ export class TransactionService {
       return this.createInstallments(payload, ownerId);
     }
 
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .insert(this.toRow(payload, ownerId))
-        .select()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .insert(this.toRow(payload, ownerId))
+      .select()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
   }
 
-  private createInstallments(
+  private async createInstallments(
     payload: CreateTransactionPayload,
     ownerId: string
-  ): Observable<Transaction[]> {
+  ): Promise<Transaction[]> {
     const groupId = crypto.randomUUID();
     const total = payload.totalInstallments!;
     const baseDate = new Date(payload.date + 'T00:00:00');
@@ -145,19 +138,17 @@ export class TransactionService {
       };
     });
 
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .insert(rows)
-        .select()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .insert(rows)
+      .select()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
   }
 
-  update(id: string, payload: Partial<CreateTransactionPayload>): Observable<Transaction> {
+  async update(id: string, payload: Partial<CreateTransactionPayload>): Promise<Transaction> {
     this.logger.info('Updating transaction', id);
     const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (payload.description !== undefined) row['description'] = payload.description;
@@ -178,22 +169,20 @@ export class TransactionService {
       row['installment_group_id'] = null;
     }
 
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update(row)
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .select()
-        .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return this.toModel(data);
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .update(row)
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return this.toModel(data);
+      });
   }
 
-  getAllInstallments(): Observable<Transaction[]> {
+  async getAllInstallments(): Promise<Transaction[]> {
     const PAGE = 1000;
     const fetchPage = (offset: number): Promise<Transaction[]> =>
       Promise.resolve(
@@ -209,89 +198,75 @@ export class TransactionService {
         return (data ?? []).map((r: any) => this.toModel(r));
       });
 
-    return from(
-      (async () => {
-        const all: Transaction[] = [];
-        let offset = 0;
-        while (true) {
-          const page = await fetchPage(offset);
-          all.push(...page);
-          if (page.length < PAGE) break;
-          offset += PAGE;
-        }
-        return all;
-      })()
-    );
+    const all: Transaction[] = [];
+    let offset = 0;
+    while (true) {
+      const page = await fetchPage(offset);
+      all.push(...page);
+      if (page.length < PAGE) break;
+      offset += PAGE;
+    }
+    return all;
   }
 
-  getAllCreditCard(): Observable<Transaction[]> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .select('*')
-        .eq('owner_id', this.ownerId)
-        .not('credit_card_id', 'is', null)
-        .order('date', { ascending: true })
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        })
-    );
+  async getAllCreditCard(): Promise<Transaction[]> {
+    return this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('owner_id', this.ownerId)
+      .not('credit_card_id', 'is', null)
+      .order('date', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
   }
 
-  bulkUpdateStatusByCardMonth(creditCardId: string, year: number, month: number, status: TransactionStatus): Observable<void> {
+  async bulkUpdateStatusByCardMonth(creditCardId: string, year: number, month: number, status: TransactionStatus): Promise<void> {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
     const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('owner_id', this.ownerId)
-        .eq('credit_card_id', creditCardId)
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .then(({ error }) => { if (error) throw error; })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('owner_id', this.ownerId)
+      .eq('credit_card_id', creditCardId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .then(({ error }) => { if (error) throw error; });
   }
 
-  delete(id: string): Observable<void> {
+  async delete(id: string): Promise<void> {
     this.logger.info('Deleting transaction', id);
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .delete()
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .then(({ error }) => {
-          if (error) throw error;
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .delete()
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .then(({ error }) => {
+        if (error) throw error;
+      });
   }
 
-  getByInstallmentGroup(groupId: string): Observable<Transaction[]> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .select('*')
-        .eq('owner_id', this.ownerId)
-        .eq('installment_group_id', groupId)
-        .order('date', { ascending: true })
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        })
-    );
+  async getByInstallmentGroup(groupId: string): Promise<Transaction[]> {
+    return this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('owner_id', this.ownerId)
+      .eq('installment_group_id', groupId)
+      .order('date', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
   }
 
-  updatePosition(id: string, position: number): Observable<void> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({ position, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .then(({ error }) => { if (error) throw error; })
-    );
+  async updatePosition(id: string, position: number): Promise<void> {
+    return this.supabase.client
+      .from(TABLE)
+      .update({ position, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .then(({ error }) => { if (error) throw error; });
   }
 
   private toModel(r: any): Transaction {

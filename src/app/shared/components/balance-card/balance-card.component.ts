@@ -1,10 +1,9 @@
 import {
   ChangeDetectionStrategy, ChangeDetectorRef, Component, Input,
-  OnChanges, OnDestroy, SimpleChanges, effect, inject, untracked,
+  OnChanges, SimpleChanges, effect, inject, untracked,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
 import { BalanceService } from '../../../core/services/balance.service';
 
 @Component({
@@ -14,10 +13,9 @@ import { BalanceService } from '../../../core/services/balance.service';
     styleUrls: ['./balance-card.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BalanceCardComponent implements OnChanges, OnDestroy {
+export class BalanceCardComponent implements OnChanges {
   private readonly balanceService = inject(BalanceService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private subs: Subscription[] = [];
 
   @Input() year: number  = new Date().getFullYear();
   @Input() month: number = new Date().getMonth() + 1;
@@ -44,39 +42,21 @@ export class BalanceCardComponent implements OnChanges, OnDestroy {
     if (changes['year'] || changes['month']) { this.fetch(); }
   }
 
-  ngOnDestroy(): void { this.subs.forEach(s => s.unsubscribe()); }
-
-  private fetch(): void {
-    if (this.preloaded !== null) return; // pai controla os valores
-    this.subs.forEach(s => s.unsubscribe());
-    this.subs = [];
-
-    const y = this.year;
-    const m = this.month;
+  private async fetch(): Promise<void> {
+    if (this.preloaded !== null) return;
+    const y = this.year; const m = this.month;
     const now = new Date();
     const isCurrent = y === now.getFullYear() && m === now.getMonth() + 1;
     const end = new Date(y, m, 0).toISOString().split('T')[0];
-
     if (isCurrent) {
-      // Regra B: mês atual — Atual = só REALIZED; Projetado = todos os status até fim do mês
-      this.subs.push(
-        this.balanceService.getAvailableBalance().subscribe({
-          next: v => { this.available = v; this.cdr.markForCheck(); },
-          error: () => {},
-        }),
-        this.balanceService.getBalanceUpTo(end).subscribe({
-          next: v => { this.projected = v; this.cdr.markForCheck(); },
-          error: () => {},
-        }),
-      );
+      const [available, projected] = await Promise.all([
+        this.balanceService.getAvailableBalance(),
+        this.balanceService.getBalanceUpTo(end),
+      ]);
+      this.available = available; this.projected = projected; this.cdr.markForCheck();
     } else {
-      // Regra A (mês passado) ou C (mês futuro): ambos = cumulativo até o fim do mês selecionado
-      this.subs.push(
-        this.balanceService.getBalanceUpTo(end).subscribe({
-          next: v => { this.available = v; this.projected = v; this.cdr.markForCheck(); },
-          error: () => {},
-        }),
-      );
+      const v = await this.balanceService.getBalanceUpTo(end);
+      this.available = v; this.projected = v; this.cdr.markForCheck();
     }
   }
 }

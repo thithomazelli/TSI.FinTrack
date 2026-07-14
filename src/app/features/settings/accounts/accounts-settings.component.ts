@@ -43,24 +43,18 @@ export class AccountsSettingsComponent implements OnInit {
   formOpenedAt = '';
 
   ngOnInit(): void {
-    this.domainListService.getByCode('account_type').subscribe({
-      next: types => this.accountTypes.set(types),
-      error: err => this.logger.error('Failed to load account types', err),
-    });
+    this.domainListService.getByCode('account_type').then(types => this.accountTypes.set(types)).catch((err: unknown) => this.logger.error('Failed to load account types', err));
     this.load();
   }
 
   private load(): void {
     this.loading.set(true);
-    this.accountService.getAll(this.showArchived()).subscribe({
-      next: data => {
-        this.accounts.set(data);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to load accounts', err);
-        this.loading.set(false);
-      },
+    this.accountService.getAll(this.showArchived()).then(data => {
+      this.accounts.set(data);
+      this.loading.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to load accounts', err);
+      this.loading.set(false);
     });
   }
 
@@ -111,20 +105,17 @@ export class AccountsSettingsComponent implements OnInit {
       ? this.accountService.update(id, payload)
       : this.accountService.create(payload);
 
-    op$.subscribe({
-      next: saved => {
-        this.accounts.update(list =>
-          id ? list.map(a => (a.id === id ? saved : a)) : [...list, saved]
-        );
-        this.toast.success(id ? 'Conta atualizada com sucesso!' : 'Conta criada com sucesso!');
-        this.saving.set(false);
-        this.closeForm();
-      },
-      error: err => {
-        this.logger.error('Failed to save account', err);
-        this.toast.error('Erro ao salvar conta.');
-        this.saving.set(false);
-      },
+    op$.then(saved => {
+      this.accounts.update(list =>
+        id ? list.map(a => (a.id === id ? saved : a)) : [...list, saved]
+      );
+      this.toast.success(id ? 'Conta atualizada com sucesso!' : 'Conta criada com sucesso!');
+      this.saving.set(false);
+      this.closeForm();
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to save account', err);
+      this.toast.error('Erro ao salvar conta.');
+      this.saving.set(false);
     });
   }
 
@@ -140,31 +131,25 @@ export class AccountsSettingsComponent implements OnInit {
     const account = this.deletingItem();
     if (!account) return;
     this.saving.set(true);
-    this.accountService.archive(account.id).subscribe({
-      next: () => {
-        this.accounts.update(list => list.filter(a => a.id !== account.id));
-        this.toast.success('Conta arquivada.');
-        this.deletingItem.set(null);
-        this.saving.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to archive account', err);
-        this.toast.error('Erro ao arquivar conta.');
-        this.saving.set(false);
-      },
+    this.accountService.archive(account.id).then(() => {
+      this.accounts.update(list => list.filter(a => a.id !== account.id));
+      this.toast.success('Conta arquivada.');
+      this.deletingItem.set(null);
+      this.saving.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to archive account', err);
+      this.toast.error('Erro ao arquivar conta.');
+      this.saving.set(false);
     });
   }
 
   restore(account: Account): void {
-    this.accountService.restore(account.id).subscribe({
-      next: () => {
-        this.accounts.update(list => list.filter(a => a.id !== account.id));
-        this.toast.success('Conta restaurada com sucesso!');
-      },
-      error: err => {
-        this.logger.error('Failed to restore account', err);
-        this.toast.error('Erro ao restaurar conta.');
-      },
+    this.accountService.restore(account.id).then(() => {
+      this.accounts.update(list => list.filter(a => a.id !== account.id));
+      this.toast.success('Conta restaurada com sucesso!');
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to restore account', err);
+      this.toast.error('Erro ao restaurar conta.');
     });
   }
 

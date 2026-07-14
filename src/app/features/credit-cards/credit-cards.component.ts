@@ -8,7 +8,6 @@ import {
 import { DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { forkJoin } from 'rxjs';
 import { CreditCardBillService } from '../../core/services/credit-card-bill.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { TransactionService, CreateTransactionPayload } from '../../core/services/transaction.service';
@@ -109,13 +108,9 @@ export class CreditCardsComponent implements OnInit {
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    forkJoin({
-      cards: this.cardService.getAll(false),
-      cats:  this.categoryService.getAll(),
-    }).subscribe({
-      next: ({ cards, cats }) => { this.cards.set(cards); this.categories.set(cats); },
-      error: err => this.logger.error('Failed to load cards/cats', err),
-    });
+    Promise.all([this.cardService.getAll(false), this.categoryService.getAll()])
+      .then(([cards, cats]) => { this.cards.set(cards); this.categories.set(cats); })
+      .catch((err: unknown) => this.logger.error('Failed to load cards/cats', err));
     this.loadAll();
   }
 
@@ -129,11 +124,8 @@ export class CreditCardsComponent implements OnInit {
   private loadAll(): void {
     this.loading.set(true);
     const y = this.year(), m = this.month();
-    forkJoin({
-      bills: this.billService.getByMonth(y, m),
-      txs:   this.txService.getByMonth({ year: y, month: m }),
-    }).subscribe({
-      next: ({ bills, txs }) => {
+    Promise.all([this.billService.getByMonth(y, m), this.txService.getByMonth({ year: y, month: m })])
+      .then(([bills, txs]) => {
         const cardTxs = txs.filter(t => !!t.creditCardId);
         this.bills.set(bills as BillWithCard[]);
         this.transactions.set(cardTxs);
@@ -144,9 +136,8 @@ export class CreditCardsComponent implements OnInit {
         );
         this.expandedBillIds.set(withTx);
         this.loading.set(false);
-      },
-      error: err => { this.logger.error('Failed to load', err); this.loading.set(false); },
-    });
+      })
+      .catch((err: unknown) => { this.logger.error('Failed to load', err); this.loading.set(false); });
   }
 
   isExpanded(billId: string): boolean {
@@ -164,8 +155,8 @@ export class CreditCardsComponent implements OnInit {
   // ── Bill status ──────────────────────────────────────────────────────────────
   updateStatus(bill: BillWithCard, status: BillStatus): void {
     this.updatingId.set(bill.id);
-    this.billService.updateStatus(bill.id, status).subscribe({
-      next: updated => {
+    this.billService.updateStatus(bill.id, status)
+      .then(updated => {
         this.bills.update(list => list.map(b => b.id === updated.id ? { ...b, ...updated } : b));
         const txStatus = status === BillStatus.Paid  ? TransactionStatus.Realized
                        : status === BillStatus.Open  ? TransactionStatus.Projected
@@ -173,25 +164,22 @@ export class CreditCardsComponent implements OnInit {
         if (txStatus && bill.creditCardId) {
           this.txService.bulkUpdateStatusByCardMonth(
             bill.creditCardId, this.year(), this.month(), txStatus
-          ).subscribe({
-            next: () => {
+          ).then(() => {
               this.transactions.update(list =>
                 list.map(t => t.creditCardId === bill.creditCardId ? { ...t, status: txStatus } : t)
               );
               this.balanceService.invalidate();
-            },
-            error: err => this.logger.error('Bulk status update failed', err),
-          });
+            })
+            .catch((err: unknown) => this.logger.error('Bulk status update failed', err));
         }
         this.updatingId.set(null);
         this.toast.success('Status da fatura atualizado.');
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to update bill status', err);
         this.updatingId.set(null);
         this.toast.error('Erro ao atualizar status da fatura.');
-      },
-    });
+      });
   }
 
   nextStatus(current: BillStatus): BillStatus {
@@ -221,19 +209,18 @@ export class CreditCardsComponent implements OnInit {
     const cardId = this.formBillCardId();
     if (!cardId) return;
     this.saving.set(true);
-    this.billService.upsert({ creditCardId: cardId, year: this.year(), month: this.month() }).subscribe({
-      next: () => {
+    this.billService.upsert({ creditCardId: cardId, year: this.year(), month: this.month() })
+      .then(() => {
         this.billModalOpen.set(false);
         this.saving.set(false);
         this.toast.success('Fatura criada.');
         this.loadAll();
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to save bill', err);
         this.saving.set(false);
         this.toast.error('Erro ao criar fatura.');
-      },
-    });
+      });
   }
 
   openDeleteBill(bill: BillWithCard): void {
@@ -244,19 +231,18 @@ export class CreditCardsComponent implements OnInit {
     const bill = this.deletingBill();
     if (!bill) return;
     this.saving.set(true);
-    this.billService.delete(bill.id).subscribe({
-      next: () => {
+    this.billService.delete(bill.id)
+      .then(() => {
         this.bills.update(list => list.filter(b => b.id !== bill.id));
         this.deletingBill.set(null);
         this.saving.set(false);
         this.toast.success('Fatura removida.');
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to delete bill', err);
         this.saving.set(false);
         this.toast.error('Erro ao remover fatura.');
-      },
-    });
+      });
   }
 
   // ── Transaction add / edit / delete ─────────────────────────────────────────
@@ -318,37 +304,34 @@ export class CreditCardsComponent implements OnInit {
     const fail = (err: unknown) => { this.logger.error('Failed to save transaction', err); this.saving.set(false); this.toast.error('Erro ao salvar lançamento.'); };
 
     if (id) {
-      this.txService.update(id, payload).subscribe({
-        next: (updated: Transaction) => {
+      this.txService.update(id, payload)
+        .then((updated: Transaction) => {
           this.transactions.update(list => list.map(t => t.id === id ? updated : t));
           this.toast.success('Lançamento atualizado.');
           done();
-        },
-        error: fail,
-      });
+        })
+        .catch(fail);
     } else {
-      this.txService.create(payload as CreateTransactionPayload).subscribe({
-        next: (created: Transaction[]) => {
+      this.txService.create(payload as CreateTransactionPayload)
+        .then((created: Transaction[]) => {
           this.transactions.update(list => [...list, ...created]);
           this.toast.success('Lançamento adicionado.');
           done();
-        },
-        error: fail,
-      });
+        })
+        .catch(fail);
     }
   }
 
   toggleTxStatus(tx: Transaction, newStatus: TransactionStatus): void {
-    this.txService.update(tx.id, { status: newStatus }).subscribe({
-      next: (updated: Transaction) => {
+    this.txService.update(tx.id, { status: newStatus })
+      .then((updated: Transaction) => {
         this.transactions.update(list => list.map(t => t.id === updated.id ? updated : t));
         this.balanceService.invalidate();
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to update tx status', err);
         this.toast.error('Erro ao atualizar status.');
-      },
-    });
+      });
   }
 
   openDeleteTx(tx: Transaction): void {
@@ -359,20 +342,19 @@ export class CreditCardsComponent implements OnInit {
     const tx = this.deletingTx();
     if (!tx) return;
     this.saving.set(true);
-    this.txService.delete(tx.id).subscribe({
-      next: () => {
+    this.txService.delete(tx.id)
+      .then(() => {
         this.transactions.update(list => list.filter(t => t.id !== tx.id));
         this.deletingTx.set(null);
         this.saving.set(false);
         this.balanceService.invalidate();
         this.toast.success('Lançamento removido.');
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to delete transaction', err);
         this.saving.set(false);
         this.toast.error('Erro ao remover lançamento.');
-      },
-    });
+      });
   }
 
   // ── Drag & drop ──────────────────────────────────────────────────────────────
@@ -405,9 +387,8 @@ export class CreditCardsComponent implements OnInit {
     const [moved] = reordered.splice(fromIdx, 1);
     reordered.splice(toIdx, 0, moved);
     reordered.forEach((tx, i) => {
-      this.txService.updatePosition(tx.id, i).subscribe({
-        error: err => this.logger.error('Failed to update position', err),
-      });
+      this.txService.updatePosition(tx.id, i)
+        .catch((err: unknown) => this.logger.error('Failed to update position', err));
     });
     this.transactions.update(list => {
       const others = list.filter(t => t.creditCardId !== bill.creditCardId);

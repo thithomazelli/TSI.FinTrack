@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { LoggingService } from './logging.service';
 import { AuthService } from '../auth/auth.service';
@@ -38,7 +37,7 @@ export class EntryService {
     return this.auth.currentUser!.id;
   }
 
-  getByMonth(filter: EntryFilter): Observable<Entry[]> {
+  async getByMonth(filter: EntryFilter): Promise<Entry[]> {
     this.logger.debug('Fetching entries', filter);
     const startDate = `${filter.year}-${String(filter.month).padStart(2, '0')}-01`;
     const endDate = new Date(filter.year, filter.month, 0)
@@ -57,43 +56,39 @@ export class EntryService {
     if (filter.accountId) query = query.eq('account_id', filter.accountId);
     if (filter.typeId) query = query.eq('type_id', filter.typeId);
 
-    return from(
-      query.then(({ data, error }) => {
-        if (error) throw error;
-        return (data ?? []).map((r: any) => this.toModel(r));
-      })
-    );
+    return query.then(({ data, error }) => {
+      if (error) throw error;
+      return (data ?? []).map((r: any) => this.toModel(r));
+    });
   }
 
-  create(payload: CreateEntryPayload): Observable<Entry> {
+  async create(payload: CreateEntryPayload): Promise<Entry> {
     this.logger.info('Creating entry', payload.description);
     if (payload.totalInstallments && payload.totalInstallments > 1) {
       return this.createInstallments(payload);
     }
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .insert({
-          owner_id: this.ownerId,
-          description: payload.description,
-          amount: payload.amount,
-          date: payload.date,
-          type_id: payload.typeId,
-          account_id: payload.accountId,
-          labels: payload.labels,
-          status: payload.status ?? 'REALIZED',
-          position: payload.position ?? null,
-        })
-        .select()
-        .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return this.toModel(data);
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .insert({
+        owner_id: this.ownerId,
+        description: payload.description,
+        amount: payload.amount,
+        date: payload.date,
+        type_id: payload.typeId,
+        account_id: payload.accountId,
+        labels: payload.labels,
+        status: payload.status ?? 'REALIZED',
+        position: payload.position ?? null,
+      })
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return this.toModel(data);
+      });
   }
 
-  private createInstallments(payload: CreateEntryPayload): Observable<Entry> {
+  private async createInstallments(payload: CreateEntryPayload): Promise<Entry> {
     const total = payload.totalInstallments!;
     const installmentAmount = payload.installmentAmountIsFixed
       ? payload.amount
@@ -120,19 +115,17 @@ export class EntryService {
       };
     });
 
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .insert(rows)
-        .select()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return this.toModel((data as any[])[0]);
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .insert(rows)
+      .select()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return this.toModel((data as any[])[0]);
+      });
   }
 
-  update(id: string, payload: Partial<CreateEntryPayload>): Observable<Entry> {
+  async update(id: string, payload: Partial<CreateEntryPayload>): Promise<Entry> {
     this.logger.info('Updating entry', id);
     const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (payload.description !== undefined) row['description'] = payload.description;
@@ -143,30 +136,26 @@ export class EntryService {
     if (payload.labels !== undefined) row['labels'] = payload.labels;
     if (payload.status !== undefined) row['status'] = payload.status;
 
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update(row)
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .select()
-        .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return this.toModel(data);
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .update(row)
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return this.toModel(data);
+      });
   }
 
-  updatePosition(id: string, position: number): Observable<void> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .update({ position, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .then(({ error }) => { if (error) throw error; })
-    );
+  async updatePosition(id: string, position: number): Promise<void> {
+    return this.supabase.client
+      .from(TABLE)
+      .update({ position, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .then(({ error }) => { if (error) throw error; });
   }
 
   private toModel(r: any): Entry {
@@ -183,32 +172,28 @@ export class EntryService {
     };
   }
 
-  getByDescriptionPrefix(baseDescription: string): Observable<Entry[]> {
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .select('*')
-        .eq('owner_id', this.ownerId)
-        .like('description', `${baseDescription} - %/%`)
-        .order('date', { ascending: true })
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return (data ?? []).map((r: any) => this.toModel(r));
-        })
-    );
+  async getByDescriptionPrefix(baseDescription: string): Promise<Entry[]> {
+    return this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('owner_id', this.ownerId)
+      .like('description', `${baseDescription} - %/%`)
+      .order('date', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
   }
 
-  delete(id: string): Observable<void> {
+  async delete(id: string): Promise<void> {
     this.logger.info('Deleting entry', id);
-    return from(
-      this.supabase.client
-        .from(TABLE)
-        .delete()
-        .eq('id', id)
-        .eq('owner_id', this.ownerId)
-        .then(({ error }) => {
-          if (error) throw error;
-        })
-    );
+    return this.supabase.client
+      .from(TABLE)
+      .delete()
+      .eq('id', id)
+      .eq('owner_id', this.ownerId)
+      .then(({ error }) => {
+        if (error) throw error;
+      });
   }
 }

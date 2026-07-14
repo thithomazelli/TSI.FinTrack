@@ -1,11 +1,9 @@
 import {
   ChangeDetectionStrategy, Component, OnInit, OnDestroy,
-  inject, output, signal, computed, HostListener, ElementRef, untracked,
+  inject, output, signal, computed, HostListener, ElementRef, untracked, effect,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
-import { filter, switchMap, Subscription } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -40,7 +38,7 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  private readonly routeSub = new Subscription();
+  private routeSub: { unsubscribe(): void } | null = null;
   private readonly el = inject(ElementRef);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -53,7 +51,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   readonly themeService = inject(ThemeService);
   readonly lang = inject(LanguageService);
 
-  readonly session$ = this.authService.session$;
+  readonly session = this.authService.session;
   readonly menuToggle = output<void>();
 
   readonly alerts = signal<Alert[]>([]);
@@ -83,14 +81,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private readonly now = new Date();
   private readonly year = this.now.getFullYear();
   private readonly month = this.now.getMonth() + 1;
-
-  private readonly balanceSubs: Subscription[] = [];
   private readonly end = new Date(this.year, this.month, 0).toISOString().split('T')[0];
-  private readonly version$ = toObservable(this.balanceService.version);
+
+  constructor() {
+    effect(() => {
+      this.balanceService.version();
+      untracked(() => this.fetchBalance());
+    });
+  }
 
   private resolveTitle(url: string): string {
     const path = url.split('?')[0].split('#')[0];
-    // match longest prefix
     const key = Object.keys(ROUTE_TITLE_KEYS)
       .filter(k => path === k || path.startsWith(k + '/'))
       .sort((a, b) => b.length - a.length)[0];
@@ -106,45 +107,37 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
-    this.balanceSubs.push(
-      // Regra C — chip do header: saldo realizado (v_available_balance)
-      this.version$.pipe(
-        switchMap(() => this.balanceService.getAvailableBalance())
-      ).subscribe({ next: v => untracked(() => this.availableBalance.set(v)), error: () => {} }),
-      // Regra C — popover: todos os status até fim do mês atual
-      this.version$.pipe(
-        switchMap(() => this.balanceService.getBalanceUpTo(this.end))
-      ).subscribe({ next: v => untracked(() => this.projectedBalance.set(v)), error: () => {} }),
-      this.version$.pipe(
-        switchMap(() => this.balanceService.getSummary(this.year, this.month))
-      ).subscribe({ next: s => untracked(() => this.balanceSummary.set(s)), error: () => {} }),
-    );
+  private async fetchBalance(): Promise<void> {
+    const [available, projected, summary] = await Promise.all([
+      this.balanceService.getAvailableBalance(),
+      this.balanceService.getBalanceUpTo(this.end),
+      this.balanceService.getSummary(this.year, this.month),
+    ]);
+    this.availableBalance.set(available);
+    this.projectedBalance.set(projected);
+    this.balanceSummary.set(summary);
+  }
 
-    this.routeSub.add(
-      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(e => {
-        this.pageTitleKey.set(this.resolveTitle((e as NavigationEnd).urlAfterRedirects));
-      })
-    );
-    this.alertService.getAlerts(this.year, this.month).subscribe({
-      next: alerts => this.alerts.set(alerts),
-      error: () => {},
+  ngOnInit(): void {
+    this.routeSub = this.router.events.subscribe(e => {
+      if (e instanceof NavigationEnd) {
+        this.pageTitleKey.set(this.resolveTitle(e.urlAfterRedirects));
+      }
     });
+
+    this.alertService.getAlerts(this.year, this.month).then(alerts => this.alerts.set(alerts));
+
     const user = this.authService.currentUser;
     if (user) {
       this.userEmail.set(user.email ?? '');
-      this.profileService.getById(user.id).subscribe({
-        next: p => {
-          this.fullName.set(p.fullName ?? '');
-          this.avatarUrl.set(p.avatarUrl ?? null);
-        },
-        error: () => {},
+      this.profileService.getById(user.id).then(p => {
+        this.fullName.set(p?.fullName ?? '');
+        this.avatarUrl.set(p?.avatarUrl ?? null);
       });
     }
   }
 
-  ngOnDestroy(): void { this.routeSub.unsubscribe(); this.balanceSubs.forEach(s => s.unsubscribe()); }
-
+  ngOnDestroy(): void { this.routeSub?.unsubscribe(); }
 
   toggleBell(): void { this.bellOpen.update(v => !v); this.userMenuOpen.set(false); this.balanceOpen.set(false); }
   closeBell(): void { this.bellOpen.set(false); }
@@ -154,7 +147,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   signOut(): void {
     this.closeUserMenu();
-    this.authService.signOut().subscribe();
+    this.authService.signOut();
   }
 
   readonly Language = Language;
@@ -181,28 +174,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
     input.click();
   }
 
-  private handleFileChange(event: Event): void {
+  private async handleFileChange(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const user = this.authService.currentUser;
     if (!user) return;
     this.avatarUploading.set(true);
-    this.profileService.uploadAvatar(user.id, file).subscribe({
-      next: (url) => {
-        this.profileService.upsert({ id: user.id, avatarUrl: url, email: this.userEmail(), fullName: this.fullName() }).subscribe({
-          next: () => {
-            this.avatarUrl.set(url);
-            this.avatarUploading.set(false);
-            this.toast.success(this.t.instant('profile.saved'));
-          },
-          error: () => { this.avatarUploading.set(false); this.toast.error(this.t.instant('common.error.save')); },
-        });
-      },
-      error: (err) => {
-        this.logger.error('Avatar upload failed', err);
-        this.avatarUploading.set(false);
-        this.toast.error(this.t.instant('common.error.save'));
-      },
-    });
+    try {
+      const url = await this.profileService.uploadAvatar(user.id, file);
+      await this.profileService.upsert({ id: user.id, avatarUrl: url, email: this.userEmail(), fullName: this.fullName() });
+      this.avatarUrl.set(url);
+      this.toast.success(this.t.instant('profile.saved'));
+    } catch (err) {
+      this.logger.error('Avatar upload failed', err);
+      this.toast.error(this.t.instant('common.error.save'));
+    } finally {
+      this.avatarUploading.set(false);
+    }
   }
 }

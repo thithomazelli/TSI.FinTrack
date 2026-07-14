@@ -1,8 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, effect, untracked } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, switchMap } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { BalanceService, BalanceSummary } from '../../core/services/balance.service';
 import { LanguageService } from '../../core/services/language.service';
 
@@ -13,10 +11,9 @@ import { LanguageService } from '../../core/services/language.service';
     styleUrls: ['./balance-widget.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BalanceWidgetComponent implements OnInit, OnDestroy {
+export class BalanceWidgetComponent {
   private readonly balanceService = inject(BalanceService);
   private readonly lang = inject(LanguageService);
-  private readonly subs: Subscription[] = [];
 
   readonly summary   = signal<BalanceSummary | null>(null);
   readonly available = signal<number | null>(null);
@@ -29,7 +26,6 @@ export class BalanceWidgetComponent implements OnInit, OnDestroy {
   readonly year  = this.now.getFullYear();
   readonly month = this.now.getMonth() + 1;
   readonly end   = new Date(this.year, this.month, 0).toISOString().split('T')[0];
-  private readonly version$ = toObservable(this.balanceService.version);
 
   readonly monthLabel = computed(() => {
     const locale = this.lang.current() === 'pt-BR' ? 'pt-BR' : 'en-US';
@@ -39,24 +35,24 @@ export class BalanceWidgetComponent implements OnInit, OnDestroy {
     return `${capitalized}/${this.year}`;
   });
 
-  ngOnInit(): void {
-    this.subs.push(
-      // Regra B — resumo do mês (só REALIZED)
-      this.version$.pipe(
-        switchMap(() => this.balanceService.getSummary(this.year, this.month))
-      ).subscribe({ next: s => { this.summary.set(s); this.loading.set(false); }, error: () => this.loading.set(false) }),
-      // Regra B — ATUAL = saldo realizado acumulado (v_available_balance)
-      this.version$.pipe(
-        switchMap(() => this.balanceService.getAvailableBalance())
-      ).subscribe({ next: v => this.available.set(v), error: () => {} }),
-      // Regra B — PROJETADO = todos os status até fim do mês
-      this.version$.pipe(
-        switchMap(() => this.balanceService.getBalanceUpTo(this.end))
-      ).subscribe({ next: v => this.projected.set(v), error: () => {} }),
-    );
+  constructor() {
+    effect(() => {
+      this.balanceService.version();
+      untracked(() => this.fetch());
+    });
   }
 
-  ngOnDestroy(): void { this.subs.forEach(s => s.unsubscribe()); }
+  private async fetch(): Promise<void> {
+    const [summary, available, projected] = await Promise.all([
+      this.balanceService.getSummary(this.year, this.month),
+      this.balanceService.getAvailableBalance(),
+      this.balanceService.getBalanceUpTo(this.end),
+    ]);
+    this.summary.set(summary);
+    this.available.set(available);
+    this.projected.set(projected);
+    this.loading.set(false);
+  }
 
   toggle(): void { this.hidden.update(v => !v); }
   toggleCollapse(): void { this.collapsed.update(v => !v); }

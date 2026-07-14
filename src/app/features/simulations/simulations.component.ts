@@ -401,9 +401,9 @@ export class SimulationsComponent implements OnInit {
   isSelected(id: string): boolean { return this.selectedIds().has(id); }
 
   ngOnInit(): void {
-    this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
-    this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
-    this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
+    this.categoryService.getAll().then(d => this.categories.set(d));
+    this.cardService.getAll().then(d => this.cards.set(d));
+    this.accountService.getAll().then(d => this.accounts.set(d));
     this.load();
   }
 
@@ -636,16 +636,16 @@ export class SimulationsComponent implements OnInit {
       for (const d of changes) {
         const { item } = d;
         if (d.type === 'deleted') {
-          if (item.kind === 'entry') await this.entryService.delete(item.id).toPromise();
-          else await this.transactionService.delete(item.id).toPromise();
+          if (item.kind === 'entry') await this.entryService.delete(item.id);
+          else await this.transactionService.delete(item.id);
         } else {
           const o = this.overrides().get(item.id)!;
           const payload: any = {};
           if (o.amount !== undefined) payload['amount'] = o.amount;
           if (o.date !== undefined) payload['date'] = o.date;
           if (o.description !== undefined) payload['description'] = o.description;
-          if (item.kind === 'entry') await this.entryService.update(item.id, payload).toPromise();
-          else await this.transactionService.update(item.id, payload).toPromise();
+          if (item.kind === 'entry') await this.entryService.update(item.id, payload);
+          else await this.transactionService.update(item.id, payload);
         }
       }
       this.toast.success(this.tr('simulations.applied', { count: changes.length }));

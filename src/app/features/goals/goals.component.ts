@@ -75,10 +75,9 @@ export class GoalsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.categoryService.getAll().subscribe({
-      next: (cats) => this.categories.set(cats),
-      error: (err) => this.logger.error('Failed to load categories', err),
-    });
+    this.categoryService.getAll()
+      .then((cats) => this.categories.set(cats))
+      .catch((err: unknown) => this.logger.error('Failed to load categories', err));
     this.loadGoals();
   }
 
@@ -90,17 +89,16 @@ export class GoalsComponent implements OnInit {
 
   private loadGoals(): void {
     this.loading.set(true);
-    this.goalService.getByMonth(this.year(), this.month()).subscribe({
-      next: (goals) => {
+    this.goalService.getByMonth(this.year(), this.month())
+      .then((goals) => {
         this.goals.set(goals);
         this.loading.set(false);
         this.loadSpent();
-      },
-      error: (err) => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to load goals', err);
         this.loading.set(false);
-      },
-    });
+      });
   }
 
   private loadSpent(): void {
@@ -110,17 +108,15 @@ export class GoalsComponent implements OnInit {
         month: this.month(),
         status: TransactionStatus.Realized,
       })
-      .subscribe({
-        next: (transactions) => {
-          const map: Record<string, number> = {};
-          for (const t of transactions) {
-            if (!t.categoryId) continue;
-            map[t.categoryId] = (map[t.categoryId] ?? 0) + t.amount;
-          }
-          this.spentMap.set(map);
-        },
-        error: (err) => this.logger.error('Failed to load transactions for goals', err),
-      });
+      .then((transactions) => {
+        const map: Record<string, number> = {};
+        for (const t of transactions) {
+          if (!t.categoryId) continue;
+          map[t.categoryId] = (map[t.categoryId] ?? 0) + t.amount;
+        }
+        this.spentMap.set(map);
+      })
+      .catch((err: unknown) => this.logger.error('Failed to load transactions for goals', err));
   }
 
   openAddForm(): void {
@@ -159,26 +155,24 @@ export class GoalsComponent implements OnInit {
     this.saving.set(true);
     this.goalService
       .upsert({ categoryId, monthlyLimit, year: this.year(), month: this.month() })
-      .subscribe({
-        next: (goal) => {
-          this.goals.update((list) => {
-            const idx = list.findIndex((g) => g.id === goal.id || g.categoryId === goal.categoryId);
-            if (idx >= 0) {
-              const updated = [...list];
-              updated[idx] = goal;
-              return updated;
-            }
-            return [...list, goal];
-          });
-          this.saving.set(false);
-          this.closeForm();
-          this.toast.success('Meta salva com sucesso!');
-        },
-        error: (err) => {
-          this.logger.error('Failed to save goal', err);
-          this.saving.set(false);
-          this.toast.error('Erro ao salvar meta.');
-        },
+      .then((goal) => {
+        this.goals.update((list) => {
+          const idx = list.findIndex((g) => g.id === goal.id || g.categoryId === goal.categoryId);
+          if (idx >= 0) {
+            const updated = [...list];
+            updated[idx] = goal;
+            return updated;
+          }
+          return [...list, goal];
+        });
+        this.saving.set(false);
+        this.closeForm();
+        this.toast.success('Meta salva com sucesso!');
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed to save goal', err);
+        this.saving.set(false);
+        this.toast.error('Erro ao salvar meta.');
       });
   }
 
@@ -189,17 +183,16 @@ export class GoalsComponent implements OnInit {
   confirmDeleteGoal(): void {
     const id = this.deletingGoalId();
     if (!id) return;
-    this.goalService.delete(id).subscribe({
-      next: () => {
+    this.goalService.delete(id)
+      .then(() => {
         this.goals.update((list) => list.filter((g) => g.id !== id));
         this.deletingGoalId.set(null);
         this.toast.success('Meta excluída.');
-      },
-      error: (err) => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to delete goal', err);
         this.deletingGoalId.set(null);
         this.toast.error('Erro ao excluir meta.');
-      },
-    });
+      });
   }
 }

@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map } from 'rxjs';
 import { TransactionService } from './transaction.service';
 import { EntryService } from './entry.service';
 import { GoalService } from './goal.service';
@@ -33,23 +32,21 @@ export class AlertService {
   private readonly cardService = inject(CreditCardService);
   private readonly billService = inject(CreditCardBillService);
 
-  getAlerts(year: number, month: number): Observable<Alert[]> {
+  async getAlerts(year: number, month: number): Promise<Alert[]> {
     const prevMonth = month === 1 ? 12 : month - 1;
     const prevYear = month === 1 ? year - 1 : year;
 
-    return forkJoin({
-      transactions: this.transactionService.getByMonth({ year, month }),
-      prevTransactions: this.transactionService.getByMonth({ year: prevYear, month: prevMonth }),
-      entries: this.entryService.getByMonth({ year, month }),
-      goals: this.goalService.getByMonth(year, month),
-      categories: this.categoryService.getAll(),
-      cards: this.cardService.getAll(false),
-      bills: this.billService.getByMonth(year, month),
-    }).pipe(
-      map(({ transactions, prevTransactions, entries, goals, categories, cards, bills }) =>
-        this.compute(year, month, transactions, prevTransactions, entries, goals, categories, cards, bills)
-      )
-    );
+    const [transactions, prevTransactions, entries, goals, categories, cards, bills] = await Promise.all([
+      this.transactionService.getByMonth({ year, month }),
+      this.transactionService.getByMonth({ year: prevYear, month: prevMonth }),
+      this.entryService.getByMonth({ year, month }),
+      this.goalService.getByMonth(year, month),
+      this.categoryService.getAll(),
+      this.cardService.getAll(false),
+      this.billService.getByMonth(year, month),
+    ]);
+
+    return this.compute(year, month, transactions, prevTransactions, entries, goals, categories, cards, bills);
   }
 
   private compute(

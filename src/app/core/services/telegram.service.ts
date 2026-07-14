@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { from, Observable, switchMap, map } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 
 export interface TelegramSubscription {
@@ -14,52 +13,38 @@ export interface TelegramSubscription {
 export class TelegramService {
   private readonly supabase = inject(SupabaseService).client;
 
-  getSubscription(userId: string): Observable<TelegramSubscription | null> {
-    return from(
-      this.supabase
-        .from('telegram_subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle()
-    ).pipe(
-      map((res) => {
-        if (!res.data) return null;
-        const d = res.data;
-        return {
-          id: d.id,
-          userId: d.user_id,
-          chatId: d.chat_id,
-          notificationsEnabled: d.notifications_enabled,
-          linkedAt: d.linked_at,
-        };
-      })
-    );
+  async getSubscription(userId: string): Promise<TelegramSubscription | null> {
+    const res = await this.supabase
+      .from('telegram_subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (!res.data) return null;
+    const d = res.data;
+    return {
+      id: d.id,
+      userId: d.user_id,
+      chatId: d.chat_id,
+      notificationsEnabled: d.notifications_enabled,
+      linkedAt: d.linked_at,
+    };
   }
 
-  generateLinkToken(userId: string, botUsername: string): Observable<{ url: string; token: string }> {
+  async generateLinkToken(userId: string, botUsername: string): Promise<{ url: string; token: string }> {
     const token = crypto.randomUUID().replace(/-/g, '');
-    return from(
-      this.supabase.from('telegram_links').insert({ user_id: userId, token }).select()
-    ).pipe(
-      map((res) => {
-        if (res.error) throw new Error(res.error.message);
-        return { url: `https://t.me/${botUsername}?start=${token}`, token };
-      })
-    );
+    const res = await this.supabase.from('telegram_links').insert({ user_id: userId, token }).select();
+    if (res.error) throw new Error(res.error.message);
+    return { url: `https://t.me/${botUsername}?start=${token}`, token };
   }
 
-  disconnect(userId: string): Observable<void> {
-    return from(
-      this.supabase.from('telegram_subscriptions').delete().eq('user_id', userId)
-    ).pipe(map(() => undefined));
+  async disconnect(userId: string): Promise<void> {
+    await this.supabase.from('telegram_subscriptions').delete().eq('user_id', userId);
   }
 
-  setNotifications(userId: string, enabled: boolean): Observable<void> {
-    return from(
-      this.supabase
-        .from('telegram_subscriptions')
-        .update({ notifications_enabled: enabled })
-        .eq('user_id', userId)
-    ).pipe(map(() => undefined));
+  async setNotifications(userId: string, enabled: boolean): Promise<void> {
+    await this.supabase
+      .from('telegram_subscriptions')
+      .update({ notifications_enabled: enabled })
+      .eq('user_id', userId);
   }
 }

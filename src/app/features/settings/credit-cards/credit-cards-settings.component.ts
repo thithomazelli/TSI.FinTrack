@@ -46,15 +46,12 @@ export class CreditCardsSettingsComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.cardService.getAll(this.showArchived()).subscribe({
-      next: data => {
-        this.cards.set(data);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to load credit cards', err);
-        this.loading.set(false);
-      },
+    this.cardService.getAll(this.showArchived()).then(data => {
+      this.cards.set(data);
+      this.loading.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to load credit cards', err);
+      this.loading.set(false);
     });
   }
 
@@ -113,20 +110,17 @@ export class CreditCardsSettingsComponent implements OnInit {
       ? this.cardService.update(id, payload)
       : this.cardService.create(payload);
 
-    op$.subscribe({
-      next: saved => {
-        this.cards.update(list =>
-          id ? list.map(c => (c.id === id ? saved : c)) : [...list, saved]
-        );
-        this.toast.success(id ? 'Cartão atualizado com sucesso!' : 'Cartão criado com sucesso!');
-        this.saving.set(false);
-        this.closeForm();
-      },
-      error: err => {
-        this.logger.error('Failed to save credit card', err);
-        this.toast.error('Erro ao salvar cartão.');
-        this.saving.set(false);
-      },
+    op$.then(saved => {
+      this.cards.update(list =>
+        id ? list.map(c => (c.id === id ? saved : c)) : [...list, saved]
+      );
+      this.toast.success(id ? 'Cartão atualizado com sucesso!' : 'Cartão criado com sucesso!');
+      this.saving.set(false);
+      this.closeForm();
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to save credit card', err);
+      this.toast.error('Erro ao salvar cartão.');
+      this.saving.set(false);
     });
   }
 
@@ -142,45 +136,36 @@ export class CreditCardsSettingsComponent implements OnInit {
     const card = this.deletingItem();
     if (!card) return;
     this.saving.set(true);
-    this.cardService.archive(card.id).subscribe({
-      next: () => {
-        this.cards.update(list => list.filter(c => c.id !== card.id));
-        this.toast.success('Cartão arquivado.');
-        this.deletingItem.set(null);
-        this.saving.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to archive card', err);
-        this.toast.error('Erro ao arquivar cartão.');
-        this.saving.set(false);
-      },
+    this.cardService.archive(card.id).then(() => {
+      this.cards.update(list => list.filter(c => c.id !== card.id));
+      this.toast.success('Cartão arquivado.');
+      this.deletingItem.set(null);
+      this.saving.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to archive card', err);
+      this.toast.error('Erro ao arquivar cartão.');
+      this.saving.set(false);
     });
   }
 
   restore(card: CreditCard): void {
-    this.cardService.restore(card.id).subscribe({
-      next: () => {
-        this.cards.update(list => list.filter(c => c.id !== card.id));
-        this.toast.success('Cartão restaurado com sucesso!');
-      },
-      error: err => {
-        this.logger.error('Failed to restore card', err);
-        this.toast.error('Erro ao restaurar cartão.');
-      },
+    this.cardService.restore(card.id).then(() => {
+      this.cards.update(list => list.filter(c => c.id !== card.id));
+      this.toast.success('Cartão restaurado com sucesso!');
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to restore card', err);
+      this.toast.error('Erro ao restaurar cartão.');
     });
   }
 
   toggleActive(card: CreditCard): void {
     const newActive = !card.isActive;
-    this.cardService.toggleActive(card.id, newActive).subscribe({
-      next: updated => {
-        this.cards.update(list => list.map(c => c.id === updated.id ? updated : c));
-        this.toast.success(newActive ? 'Cartão habilitado.' : 'Cartão desabilitado.');
-      },
-      error: err => {
-        this.logger.error('Failed to toggle card active state', err);
-        this.toast.error('Erro ao atualizar cartão.');
-      },
+    this.cardService.toggleActive(card.id, newActive).then(updated => {
+      this.cards.update(list => list.map(c => c.id === updated.id ? updated : c));
+      this.toast.success(newActive ? 'Cartão habilitado.' : 'Cartão desabilitado.');
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to toggle card active state', err);
+      this.toast.error('Erro ao atualizar cartão.');
     });
   }
 

@@ -1,13 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   OnInit,
   computed,
   inject,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Router } from '@angular/router';
@@ -15,8 +13,6 @@ import { LanguageService } from '../../core/services/language.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
-import { forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { TransactionService } from '../../core/services/transaction.service';
 import { EntryService } from '../../core/services/entry.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -81,7 +77,6 @@ export class ReportsComponent implements OnInit {
   private readonly logger = inject(LoggingService);
   readonly themeService = inject(ThemeService);
   private readonly language = inject(LanguageService);
-  private readonly destroyRef = inject(DestroyRef);
 
   /** Abreviação do mês (1-12) no idioma atual. */
   monthAbbr(month: number): string {
@@ -519,15 +514,12 @@ export class ReportsComponent implements OnInit {
 
     const prevYearEnd = `${year - 1}-12-31`;
 
-    forkJoin({
-      openingBalance: this.balanceService.getBalanceUpTo(prevYearEnd),
-      entries: forkJoin(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).pipe(map((r) => r.flat())),
-      realized: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).pipe(map((r) => r.flat())),
-      projected: forkJoin(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).pipe(map((r) => r.flat())),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ openingBalance, entries, realized, projected }) => {
+    Promise.all([
+      this.balanceService.getBalanceUpTo(prevYearEnd),
+      Promise.all(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).then((r) => r.flat()),
+      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).then((r) => r.flat()),
+      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).then((r) => r.flat()),
+    ]).then(([openingBalance, entries, realized, projected]) => {
           const transactions = [...realized, ...projected];
           const allSavings = this.savingsMovements();
           let running = openingBalance;
@@ -557,12 +549,11 @@ export class ReportsComponent implements OnInit {
           });
           this.yearSummaryRows.set(rows);
           this.loadingHistory.set(false);
-        },
-        error: (err) => {
+        })
+        .catch((err: unknown) => {
           this.logger.error('Failed to load year summary', err);
           this.loadingHistory.set(false);
-        },
-      });
+        });
   }
 
   readonly categoryMonthMatrix = computed(() => {
@@ -657,12 +648,9 @@ export class ReportsComponent implements OnInit {
     this.loadingMultiYear.set(true);
     const years = [...this.availableYears].reverse();
 
-    forkJoin(
+    Promise.all(
       years.map((y) => this.transactionService.getByYear(y, TransactionStatus.Realized))
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (results) => {
+    ).then((results) => {
           const rows = results.map((txList, i) => {
             const catTotals: Record<string, number> = {};
             for (const t of txList) {
@@ -674,12 +662,11 @@ export class ReportsComponent implements OnInit {
           this.multiYearCatData.set(rows);
           this.loadingMultiYear.set(false);
           this.multiYearLoaded.set(true);
-        },
-        error: (err) => {
+        })
+        .catch((err: unknown) => {
           this.logger.error('Failed to load multi-year data', err);
           this.loadingMultiYear.set(false);
-        },
-      });
+        });
   }
 
   private loadAll(): void {
@@ -687,46 +674,26 @@ export class ReportsComponent implements OnInit {
     const year = this.filterYear();
     const prevYear = year - 1;
 
-    forkJoin({
-      realized: forkJoin(
-        ALL_MONTHS.map((m) =>
-          this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized })
-        )
-      ).pipe(map((r) => r.flat())),
-      projected: forkJoin(
-        ALL_MONTHS.map((m) =>
-          this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected })
-        )
-      ).pipe(map((r) => r.flat())),
-      entries: forkJoin(
-        ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))
-      ).pipe(map((r) => r.flat())),
-      prevRealized: forkJoin(
-        ALL_MONTHS.map((m) =>
-          this.transactionService.getByMonth({ year: prevYear, month: m, status: TransactionStatus.Realized })
-        )
-      ).pipe(map((r) => r.flat())),
-      prevEntries: forkJoin(
-        ALL_MONTHS.map((m) => this.entryService.getByMonth({ year: prevYear, month: m }))
-      ).pipe(map((r) => r.flat())),
-      savings: this.savingsService.getAll(),
-      categories: this.categoryService.getAll(),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ realized, projected, entries, prevRealized, prevEntries, savings, categories }) => {
+    Promise.all([
+      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).then((r) => r.flat()),
+      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).then((r) => r.flat()),
+      Promise.all(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).then((r) => r.flat()),
+      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year: prevYear, month: m, status: TransactionStatus.Realized }))).then((r) => r.flat()),
+      Promise.all(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year: prevYear, month: m }))).then((r) => r.flat()),
+      this.savingsService.getAll(),
+      this.categoryService.getAll(),
+    ]).then(([realized, projected, entries, prevRealized, prevEntries, savings, categories]) => {
           this.categories.set(categories);
           this.savingsMovements.set(savings);
           this.realizedTransactions.set([...realized, ...projected]);
           this.yearEntries.set(entries);
           this.buildCharts(year, realized, projected, entries, prevRealized, prevEntries, categories);
           this.loading.set(false);
-        },
-        error: (err) => {
+        })
+        .catch((err: unknown) => {
           this.logger.error('Failed to load reports data', err);
           this.loading.set(false);
-        },
-      });
+        });
   }
 
   private buildCharts(
@@ -802,9 +769,7 @@ export class ReportsComponent implements OnInit {
 
     this.transactionService
       .getByMonth({ year, month, status: TransactionStatus.Realized })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (transactions) => {
+      .then((transactions) => {
           const monthCatMap: Record<string, CategorySpend> = {};
           for (const t of transactions) {
             if (!t.categoryId) continue;
@@ -823,9 +788,8 @@ export class ReportsComponent implements OnInit {
           this.monthCategorySpend.set(
             Object.values(monthCatMap).sort((a, b) => b.amount - a.amount)
           );
-        },
-        error: (err) => this.logger.error('Failed to load month categories', err),
-      });
+        })
+        .catch((err: unknown) => this.logger.error('Failed to load month categories', err));
   }
 
   private buildPaymentTypes(realized: Transaction[]): void {
@@ -862,14 +826,11 @@ export class ReportsComponent implements OnInit {
       return { year: d.getFullYear(), month: d.getMonth() + 1 };
     }).reverse();
 
-    forkJoin(
+    Promise.all(
       monthsBack.map(({ year, month }) =>
         this.transactionService.getByMonth({ year, month, status: TransactionStatus.Realized, categoryId: catId })
       )
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (results) => {
+    ).then((results) => {
           const points = results.map((txList, i) => {
             const { year, month } = monthsBack[i];
             const amount = txList.reduce((s, t) => s + t.amount, 0);
@@ -877,12 +838,11 @@ export class ReportsComponent implements OnInit {
           });
           this.catEvolPoints.set(points);
           this.loadingCatEvol.set(false);
-        },
-        error: (err) => {
+        })
+        .catch((err: unknown) => {
           this.logger.error('Failed to load category evolution', err);
           this.loadingCatEvol.set(false);
-        },
-      });
+        });
   }
 
   goToMovimentos(year: number, month: number): void {

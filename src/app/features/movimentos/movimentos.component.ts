@@ -453,10 +453,7 @@ export class MovimentosComponent implements OnInit {
     });
 
     // Persist and reload to guarantee visual consistency (silent = no loading spinner)
-    save$.subscribe({
-      next: () => this.load(true),
-      error: err => this.logger.error('Failed to update position', err),
-    });
+    save$.then(() => this.load(true)).catch((err: unknown) => this.logger.error('Failed to update position', err));
   }
 
   selectedCardIsCredit(): boolean {
@@ -577,10 +574,10 @@ export class MovimentosComponent implements OnInit {
     const qMonth = qp.get('month');
     if (qYear)  this.year.set(+qYear);
     if (qMonth) this.month.set(+qMonth);
-    this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
-    this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
-    this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
-    this.domainListService.getByCode('entry_type').subscribe({ next: d => this.entryTypes.set(d) });
+    this.categoryService.getAll().then(d => this.categories.set(d));
+    this.accountService.getAll().then(d => this.accounts.set(d));
+    this.cardService.getAll().then(d => this.cards.set(d));
+    this.domainListService.getByCode('entry_type').then(d => this.entryTypes.set(d));
     if (qYear || qMonth) {
       this.applyMonth(this.year(), this.month());
     } else {
@@ -619,14 +616,14 @@ export class MovimentosComponent implements OnInit {
           .order('position', { ascending: true, nullsFirst: false }),
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
         this.supabase.client.rpc('get_balance_in_range', { start_date: from, end_date: to }),
-        this.savingsService.getPeriodTotals(from, to).toPromise(),
+        this.savingsService.getPeriodTotals(from, to),
         // Para o balance card: busca available e projected em paralelo com o resto
         isCurrent
-          ? this.balanceService.getAvailableBalance().toPromise()
-          : this.balanceService.getBalanceUpTo(endOfMonth).toPromise(),
-        this.balanceService.getBalanceUpTo(isCurrent ? endOfMonth : endOfMonth).toPromise(),
-        this.savingsService.getBalanceUpTo(today).toPromise(),
-        this.savingsService.getBalanceUpTo(endOfMonth).toPromise(),
+          ? this.balanceService.getAvailableBalance()
+          : this.balanceService.getBalanceUpTo(endOfMonth),
+        this.balanceService.getBalanceUpTo(isCurrent ? endOfMonth : endOfMonth),
+        this.savingsService.getBalanceUpTo(today),
+        this.savingsService.getBalanceUpTo(endOfMonth),
       ]);
 
       if (entriesRes.error) throw entriesRes.error;
@@ -688,11 +685,11 @@ export class MovimentosComponent implements OnInit {
     const today = now.toISOString().split('T')[0];
     const [availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = await Promise.all([
       isCurrent
-        ? this.balanceService.getAvailableBalance().toPromise()
-        : this.balanceService.getBalanceUpTo(endOfMonth).toPromise(),
-      this.balanceService.getBalanceUpTo(endOfMonth).toPromise(),
-      this.savingsService.getBalanceUpTo(today).toPromise(),
-      this.savingsService.getBalanceUpTo(endOfMonth).toPromise(),
+        ? this.balanceService.getAvailableBalance()
+        : this.balanceService.getBalanceUpTo(endOfMonth),
+      this.balanceService.getBalanceUpTo(endOfMonth),
+      this.savingsService.getBalanceUpTo(today),
+      this.savingsService.getBalanceUpTo(endOfMonth),
     ]);
     this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
     this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
@@ -779,10 +776,7 @@ export class MovimentosComponent implements OnInit {
         this.editingHasInstallments.set(true);
         const base = e.description.replace(/ - \d+\/\d+$/, '');
         this.installmentsLoading.set(true);
-        this.entryService.getByDescriptionPrefix(base).subscribe({
-          next: list => { this.editInstallments.set(list); this.installmentsLoading.set(false); this.cdr.markForCheck(); },
-          error: () => this.installmentsLoading.set(false),
-        });
+        this.entryService.getByDescriptionPrefix(base).then(list => { this.editInstallments.set(list); this.installmentsLoading.set(false); this.cdr.markForCheck(); }).catch(() => this.installmentsLoading.set(false));
       }
     } else {
       const t = item.raw as Transaction;
@@ -806,10 +800,7 @@ export class MovimentosComponent implements OnInit {
       if (t.installmentGroupId) {
         this.editingHasInstallments.set(true);
         this.installmentsLoading.set(true);
-        this.transactionService.getByInstallmentGroup(t.installmentGroupId).subscribe({
-          next: list => { this.editInstallments.set(list); this.installmentsLoading.set(false); this.cdr.markForCheck(); },
-          error: () => this.installmentsLoading.set(false),
-        });
+        this.transactionService.getByInstallmentGroup(t.installmentGroupId).then(list => { this.editInstallments.set(list); this.installmentsLoading.set(false); this.cdr.markForCheck(); }).catch(() => this.installmentsLoading.set(false));
       }
     }
   }
@@ -867,26 +858,23 @@ export class MovimentosComponent implements OnInit {
       ? this.entryService.update(id, payload)
       : this.entryService.create(payload);
 
-    op$.subscribe({
-      next: (saved: Entry) => {
-        this.zone.run(() => {
-          this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
-          this.saving.set(false);
-          this.closeModal();
-          if (id) {
-            this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
-            this.cdr.markForCheck();
-          } else {
-            this.load(true);
-          }
-          this.balanceService.invalidate();
-        });
-      },
-      error: err => {
-        this.logger.error('Failed to save entry', err);
+    op$.then((saved: Entry) => {
+      this.zone.run(() => {
+        this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
         this.saving.set(false);
-        this.toast.error(this.tr('movimentos.toast.entrySaveError'));
-      },
+        this.closeModal();
+        if (id) {
+          this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
+          this.cdr.markForCheck();
+        } else {
+          this.load(true);
+        }
+        this.balanceService.invalidate();
+      });
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to save entry', err);
+      this.saving.set(false);
+      this.toast.error(this.tr('movimentos.toast.entrySaveError'));
     });
   }
 
@@ -922,36 +910,30 @@ export class MovimentosComponent implements OnInit {
     const id = this.editingId();
 
     if (id) {
-      this.transactionService.update(id, payload).subscribe({
-        next: (saved: Transaction) => {
-          this.toast.success(this.tr('movimentos.toast.txUpdated'));
-          this.saving.set(false);
-          this.closeModal();
-          this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
-          this.balanceService.invalidate();
-        },
-        error: err => {
-          this.logger.error('Failed to update transaction', err);
-          this.saving.set(false);
-          this.toast.error(this.tr('movimentos.toast.txUpdateError'));
-        },
+      this.transactionService.update(id, payload).then((saved: Transaction) => {
+        this.toast.success(this.tr('movimentos.toast.txUpdated'));
+        this.saving.set(false);
+        this.closeModal();
+        this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
+        this.balanceService.invalidate();
+      }).catch((err: unknown) => {
+        this.logger.error('Failed to update transaction', err);
+        this.saving.set(false);
+        this.toast.error(this.tr('movimentos.toast.txUpdateError'));
       });
     } else {
-      this.transactionService.create(payload).subscribe({
-        next: () => {
-          this.zone.run(() => {
-            this.toast.success(this.tr('movimentos.toast.txAdded'));
-            this.saving.set(false);
-            this.closeModal();
-            this.load(true);
-            this.balanceService.invalidate();
-          });
-        },
-        error: err => {
-          this.logger.error('Failed to create transaction', err);
+      this.transactionService.create(payload).then(() => {
+        this.zone.run(() => {
+          this.toast.success(this.tr('movimentos.toast.txAdded'));
           this.saving.set(false);
-          this.toast.error(this.tr('movimentos.toast.txCreateError'));
-        },
+          this.closeModal();
+          this.load(true);
+          this.balanceService.invalidate();
+        });
+      }).catch((err: unknown) => {
+        this.logger.error('Failed to create transaction', err);
+        this.saving.set(false);
+        this.toast.error(this.tr('movimentos.toast.txCreateError'));
       });
     }
   }
@@ -967,23 +949,20 @@ export class MovimentosComponent implements OnInit {
       ? this.entryService.delete(item.id)
       : this.transactionService.delete(item.id);
 
-    op$.subscribe({
-      next: () => {
-        if (item.kind === 'entry') {
-          this.allEntries.update(list => list.filter(e => e.id !== item.id));
-        } else {
-          this.allTransactions.update(list => list.filter(t => t.id !== item.id));
-        }
-        this.deletingItem.set(null);
-        this.preloadedBalance.set(null);
-        this.balanceService.invalidate();
-        this.toast.success(this.tr('movimentos.toast.deleted'));
-      },
-      error: err => {
-        this.logger.error('Failed to delete', err);
-        this.deletingItem.set(null);
-        this.toast.error(this.tr('movimentos.toast.deleteError'));
-      },
+    op$.then(() => {
+      if (item.kind === 'entry') {
+        this.allEntries.update(list => list.filter(e => e.id !== item.id));
+      } else {
+        this.allTransactions.update(list => list.filter(t => t.id !== item.id));
+      }
+      this.deletingItem.set(null);
+      this.preloadedBalance.set(null);
+      this.balanceService.invalidate();
+      this.toast.success(this.tr('movimentos.toast.deleted'));
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to delete', err);
+      this.deletingItem.set(null);
+      this.toast.error(this.tr('movimentos.toast.deleteError'));
     });
   }
 
@@ -1002,9 +981,9 @@ export class MovimentosComponent implements OnInit {
       this.balanceService.invalidate();
     };
     if (item.kind === 'entry') {
-      this.entryService.update(item.id, { status: newStatus }).subscribe({ next: apply, error: (err: unknown) => this.logger.error('Failed to toggle status', err) });
+      this.entryService.update(item.id, { status: newStatus }).then(apply).catch((err: unknown) => this.logger.error('Failed to toggle status', err));
     } else {
-      this.transactionService.update(item.id, { status: newStatus }).subscribe({ next: apply, error: (err: unknown) => this.logger.error('Failed to toggle status', err) });
+      this.transactionService.update(item.id, { status: newStatus }).then(apply).catch((err: unknown) => this.logger.error('Failed to toggle status', err));
     }
   }
 
@@ -1016,10 +995,10 @@ export class MovimentosComponent implements OnInit {
       for (const item of items) {
         const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED';
         if (item.kind === 'entry') {
-          await this.entryService.update(item.id, { status: newStatus as TransactionStatus }).toPromise();
+          await this.entryService.update(item.id, { status: newStatus as TransactionStatus });
           this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status: newStatus as TransactionStatus } : e));
         } else {
-          await this.transactionService.update(item.id, { status: newStatus as TransactionStatus }).toPromise();
+          await this.transactionService.update(item.id, { status: newStatus as TransactionStatus });
           this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status: newStatus as TransactionStatus } : t));
         }
       }
@@ -1074,8 +1053,8 @@ export class MovimentosComponent implements OnInit {
     this.bulkSaving.set(true);
     try {
       for (const item of items) {
-        if (item.kind === 'entry') await this.entryService.delete(item.id).toPromise();
-        else await this.transactionService.delete(item.id).toPromise();
+        if (item.kind === 'entry') await this.entryService.delete(item.id);
+        else await this.transactionService.delete(item.id);
       }
       this.clearSelection();
       this.toast.success(`${items.length} ${this.tr('movimentos.bulk.deleted')}`);
@@ -1097,9 +1076,9 @@ export class MovimentosComponent implements OnInit {
     try {
       for (const item of items) {
         if (item.kind === 'entry') {
-          await this.entryService.update(item.id, { amount: this.bulkNewAmount } as any).toPromise();
+          await this.entryService.update(item.id, { amount: this.bulkNewAmount } as any);
         } else {
-          await this.transactionService.update(item.id, { amount: this.bulkNewAmount } as any).toPromise();
+          await this.transactionService.update(item.id, { amount: this.bulkNewAmount } as any);
         }
       }
       this.clearSelection();
@@ -1125,9 +1104,9 @@ export class MovimentosComponent implements OnInit {
         const origDay = item.date.split('-')[2];
         const newDate = `${y}-${m}-${origDay}`;
         if (item.kind === 'entry') {
-          await this.entryService.update(item.id, { date: newDate } as any).toPromise();
+          await this.entryService.update(item.id, { date: newDate } as any);
         } else {
-          await this.transactionService.update(item.id, { date: newDate } as any).toPromise();
+          await this.transactionService.update(item.id, { date: newDate } as any);
         }
       }
       this.clearSelection();

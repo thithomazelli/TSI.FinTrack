@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, from } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { RecurringTemplate } from '../models/interfaces/recurring-template.interface';
 
@@ -28,19 +27,17 @@ function mapRow(r: Record<string, unknown>): RecurringTemplate {
 export class RecurringTemplateService {
   private readonly supabase = inject(SupabaseService);
 
-  getAll(): Observable<RecurringTemplate[]> {
-    return from(
-      this.supabase.client.from(TABLE).select('*').order('created_at')
-        .then(({ data, error }) => {
-          if (error) throw error;
-          const rows = (data as Record<string, unknown>[]).map(mapRow);
-          // Sort by position client-side (position col may not exist on older DB)
-          return rows.sort((a, b) => a.position - b.position);
-        })
-    );
+  async getAll(): Promise<RecurringTemplate[]> {
+    return this.supabase.client.from(TABLE).select('*').order('created_at')
+      .then(({ data, error }) => {
+        if (error) throw error;
+        const rows = (data as Record<string, unknown>[]).map(mapRow);
+        // Sort by position client-side (position col may not exist on older DB)
+        return rows.sort((a, b) => a.position - b.position);
+      });
   }
 
-  create(payload: Omit<RecurringTemplate, 'id' | 'ownerId' | 'createdAt'>): Observable<RecurringTemplate> {
+  async create(payload: Omit<RecurringTemplate, 'id' | 'ownerId' | 'createdAt'>): Promise<RecurringTemplate> {
     const row = {
       description: payload.description,
       amount: payload.amount,
@@ -54,16 +51,14 @@ export class RecurringTemplateService {
       months: payload.months,
       position: payload.position,
     };
-    return from(
-      this.supabase.client.from(TABLE).insert(row).select().single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return mapRow(data as Record<string, unknown>);
-        })
-    );
+    return this.supabase.client.from(TABLE).insert(row).select().single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return mapRow(data as Record<string, unknown>);
+      });
   }
 
-  update(id: string, payload: Partial<Omit<RecurringTemplate, 'id' | 'ownerId' | 'createdAt'>>): Observable<RecurringTemplate> {
+  async update(id: string, payload: Partial<Omit<RecurringTemplate, 'id' | 'ownerId' | 'createdAt'>>): Promise<RecurringTemplate> {
     const row: Record<string, unknown> = {};
     if (payload.description !== undefined) row['description'] = payload.description;
     if (payload.amount !== undefined) row['amount'] = payload.amount;
@@ -76,37 +71,29 @@ export class RecurringTemplateService {
     if (payload.frequency !== undefined) row['frequency'] = payload.frequency;
     if (payload.months !== undefined) row['months'] = payload.months;
     if (payload.position !== undefined) row['position'] = payload.position;
-    return from(
-      this.supabase.client.from(TABLE).update(row).eq('id', id).select().single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return mapRow(data as Record<string, unknown>);
-        })
-    );
+    return this.supabase.client.from(TABLE).update(row).eq('id', id).select().single()
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return mapRow(data as Record<string, unknown>);
+      });
   }
 
-  updatePosition(id: string, position: number): Observable<void> {
-    return from(
-      this.supabase.client.from(TABLE).update({ position }).eq('id', id)
-        .then(({ error }) => { if (error) throw error; })
-    );
+  async updatePosition(id: string, position: number): Promise<void> {
+    return this.supabase.client.from(TABLE).update({ position }).eq('id', id)
+      .then(({ error }) => { if (error) throw error; });
   }
 
-  delete(id: string): Observable<void> {
-    return from(
-      this.supabase.client.from(TABLE).delete().eq('id', id)
-        .then(({ error }) => { if (error) throw error; })
-    );
+  async delete(id: string): Promise<void> {
+    return this.supabase.client.from(TABLE).delete().eq('id', id)
+      .then(({ error }) => { if (error) throw error; });
   }
 
   /** Project all active templates for a given year/month via RPC */
-  projectPeriod(year: number, month: number): Observable<{ created: number }> {
-    return from(
-      this.supabase.client.rpc('project_recurring_period', { p_year: year, p_month: month })
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return data as { created: number };
-        })
-    );
+  async projectPeriod(year: number, month: number): Promise<{ created: number }> {
+    return this.supabase.client.rpc('project_recurring_period', { p_year: year, p_month: month })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return data as { created: number };
+      });
   }
 }

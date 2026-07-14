@@ -216,7 +216,7 @@ export class InstallmentsComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.ccService.getAll(true).subscribe(cards => this.creditCards.set(cards));
+    this.ccService.getAll(true).then(cards => this.creditCards.set(cards));
     this.load();
   }
 
@@ -228,16 +228,15 @@ export class InstallmentsComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.txService.getAllInstallments().subscribe({
-      next: (txs) => {
+    this.txService.getAllInstallments()
+      .then((txs) => {
         this.allInstallments.set(txs);
         this.loading.set(false);
         this.syncSelectionToAll();
-      },
-      error: (err) => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to load installments', err);
         this.loading.set(false);
-      },
-    });
+      });
   }
 }

@@ -43,19 +43,13 @@ export class FamilySettingsComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.familyService.getMembers().subscribe({
-      next: (members) => this.members.set(members),
-      error: (err) => this.logger.error('Failed to load members', err),
-    });
-    this.familyService.getInvites().subscribe({
-      next: (invites) => {
-        this.invites.set(invites);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.logger.error('Failed to load invites', err);
-        this.loading.set(false);
-      },
+    this.familyService.getMembers().then((members) => this.members.set(members)).catch((err: unknown) => this.logger.error('Failed to load members', err));
+    this.familyService.getInvites().then((invites) => {
+      this.invites.set(invites);
+      this.loading.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to load invites', err);
+      this.loading.set(false);
     });
   }
 
@@ -82,33 +76,27 @@ export class FamilySettingsComponent implements OnInit {
     const email = this.formEmail().trim();
     if (!email) { this.saveAttempted.set(true); return; }
     this.saving.set(true);
-    this.familyService.invite(email, this.formRole()).subscribe({
-      next: (invite) => {
-        this.invites.update((list) => [invite, ...list]);
-        this.toast.success('Membro convidado com sucesso!');
-        this.saving.set(false);
-        this.closeForm();
-      },
-      error: (err) => {
-        this.logger.error('Failed to send invite', err);
-        this.toast.error('Erro ao enviar convite.');
-        this.saving.set(false);
-      },
+    this.familyService.invite(email, this.formRole()).then((invite) => {
+      this.invites.update((list) => [invite, ...list]);
+      this.toast.success('Membro convidado com sucesso!');
+      this.saving.set(false);
+      this.closeForm();
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to send invite', err);
+      this.toast.error('Erro ao enviar convite.');
+      this.saving.set(false);
     });
   }
 
   updateRole(member: FamilyMember, role: FamilyRole): void {
-    this.familyService.updateMemberRole(member.id, role).subscribe({
-      next: (updated) => {
-        this.members.update((list) =>
-          list.map((m) => (m.id === updated.id ? { ...m, role: updated.role } : m))
-        );
-        this.toast.success('Membro atualizado com sucesso!');
-      },
-      error: (err) => {
-        this.logger.error('Failed to update role', err);
-        this.toast.error('Erro ao atualizar membro.');
-      },
+    this.familyService.updateMemberRole(member.id, role).then((updated) => {
+      this.members.update((list) =>
+        list.map((m) => (m.id === updated.id ? { ...m, role: updated.role } : m))
+      );
+      this.toast.success('Membro atualizado com sucesso!');
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to update role', err);
+      this.toast.error('Erro ao atualizar membro.');
     });
   }
 
@@ -124,31 +112,25 @@ export class FamilySettingsComponent implements OnInit {
     const member = this.deletingItem();
     if (!member) return;
     this.saving.set(true);
-    this.familyService.revokeMember(member.id).subscribe({
-      next: () => {
-        this.members.update((list) => list.filter((m) => m.id !== member.id));
-        this.toast.success('Membro removido.');
-        this.deletingItem.set(null);
-        this.saving.set(false);
-      },
-      error: (err) => {
-        this.logger.error('Failed to revoke member', err);
-        this.toast.error('Erro ao remover membro.');
-        this.saving.set(false);
-      },
+    this.familyService.revokeMember(member.id).then(() => {
+      this.members.update((list) => list.filter((m) => m.id !== member.id));
+      this.toast.success('Membro removido.');
+      this.deletingItem.set(null);
+      this.saving.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to revoke member', err);
+      this.toast.error('Erro ao remover membro.');
+      this.saving.set(false);
     });
   }
 
   cancelInvite(invite: FamilyInvite): void {
-    this.familyService.cancelInvite(invite.id).subscribe({
-      next: () => {
-        this.invites.update((list) => list.filter((i) => i.id !== invite.id));
-        this.toast.success('Convite cancelado.');
-      },
-      error: (err) => {
-        this.logger.error('Failed to cancel invite', err);
-        this.toast.error('Erro ao cancelar convite.');
-      },
+    this.familyService.cancelInvite(invite.id).then(() => {
+      this.invites.update((list) => list.filter((i) => i.id !== invite.id));
+      this.toast.success('Convite cancelado.');
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to cancel invite', err);
+      this.toast.error('Erro ao cancelar convite.');
     });
   }
 }

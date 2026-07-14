@@ -47,9 +47,7 @@ export class LabelsInputComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.peopleService.getAll().subscribe({
-      next: people => this.allPeople.set(people),
-    });
+    this.peopleService.getAll().then(people => this.allPeople.set(people));
   }
 
   onInput(value: string): void {
@@ -75,7 +73,7 @@ export class LabelsInputComponent implements OnInit {
       return;
     }
     this.labels.update(l => [...l, trimmed]);
-    this.peopleService.upsertByName(trimmed).subscribe();
+    this.peopleService.upsertByName(trimmed);
     this.inputValue.set('');
     this.showDropdown.set(false);
     this.inputEl?.nativeElement.focus();

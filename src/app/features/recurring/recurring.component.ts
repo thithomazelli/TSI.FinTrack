@@ -139,22 +139,21 @@ export class RecurringComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.categoryService.getAll().subscribe({ next: d => this.categories.set(d) });
-    this.accountService.getAll().subscribe({ next: d => this.accounts.set(d) });
-    this.cardService.getAll().subscribe({ next: d => this.cards.set(d) });
+    this.categoryService.getAll().then(d => this.categories.set(d));
+    this.accountService.getAll().then(d => this.accounts.set(d));
+    this.cardService.getAll().then(d => this.cards.set(d));
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.service.getAll().subscribe({
-      next: data => { this.templates.set(data); this.loading.set(false); },
-      error: err => {
+    this.service.getAll()
+      .then(data => { this.templates.set(data); this.loading.set(false); })
+      .catch((err: unknown) => {
         this.logger.error('Failed to load recurring templates', err);
-        this.toast.error('Erro ao carregar recorrentes: ' + (err?.message ?? err));
+        this.toast.error('Erro ao carregar recorrentes: ' + ((err as { message?: string })?.message ?? err));
         this.loading.set(false);
-      },
-    });
+      });
   }
 
   // ── Insert zone ─────────────────────────────────────────────────────────────
@@ -234,12 +233,11 @@ export class RecurringComponent implements OnInit {
         : (this.nextPosition()),
     };
 
-    const op$ = editingId
+    const op = editingId
       ? this.service.update(editingId, payload)
       : this.service.create(payload);
 
-    op$.subscribe({
-      next: saved => {
+    op.then(saved => {
         if (editingId) {
           this.templates.update(list => list.map(t => t.id === editingId ? saved : t));
           this.toast.success('Recorrente atualizado!');
@@ -250,13 +248,12 @@ export class RecurringComponent implements OnInit {
           this.cancelInsert();
         }
         this.saving.set(false);
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to save recurring template', err);
         this.saving.set(false);
         this.toast.error('Erro ao salvar recorrente.');
-      },
-    });
+      });
   }
 
   private nextPosition(): number {
@@ -273,18 +270,17 @@ export class RecurringComponent implements OnInit {
   confirmDelete(): void {
     const t = this.deletingTemplate();
     if (!t) return;
-    this.service.delete(t.id).subscribe({
-      next: () => {
+    this.service.delete(t.id)
+      .then(() => {
         this.templates.update(list => list.filter(x => x.id !== t.id));
         this.deletingTemplate.set(null);
         this.toast.success('Recorrente excluído.');
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to delete recurring template', err);
         this.deletingTemplate.set(null);
         this.toast.error('Erro ao excluir recorrente.');
-      },
-    });
+      });
   }
 
   cancelDelete(): void {
@@ -294,13 +290,12 @@ export class RecurringComponent implements OnInit {
   // ── Toggle active ────────────────────────────────────────────────────────────
 
   toggleActive(t: RecurringTemplate): void {
-    this.service.update(t.id, { isActive: !t.isActive }).subscribe({
-      next: saved => {
+    this.service.update(t.id, { isActive: !t.isActive })
+      .then(saved => {
         this.templates.update(list => list.map(x => x.id === t.id ? saved : x));
         this.toast.info(saved.isActive ? 'Recorrente ativado.' : 'Recorrente pausado.');
-      },
-      error: err => this.logger.error('Failed to toggle recurring', err),
-    });
+      })
+      .catch((err: unknown) => this.logger.error('Failed to toggle recurring', err));
   }
 
   // ── Drag & drop ──────────────────────────────────────────────────────────────
@@ -326,9 +321,8 @@ export class RecurringComponent implements OnInit {
     }
 
     this.templates.update(list => list.map(t => t.id === event.id ? { ...t, position: newPos } : t));
-    this.service.updatePosition(event.id, newPos).subscribe({
-      error: err => this.logger.error('Failed to update position', err),
-    });
+    this.service.updatePosition(event.id, newPos)
+      .catch((err: unknown) => this.logger.error('Failed to update position', err));
   }
 
   private groupIdFor(t: RecurringTemplate): string {
@@ -352,18 +346,17 @@ export class RecurringComponent implements OnInit {
 
   projectPeriod(): void {
     this.projecting.set(true);
-    this.service.projectPeriod(this.projectYear, this.projectMonth).subscribe({
-      next: result => {
+    this.service.projectPeriod(this.projectYear, this.projectMonth)
+      .then(result => {
         this.projecting.set(false);
         this.closeProjectModal();
         this.toast.success(`${result?.created ?? 0} lançamentos projetados com sucesso!`);
-      },
-      error: err => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to project period', err);
         this.projecting.set(false);
         this.toast.error('Erro ao projetar período.');
-      },
-    });
+      });
   }
 
   // ── Month toggle (for sporadic) ──────────────────────────────────────────────

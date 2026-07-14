@@ -42,15 +42,12 @@ export class CategoriesSettingsComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.categoryService.getAll().subscribe({
-      next: data => {
-        this.categories.set(data);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to load categories', err);
-        this.loading.set(false);
-      },
+    this.categoryService.getAll().then(data => {
+      this.categories.set(data);
+      this.loading.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to load categories', err);
+      this.loading.set(false);
     });
   }
 
@@ -92,22 +89,19 @@ export class CategoriesSettingsComponent implements OnInit {
       ? this.categoryService.update(id, payload)
       : this.categoryService.create(payload);
 
-    op$.subscribe({
-      next: saved => {
-        this.categories.update(list =>
-          id
-            ? list.map(c => (c.id === id ? saved : c))
-            : [...list, saved].sort((a, b) => a.name.localeCompare(b.name))
-        );
-        this.toast.success(id ? 'Categoria atualizada!' : 'Categoria criada!');
-        this.saving.set(false);
-        this.closeForm();
-      },
-      error: err => {
-        this.logger.error('Failed to save category', err);
-        this.toast.error('Erro ao salvar categoria.');
-        this.saving.set(false);
-      },
+    op$.then(saved => {
+      this.categories.update(list =>
+        id
+          ? list.map(c => (c.id === id ? saved : c))
+          : [...list, saved].sort((a, b) => a.name.localeCompare(b.name))
+      );
+      this.toast.success(id ? 'Categoria atualizada!' : 'Categoria criada!');
+      this.saving.set(false);
+      this.closeForm();
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to save category', err);
+      this.toast.error('Erro ao salvar categoria.');
+      this.saving.set(false);
     });
   }
 
@@ -123,18 +117,15 @@ export class CategoriesSettingsComponent implements OnInit {
     const cat = this.deletingCat();
     if (!cat) return;
     this.saving.set(true);
-    this.categoryService.delete(cat.id).subscribe({
-      next: () => {
-        this.categories.update(list => list.filter(c => c.id !== cat.id));
-        this.toast.success('Categoria excluída.');
-        this.deletingCat.set(null);
-        this.saving.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to delete category', err);
-        this.toast.error('Erro ao excluir categoria.');
-        this.saving.set(false);
-      },
+    this.categoryService.delete(cat.id).then(() => {
+      this.categories.update(list => list.filter(c => c.id !== cat.id));
+      this.toast.success('Categoria excluída.');
+      this.deletingCat.set(null);
+      this.saving.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to delete category', err);
+      this.toast.error('Erro ao excluir categoria.');
+      this.saving.set(false);
     });
   }
 }

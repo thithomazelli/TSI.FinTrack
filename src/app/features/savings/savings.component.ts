@@ -88,17 +88,15 @@ export class SavingsComponent implements OnInit {
   readonly monthNet = computed(() => this.monthDeposits() - this.monthWithdrawals());
 
   ngOnInit(): void {
-    this.accountService.getAll(false).subscribe({
-      next: (accounts) => this.accounts.set(accounts),
-      error: (err) => this.logger.error('Failed to load accounts', err),
-    });
-    this.domainService.getByCode('savings_movement_type').subscribe({
-      next: (types) => {
+    this.accountService.getAll(false)
+      .then((accounts) => this.accounts.set(accounts))
+      .catch((err: unknown) => this.logger.error('Failed to load accounts', err));
+    this.domainService.getByCode('savings_movement_type')
+      .then((types) => {
         this.types.set(types);
         if (types.length > 0) this.formTypeId.set(types[0].id);
-      },
-      error: (err) => this.logger.error('Failed to load savings types', err),
-    });
+      })
+      .catch((err: unknown) => this.logger.error('Failed to load savings types', err));
     this.loadAll();
     this.loadMonth();
   }
@@ -110,24 +108,22 @@ export class SavingsComponent implements OnInit {
   }
 
   private loadAll(): void {
-    this.savingsService.getAll().subscribe({
-      next: (m) => this.allMovements.set(m),
-      error: (err) => this.logger.error('Failed to load savings', err),
-    });
+    this.savingsService.getAll()
+      .then((m) => this.allMovements.set(m))
+      .catch((err: unknown) => this.logger.error('Failed to load savings', err));
   }
 
   private loadMonth(): void {
     this.loading.set(true);
-    this.savingsService.getByMonth(this.year(), this.month()).subscribe({
-      next: (m) => {
+    this.savingsService.getByMonth(this.year(), this.month())
+      .then((m) => {
         this.monthMovements.set(m);
         this.loading.set(false);
-      },
-      error: (err) => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to load savings', err);
         this.loading.set(false);
-      },
-    });
+      });
   }
 
   openForm(): void {
@@ -177,23 +173,22 @@ export class SavingsComponent implements OnInit {
     const payload = { description, amount, date, typeId, accountId: this.formAccountId() };
 
     if (id) {
-      this.savingsService.update(id, payload).subscribe({
-        next: (saved) => {
+      this.savingsService.update(id, payload)
+        .then((saved) => {
           this.allMovements.update(list => list.map(m => m.id === id ? saved : m));
           this.monthMovements.update(list => list.map(m => m.id === id ? saved : m));
           this.saving.set(false);
           this.closeForm();
           this.toast.success('Movimentação atualizada.');
-        },
-        error: (err) => {
+        })
+        .catch((err: unknown) => {
           this.logger.error('Failed to update movement', err);
           this.saving.set(false);
           this.toast.error('Erro ao atualizar movimentação.');
-        },
-      });
+        });
     } else {
-      this.savingsService.create(payload).subscribe({
-        next: (movement) => {
+      this.savingsService.create(payload)
+        .then((movement) => {
           this.allMovements.update((list) => [movement, ...list]);
           const d = new Date(movement.date + 'T12:00:00');
           if (d.getFullYear() === this.year() && d.getMonth() + 1 === this.month()) {
@@ -202,13 +197,12 @@ export class SavingsComponent implements OnInit {
           this.saving.set(false);
           this.closeForm();
           this.toast.success('Movimentação registrada com sucesso!');
-        },
-        error: (err) => {
+        })
+        .catch((err: unknown) => {
           this.logger.error('Failed to save movement', err);
           this.saving.set(false);
           this.toast.error('Erro ao registrar movimentação.');
-        },
-      });
+        });
     }
   }
 
@@ -219,19 +213,18 @@ export class SavingsComponent implements OnInit {
   confirmDeleteMovement(): void {
     const id = this.deletingId();
     if (!id) return;
-    this.savingsService.delete(id).subscribe({
-      next: () => {
+    this.savingsService.delete(id)
+      .then(() => {
         this.allMovements.update((list) => list.filter((m) => m.id !== id));
         this.monthMovements.update((list) => list.filter((m) => m.id !== id));
         this.deletingId.set(null);
         this.toast.success('Movimentação excluída.');
-      },
-      error: (err) => {
+      })
+      .catch((err: unknown) => {
         this.logger.error('Failed to delete movement', err);
         this.deletingId.set(null);
         this.toast.error('Erro ao excluir movimentação.');
-      },
-    });
+      });
   }
 
   typeLabel(typeId: string): string {

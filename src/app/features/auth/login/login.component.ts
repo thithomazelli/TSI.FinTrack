@@ -16,15 +16,11 @@ export class LoginComponent {
 
   signInWithGoogle(): void {
     this.logger.info('User signing in with Google');
-    this.authService.signInWithGoogle().subscribe({
-      error: err => this.logger.error('Google sign-in failed', err),
-    });
+    this.authService.signInWithGoogle().catch(err => this.logger.error('Google sign-in failed', err));
   }
 
   signInWithApple(): void {
     this.logger.info('User signing in with Apple');
-    this.authService.signInWithApple().subscribe({
-      error: err => this.logger.error('Apple sign-in failed', err),
-    });
+    this.authService.signInWithApple().catch(err => this.logger.error('Apple sign-in failed', err));
   }
 }

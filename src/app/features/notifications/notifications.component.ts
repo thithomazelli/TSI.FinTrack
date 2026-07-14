@@ -44,9 +44,8 @@ export class NotificationsComponent implements OnInit {
   private load(): void {
     this.loading.set(true);
     this.dismissedIds.set(new Set());
-    this.alertService.getAlerts(this.year(), this.month()).subscribe({
-      next: alerts => { this.alerts.set(alerts); this.loading.set(false); },
-      error: err => { this.logger.error('Failed to load alerts', err); this.loading.set(false); },
-    });
+    this.alertService.getAlerts(this.year(), this.month())
+      .then(alerts => { this.alerts.set(alerts); this.loading.set(false); })
+      .catch((err: unknown) => { this.logger.error('Failed to load alerts', err); this.loading.set(false); });
   }
 }

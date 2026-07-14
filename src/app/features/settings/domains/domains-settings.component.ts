@@ -56,15 +56,12 @@ export class DomainsSettingsComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.domainListService.getAll().subscribe({
-      next: data => {
-        this.allItems.set(data);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to load domain lists', err);
-        this.loading.set(false);
-      },
+    this.domainListService.getAll().then(data => {
+      this.allItems.set(data);
+      this.loading.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to load domain lists', err);
+      this.loading.set(false);
     });
   }
 
@@ -103,18 +100,15 @@ export class DomainsSettingsComponent implements OnInit {
 
     this.domainListService
       .update(id, { name: this.formName.trim(), color: this.formColor, sortOrder: this.formSortOrder })
-      .subscribe({
-        next: saved => {
-          this.allItems.update(list => list.map(i => (i.id === id ? saved : i)));
-          this.toast.success('Domínio atualizado com sucesso!');
-          this.saving.set(false);
-          this.closeForm();
-        },
-        error: err => {
-          this.logger.error('Failed to update domain list item', err);
-          this.toast.error('Erro ao atualizar domínio.');
-          this.saving.set(false);
-        },
+      .then(saved => {
+        this.allItems.update(list => list.map(i => (i.id === id ? saved : i)));
+        this.toast.success('Domínio atualizado com sucesso!');
+        this.saving.set(false);
+        this.closeForm();
+      }).catch((err: unknown) => {
+        this.logger.error('Failed to update domain list item', err);
+        this.toast.error('Erro ao atualizar domínio.');
+        this.saving.set(false);
       });
   }
 
@@ -131,18 +125,15 @@ export class DomainsSettingsComponent implements OnInit {
     const item = this.deletingItem();
     if (!item) return;
     this.saving.set(true);
-    this.domainListService.delete(item.id).subscribe({
-      next: () => {
-        this.allItems.update(list => list.filter(i => i.id !== item.id));
-        this.toast.success('Domínio excluído.');
-        this.deletingItem.set(null);
-        this.saving.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to delete domain list item', err);
-        this.toast.error('Erro ao excluir domínio.');
-        this.saving.set(false);
-      },
+    this.domainListService.delete(item.id).then(() => {
+      this.allItems.update(list => list.filter(i => i.id !== item.id));
+      this.toast.success('Domínio excluído.');
+      this.deletingItem.set(null);
+      this.saving.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to delete domain list item', err);
+      this.toast.error('Erro ao excluir domínio.');
+      this.saving.set(false);
     });
   }
 }

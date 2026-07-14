@@ -38,10 +38,7 @@ export class PeopleSettingsComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.peopleService.getAll().subscribe({
-      next: data => { this.people.set(data); this.loading.set(false); },
-      error: err => { this.logger.error('Failed to load people', err); this.loading.set(false); },
-    });
+    this.peopleService.getAll().then(data => { this.people.set(data); this.loading.set(false); }).catch((err: unknown) => { this.logger.error('Failed to load people', err); this.loading.set(false); });
   }
 
   openCreate(): void {
@@ -80,22 +77,19 @@ export class PeopleSettingsComponent implements OnInit {
       ? this.peopleService.update(id, name)
       : this.peopleService.upsertByName(name);
 
-    op$.subscribe({
-      next: saved => {
-        this.people.update(list =>
-          id
-            ? list.map(p => (p.id === id ? saved : p))
-            : [...list, saved].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
-        );
-        this.toast.success(id ? 'Pessoa atualizada!' : 'Pessoa adicionada!');
-        this.saving.set(false);
-        this.closeForm();
-      },
-      error: err => {
-        this.logger.error('Failed to save person', err);
-        this.toast.error('Erro ao salvar.');
-        this.saving.set(false);
-      },
+    op$.then(saved => {
+      this.people.update(list =>
+        id
+          ? list.map(p => (p.id === id ? saved : p))
+          : [...list, saved].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+      );
+      this.toast.success(id ? 'Pessoa atualizada!' : 'Pessoa adicionada!');
+      this.saving.set(false);
+      this.closeForm();
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to save person', err);
+      this.toast.error('Erro ao salvar.');
+      this.saving.set(false);
     });
   }
 
@@ -111,18 +105,15 @@ export class PeopleSettingsComponent implements OnInit {
     const person = this.deletingPerson();
     if (!person) return;
     this.saving.set(true);
-    this.peopleService.delete(person.id).subscribe({
-      next: () => {
-        this.people.update(list => list.filter(p => p.id !== person.id));
-        this.toast.success('Pessoa removida.');
-        this.deletingPerson.set(null);
-        this.saving.set(false);
-      },
-      error: err => {
-        this.logger.error('Failed to delete person', err);
-        this.toast.error('Erro ao remover pessoa.');
-        this.saving.set(false);
-      },
+    this.peopleService.delete(person.id).then(() => {
+      this.people.update(list => list.filter(p => p.id !== person.id));
+      this.toast.success('Pessoa removida.');
+      this.deletingPerson.set(null);
+      this.saving.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to delete person', err);
+      this.toast.error('Erro ao remover pessoa.');
+      this.saving.set(false);
     });
   }
 }
