@@ -238,9 +238,9 @@ export class MovimentosComponent implements OnInit {
   readonly preloadedBalance = signal<{ available: number; projected: number } | null>(null);
   readonly savingsBalance = signal<{ available: number; projected: number } | null>(null);
 
-  readonly totalEntradas = computed(() => this.periodTotals()?.totalEntries ?? 0);
-  readonly totalSaidas   = computed(() => this.periodTotals()?.totalTransactions ?? 0);
-  readonly saldo         = this.balanceInRange;
+  readonly totalEntradas = computed(() => this.allEntries().reduce((s, e) => s + e.amount, 0));
+  readonly totalSaidas   = computed(() => this.allTransactions().reduce((s, t) => s + t.amount, 0));
+  readonly saldo         = computed(() => this.totalEntradas() - this.totalSaidas());
   readonly totalSavingsDeposits    = computed(() => this.savingsPeriodTotals().deposits);
   readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
   readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
@@ -853,6 +853,7 @@ export class MovimentosComponent implements OnInit {
           } else {
             this.load(true);
           }
+          this.preloadedBalance.set(null);
           this.balanceService.invalidate();
         });
       },
@@ -902,6 +903,7 @@ export class MovimentosComponent implements OnInit {
           this.saving.set(false);
           this.closeModal();
           this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
+          this.preloadedBalance.set(null);
           this.balanceService.invalidate();
         },
         error: err => {
@@ -949,6 +951,7 @@ export class MovimentosComponent implements OnInit {
           this.allTransactions.update(list => list.filter(t => t.id !== item.id));
         }
         this.deletingItem.set(null);
+        this.preloadedBalance.set(null);
         this.balanceService.invalidate();
         this.toast.success(this.tr('movimentos.toast.deleted'));
       },
