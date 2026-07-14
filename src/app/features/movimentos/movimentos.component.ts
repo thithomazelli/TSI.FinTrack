@@ -7,6 +7,8 @@ import {
   inject,
   signal,
   computed,
+  effect,
+  untracked,
 } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -562,6 +564,13 @@ export class MovimentosComponent implements OnInit {
     },
   } as ChartConfiguration<'doughnut'>['options']));
 
+  constructor() {
+    effect(() => {
+      this.balanceService.version();
+      untracked(() => this.refreshBalanceCards());
+    });
+  }
+
   ngOnInit(): void {
     const qp = this.route.snapshot.queryParamMap;
     const qYear  = qp.get('year');
@@ -670,6 +679,23 @@ export class MovimentosComponent implements OnInit {
 
   onDateChange(): void {
     this.load();
+  }
+
+  private async refreshBalanceCards(): Promise<void> {
+    const now = new Date();
+    const isCurrent = +this.year() === now.getFullYear() && +this.month() === now.getMonth() + 1;
+    const endOfMonth = new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0];
+    const today = now.toISOString().split('T')[0];
+    const [availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = await Promise.all([
+      isCurrent
+        ? this.balanceService.getAvailableBalance().toPromise()
+        : this.balanceService.getBalanceUpTo(endOfMonth).toPromise(),
+      this.balanceService.getBalanceUpTo(endOfMonth).toPromise(),
+      this.savingsService.getBalanceUpTo(today).toPromise(),
+      this.savingsService.getBalanceUpTo(endOfMonth).toPromise(),
+    ]);
+    this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
+    this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
   }
 
   setPeriodMode(mode: 'month' | 'range'): void {
@@ -853,7 +879,6 @@ export class MovimentosComponent implements OnInit {
           } else {
             this.load(true);
           }
-          this.preloadedBalance.set(null);
           this.balanceService.invalidate();
         });
       },
@@ -903,7 +928,6 @@ export class MovimentosComponent implements OnInit {
           this.saving.set(false);
           this.closeModal();
           this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
-          this.preloadedBalance.set(null);
           this.balanceService.invalidate();
         },
         error: err => {
