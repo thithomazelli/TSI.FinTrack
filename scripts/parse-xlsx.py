@@ -441,12 +441,16 @@ def generate_pending_installments(all_transactions: list) -> list:
 
         # Compute the month after the last billing date
         last_date = date.fromisoformat(last["date"][:10])
+        # Use purchase_date of last known installment as base for projecting purchase dates
+        last_purch_raw = last.get("purchase_date")
+        last_purch = date.fromisoformat(last_purch_raw[:10]) if last_purch_raw else last_date
         card_name = last.get("credit_card_name")
         due_day   = CARD_DUE.get((card_name or "").lower(), 10) if card_name else None
 
         for n in range(last_num + 1, total + 1):
             # Advance month
-            m = last_date.month + (n - last_num)
+            delta = n - last_num
+            m = last_date.month + delta
             y = last_date.year + (m - 1) // 12
             m = ((m - 1) % 12) + 1
             last_day = calendar.monthrange(y, m)[1]
@@ -456,10 +460,16 @@ def generate_pending_installments(all_transactions: list) -> list:
             else:
                 bill_dt = date(y, m, last_day).isoformat()
 
+            # Advance purchase date by same number of months
+            pm = last_purch.month + delta
+            py = last_purch.year + (pm - 1) // 12
+            pm = ((pm - 1) % 12) + 1
+            purch_dt = date(py, pm, min(last_purch.day, calendar.monthrange(py, pm)[1])).isoformat()
+
             new_t = {**last}
             new_t["description"]         = f"{base_desc} {n}/{total}"
             new_t["date"]                = bill_dt
-            new_t["purchase_date"]       = None
+            new_t["purchase_date"]       = purch_dt
             new_t["installment_number"]  = n
             new_t["status"]              = "PROJECTED"
             new_t["position"]            = None
