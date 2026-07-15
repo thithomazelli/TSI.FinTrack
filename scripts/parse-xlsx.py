@@ -389,7 +389,7 @@ def generate_pending_installments(all_transactions: list) -> list:
         base_desc, _, _ = parsed
 
         # Compute the month after the last billing date
-        last_date = date.fromisoformat(last["date"])
+        last_date = date.fromisoformat(last["date"][:10])
         card_name = last.get("credit_card_name")
         due_day   = CARD_DUE.get((card_name or "").lower(), 10) if card_name else None
 
