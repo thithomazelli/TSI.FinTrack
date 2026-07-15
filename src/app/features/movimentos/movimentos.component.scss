@@ -9,6 +9,12 @@
   padding-bottom: .25rem;
   margin: -1.5rem -1.5rem 0;
   padding: 1.5rem 1.5rem 0;
+
+  @media (max-width: 720px) {
+    position: static;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
