@@ -57,6 +57,8 @@ def parse_installment(description: str):
     num, total = int(m.group(2)), int(m.group(3))
     if num < 1 or total < 2 or num > total:
         return None
+    if total > 120:  # >120 months is not a real installment (likely MM/YYYY pattern)
+        return None
     return m.group(1).strip(), num, total
 
 # Normalise category names that changed over the years
