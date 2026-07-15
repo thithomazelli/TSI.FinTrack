@@ -337,6 +337,69 @@ def parse_workbook(path: Path, year: int):
     return all_entries, all_transactions, all_savings
 
 
+# ── Installment continuation ──────────────────────────────────────────────────
+
+def generate_pending_installments(all_transactions: list) -> list:
+    """
+    For each installment group where the highest seen installment < total,
+    generate the missing future installments as PROJECTED transactions.
+
+    The billing date for each missing installment is computed by advancing
+    the last seen billing date by 1 month per installment.
+    """
+    # Group by installment_group_id
+    groups: dict[str, list] = {}
+    for t in all_transactions:
+        gid = t.get("installment_group_id")
+        if not gid:
+            continue
+        groups.setdefault(gid, []).append(t)
+
+    generated = []
+    for gid, items in groups.items():
+        items_sorted = sorted(items, key=lambda x: x.get("installment_number", 0))
+        last = items_sorted[-1]
+        total = last.get("total_installments", 0)
+        last_num = last.get("installment_number", 0)
+
+        if last_num >= total:
+            continue  # all installments already present
+
+        # Parse base description from last item
+        parsed = parse_installment(last["description"])
+        if not parsed:
+            continue
+        base_desc, _, _ = parsed
+
+        # Compute the month after the last billing date
+        last_date = date.fromisoformat(last["date"])
+        card_name = last.get("credit_card_name")
+        due_day   = CARD_DUE.get((card_name or "").lower(), 10) if card_name else None
+
+        for n in range(last_num + 1, total + 1):
+            # Advance month
+            m = last_date.month + (n - last_num)
+            y = last_date.year + (m - 1) // 12
+            m = ((m - 1) % 12) + 1
+            last_day = calendar.monthrange(y, m)[1]
+
+            if card_name and due_day:
+                bill_dt = date(y, m, min(due_day, last_day)).isoformat()
+            else:
+                bill_dt = date(y, m, last_day).isoformat()
+
+            new_t = {**last}
+            new_t["description"]         = f"{base_desc} {n}/{total}"
+            new_t["date"]                = bill_dt
+            new_t["purchase_date"]       = None
+            new_t["installment_number"]  = n
+            new_t["status"]              = "PROJECTED"
+            new_t["position"]            = None
+            generated.append(new_t)
+
+    return generated
+
+
 # ── main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -368,6 +431,15 @@ def main():
         all_transactions.extend(t)
         all_savings.extend(s)
         print(f"  -> subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
+
+    # ── Installment continuation: project remaining parcelas beyond last year ──
+    projected = generate_pending_installments(all_transactions)
+    if projected:
+        print(f"Parcelas projetadas geradas: {len(projected)}")
+        for t in projected:
+            parsed = parse_installment(t["description"])
+            print(f"  {t['date']}  {t['description']}  R$ {t['amount']:.2f}  [{t.get('credit_card_name') or 'debito'}]")
+        all_transactions.extend(projected)
 
     result = {
         "meta": {"opening_balance": -305, "opened_at": "2009-05-01"},
