@@ -65,15 +65,15 @@
          (pointerdown)="savingsShowCarousel() && onSavPointerDown($event)"
          (pointerup)="savingsShowCarousel() && onSavPointerUp($event)">
       <div class="sm-card-main">
+        @if (savingsShowCarousel()) {
+          <button class="carousel-arrow" (click)="savingsPrev(); $event.stopPropagation()" [disabled]="savingsIndex() === 0" aria-label="anterior">‹</button>
+        }
         <div class="sm-left">
           <span class="sm-title">{{ 'widget.balance' | translate }}</span>
           <span class="sm-account">
             @if (savLabel()) { {{ savLabel() }} } @else { {{ 'widget.savingsAccount' | translate }} }
           </span>
         </div>
-        @if (savingsShowCarousel()) {
-          <button class="carousel-arrow" (click)="savingsPrev(); $event.stopPropagation()" [disabled]="savingsIndex() === 0" aria-label="anterior">‹</button>
-        }
         <div class="sm-values">
           <div class="sm-row">
             <span class="sm-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
@@ -106,15 +106,15 @@
          (pointerdown)="ccShowCarousel() && onCCPointerDown($event)"
          (pointerup)="ccShowCarousel() && onCCPointerUp($event)">
       <div class="sm-card-main">
+        @if (ccShowCarousel()) {
+          <button class="carousel-arrow" (click)="ccPrev(); $event.stopPropagation()" [disabled]="ccIndex() === 0" aria-label="anterior">‹</button>
+        }
         <div class="sm-left">
           <span class="sm-title">{{ 'widget.balance' | translate }}</span>
           <span class="sm-account">
             @if (ccLabel()) { {{ ccLabel() }} } @else { {{ 'widget.checkingAccount' | translate }} }
           </span>
         </div>
-        @if (ccShowCarousel()) {
-          <button class="carousel-arrow" (click)="ccPrev(); $event.stopPropagation()" [disabled]="ccIndex() === 0" aria-label="anterior">‹</button>
-        }
         <div class="sm-values">
           <div class="sm-row">
             <span class="sm-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
