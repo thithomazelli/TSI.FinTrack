@@ -761,10 +761,8 @@ export class MovimentosComponent implements OnInit {
     ];
 
     const ccPerAccQueries: Promise<number>[] = ccAccs.length >= 2 ? [
-      ...ccAccs.map(a => isCurrent
-        ? this.balanceService.getAvailableBalanceByAccount(a.id, 0)
-        : this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id, 0)),
-      ...ccAccs.map(a => this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id, 0)),
+      ...ccAccs.map(a => this.balanceService.getMonthRealizedByAccount(+this.year(), +this.month(), a.id)),
+      ...ccAccs.map(a => this.balanceService.getMonthProjectedByAccount(+this.year(), +this.month(), a.id)),
     ] : [];
 
     const savPerAccQueries: Promise<number>[] = savAccs.length >= 2 ? [
