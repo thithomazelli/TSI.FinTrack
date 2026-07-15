@@ -353,7 +353,7 @@ def main():
 
     print(f"Encontrados {len(year_files)} arquivos:")
     for y, p in sorted(year_files.items()):
-        print(f"  {y} → {p.name}")
+        print(f"  {y} -> {p.name}")
     print()
 
     all_entries      = []
@@ -367,7 +367,7 @@ def main():
         all_entries.extend(e)
         all_transactions.extend(t)
         all_savings.extend(s)
-        print(f"  → subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
+        print(f"  -> subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
 
     result = {
         "meta": {"opening_balance": -305, "opened_at": "2009-05-01"},
@@ -381,12 +381,12 @@ def main():
     total_dep_amt = sum(s["amount"] for s in all_savings if s["type"] == "DEPOSIT")
     total_wdw_amt = sum(s["amount"] for s in all_savings if s["type"] == "WITHDRAWAL")
     OUT_FILE.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
-    print(f"\n✅ {len(all_entries)} entries + {len(all_transactions)} transactions")
+    print(f"\nOK: {len(all_entries)} entries + {len(all_transactions)} transactions")
     print(f"   savings: {len(all_savings)} total")
     print(f"   DEPOSIT  : {total_dep_n:4d} movimentos  R$ {total_dep_amt:,.2f}")
     print(f"   WITHDRAWAL: {total_wdw_n:4d} movimentos  R$ {total_wdw_amt:,.2f}")
     print(f"   SALDO     :                  R$ {total_dep_amt - total_wdw_amt:,.2f}")
-    print(f"   → {OUT_FILE}")
+    print(f"   -> {OUT_FILE}")
 
 
 if __name__ == "__main__":
