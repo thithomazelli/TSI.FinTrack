@@ -62,6 +62,20 @@ async function insert(table, rows, returning = 'id,name') {
 
 // ── Cleanup ───────────────────────────────────────────────────────────────────
 
+async function deleteInBatches(table) {
+  let total = 0;
+  while (true) {
+    const { data, error } = await supabase.from(table).select('id').eq('owner_id', OWNER_ID).limit(200);
+    if (error) throw new Error(`cleanup ${table} (select): ${error.message}`);
+    if (!data || data.length === 0) break;
+    const ids = data.map(r => r.id);
+    const { error: delError } = await supabase.from(table).delete().in('id', ids);
+    if (delError) throw new Error(`cleanup ${table} (delete): ${delError.message}`);
+    total += ids.length;
+  }
+  return total;
+}
+
 async function cleanup() {
   const tables = [
     'transactions', 'entries', 'savings_movements', 'goals',
@@ -69,11 +83,13 @@ async function cleanup() {
     'credit_cards', 'accounts', 'categories',
     'family_members', 'family_invites', 'domain_lists', 'people',
   ];
+  let totalDeleted = 0;
   for (const t of tables) {
-    const { error } = await supabase.from(t).delete().eq('owner_id', OWNER_ID);
-    if (error && error.code !== 'PGRST116') throw new Error(`cleanup ${t}: ${error.message}`);
+    const count = await deleteInBatches(t);
+    if (count > 0) process.stdout.write(`\n    ${t}: ${count} rows`);
+    totalDeleted += count;
   }
-  return `${tables.length} tables cleaned`;
+  return `${tables.length} tables cleaned (${totalDeleted} rows)`;
 }
 
 // ── Domain lists ──────────────────────────────────────────────────────────────
