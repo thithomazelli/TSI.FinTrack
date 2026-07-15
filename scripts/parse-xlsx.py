@@ -114,23 +114,49 @@ def open_xlsx(path: Path):
 
 
 def to_date_str(val, fallback_year: int, fallback_month: int, enforce_month: bool = False) -> str | None:
-    """Convert a cell value to an ISO date string.
+    """Convert a cell value to an ISO date string (YYYY-MM-DD).
 
-    enforce_month=True: force the result into fallback_year/fallback_month (used for
-    debit transactions whose date must belong to the sheet's month).
+    Handles: datetime/date objects from openpyxl, text strings (M/D/YYYY or
+    YYYY-MM-DD), and Excel float serial numbers.
+    enforce_month=True: force the result into fallback_year/fallback_month.
     """
-    if isinstance(val, (datetime, date)):
-        d = val if isinstance(val, date) else val.date()
-        # Dates before 2000 almost certainly have the wrong year due to a cell
-        # storing only the day number (e.g. 19 → 1900-01-19 instead of 2020-01-19).
-        if d.year < 2000:
-            last = calendar.monthrange(fallback_year, fallback_month)[1]
-            return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
-        if enforce_month and (d.year != fallback_year or d.month != fallback_month):
-            last = calendar.monthrange(fallback_year, fallback_month)[1]
-            return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
-        return d.isoformat()
-    return None
+    d = None
+
+    if isinstance(val, datetime):
+        d = val.date()
+    elif isinstance(val, date):
+        d = val
+    elif isinstance(val, str):
+        val = val.strip()
+        if not val:
+            return None
+        for fmt in ('%m/%d/%Y', '%d/%m/%Y', '%Y-%m-%d', '%m/%d/%y', '%d/%m/%y'):
+            try:
+                d = datetime.strptime(val, fmt).date()
+                break
+            except ValueError:
+                continue
+        if d is None:
+            return None
+    elif isinstance(val, float):
+        # Excel date serial number
+        try:
+            epoch = date(1899, 12, 30)
+            from datetime import timedelta
+            d = epoch + timedelta(days=int(val))
+        except Exception:
+            return None
+    else:
+        return None
+
+    # Dates before 2000 almost certainly have the wrong year (cell stores only day).
+    if d.year < 2000:
+        last = calendar.monthrange(fallback_year, fallback_month)[1]
+        return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
+    if enforce_month and (d.year != fallback_year or d.month != fallback_month):
+        last = calendar.monthrange(fallback_year, fallback_month)[1]
+        return date(fallback_year, fallback_month, min(d.day, last)).isoformat()
+    return d.isoformat()
 
 
 def coerce_amount(val):
