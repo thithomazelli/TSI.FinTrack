@@ -689,7 +689,7 @@ export class MovimentosComponent implements OnInit {
         isCurrent
           ? this.balanceService.getAvailableBalance()
           : this.balanceService.getBalanceUpTo(endOfMonth),
-        this.balanceService.getBalanceUpTo(isCurrent ? endOfMonth : endOfMonth),
+        this.balanceService.getMonthBalance(+this.year(), +this.month()),
         this.savingsService.getBalanceUpTo(today),
         this.savingsService.getBalanceUpTo(endOfMonth),
       ]);
@@ -756,7 +756,7 @@ export class MovimentosComponent implements OnInit {
 
     const baseQueries: Promise<number>[] = [
       isCurrent ? this.balanceService.getAvailableBalance() : this.balanceService.getBalanceUpTo(endOfMonth),
-      this.balanceService.getBalanceUpTo(endOfMonth),
+      this.balanceService.getMonthBalance(+this.year(), +this.month()),
       this.savingsService.getBalanceUpTo(today),
       this.savingsService.getBalanceUpTo(endOfMonth),
     ];
