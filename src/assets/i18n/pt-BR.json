@@ -398,7 +398,11 @@
       "moveMsg": "Mover {{count}} registro(s) para:",
       "toggleStatus": "Alternar status",
       "confirmToggleStatus": "Alternar status",
-      "confirmToggleStatusMsg": "Alternar status de {{ count }} registro(s)? Realizado ↔ Projetado."
+      "confirmToggleStatusMsg": "Alternar status de {{ count }} registro(s)? Realizado ↔ Projetado.",
+      "changeDate": "Alterar data",
+      "changeDateTitle": "Alterar data em massa",
+      "changeDateMsg": "Aplicar nova data em {{count}} registro(s):",
+      "datChanged": "registro(s) com data alterada"
     },
     "toggleStatusHint": "Duplo clique para alternar status"
   },

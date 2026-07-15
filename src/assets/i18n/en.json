@@ -398,7 +398,11 @@
       "moveMsg": "Move {{count}} record(s) to:",
       "toggleStatus": "Toggle status",
       "confirmToggleStatus": "Toggle status",
-      "confirmToggleStatusMsg": "Toggle status of {{ count }} record(s)? Realized ↔ Projected."
+      "confirmToggleStatusMsg": "Toggle status of {{ count }} record(s)? Realized ↔ Projected.",
+      "changeDate": "Change date",
+      "changeDateTitle": "Bulk change date",
+      "changeDateMsg": "Apply new date to {{count}} record(s):",
+      "datChanged": "record(s) date updated"
     },
     "toggleStatusHint": "Double-click to toggle status"
   },

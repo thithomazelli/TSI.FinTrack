@@ -574,10 +574,11 @@ export class MovimentosComponent implements OnInit {
   readonly deletingItem = signal<MovimentoItem | null>(null);
 
   // Bulk actions
-  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | null>(null);
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | 'date' | null>(null);
   bulkNewAmount = 0;
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
+  bulkNewDate = '';
   readonly bulkSaving = signal(false);
 
   // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
@@ -1141,10 +1142,11 @@ export class MovimentosComponent implements OnInit {
     this.bulkActionOpen.set(null);
   }
 
-  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status'): void {
+  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status' | 'date'): void {
     this.bulkNewAmount = 0;
     this.bulkTargetYear = new Date().getFullYear();
     this.bulkTargetMonth = new Date().getMonth() + 1;
+    this.bulkNewDate = '';
     this.bulkActionOpen.set(action);
   }
 
@@ -1188,6 +1190,31 @@ export class MovimentosComponent implements OnInit {
       this.load();
     } catch (err) {
       this.logger.error('Bulk amount update failed', err);
+      this.toast.error(this.tr('movimentos.toast.txUpdateError'));
+    } finally {
+      this.bulkSaving.set(false);
+    }
+  }
+
+  // ── Bulk change date ───────────────────────────────────────────────────────
+  async bulkChangeDate(): Promise<void> {
+    if (!this.bulkNewDate) return;
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    this.bulkSaving.set(true);
+    try {
+      for (const item of items) {
+        if (item.kind === 'entry') {
+          await this.entryService.update(item.id, { date: this.bulkNewDate } as any);
+        } else {
+          await this.transactionService.update(item.id, { date: this.bulkNewDate } as any);
+        }
+      }
+      this.clearSelection();
+      this.toast.success(`${items.length} ${this.tr('movimentos.bulk.datChanged')}`);
+      this.load();
+    } catch (err) {
+      this.logger.error('Bulk date change failed', err);
       this.toast.error(this.tr('movimentos.toast.txUpdateError'));
     } finally {
       this.bulkSaving.set(false);

@@ -201,6 +201,7 @@
       <div class="bulk-bar">
         <span class="bulk-count">{{ selectionCount() }} {{ 'movimentos.bulk.selected' | translate }}</span>
         <div class="bulk-actions">
+          <button class="bulk-btn bulk-btn--date" (click)="openBulkAction('date')">{{ 'movimentos.bulk.changeDate' | translate }}</button>
           <button class="bulk-btn bulk-btn--move" (click)="openBulkAction('move')">{{ 'movimentos.bulk.move' | translate }}</button>
           <button class="bulk-btn bulk-btn--amount" (click)="openBulkAction('amount')">{{ 'movimentos.bulk.editAmount' | translate }}</button>
           <button class="bulk-btn bulk-btn--status" (click)="openBulkAction('status')">{{ 'movimentos.bulk.toggleStatus' | translate }}</button>
@@ -472,12 +473,27 @@
   </div>
 }
 
+@if (bulkActionOpen() === 'date') {
+  <div class="modal-backdrop" (click)="clearSelection()"></div>
+  <div class="modal modal--sm">
+    <h3 class="modal-title">{{ 'movimentos.bulk.changeDateTitle' | translate }}</h3>
+    <p class="modal-text">{{ 'movimentos.bulk.changeDateMsg' | translate: { count: selectionCount() } }}</p>
+    <input class="input" type="date" [(ngModel)]="bulkNewDate"
+           (keydown.enter)="bulkNewDate && bulkSimChangeDate()" />
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="bulkSimChangeDate()" [disabled]="!bulkNewDate">{{ 'common.confirm' | translate }}</button>
+    </div>
+  </div>
+}
+
 @if (bulkActionOpen() === 'amount') {
   <div class="modal-backdrop" (click)="clearSelection()"></div>
   <div class="modal modal--sm">
     <h3 class="modal-title">{{ 'movimentos.bulk.editAmountTitle' | translate }}</h3>
     <p class="modal-text">{{ 'movimentos.bulk.editAmountMsg' | translate: { count: selectionCount() } }}</p>
-    <input class="input" type="number" min="0.01" step="0.01" [(ngModel)]="bulkNewAmount" />
+    <input class="input" type="number" min="0.01" step="0.01" [(ngModel)]="bulkNewAmount"
+           (keydown.enter)="bulkNewAmount > 0 && bulkSimAmount()" />
     <div class="modal-footer">
       <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary" (click)="bulkSimAmount()" [disabled]="bulkNewAmount <= 0">{{ 'common.confirm' | translate }}</button>
@@ -496,7 +512,8 @@
           <option [value]="m">{{ m }}</option>
         }
       </select>
-      <input class="input" type="number" [(ngModel)]="bulkTargetYear" min="2000" max="2100" />
+      <input class="input" type="number" [(ngModel)]="bulkTargetYear" min="2000" max="2100"
+             (keydown.enter)="bulkSimMove()" />
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>

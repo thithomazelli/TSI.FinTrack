@@ -134,10 +134,11 @@ export class SimulationsComponent implements OnInit {
 
   // Multi-select
   readonly selectedIds = signal<Set<string>>(new Set());
-  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | null>(null);
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | 'date' | null>(null);
   bulkNewAmount = 0;
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
+  bulkNewDate = '';
   readonly bulkSaving = signal(false);
 
   // Raw real items loaded from DB
@@ -575,10 +576,11 @@ export class SimulationsComponent implements OnInit {
     this.bulkActionOpen.set(null);
   }
 
-  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status'): void {
+  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status' | 'date'): void {
     this.bulkNewAmount = 0;
     this.bulkTargetYear = new Date().getFullYear();
     this.bulkTargetMonth = new Date().getMonth() + 1;
+    this.bulkNewDate = '';
     this.bulkActionOpen.set(action);
   }
 
@@ -605,6 +607,19 @@ export class SimulationsComponent implements OnInit {
     const count = ids.length;
     this.clearSelection();
     this.toast.success(`${count} ${this.tr('movimentos.bulk.amountUpdated')}`);
+  }
+
+  bulkSimChangeDate(): void {
+    if (!this.bulkNewDate) return;
+    const ids = [...this.selectedIds()];
+    this.overrides.update(m => {
+      const next = new Map(m);
+      for (const id of ids) next.set(id, { ...(next.get(id) ?? {}), date: this.bulkNewDate });
+      return next;
+    });
+    const count = ids.length;
+    this.clearSelection();
+    this.toast.success(`${count} ${this.tr('movimentos.bulk.datChanged')}`);
   }
 
   bulkSimMove(): void {
