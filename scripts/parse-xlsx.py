@@ -245,7 +245,7 @@ def parse_sheet(ws, year: int, month: int):
                 purchase_dt = to_date_str(dt_val, year, month)
                 due_day = CARD_DUE.get(card_name.lower(), 10)
                 bill_dt  = payment_date(year, month, due_day)
-                purch    = purchase_dt or bill_dt
+                purch    = purchase_dt  # null when spreadsheet has no purchase date
             else:
                 # Debit: date must belong to the sheet's month — enforce it
                 purchase_dt = to_date_str(dt_val, year, month, enforce_month=True)
