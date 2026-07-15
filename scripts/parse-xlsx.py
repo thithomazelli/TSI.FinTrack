@@ -61,13 +61,21 @@ def parse_installment(description: str):
 
 # Normalise category names that changed over the years
 CAT_ALIAS = {
-    "jogos":      "Games",
-    "uber / 99":  "Uber/99",
+    "jogos":             "Games",
+    "uber / 99":         "Uber/99",
     "cuidados pessoais": "Cuidados Pessoais",
-    "despesas carro":    "Despesas Carro",
-    "despesas casa":     "Despesas Casa",
+    "despesas carro":    "Despesas carro",
+    "despesas casa":     "Despesas casa",
     "despesas empresa":  "Despesas Empresa",
-    "despesas terreno":  "Despesas Terreno",
+    "despesas terreno":  "Despesas terreno",
+    "saude":             "Saúde",
+    "saúde":             "Saúde",
+    "vestuario":         "Vestuário",
+    "vestuário":         "Vestuário",
+    "eletronicos":       "Eletrônicos",
+    "eletrônicos":       "Eletrônicos",
+    "poupanca":          "Poupança",
+    "poupança":          "Poupança",
 }
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -281,31 +289,6 @@ def parse_sheet(ws, year: int, month: int):
                 "type":        "DEPOSIT",
             })
 
-    # ── Installment detection ────────────────────────────────────────────────
-    # Group transactions that match "Descrição X/Y" by (base, card, total)
-    # so each group shares an installment_group_id.
-    _inst_buckets: dict[tuple, list] = {}
-    for t in transactions:
-        parsed = parse_installment(t["description"])
-        if not parsed:
-            continue
-        base, num, total = parsed
-        key = (base.lower(), t.get("credit_card_name") or "", total)
-        _inst_buckets.setdefault(key, []).append((t, num))
-
-    for (base_key, card_key, total), items in _inst_buckets.items():
-        # Sort by installment number; split into complete groups of `total` items
-        items.sort(key=lambda x: x[1])
-        for chunk_start in range(0, len(items), total):
-            chunk = items[chunk_start : chunk_start + total]
-            if len(chunk) < 2:
-                continue
-            group_id = str(uuid.uuid4())
-            for t, num in chunk:
-                t["installment_number"]   = num
-                t["total_installments"]   = total
-                t["installment_group_id"] = group_id
-
     return entries, transactions, savings
 
 
@@ -335,6 +318,40 @@ def parse_workbook(path: Path, year: int):
         print(f"  {year}/{month:02d} {sheet_name}: {len(e)} entries, {len(t)} transactions, {len(s)} savings ({dep}D/{wdw}W)")
 
     return all_entries, all_transactions, all_savings
+
+
+# ── Global installment grouping ───────────────────────────────────────────────
+
+def assign_installment_groups(all_transactions: list) -> int:
+    """
+    Scan all transactions globally (across all months/years), group those whose
+    description matches 'Base X/Y', and assign a shared installment_group_id.
+    Must run before generate_pending_installments.
+    """
+    buckets: dict[tuple, list] = {}
+    for t in all_transactions:
+        parsed = parse_installment(t["description"])
+        if not parsed:
+            continue
+        base, num, total = parsed
+        t["installment_number"] = num
+        t["total_installments"] = total
+        key = (base.lower(), t.get("credit_card_name") or "", total)
+        buckets.setdefault(key, []).append((t, num))
+
+    groups_created = 0
+    for (base_key, card_key, total), items in buckets.items():
+        # Sort by date then installment number
+        items.sort(key=lambda x: (x[0]["date"], x[1]))
+        for chunk_start in range(0, len(items), total):
+            chunk = items[chunk_start: chunk_start + total]
+            if len(chunk) < 2:
+                continue
+            group_id = str(uuid.uuid4())
+            for t, num in chunk:
+                t["installment_group_id"] = group_id
+            groups_created += 1
+    return groups_created
 
 
 # ── Installment continuation ──────────────────────────────────────────────────
@@ -431,6 +448,10 @@ def main():
         all_transactions.extend(t)
         all_savings.extend(s)
         print(f"  -> subtotal: {len(e)} entries, {len(t)} transactions, {len(s)} savings\n")
+
+    # ── Global installment grouping (across all months/years) ────────────────
+    groups = assign_installment_groups(all_transactions)
+    print(f"Grupos de parcelas detectados: {groups}")
 
     # ── Installment continuation: project remaining parcelas beyond last year ──
     projected = generate_pending_installments(all_transactions)
