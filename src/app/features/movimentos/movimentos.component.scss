@@ -41,6 +41,12 @@
     opacity: 1;
     margin-bottom: 1.25rem;
   }
+
+  @media (max-width: 720px) {
+    &--open {
+      max-height: 900px;
+    }
+  }
 }
 
 .btn-nova {
