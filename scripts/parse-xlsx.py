@@ -305,12 +305,9 @@ def parse_sheet(ws, year: int, month: int):
                     last_day = calendar.monthrange(year, month)[1]
                     purchase_dt = date(year, month, last_day).isoformat()
                 purch = purchase_dt
-                # DEBUG: print first 20 credit rows with their raw dt_val and parsed result
-                if not hasattr(parse_sheet, '_debug_count'):
-                    parse_sheet._debug_count = 0
-                if parse_sheet._debug_count < 20:
-                    parse_sheet._debug_count += 1
-                    print(f"  [DBG] {year}/{month:02d} {card_name} | dt_val={repr(dt_val)} ({type(dt_val).__name__}) -> purchase_dt={purchase_dt}")
+                # DEBUG: print credit rows from 2025+ to diagnose purchase_date issue
+                if year >= 2025:
+                    print(f"  [DBG] {year}/{month:02d} {card_name} | dt_val={repr(dt_val)} ({type(dt_val).__name__}) -> purchase_dt={purchase_dt} | {(desc or '').strip()[:40]}")
             else:
                 # Debit: date must belong to the sheet's month — enforce it
                 purchase_dt = to_date_str(dt_val, year, month, enforce_month=True)
