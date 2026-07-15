@@ -59,47 +59,87 @@
         }
       </div>
     </div>
-    <!-- Card 2: saldo poupança -->
-    <div class="sm-card sm-card--savings">
-      <div class="sm-left">
-        <span class="sm-title">{{ 'widget.balance' | translate }}</span>
-        <span class="sm-account">{{ 'widget.savingsAccount' | translate }}</span>
-      </div>
-      <div class="sm-values">
-        <div class="sm-row">
-          <span class="sm-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
-          <span class="sm-value" [class.sm-pos]="(savingsBalance()?.available ?? 0) >= 0" [class.sm-neg]="(savingsBalance()?.available ?? 0) < 0">
-            R$ {{ (savingsBalance()?.available ?? 0) | number:'1.2-2' }}
+    <!-- Card 2: saldo poupança (com carrossel quando há 2+ contas) -->
+    <div class="sm-card sm-card--savings"
+         [class.sm-card--carousel]="savingsShowCarousel()"
+         (pointerdown)="savingsShowCarousel() && onSavPointerDown($event)"
+         (pointerup)="savingsShowCarousel() && onSavPointerUp($event)">
+      <div class="sm-card-main">
+        <div class="sm-left">
+          <span class="sm-title">{{ 'widget.balance' | translate }}</span>
+          <span class="sm-account">
+            @if (savLabel()) { {{ savLabel() }} } @else { {{ 'widget.savingsAccount' | translate }} }
           </span>
         </div>
-        <div class="sm-row">
-          <span class="sm-sublabel">{{ 'widget.balanceProjectedShort' | translate }}</span>
-          <span class="sm-value" [class.sm-pos]="(savingsBalance()?.projected ?? 0) >= 0" [class.sm-neg]="(savingsBalance()?.projected ?? 0) < 0">
-            R$ {{ (savingsBalance()?.projected ?? 0) | number:'1.2-2' }}
-          </span>
+        @if (savingsShowCarousel()) {
+          <button class="carousel-arrow" (click)="savingsPrev(); $event.stopPropagation()" [disabled]="savingsIndex() === 0" aria-label="anterior">‹</button>
+        }
+        <div class="sm-values">
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
+            <span class="sm-value" [class.sm-pos]="savAvailable() >= 0" [class.sm-neg]="savAvailable() < 0">
+              R$ {{ savAvailable() | number:'1.2-2' }}
+            </span>
+          </div>
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'widget.balanceProjectedShort' | translate }}</span>
+            <span class="sm-value" [class.sm-pos]="savProjected() >= 0" [class.sm-neg]="savProjected() < 0">
+              R$ {{ savProjected() | number:'1.2-2' }}
+            </span>
+          </div>
         </div>
+        @if (savingsShowCarousel()) {
+          <button class="carousel-arrow" (click)="savingsNext(); $event.stopPropagation()" [disabled]="savingsIndex() === savingsTotalSlides() - 1" aria-label="próximo">›</button>
+        }
       </div>
+      @if (savingsShowCarousel()) {
+        <div class="carousel-dots">
+          @for (dot of dotsArray(savingsTotalSlides()); track $index) {
+            <button class="carousel-dot" [class.is-active]="savingsIndex() === $index" (click)="savingsIndex.set($index); $event.stopPropagation()"></button>
+          }
+        </div>
+      }
     </div>
-    <!-- Card 3: saldo conta corrente -->
-    <div class="sm-card sm-card--cc">
-      <div class="sm-left">
-        <span class="sm-title">{{ 'widget.balance' | translate }}</span>
-        <span class="sm-account">{{ 'widget.checkingAccount' | translate }}</span>
-      </div>
-      <div class="sm-values">
-        <div class="sm-row">
-          <span class="sm-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
-          <span class="sm-value" [class.sm-pos]="(preloadedBalance()?.available ?? 0) >= 0" [class.sm-neg]="(preloadedBalance()?.available ?? 0) < 0">
-            R$ {{ (preloadedBalance()?.available ?? 0) | number:'1.2-2' }}
+    <!-- Card 3: saldo conta corrente (com carrossel quando há 2+ contas) -->
+    <div class="sm-card sm-card--cc"
+         [class.sm-card--carousel]="ccShowCarousel()"
+         (pointerdown)="ccShowCarousel() && onCCPointerDown($event)"
+         (pointerup)="ccShowCarousel() && onCCPointerUp($event)">
+      <div class="sm-card-main">
+        <div class="sm-left">
+          <span class="sm-title">{{ 'widget.balance' | translate }}</span>
+          <span class="sm-account">
+            @if (ccLabel()) { {{ ccLabel() }} } @else { {{ 'widget.checkingAccount' | translate }} }
           </span>
         </div>
-        <div class="sm-row">
-          <span class="sm-sublabel">{{ 'widget.balanceProjectedShort' | translate }}</span>
-          <span class="sm-value" [class.sm-pos]="(preloadedBalance()?.projected ?? 0) >= 0" [class.sm-neg]="(preloadedBalance()?.projected ?? 0) < 0">
-            R$ {{ (preloadedBalance()?.projected ?? 0) | number:'1.2-2' }}
-          </span>
+        @if (ccShowCarousel()) {
+          <button class="carousel-arrow" (click)="ccPrev(); $event.stopPropagation()" [disabled]="ccIndex() === 0" aria-label="anterior">‹</button>
+        }
+        <div class="sm-values">
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'widget.balanceRealizedShort' | translate }}</span>
+            <span class="sm-value" [class.sm-pos]="ccAvailable() >= 0" [class.sm-neg]="ccAvailable() < 0">
+              R$ {{ ccAvailable() | number:'1.2-2' }}
+            </span>
+          </div>
+          <div class="sm-row">
+            <span class="sm-sublabel">{{ 'widget.balanceProjectedShort' | translate }}</span>
+            <span class="sm-value" [class.sm-pos]="ccProjected() >= 0" [class.sm-neg]="ccProjected() < 0">
+              R$ {{ ccProjected() | number:'1.2-2' }}
+            </span>
+          </div>
         </div>
+        @if (ccShowCarousel()) {
+          <button class="carousel-arrow" (click)="ccNext(); $event.stopPropagation()" [disabled]="ccIndex() === ccTotalSlides() - 1" aria-label="próximo">›</button>
+        }
       </div>
+      @if (ccShowCarousel()) {
+        <div class="carousel-dots">
+          @for (dot of dotsArray(ccTotalSlides()); track $index) {
+            <button class="carousel-dot" [class.is-active]="ccIndex() === $index" (click)="ccIndex.set($index); $event.stopPropagation()"></button>
+          }
+        </div>
+      }
     </div>
   </div>
     </div><!-- /.top-row-wrap -->

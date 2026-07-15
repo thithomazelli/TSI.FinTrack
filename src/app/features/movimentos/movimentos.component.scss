@@ -31,7 +31,7 @@
   transition: max-height .3s ease, opacity .25s ease, margin-bottom .3s ease;
   margin-bottom: 0;
   &--open {
-    max-height: 200px;
+    max-height: 240px;
     opacity: 1;
     margin-bottom: 1.25rem;
   }
@@ -266,6 +266,61 @@ tsi-month-picker ::ng-deep .month-picker {
   &--cc      { border-left-color: #22c55e; }
   &--savings { border-left-color: #3b82f6; }
   &--period  { border-left-color: var(--color-border); }
+
+  &--carousel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: .35rem;
+    user-select: none;
+    cursor: grab;
+    &:active { cursor: grabbing; }
+  }
+}
+
+.sm-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .4rem;
+}
+
+.carousel-arrow {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-2);
+  font-size: 1rem; line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color var(--transition), color var(--transition), opacity var(--transition);
+
+  &:hover:not(:disabled) { border-color: var(--color-accent); color: var(--color-accent); }
+  &:disabled { opacity: .3; cursor: not-allowed; }
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.carousel-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  border: none; padding: 0;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+
+  &.is-active {
+    background: var(--color-accent);
+    transform: scale(1.25);
+  }
+
+  &:hover:not(.is-active) { background: var(--color-text-2); }
 }
 
 

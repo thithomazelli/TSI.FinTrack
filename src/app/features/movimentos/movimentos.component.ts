@@ -247,6 +247,59 @@ export class MovimentosComponent implements OnInit {
   readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
   readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
 
+  // Carousel state
+  readonly ccIndex      = signal(0);
+  readonly savingsIndex = signal(0);
+
+  readonly ccPerAccountBalances      = signal<Array<{ account: Account; available: number; projected: number }>>([]);
+  readonly savingsPerAccountBalances = signal<Array<{ account: Account; available: number; projected: number }>>([]);
+
+  readonly ccShowCarousel      = computed(() => this.accounts().length >= 2);
+  readonly savingsShowCarousel = computed(() => this.accounts().length >= 2);
+  readonly ccTotalSlides       = computed(() => this.accounts().length + 1);
+  readonly savingsTotalSlides  = computed(() => this.accounts().length + 1);
+
+  readonly ccCurrentSlide = computed(() => {
+    const idx = this.ccIndex();
+    if (idx === 0) return null;
+    return this.ccPerAccountBalances()[idx - 1] ?? null;
+  });
+
+  readonly savingsCurrentSlide = computed(() => {
+    const idx = this.savingsIndex();
+    if (idx === 0) return null;
+    return this.savingsPerAccountBalances()[idx - 1] ?? null;
+  });
+
+  readonly ccAvailable  = computed(() => this.ccCurrentSlide()?.available  ?? (this.preloadedBalance()?.available ?? 0));
+  readonly ccProjected  = computed(() => this.ccCurrentSlide()?.projected  ?? (this.preloadedBalance()?.projected ?? 0));
+  readonly savAvailable = computed(() => this.savingsCurrentSlide()?.available ?? (this.savingsBalance()?.available ?? 0));
+  readonly savProjected = computed(() => this.savingsCurrentSlide()?.projected ?? (this.savingsBalance()?.projected ?? 0));
+  readonly ccLabel      = computed(() => this.ccCurrentSlide()?.account.name ?? '');
+  readonly savLabel     = computed(() => this.savingsCurrentSlide()?.account.name ?? '');
+
+  ccNext():      void { this.ccIndex.update(i => Math.min(i + 1, this.ccTotalSlides() - 1)); }
+  ccPrev():      void { this.ccIndex.update(i => Math.max(i - 1, 0)); }
+  savingsNext(): void { this.savingsIndex.update(i => Math.min(i + 1, this.savingsTotalSlides() - 1)); }
+  savingsPrev(): void { this.savingsIndex.update(i => Math.max(i - 1, 0)); }
+
+  dotsArray(n: number): number[] { return Array.from({ length: n }); }
+
+  // Drag/swipe support
+  private ccDragStartX: number | null = null;
+  private savingsDragStartX: number | null = null;
+
+  onCCPointerDown(e: PointerEvent): void   { this.ccDragStartX = e.clientX; }
+  onCCPointerUp(e: PointerEvent): void     { this._applyDrag(e.clientX, this.ccDragStartX, () => this.ccNext(), () => this.ccPrev()); this.ccDragStartX = null; }
+  onSavPointerDown(e: PointerEvent): void  { this.savingsDragStartX = e.clientX; }
+  onSavPointerUp(e: PointerEvent): void    { this._applyDrag(e.clientX, this.savingsDragStartX, () => this.savingsNext(), () => this.savingsPrev()); this.savingsDragStartX = null; }
+
+  private _applyDrag(endX: number, startX: number | null, onLeft: () => void, onRight: () => void): void {
+    if (startX === null) return;
+    const delta = endX - startX;
+    if (Math.abs(delta) > 50) delta < 0 ? onLeft() : onRight();
+  }
+
   // UI state
   readonly headerExpanded  = signal(true);
   readonly summaryExpanded = signal(true);
@@ -683,16 +736,44 @@ export class MovimentosComponent implements OnInit {
     const isCurrent = +this.year() === now.getFullYear() && +this.month() === now.getMonth() + 1;
     const endOfMonth = new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0];
     const today = now.toISOString().split('T')[0];
-    const [availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = await Promise.all([
-      isCurrent
-        ? this.balanceService.getAvailableBalance()
-        : this.balanceService.getBalanceUpTo(endOfMonth),
+    const accs = this.accounts();
+
+    const baseQueries: Promise<number>[] = [
+      isCurrent ? this.balanceService.getAvailableBalance() : this.balanceService.getBalanceUpTo(endOfMonth),
       this.balanceService.getBalanceUpTo(endOfMonth),
       this.savingsService.getBalanceUpTo(today),
       this.savingsService.getBalanceUpTo(endOfMonth),
-    ]);
+    ];
+
+    const perAccQueries: Promise<number>[] = accs.length >= 2 ? [
+      ...accs.map(a => isCurrent
+        ? this.balanceService.getAvailableBalanceByAccount(a.id, a.balance)
+        : this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id, a.balance)),
+      ...accs.map(a => this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id, a.balance)),
+      ...accs.map(a => this.savingsService.getBalanceUpToByAccount(today, a.id)),
+      ...accs.map(a => this.savingsService.getBalanceUpToByAccount(endOfMonth, a.id)),
+    ] : [];
+
+    const results = await Promise.all([...baseQueries, ...perAccQueries]);
+    const [availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = results;
+
     this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
     this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
+
+    if (accs.length >= 2) {
+      const n = accs.length;
+      const off = 4;
+      this.ccPerAccountBalances.set(accs.map((acc, i) => ({
+        account: acc,
+        available: results[off + i],
+        projected: results[off + n + i],
+      })));
+      this.savingsPerAccountBalances.set(accs.map((acc, i) => ({
+        account: acc,
+        available: results[off + 2 * n + i],
+        projected: results[off + 3 * n + i],
+      })));
+    }
   }
 
   setPeriodMode(mode: 'month' | 'range'): void {

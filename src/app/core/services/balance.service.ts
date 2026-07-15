@@ -97,6 +97,28 @@ export class BalanceService {
     };
   }
 
+  async getAvailableBalanceByAccount(accountId: string, openingBalance: number): Promise<number> {
+    const uid = this.ownerId;
+    const [entriesRes, txRes] = await Promise.all([
+      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED'),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED'),
+    ]);
+    const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
+    const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);
+    return openingBalance + income - expenses;
+  }
+
+  async getBalanceUpToByAccount(endDate: string, accountId: string, openingBalance: number): Promise<number> {
+    const uid = this.ownerId;
+    const [entriesRes, txRes] = await Promise.all([
+      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate),
+    ]);
+    const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
+    const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);
+    return openingBalance + income - expenses;
+  }
+
   async getCurrentBillByCard(creditCardId: string, year: number, month: number): Promise<number> {
     const start = `${year}-${String(month).padStart(2,'0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];

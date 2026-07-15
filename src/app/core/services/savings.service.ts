@@ -96,6 +96,23 @@ export class SavingsService {
       });
   }
 
+  async getBalanceUpToByAccount(endDate: string, accountId: string): Promise<number> {
+    return this.supabase.client
+      .from('savings_movements')
+      .select('amount, domain_lists(value)')
+      .eq('owner_id', this.ownerId)
+      .eq('account_id', accountId)
+      .lte('date', endDate)
+      .range(0, 9999)
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).reduce((sum: number, r: any) => {
+          const isDeposit = (r.domain_lists?.value ?? '') === 'DEPOSIT';
+          return sum + (isDeposit ? Number(r.amount) : -Number(r.amount));
+        }, 0);
+      });
+  }
+
   /** Totais de depósito e retirada dentro de um período. */
   async getPeriodTotals(startDate: string, endDate: string): Promise<{ deposits: number; withdrawals: number }> {
     return this.supabase.client
