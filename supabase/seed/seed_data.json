@@ -21,7 +21,11 @@
     { "name": "Poupança", "type": "SAVINGS",  "balance": 0, "color": "#22c55e" }
   ],
   "creditCards": [
-    { "name": "Latam Pass", "limit": 20000, "closingDay": 10, "dueDay": 17, "color": "#ec4899" }
+    { "name": "Crédito Latam Pass",        "limit": 20000, "closingDay": 10, "dueDay": 17, "color": "#ec4899" },
+    { "name": "Crédito Nubank",            "limit": 10000, "closingDay": 22, "dueDay": 29, "color": "#8b5cf6" },
+    { "name": "Crédito Itaú Multi Pontos", "limit": 15000, "closingDay": 20, "dueDay": 27, "color": "#f97316" },
+    { "name": "Crédito Mastercard",        "limit":  5000, "closingDay":  3, "dueDay": 10, "color": "#64748b" },
+    { "name": "Crédito Visa",              "limit":  5000, "closingDay":  3, "dueDay": 10, "color": "#3b82f6" }
   ],
   "recurringTemplates": [
     {
@@ -308,7 +312,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -321,7 +325,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -334,7 +338,7 @@
       "isActive": true,
       "categoryRef": "Alimentação",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -347,7 +351,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -360,7 +364,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -373,7 +377,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -386,7 +390,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -399,7 +403,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -412,7 +416,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -425,7 +429,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -438,7 +442,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -451,7 +455,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -464,7 +468,7 @@
       "isActive": true,
       "categoryRef": "Assinaturas",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -477,7 +481,7 @@
       "isActive": true,
       "categoryRef": "Transporte",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -490,7 +494,7 @@
       "isActive": true,
       "categoryRef": "Pets",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -503,7 +507,7 @@
       "isActive": true,
       "categoryRef": "Pets",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -516,7 +520,7 @@
       "isActive": true,
       "categoryRef": "Seguros",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -529,7 +533,7 @@
       "isActive": true,
       "categoryRef": "Seguros",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     },
     {
       "_group": "Saídas Fatura Latam Pass mensais",
@@ -542,7 +546,7 @@
       "isActive": true,
       "categoryRef": "Pets",
       "accountRef": null,
-      "creditCardRef": "Latam Pass"
+      "creditCardRef": "Crédito Latam Pass"
     }
   ]
 }
