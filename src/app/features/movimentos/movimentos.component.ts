@@ -100,7 +100,8 @@ export class MovimentosComponent implements OnInit {
   readonly categories = signal<Category[]>([]);
   readonly accounts = signal<Account[]>([]);
   readonly cards = signal<CreditCard[]>([]);
-  readonly entryTypes = signal<DomainList[]>([]);
+  readonly entryTypes    = signal<DomainList[]>([]);
+  readonly accountTypes  = signal<DomainList[]>([]);
 
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -247,6 +248,18 @@ export class MovimentosComponent implements OnInit {
   readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
   readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
 
+  // Account type separation
+  private isSavingsType(typeId: string): boolean {
+    const type = this.accountTypes().find(t => t.id === typeId);
+    if (!type) return false;
+    const v = type.value.toLowerCase();
+    const n = type.name.toLowerCase();
+    return v.includes('saving') || v.includes('poupan') || n.includes('poupan') || n.includes('saving');
+  }
+
+  readonly checkingAccounts = computed(() => this.accounts().filter(a => !this.isSavingsType(a.typeId)));
+  readonly savingsAccounts  = computed(() => this.accounts().filter(a =>  this.isSavingsType(a.typeId)));
+
   // Carousel state
   readonly ccIndex      = signal(0);
   readonly savingsIndex = signal(0);
@@ -254,10 +267,10 @@ export class MovimentosComponent implements OnInit {
   readonly ccPerAccountBalances      = signal<Array<{ account: Account; available: number; projected: number }>>([]);
   readonly savingsPerAccountBalances = signal<Array<{ account: Account; available: number; projected: number }>>([]);
 
-  readonly ccShowCarousel      = computed(() => this.accounts().length >= 2);
-  readonly savingsShowCarousel = computed(() => this.accounts().length >= 2);
-  readonly ccTotalSlides       = computed(() => this.accounts().length + 1);
-  readonly savingsTotalSlides  = computed(() => this.accounts().length + 1);
+  readonly ccShowCarousel      = computed(() => this.checkingAccounts().length >= 2);
+  readonly savingsShowCarousel = computed(() => this.savingsAccounts().length >= 2);
+  readonly ccTotalSlides       = computed(() => this.checkingAccounts().length + 1);
+  readonly savingsTotalSlides  = computed(() => this.savingsAccounts().length + 1);
 
   readonly ccCurrentSlide = computed(() => {
     const idx = this.ccIndex();
@@ -631,6 +644,7 @@ export class MovimentosComponent implements OnInit {
     this.accountService.getAll().then(d => this.accounts.set(d));
     this.cardService.getAll().then(d => this.cards.set(d));
     this.domainListService.getByCode('entry_type').then(d => this.entryTypes.set(d));
+    this.domainListService.getByCode('account_type').then(d => this.accountTypes.set(d));
     if (qYear || qMonth) {
       this.applyMonth(this.year(), this.month());
     } else {
@@ -736,7 +750,8 @@ export class MovimentosComponent implements OnInit {
     const isCurrent = +this.year() === now.getFullYear() && +this.month() === now.getMonth() + 1;
     const endOfMonth = new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0];
     const today = now.toISOString().split('T')[0];
-    const accs = this.accounts();
+    const ccAccs  = this.checkingAccounts();
+    const savAccs = this.savingsAccounts();
 
     const baseQueries: Promise<number>[] = [
       isCurrent ? this.balanceService.getAvailableBalance() : this.balanceService.getBalanceUpTo(endOfMonth),
@@ -745,33 +760,41 @@ export class MovimentosComponent implements OnInit {
       this.savingsService.getBalanceUpTo(endOfMonth),
     ];
 
-    const perAccQueries: Promise<number>[] = accs.length >= 2 ? [
-      ...accs.map(a => isCurrent
+    const ccPerAccQueries: Promise<number>[] = ccAccs.length >= 2 ? [
+      ...ccAccs.map(a => isCurrent
         ? this.balanceService.getAvailableBalanceByAccount(a.id, a.balance)
         : this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id, a.balance)),
-      ...accs.map(a => this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id, a.balance)),
-      ...accs.map(a => this.savingsService.getBalanceUpToByAccount(today, a.id)),
-      ...accs.map(a => this.savingsService.getBalanceUpToByAccount(endOfMonth, a.id)),
+      ...ccAccs.map(a => this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id, a.balance)),
     ] : [];
 
-    const results = await Promise.all([...baseQueries, ...perAccQueries]);
+    const savPerAccQueries: Promise<number>[] = savAccs.length >= 2 ? [
+      ...savAccs.map(a => this.savingsService.getBalanceUpToByAccount(today, a.id)),
+      ...savAccs.map(a => this.savingsService.getBalanceUpToByAccount(endOfMonth, a.id)),
+    ] : [];
+
+    const results = await Promise.all([...baseQueries, ...ccPerAccQueries, ...savPerAccQueries]);
     const [availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = results;
 
     this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
     this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
 
-    if (accs.length >= 2) {
-      const n = accs.length;
+    if (ccAccs.length >= 2) {
+      const nc = ccAccs.length;
       const off = 4;
-      this.ccPerAccountBalances.set(accs.map((acc, i) => ({
+      this.ccPerAccountBalances.set(ccAccs.map((acc, i) => ({
         account: acc,
         available: results[off + i],
-        projected: results[off + n + i],
+        projected: results[off + nc + i],
       })));
-      this.savingsPerAccountBalances.set(accs.map((acc, i) => ({
+    }
+
+    if (savAccs.length >= 2) {
+      const ns = savAccs.length;
+      const off = 4 + (ccAccs.length >= 2 ? ccAccs.length * 2 : 0);
+      this.savingsPerAccountBalances.set(savAccs.map((acc, i) => ({
         account: acc,
-        available: results[off + 2 * n + i],
-        projected: results[off + 3 * n + i],
+        available: results[off + i],
+        projected: results[off + ns + i],
       })));
     }
   }
