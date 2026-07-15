@@ -140,8 +140,8 @@ def to_date_str(val, fallback_year: int, fallback_month: int, enforce_month: boo
                 continue
         if d is None:
             return None
-    elif isinstance(val, float):
-        # Excel date serial number
+    elif isinstance(val, (float, int)):
+        # Excel date serial number (openpyxl may return int for whole-number dates)
         try:
             epoch = date(1899, 12, 30)
             from datetime import timedelta
@@ -296,11 +296,15 @@ def parse_sheet(ws, year: int, month: int):
             card_name = TIPO_MAP[tipo_l]   # None = debit
 
             if card_name:
-                # Credit: purchase date may be from previous month (normal for CC billing)
+                # Credit: purchase date from col D (same as debit uses col D for date)
                 purchase_dt = to_date_str(dt_val, year, month)
                 due_day = CARD_DUE.get(card_name.lower(), 10)
                 bill_dt  = payment_date(year, month, due_day)
-                purch    = purchase_dt  # null when spreadsheet has no purchase date
+                # Fallback: if col D is empty/unparseable, use last day of billing month
+                if not purchase_dt:
+                    last_day = calendar.monthrange(year, month)[1]
+                    purchase_dt = date(year, month, last_day).isoformat()
+                purch = purchase_dt
             else:
                 # Debit: date must belong to the sheet's month — enforce it
                 purchase_dt = to_date_str(dt_val, year, month, enforce_month=True)
