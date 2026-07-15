@@ -16,8 +16,9 @@
     { "name": "Outros",                "color": "#94a3b8", "icon": "📦" }
   ],
   "accounts": [
-    { "name": "Itaú",   "type": "CHECKING", "balance": 0, "color": "#f97316" },
-    { "name": "Nubank",  "type": "CHECKING", "balance": 0, "color": "#8b5cf6" }
+    { "name": "Itaú",     "type": "CHECKING", "balance": 0, "color": "#f97316" },
+    { "name": "Nubank",   "type": "CHECKING", "balance": 0, "color": "#8b5cf6" },
+    { "name": "Poupança", "type": "SAVINGS",  "balance": 0, "color": "#22c55e" }
   ],
   "creditCards": [
     { "name": "Latam Pass", "limit": 20000, "closingDay": 10, "dueDay": 17, "color": "#ec4899" }

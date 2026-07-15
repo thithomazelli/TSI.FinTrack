@@ -15,7 +15,7 @@ from datetime import date, datetime
 PASSWORD    = "l#p01091910"
 OWNER_ID    = "69f852bc-af5a-4f11-b293-37bf2f809018"
 UPLOADS_DIR = Path(r"D:\Google Drive\Arquivos Thiago\Meus Gastos\Orçamentos encerrados")
-OUT_FILE    = Path(__file__).parent / "seed_data.json"
+OUT_FILE    = Path(__file__).parent.parent / "supabase" / "seed" / "transactions_data.json"
 
 # ── Card metadata (name → due_day) ───────────────────────────────────────────
 CARD_DUE = {

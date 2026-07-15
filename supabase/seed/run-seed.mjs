@@ -15,7 +15,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -37,6 +37,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 
 const data = JSON.parse(readFileSync(join(__dirname, 'seed_data.json'), 'utf8'));
+
+const txDataPath = join(__dirname, 'transactions_data.json');
+const txData = existsSync(txDataPath)
+  ? JSON.parse(readFileSync(txDataPath, 'utf8'))
+  : null;
+
+const BATCH = 200;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -120,9 +127,13 @@ console.log(`\nTSI.FinTrack Seed — owner: ${OWNER_ID}\n`);
 await run('Cleanup', cleanup);
 
 // 2. Domain lists
+const savingsTypeIdMap = {};
 await run('Domain lists', async () => {
   const rows = DOMAINS.map(d => ({ ...d, owner_id: OWNER_ID }));
-  await insert('domain_lists', rows, 'id');
+  const inserted = await insert('domain_lists', rows, 'id,code,value');
+  for (const d of inserted) {
+    if (d.code === 'savings_movement_type') savingsTypeIdMap[d.value] = d.id;
+  }
   return `${rows.length} domains`;
 });
 
@@ -190,5 +201,91 @@ await run('Recurring templates', async () => {
   const inserted = await insert('recurring_templates', rows, 'id');
   return `${inserted.length} templates`;
 });
+
+if (!txData) {
+  console.log('\n  (transactions_data.json not found — skipping entries/transactions/savings)\n');
+} else {
+  // Build case-insensitive category lookup
+  const catLookup = {};
+  for (const [name, id] of Object.entries(categoryIdMap)) {
+    catLookup[name.toLowerCase()] = id;
+  }
+
+  async function insertBatched(table, rows) {
+    let count = 0;
+    for (let i = 0; i < rows.length; i += BATCH) {
+      await insert(table, rows.slice(i, i + BATCH), 'id');
+      count += rows.slice(i, i + BATCH).length;
+      process.stdout.write(`\r    ${count}/${rows.length}`);
+    }
+    process.stdout.write('\n');
+    return count;
+  }
+
+  // 7. Entries
+  await run('Entries', async () => {
+    const defaultAccountId = accountIdMap['Itaú'];
+    const rows = (txData.entries ?? []).map(e => ({
+      owner_id:   OWNER_ID,
+      description: e.description,
+      amount:      e.amount,
+      date:        e.date,
+      status:      e.status,
+      account_id:  defaultAccountId,
+      labels:      e.labels ?? [],
+      position:    e.position ?? null,
+    }));
+    const count = await insertBatched('entries', rows);
+    return `${count} entries`;
+  });
+
+  // 8. Transactions
+  await run('Transactions', async () => {
+    const defaultAccountId = accountIdMap['Itaú'];
+    const missing = new Set();
+    const rows = (txData.transactions ?? []).map(t => {
+      const cardId = t.credit_card_name ? (cardIdMap[t.credit_card_name] ?? null) : null;
+      const catId  = t.category_name
+        ? (catLookup[t.category_name.toLowerCase()] ?? null)
+        : null;
+      if (t.category_name && !catId) missing.add(t.category_name);
+      return {
+        owner_id:              OWNER_ID,
+        description:           t.description,
+        amount:                t.amount,
+        date:                  t.date,
+        purchase_date:         t.purchase_date ?? null,
+        category_id:           catId,
+        account_id:            cardId ? null : defaultAccountId,
+        credit_card_id:        cardId,
+        status:                t.status,
+        installment_number:    t.installment_number ?? null,
+        total_installments:    t.total_installments ?? null,
+        installment_group_id:  t.installment_group_id ?? null,
+        labels:                t.labels ?? [],
+        position:              t.position ?? null,
+      };
+    });
+    const count = await insertBatched('transactions', rows);
+    if (missing.size) console.log(`\n    ⚠ categories not found (saved as null): ${[...missing].join(', ')}`);
+    return `${count} transactions`;
+  });
+
+  // 9. Savings movements
+  await run('Savings movements', async () => {
+    const savingsAccountId = accountIdMap['Poupança'];
+    if (!savingsAccountId) return 'skipped (no Poupança account)';
+    const rows = (txData.savings ?? []).map(s => ({
+      owner_id:    OWNER_ID,
+      description: s.description,
+      amount:      s.amount,
+      date:        s.date,
+      type_id:     savingsTypeIdMap[s.type] ?? null,
+      account_id:  savingsAccountId,
+    }));
+    const count = await insertBatched('savings_movements', rows);
+    return `${count} savings movements`;
+  });
+}
 
 console.log('\nSeed completed successfully!\n');
