@@ -305,11 +305,6 @@ def parse_sheet(ws, year: int, month: int):
                     last_day = calendar.monthrange(year, month)[1]
                     purchase_dt = date(year, month, last_day).isoformat()
                 purch = purchase_dt
-                # DEBUG: log credit rows from 2025+ to diagnose purchase_date issue
-                if year >= 2025:
-                    _dbg_line = f"{year}/{month:02d} {card_name} | dt_val={repr(dt_val)} ({type(dt_val).__name__}) -> purchase_dt={purchase_dt} | {str(desc or '')[:40]}\n"
-                    with open("debug_credit.txt", "a", encoding="utf-8") as _dbg:
-                        _dbg.write(_dbg_line)
             else:
                 # Debit: date must belong to the sheet's month — enforce it
                 purchase_dt = to_date_str(dt_val, year, month, enforce_month=True)
