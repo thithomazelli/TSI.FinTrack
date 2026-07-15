@@ -722,7 +722,7 @@ export class MovimentosComponent implements OnInit {
 
       this.allTransactions.set((txsRes.data ?? []).map((r: any) => ({
         id: r.id, ownerId: r.owner_id, description: r.description,
-        amount: r.amount, date: r.date, status: r.status,
+        amount: r.amount, date: r.date, purchaseDate: r.purchase_date ?? null, status: r.status,
         categoryId: r.category_id, accountId: r.account_id,
         creditCardId: r.credit_card_id, creditCardBillId: r.credit_card_bill_id,
         installmentNumber: r.installment_number, totalInstallments: r.total_installments,
