@@ -128,11 +128,13 @@ await run('Cleanup', cleanup);
 
 // 2. Domain lists
 const savingsTypeIdMap = {};
+const accountTypeIdMap = {};
 await run('Domain lists', async () => {
   const rows = DOMAINS.map(d => ({ ...d, owner_id: OWNER_ID }));
   const inserted = await insert('domain_lists', rows, 'id,code,value');
   for (const d of inserted) {
     if (d.code === 'savings_movement_type') savingsTypeIdMap[d.value] = d.id;
+    if (d.code === 'account_type') accountTypeIdMap[d.value] = d.id;
   }
   return `${rows.length} domains`;
 });
@@ -157,9 +159,8 @@ await run('Accounts', async () => {
   const rows = data.accounts.map(a => ({
     owner_id: OWNER_ID,
     name: a.name,
-    type: a.type,
+    type_id: accountTypeIdMap[a.type] ?? null,
     balance: a.balance,
-    color: a.color,
   }));
   const inserted = await insert('accounts', rows, 'id,name');
   for (const a of inserted) accountIdMap[a.name] = a.id;
@@ -172,10 +173,9 @@ await run('Credit cards', async () => {
   const rows = data.creditCards.map(c => ({
     owner_id: OWNER_ID,
     name: c.name,
-    limit: c.limit,
+    credit_limit: c.limit,
     closing_day: c.closingDay,
     due_day: c.dueDay,
-    color: c.color,
   }));
   const inserted = await insert('credit_cards', rows, 'id,name');
   for (const c of inserted) cardIdMap[c.name] = c.id;
