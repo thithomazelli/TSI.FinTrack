@@ -245,12 +245,16 @@ export class ImportComponent implements OnInit {
     const selected = this.creditRows().filter((r) => r.selected);
     let count = 0;
 
+    const card = this.cards().find(c => c.id === cardId);
+    const dueDay = card?.dueDay ?? 1;
+    const billingDate = `${year}-${String(month).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}`;
+
     for (const row of selected) {
       await this.transactionService.create({
         description: row.description,
         amount: row.amount,
-        date: row.date,
-        purchaseDate: row.date,   // statement date = purchase date
+        date: billingDate,
+        purchaseDate: row.date,
         categoryId: row.categoryId || null,
         accountId: null,
         creditCardId: cardId,
