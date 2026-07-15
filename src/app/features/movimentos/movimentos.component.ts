@@ -890,7 +890,7 @@ export class MovimentosComponent implements OnInit {
       this.formTxCategoryId = t.categoryId ?? '';
       this.formTxAccountId = t.accountId ?? '';
       this.formTxCreditCardId = t.creditCardId ?? '';
-      this.formTxPurchaseDate = t.purchaseDate ?? '';
+      this.formTxPurchaseDate = t.purchaseDate ?? t.date;
       this.formTxIsInstallment = !!t.totalInstallments && t.totalInstallments > 1;
       this.formTxInstallments = t.totalInstallments ?? 1;
       this.formTxIsInternational = !!t.originalCurrency;
