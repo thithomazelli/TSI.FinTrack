@@ -412,9 +412,18 @@ def generate_pending_installments(all_transactions: list) -> list:
     For each installment group where the highest seen installment < total,
     generate the missing future installments as PROJECTED transactions.
 
-    The billing date for each missing installment is computed by advancing
-    the last seen billing date by 1 month per installment.
+    Only generates installments with billing dates AFTER the latest date
+    already present in all_transactions, preventing duplicates when installment
+    series span multiple Excel files (e.g. a 12-month purchase whose first 6
+    installments are in the 2010 file and the remaining 6 already exist in the
+    2011 file but landed in a different group due to a description mismatch).
     """
+    # Cutoff: only generate installments beyond the latest parsed date
+    if all_transactions:
+        cutoff = max(t["date"][:10] for t in all_transactions)
+    else:
+        cutoff = "0000-00-00"
+
     # Group by installment_group_id
     groups: dict[str, list] = {}
     for t in all_transactions:
@@ -459,6 +468,12 @@ def generate_pending_installments(all_transactions: list) -> list:
                 bill_dt = date(y, m, min(due_day, last_day)).isoformat()
             else:
                 bill_dt = date(y, m, last_day).isoformat()
+
+            # Skip installments that fall within the range already covered by
+            # the Excel files — they either exist already or are genuine gaps
+            # the user left in their spreadsheet.
+            if bill_dt <= cutoff:
+                continue
 
             # Advance purchase date by same number of months
             pm = last_purch.month + delta
