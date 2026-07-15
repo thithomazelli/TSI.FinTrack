@@ -292,10 +292,16 @@ tsi-month-picker ::ng-deep .month-picker {
 .sm-card-main {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: .4rem;
+  gap: .5rem;
   flex: 1;
   width: 100%;
+
+  // Push values to the right
+  .sm-values { margin-left: auto; }
+
+  // Pull arrows flush to the card padding edges
+  .carousel-arrow:first-child { margin-left: -.75rem; }
+  .carousel-arrow:last-child  { margin-right: -.75rem; }
 }
 
 .carousel-arrow {
@@ -313,6 +319,8 @@ tsi-month-picker ::ng-deep .month-picker {
 
   &:hover:not(:disabled) { border-color: var(--color-accent); color: var(--color-accent); }
   &:disabled { opacity: .3; cursor: not-allowed; }
+
+  &--hidden { visibility: hidden; pointer-events: none; }
 }
 
 .carousel-dots {

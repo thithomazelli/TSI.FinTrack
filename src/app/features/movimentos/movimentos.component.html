@@ -65,9 +65,8 @@
          (pointerdown)="savingsShowCarousel() && onSavPointerDown($event)"
          (pointerup)="savingsShowCarousel() && onSavPointerUp($event)">
       <div class="sm-card-main">
-        @if (savingsShowCarousel()) {
-          <button class="carousel-arrow" (click)="savingsPrev(); $event.stopPropagation()" [disabled]="savingsIndex() === 0" aria-label="anterior">‹</button>
-        }
+        <button class="carousel-arrow" [class.carousel-arrow--hidden]="!savingsShowCarousel()"
+                (click)="savingsPrev(); $event.stopPropagation()" [disabled]="savingsIndex() === 0" aria-label="anterior">‹</button>
         <div class="sm-left">
           <span class="sm-title">{{ 'widget.balance' | translate }}</span>
           <span class="sm-account">
@@ -88,9 +87,8 @@
             </span>
           </div>
         </div>
-        @if (savingsShowCarousel()) {
-          <button class="carousel-arrow" (click)="savingsNext(); $event.stopPropagation()" [disabled]="savingsIndex() === savingsTotalSlides() - 1" aria-label="próximo">›</button>
-        }
+        <button class="carousel-arrow" [class.carousel-arrow--hidden]="!savingsShowCarousel()"
+                (click)="savingsNext(); $event.stopPropagation()" [disabled]="savingsIndex() === savingsTotalSlides() - 1" aria-label="próximo">›</button>
       </div>
       @if (savingsShowCarousel()) {
         <div class="carousel-dots">
@@ -106,9 +104,8 @@
          (pointerdown)="ccShowCarousel() && onCCPointerDown($event)"
          (pointerup)="ccShowCarousel() && onCCPointerUp($event)">
       <div class="sm-card-main">
-        @if (ccShowCarousel()) {
-          <button class="carousel-arrow" (click)="ccPrev(); $event.stopPropagation()" [disabled]="ccIndex() === 0" aria-label="anterior">‹</button>
-        }
+        <button class="carousel-arrow" [class.carousel-arrow--hidden]="!ccShowCarousel()"
+                (click)="ccPrev(); $event.stopPropagation()" [disabled]="ccIndex() === 0" aria-label="anterior">‹</button>
         <div class="sm-left">
           <span class="sm-title">{{ 'widget.balance' | translate }}</span>
           <span class="sm-account">
@@ -129,9 +126,8 @@
             </span>
           </div>
         </div>
-        @if (ccShowCarousel()) {
-          <button class="carousel-arrow" (click)="ccNext(); $event.stopPropagation()" [disabled]="ccIndex() === ccTotalSlides() - 1" aria-label="próximo">›</button>
-        }
+        <button class="carousel-arrow" [class.carousel-arrow--hidden]="!ccShowCarousel()"
+                (click)="ccNext(); $event.stopPropagation()" [disabled]="ccIndex() === ccTotalSlides() - 1" aria-label="próximo">›</button>
       </div>
       @if (ccShowCarousel()) {
         <div class="carousel-dots">
