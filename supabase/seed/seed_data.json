@@ -16,7 +16,7 @@
     { "name": "Outros",                "color": "#94a3b8", "icon": "📦" }
   ],
   "accounts": [
-    { "name": "Itaú",     "type": "CHECKING", "balance": 0, "color": "#f97316" },
+    { "name": "Itaú",     "type": "CHECKING", "balance": -305, "color": "#f97316" },
     { "name": "Nubank",   "type": "CHECKING", "balance": 0, "color": "#8b5cf6" },
     { "name": "Poupança", "type": "SAVINGS",  "balance": 0, "color": "#22c55e" }
   ],
