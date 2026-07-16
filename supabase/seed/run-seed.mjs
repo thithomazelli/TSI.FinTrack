@@ -202,6 +202,28 @@ await run('Recurring templates', async () => {
   return `${inserted.length} templates`;
 });
 
+// 7. Open bills for current month (always, regardless of transactions_data.json)
+await run('Current-month bills (OPEN)', async () => {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth() + 1;
+  const pad = n => String(n).padStart(2, '0');
+  const rows = data.creditCards.map(c => {
+    const cardId = cardIdMap[c.name];
+    if (!cardId) return null;
+    const closingDate = `${y}-${pad(m)}-${pad(c.closingDay)}`;
+    let dueYear = y, dueMonth = m;
+    if (c.dueDay < c.closingDay) {
+      dueMonth++;
+      if (dueMonth > 12) { dueMonth = 1; dueYear++; }
+    }
+    const dueDate = `${dueYear}-${pad(dueMonth)}-${pad(c.dueDay)}`;
+    return { owner_id: OWNER_ID, credit_card_id: cardId, year: y, month: m, total_amount: 0, closing_date: closingDate, due_date: dueDate, status: 'OPEN' };
+  }).filter(Boolean);
+  const { error } = await supabase.from('credit_card_bills').upsert(rows, { onConflict: 'credit_card_id,year,month', ignoreDuplicates: true });
+  if (error) throw error;
+  return `${rows.length} bills (${y}/${pad(m)})`;
+});
+
 if (!txData) {
   console.log('\n  (transactions_data.json not found — skipping entries/transactions/savings)\n');
 } else {
