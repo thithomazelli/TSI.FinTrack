@@ -363,6 +363,7 @@
     "amountTotal": "Total amount",
     "amountInstallment": "Per-installment amount",
     "paymentDate": "Payment Date (bill)",
+    "paymentAccount": "Paying account",
     "purchaseDate": "Purchase Date",
     "currency": "Currency",
     "originalAmount": "Original Amount",

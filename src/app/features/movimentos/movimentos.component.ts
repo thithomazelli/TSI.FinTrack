@@ -161,6 +161,7 @@ export class MovimentosComponent implements OnInit {
   formTxCategoryId = '';
   formTxAccountId = '';
   formTxCreditCardId = '';
+  formTxPaymentAccountId = '';
   formTxPurchaseDate = '';
   formTxIsInstallment = false;
   formTxInstallments = 2;
@@ -845,6 +846,7 @@ export class MovimentosComponent implements OnInit {
     this.formTxCategoryId = '';
     this.formTxAccountId = '';
     this.formTxCreditCardId = '';
+    this.formTxPaymentAccountId = this.checkingAccounts()[0]?.id ?? '';
     this.formTxPurchaseDate = new Date().toISOString().split('T')[0];
     this.formTxIsInstallment = false;
     this.formTxInstallments = 2;
@@ -888,8 +890,9 @@ export class MovimentosComponent implements OnInit {
       this.formTxDate = t.date;
       this.formTxStatus = t.status;
       this.formTxCategoryId = t.categoryId ?? '';
-      this.formTxAccountId = t.accountId ?? '';
       this.formTxCreditCardId = t.creditCardId ?? '';
+      this.formTxAccountId = t.creditCardId ? '' : (t.accountId ?? '');
+      this.formTxPaymentAccountId = t.creditCardId ? (t.accountId ?? '') : (this.checkingAccounts()[0]?.id ?? '');
       this.formTxPurchaseDate = t.purchaseDate ?? t.date;
       this.formTxIsInstallment = !!t.totalInstallments && t.totalInstallments > 1;
       this.formTxInstallments = t.totalInstallments ?? 1;
@@ -997,7 +1000,7 @@ export class MovimentosComponent implements OnInit {
       date: this.selectedCardIsCredit() ? this.formTxDate : this.formTxPurchaseDate,
       purchaseDate: this.selectedCardIsCredit() ? (this.formTxPurchaseDate || null) : null,
       categoryId: this.formTxCategoryId || null,
-      accountId: this.formTxCreditCardId ? null : (this.formTxAccountId || null),
+      accountId: this.formTxCreditCardId ? (this.formTxPaymentAccountId || null) : (this.formTxAccountId || null),
       creditCardId: this.formTxCreditCardId || null,
       status: this.formTxStatus,
       totalInstallments: this.formTxIsInstallment ? this.formTxInstallments : null,

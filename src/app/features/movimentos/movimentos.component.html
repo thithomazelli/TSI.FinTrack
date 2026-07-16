@@ -848,15 +848,27 @@
     </div>
 
     <div class="fields-row">
-      <div class="field" [class.has-value]="formTxAccountId">
-        <select class="field-input" [(ngModel)]="formTxAccountId" [disabled]="!!formTxCreditCardId">
-          <option value="">—</option>
-          @for (acc of accounts(); track acc.id) {
-            <option [value]="acc.id">{{ acc.name }}</option>
-          }
-        </select>
-        <label class="field-label">{{ 'common.account' | translate }}</label>
-      </div>
+      @if (!formTxCreditCardId) {
+        <div class="field" [class.has-value]="formTxAccountId">
+          <select class="field-input" [(ngModel)]="formTxAccountId">
+            <option value="">—</option>
+            @for (acc of checkingAccounts(); track acc.id) {
+              <option [value]="acc.id">{{ acc.name }}</option>
+            }
+          </select>
+          <label class="field-label">{{ 'common.account' | translate }}</label>
+        </div>
+      } @else {
+        <div class="field" [class.has-value]="formTxPaymentAccountId">
+          <select class="field-input" [(ngModel)]="formTxPaymentAccountId">
+            <option value="">—</option>
+            @for (acc of checkingAccounts(); track acc.id) {
+              <option [value]="acc.id">{{ acc.name }}</option>
+            }
+          </select>
+          <label class="field-label">{{ 'movimentos.paymentAccount' | translate }}</label>
+        </div>
+      }
       <div class="field" [class.has-value]="formTxCreditCardId">
         <select class="field-input" [(ngModel)]="formTxCreditCardId">
           <option value="">—</option>

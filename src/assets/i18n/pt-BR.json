@@ -363,6 +363,7 @@
     "amountTotal": "Valor total",
     "amountInstallment": "Valor da parcela",
     "paymentDate": "Data de Pagamento (fatura)",
+    "paymentAccount": "Fonte pagadora",
     "purchaseDate": "Data da Compra",
     "currency": "Moeda",
     "originalAmount": "Valor Original",
