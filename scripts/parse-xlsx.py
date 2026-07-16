@@ -376,6 +376,91 @@ def parse_workbook(path: Path, year: int):
     return all_entries, all_transactions, all_savings
 
 
+# ── Entry installment grouping & projection ───────────────────────────────────
+
+def assign_entry_installment_groups(all_entries: list) -> int:
+    """Group entries whose description matches 'Base X/Y' and assign shared group IDs."""
+    buckets: dict[tuple, list] = {}
+    for e in all_entries:
+        parsed = parse_installment(e["description"])
+        if not parsed:
+            continue
+        base, num, total = parsed
+        e["installment_number"] = num
+        e["total_installments"] = total
+        key = (base.lower(), total)
+        buckets.setdefault(key, []).append((e, num))
+
+    groups_created = 0
+    for (base_key, total), items in buckets.items():
+        items.sort(key=lambda x: (x[0]["date"], x[1]))
+        for chunk_start in range(0, len(items), total):
+            chunk = items[chunk_start: chunk_start + total]
+            if len(chunk) < 2:
+                continue
+            group_id = str(uuid.uuid4())
+            for e, _ in chunk:
+                e["installment_group_id"] = group_id
+            groups_created += 1
+    return groups_created
+
+
+def generate_pending_entry_installments(all_entries: list) -> list:
+    """
+    For each entry installment group where the highest seen installment < total,
+    generate missing future entries as PROJECTED, only beyond the latest parsed date.
+    """
+    if all_entries:
+        cutoff = max(e["date"][:10] for e in all_entries)
+    else:
+        cutoff = "0000-00-00"
+
+    groups: dict[str, list] = {}
+    for e in all_entries:
+        gid = e.get("installment_group_id")
+        if not gid:
+            continue
+        groups.setdefault(gid, []).append(e)
+
+    generated = []
+    for gid, items in groups.items():
+        items_sorted = sorted(items, key=lambda x: x.get("installment_number", 0))
+        last = items_sorted[-1]
+        total = last.get("total_installments", 0)
+        last_num = last.get("installment_number", 0)
+
+        if last_num >= total:
+            continue
+
+        parsed = parse_installment(last["description"])
+        if not parsed:
+            continue
+        base_desc, _, _ = parsed
+
+        last_date = date.fromisoformat(last["date"][:10])
+
+        for n in range(last_num + 1, total + 1):
+            delta = n - last_num
+            m = last_date.month + delta
+            y = last_date.year + (m - 1) // 12
+            m = ((m - 1) % 12) + 1
+            last_day = calendar.monthrange(y, m)[1]
+            entry_dt = date(y, m, min(last_date.day, last_day)).isoformat()
+
+            if entry_dt <= cutoff:
+                continue
+
+            new_e = {**last}
+            new_e["description"]        = f"{base_desc} {n}/{total}"
+            new_e["date"]               = entry_dt
+            new_e["installment_number"] = n
+            new_e["status"]             = "PROJECTED"
+            new_e["position"]           = None
+            generated.append(new_e)
+
+    return generated
+
+
 # ── Global installment grouping ───────────────────────────────────────────────
 
 def assign_installment_groups(all_transactions: list) -> int:
@@ -532,16 +617,25 @@ def main():
 
     # ── Global installment grouping (across all months/years) ────────────────
     groups = assign_installment_groups(all_transactions)
-    print(f"Grupos de parcelas detectados: {groups}")
+    print(f"Grupos de parcelas (transações) detectados: {groups}")
+
+    entry_groups = assign_entry_installment_groups(all_entries)
+    print(f"Grupos de parcelas (entradas) detectados: {entry_groups}")
 
     # ── Installment continuation: project remaining parcelas beyond last year ──
     projected = generate_pending_installments(all_transactions)
     if projected:
-        print(f"Parcelas projetadas geradas: {len(projected)}")
+        print(f"Parcelas projetadas geradas (transações): {len(projected)}")
         for t in projected:
-            parsed = parse_installment(t["description"])
             print(f"  {t['date']}  {t['description']}  R$ {t['amount']:.2f}  [{t.get('credit_card_name') or 'debito'}]")
         all_transactions.extend(projected)
+
+    projected_entries = generate_pending_entry_installments(all_entries)
+    if projected_entries:
+        print(f"Parcelas projetadas geradas (entradas): {len(projected_entries)}")
+        for e in projected_entries:
+            print(f"  {e['date']}  {e['description']}  R$ {e['amount']:.2f}")
+        all_entries.extend(projected_entries)
 
     result = {
         "meta": {"opening_balance": -305, "opened_at": "2009-05-01"},
