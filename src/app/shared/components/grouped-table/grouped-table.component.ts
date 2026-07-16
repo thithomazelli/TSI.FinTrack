@@ -8,7 +8,6 @@ import {
   output,
   signal,
   computed,
-  linkedSignal,
   ChangeDetectorRef,
 } from '@angular/core';
 import { NgTemplateOutlet, DecimalPipe } from '@angular/common';
@@ -71,8 +70,8 @@ export class GroupedTableComponent {
   readonly query = signal('');
   readonly currentPage = signal(0);
 
-  /** Tracks selected page size; resets to the `pageSize` input whenever it changes. */
-  readonly _pageSize = linkedSignal(() => this.pageSize());
+  /** Tracks the active page size; follows the `pageSize` input until the user overrides it. */
+  readonly _pageSize = signal(0);
 
   private readonly _expanded = signal<Map<string, boolean>>(new Map());
 
@@ -108,6 +107,12 @@ export class GroupedTableComponent {
   private readonly cdr = inject(ChangeDetectorRef);
 
   constructor() {
+    // Sync _pageSize with the input only when the input value actually changes.
+    effect(() => {
+      const ps = this.pageSize();
+      this._pageSize.set(ps);
+    }, { allowSignalWrites: true });
+
     effect(() => {
       const groups = this.groups();
       this._expanded.update(map => {
@@ -175,7 +180,6 @@ export class GroupedTableComponent {
   setPageSize(ps: number): void {
     this._pageSize.set(ps);
     this.currentPage.set(0);
-    this.cdr.detectChanges();
   }
 
   goToPage(p: number): void {
