@@ -274,7 +274,65 @@ if (!txData) {
     return `${count} transactions`;
   });
 
-  // 9. Savings movements
+  // 9. Credit card bills (one per card×month found in transactions)
+  await run('Credit card bills', async () => {
+    const now = new Date();
+    const currentYear  = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    // card id → { closingDay, dueDay }
+    const cardConf = {};
+    for (const c of data.creditCards) {
+      const id = cardIdMap[c.name];
+      if (id) cardConf[id] = { closingDay: c.closingDay, dueDay: c.dueDay };
+    }
+
+    // aggregate total per (cardId, year, month)
+    const billMap = new Map();
+    for (const t of (txData.transactions ?? [])) {
+      if (!t.credit_card_name) continue;
+      const cardId = cardIdMap[t.credit_card_name];
+      if (!cardId) continue;
+      const [y, mo] = t.date.split('-').map(Number);
+      const key = `${cardId}|${y}|${mo}`;
+      if (!billMap.has(key)) billMap.set(key, { cardId, year: y, month: mo, total: 0 });
+      billMap.get(key).total += Number(t.amount);
+    }
+
+    const rows = [];
+    for (const { cardId, year, month, total } of billMap.values()) {
+      const conf = cardConf[cardId] ?? { closingDay: 1, dueDay: 10 };
+      const pad = n => String(n).padStart(2, '0');
+      const closingDate = `${year}-${pad(month)}-${pad(conf.closingDay)}`;
+      let dueYear = year, dueMonth = month;
+      if (conf.dueDay < conf.closingDay) {
+        dueMonth++;
+        if (dueMonth > 12) { dueMonth = 1; dueYear++; }
+      }
+      const dueDate = `${dueYear}-${pad(dueMonth)}-${pad(conf.dueDay)}`;
+      const isPast  = year < currentYear || (year === currentYear && month < currentMonth);
+      rows.push({
+        owner_id:       OWNER_ID,
+        credit_card_id: cardId,
+        year,
+        month,
+        total_amount:   Math.round(total * 100) / 100,
+        closing_date:   closingDate,
+        due_date:       dueDate,
+        status:         isPast ? 'PAID' : 'OPEN',
+      });
+    }
+
+    if (!rows.length) return '0 bills (no CC transactions found)';
+    let count = 0;
+    for (let i = 0; i < rows.length; i += BATCH) {
+      await insert('credit_card_bills', rows.slice(i, i + BATCH), 'id');
+      count += rows.slice(i, i + BATCH).length;
+    }
+    return `${count} bills`;
+  });
+
+  // 10. Savings movements
   await run('Savings movements', async () => {
     const savingsAccountId = accountIdMap['Poupança'];
     if (!savingsAccountId) return 'skipped (no Poupança account)';
