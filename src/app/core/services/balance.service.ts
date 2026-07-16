@@ -97,28 +97,46 @@ export class BalanceService {
     };
   }
 
-  /** Realized cashflow for a calendar month filtered to one account. */
+  /** Returns IDs of credit cards whose bills are paid from the given account. */
+  private async getCreditCardIds(accountId: string): Promise<string[]> {
+    const res = await this.supabase.client
+      .from('credit_cards')
+      .select('id')
+      .eq('owner_id', this.ownerId)
+      .eq('account_id', accountId);
+    return (res.data ?? []).map((r: { id: string }) => r.id);
+  }
+
+  private txOrFilter(accountId: string, ccIds: string[]): string {
+    return ccIds.length > 0
+      ? `account_id.eq.${accountId},credit_card_id.in.(${ccIds.join(',')})`
+      : `account_id.eq.${accountId}`;
+  }
+
+  /** Realized cashflow for a calendar month filtered to one account (includes CC transactions paid by this account). */
   async getMonthRealizedByAccount(year: number, month: number, accountId: string): Promise<number> {
     const start = `${year}-${String(month).padStart(2, '0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];
     const uid = this.ownerId;
+    const ccIds = await this.getCreditCardIds(accountId);
     const [entriesRes, txRes] = await Promise.all([
       this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED').gte('date', start).lte('date', end),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED').gte('date', start).lte('date', end),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).or(this.txOrFilter(accountId, ccIds)).eq('status', 'REALIZED').gte('date', start).lte('date', end),
     ]);
     const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
     const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);
     return income - expenses;
   }
 
-  /** All-status cashflow for a calendar month filtered to one account (projected). */
+  /** All-status cashflow for a calendar month filtered to one account (projected, includes CC transactions). */
   async getMonthProjectedByAccount(year: number, month: number, accountId: string): Promise<number> {
     const start = `${year}-${String(month).padStart(2, '0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];
     const uid = this.ownerId;
+    const ccIds = await this.getCreditCardIds(accountId);
     const [entriesRes, txRes] = await Promise.all([
       this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).gte('date', start).lte('date', end),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).gte('date', start).lte('date', end),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).or(this.txOrFilter(accountId, ccIds)).gte('date', start).lte('date', end),
     ]);
     const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
     const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);
@@ -127,9 +145,10 @@ export class BalanceService {
 
   async getAvailableBalanceByAccount(accountId: string, openingBalance: number): Promise<number> {
     const uid = this.ownerId;
+    const ccIds = await this.getCreditCardIds(accountId);
     const [entriesRes, txRes] = await Promise.all([
       this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED'),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED'),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).or(this.txOrFilter(accountId, ccIds)).eq('status', 'REALIZED'),
     ]);
     const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
     const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);
@@ -138,9 +157,10 @@ export class BalanceService {
 
   async getBalanceUpToByAccount(endDate: string, accountId: string, openingBalance: number): Promise<number> {
     const uid = this.ownerId;
+    const ccIds = await this.getCreditCardIds(accountId);
     const [entriesRes, txRes] = await Promise.all([
       this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).or(this.txOrFilter(accountId, ccIds)).lte('date', endDate),
     ]);
     const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
     const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);

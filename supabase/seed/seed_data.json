@@ -50,11 +50,11 @@
     { "name": "Poupança", "type": "SAVINGS",  "balance": 0, "color": "#22c55e" }
   ],
   "creditCards": [
-    { "name": "Crédito Latam Pass",        "limit": 20000, "closingDay": 10, "dueDay": 17, "color": "#ec4899" },
-    { "name": "Crédito Nubank",            "limit": 10000, "closingDay": 22, "dueDay": 29, "color": "#8b5cf6" },
-    { "name": "Crédito Itaú Multi Pontos", "limit": 15000, "closingDay": 20, "dueDay": 27, "color": "#f97316" },
-    { "name": "Crédito Mastercard",        "limit":  5000, "closingDay":  3, "dueDay": 10, "color": "#64748b" },
-    { "name": "Crédito Visa",              "limit":  5000, "closingDay":  3, "dueDay": 10, "color": "#3b82f6" }
+    { "name": "Crédito Latam Pass",        "limit": 20000, "closingDay": 10, "dueDay": 17, "color": "#ec4899", "accountRef": "Itaú" },
+    { "name": "Crédito Nubank",            "limit": 10000, "closingDay": 22, "dueDay": 29, "color": "#8b5cf6", "accountRef": "Nubank" },
+    { "name": "Crédito Itaú Multi Pontos", "limit": 15000, "closingDay": 20, "dueDay": 27, "color": "#f97316", "accountRef": "Itaú" },
+    { "name": "Crédito Mastercard",        "limit":  5000, "closingDay":  3, "dueDay": 10, "color": "#64748b", "accountRef": "Itaú" },
+    { "name": "Crédito Visa",              "limit":  5000, "closingDay":  3, "dueDay": 10, "color": "#3b82f6", "accountRef": "Itaú" }
   ],
   "recurringTemplates": [
     {

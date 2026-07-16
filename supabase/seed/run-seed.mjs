@@ -176,6 +176,7 @@ await run('Credit cards', async () => {
     credit_limit: c.limit,
     closing_day: c.closingDay,
     due_day: c.dueDay,
+    account_id: c.accountRef ? (accountIdMap[c.accountRef] ?? null) : null,
   }));
   const inserted = await insert('credit_cards', rows, 'id,name');
   for (const c of inserted) cardIdMap[c.name] = c.id;
