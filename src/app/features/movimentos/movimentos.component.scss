@@ -128,8 +128,8 @@ tsi-month-picker ::ng-deep .month-picker {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows .28s ease;
-  margin-bottom: 1.25rem;
-  &.is-open { grid-template-rows: 1fr; }
+  margin-bottom: 0;
+  &.is-open { grid-template-rows: 1fr; margin-bottom: 1.25rem; }
 }
 .filter-panel-inner { overflow: hidden; }
 .filter-panel-content {
@@ -486,6 +486,7 @@ tr:hover td { background: var(--color-surface-2); }
 .pie-card {
   background: var(--color-surface); border: 1px solid var(--color-border);
   border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+  margin-top: 1.25rem;
 }
 .pie-header {
   display: flex; align-items: center; justify-content: space-between;

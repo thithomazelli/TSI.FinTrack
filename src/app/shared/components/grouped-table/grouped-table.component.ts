@@ -175,6 +175,7 @@ export class GroupedTableComponent {
   setPageSize(ps: number): void {
     this._pageSize.set(ps);
     this.currentPage.set(0);
+    this.cdr.detectChanges();
   }
 
   goToPage(p: number): void {
