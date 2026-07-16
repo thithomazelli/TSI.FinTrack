@@ -17,6 +17,10 @@ OWNER_ID    = "69f852bc-af5a-4f11-b293-37bf2f809018"
 UPLOADS_DIR = Path(r"D:\Google Drive\Arquivos Thiago\Meus Gastos\Orçamentos encerrados")
 OUT_FILE    = Path(__file__).parent.parent / "supabase" / "seed" / "transactions_data.json"
 
+# Default account that pays all CC bills and receives all debit transactions.
+# Individual transactions can override this via the UI after seeding.
+DEFAULT_PAYMENT_ACCOUNT = "Itaú"
+
 # ── Card metadata (name → due_day) ───────────────────────────────────────────
 CARD_DUE = {
     "crédito nubank":            29,
@@ -322,6 +326,7 @@ def parse_sheet(ws, year: int, month: int):
                 "purchase_date":    purch,
                 "category_name":    cat_str,
                 "credit_card_name": card_name,
+                "account_name":     DEFAULT_PAYMENT_ACCOUNT,
                 "status":           status,
                 "labels":           [],
                 "position":         row_num,

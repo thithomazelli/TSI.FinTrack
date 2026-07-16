@@ -176,7 +176,6 @@ await run('Credit cards', async () => {
     credit_limit: c.limit,
     closing_day: c.closingDay,
     due_day: c.dueDay,
-    account_id: c.accountRef ? (accountIdMap[c.accountRef] ?? null) : null,
   }));
   const inserted = await insert('credit_cards', rows, 'id,name');
   for (const c of inserted) cardIdMap[c.name] = c.id;
@@ -250,6 +249,9 @@ if (!txData) {
         ? (catLookup[t.category_name.toLowerCase()] ?? null)
         : null;
       if (t.category_name && !catId) missing.add(t.category_name);
+      const accountId = t.account_name
+        ? (accountIdMap[t.account_name] ?? defaultAccountId)
+        : defaultAccountId;
       return {
         owner_id:              OWNER_ID,
         description:           t.description,
@@ -257,7 +259,7 @@ if (!txData) {
         date:                  t.date,
         purchase_date:         t.purchase_date ?? null,
         category_id:           catId,
-        account_id:            cardId ? null : defaultAccountId,
+        account_id:            accountId,
         credit_card_id:        cardId,
         status:                t.status,
         installment_number:    t.installment_number ?? null,
