@@ -128,8 +128,8 @@ export class BalanceService {
   async getAvailableBalanceByAccount(accountId: string, openingBalance: number): Promise<number> {
     const uid = this.ownerId;
     const [entriesRes, txRes] = await Promise.all([
-      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED'),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED'),
+      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED').range(0, 99999),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).eq('status', 'REALIZED').range(0, 99999),
     ]);
     const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
     const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);
@@ -139,8 +139,8 @@ export class BalanceService {
   async getBalanceUpToByAccount(endDate: string, accountId: string, openingBalance: number): Promise<number> {
     const uid = this.ownerId;
     const [entriesRes, txRes] = await Promise.all([
-      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate),
-      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate),
+      this.supabase.client.from('entries').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate).range(0, 99999),
+      this.supabase.client.from('transactions').select('amount').eq('owner_id', uid).eq('account_id', accountId).lte('date', endDate).range(0, 99999),
     ]);
     const income   = (entriesRes.data ?? []).reduce((s: number, e: { amount: number }) => s + Number(e.amount), 0);
     const expenses = (txRes.data ?? []).reduce((s: number, t: { amount: number }) => s + Number(t.amount), 0);
