@@ -515,6 +515,12 @@ tr:hover td { background: var(--color-surface-2); }
   flex: 1; min-width: 200px;
   columns: 3; column-gap: .75rem;
   max-height: 220px; overflow-y: auto;
+
+  @media (max-width: 600px) {
+    columns: 1;
+    max-height: none;
+    min-width: 0;
+  }
 }
 .pie-legend-row { display: flex; align-items: center; gap: .5rem; font-size: .8rem; margin-bottom: .35rem; break-inside: avoid; }
 .pie-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
