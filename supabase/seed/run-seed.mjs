@@ -296,48 +296,59 @@ if (!txData) {
     return `${count} transactions`;
   });
 
-  // 9. Credit card bills (one per card×month found in transactions)
+  // 9. Credit card bills — derived from the already-inserted transactions in the DB
   await run('Credit card bills', async () => {
     const now = new Date();
     const currentYear  = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    // card id → { closingDay, dueDay }
+    // card id (UUID) → { closingDay, dueDay }
     const cardConf = {};
     for (const c of data.creditCards) {
       const id = cardIdMap[c.name];
       if (id) cardConf[id] = { closingDay: c.closingDay, dueDay: c.dueDay };
     }
 
-    // aggregate total per (cardId, year, month)
+    // Fetch all CC transactions directly from DB (UUIDs already correct)
+    let allCcTxs = [];
+    let offset = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data: page, error } = await supabase
+        .from('transactions')
+        .select('credit_card_id, date, amount')
+        .eq('owner_id', OWNER_ID)
+        .not('credit_card_id', 'is', null)
+        .range(offset, offset + PAGE - 1);
+      if (error) throw error;
+      if (!page || page.length === 0) break;
+      allCcTxs = allCcTxs.concat(page);
+      if (page.length < PAGE) break;
+      offset += PAGE;
+    }
+
+    // Aggregate per (credit_card_id, year, month)
     const billMap = new Map();
-    for (const t of (txData.transactions ?? [])) {
-      if (!t.credit_card_name) continue;
-      const cardId = cardIdMap[t.credit_card_name];
-      if (!cardId) continue;
+    for (const t of allCcTxs) {
       const [y, mo] = t.date.split('-').map(Number);
-      const key = `${cardId}|${y}|${mo}`;
-      if (!billMap.has(key)) billMap.set(key, { cardId, year: y, month: mo, total: 0 });
+      const key = `${t.credit_card_id}|${y}|${mo}`;
+      if (!billMap.has(key)) billMap.set(key, { cardId: t.credit_card_id, year: y, month: mo, total: 0 });
       billMap.get(key).total += Number(t.amount);
     }
 
+    const pad = n => String(n).padStart(2, '0');
     const rows = [];
     for (const { cardId, year, month, total } of billMap.values()) {
       const conf = cardConf[cardId] ?? { closingDay: 1, dueDay: 10 };
-      const pad = n => String(n).padStart(2, '0');
       const closingDate = `${year}-${pad(month)}-${pad(conf.closingDay)}`;
       let dueYear = year, dueMonth = month;
-      if (conf.dueDay < conf.closingDay) {
-        dueMonth++;
-        if (dueMonth > 12) { dueMonth = 1; dueYear++; }
-      }
+      if (conf.dueDay < conf.closingDay) { dueMonth++; if (dueMonth > 12) { dueMonth = 1; dueYear++; } }
       const dueDate = `${dueYear}-${pad(dueMonth)}-${pad(conf.dueDay)}`;
-      const isPast  = year < currentYear || (year === currentYear && month < currentMonth);
+      const isPast = year < currentYear || (year === currentYear && month < currentMonth);
       rows.push({
         owner_id:       OWNER_ID,
         credit_card_id: cardId,
-        year,
-        month,
+        year, month,
         total_amount:   Math.round(total * 100) / 100,
         closing_date:   closingDate,
         due_date:       dueDate,
@@ -345,13 +356,13 @@ if (!txData) {
       });
     }
 
-    if (!rows.length) return '0 bills (no CC transactions found)';
-    let count = 0;
-    for (let i = 0; i < rows.length; i += BATCH) {
-      await insert('credit_card_bills', rows.slice(i, i + BATCH), 'id');
-      count += rows.slice(i, i + BATCH).length;
-    }
-    return `${count} bills`;
+    if (!rows.length) return '0 bills (no CC transactions in DB)';
+    // Upsert so the current-month bill from step 7 is updated with the real total
+    const { error: upsertErr } = await supabase
+      .from('credit_card_bills')
+      .upsert(rows, { onConflict: 'credit_card_id,year,month' });
+    if (upsertErr) throw upsertErr;
+    return `${rows.length} bills`;
   });
 
   // 10. Savings movements
