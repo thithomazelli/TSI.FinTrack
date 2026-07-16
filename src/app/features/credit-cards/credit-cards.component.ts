@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -62,6 +63,15 @@ export class CreditCardsComponent implements OnInit {
 
   readonly year  = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
+
+  /** When true, hides bills with no transactions. */
+  readonly onlyWithExpenses = signal(true);
+
+  readonly visibleBills = computed(() => {
+    const all = this.bills();
+    if (!this.onlyWithExpenses()) return all;
+    return all.filter(b => this.billTransactions(b).length > 0);
+  });
 
   // ── Bill modal ──────────────────────────────────────────────────────────────
   readonly billModalOpen   = signal(false);

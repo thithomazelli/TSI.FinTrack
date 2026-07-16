@@ -3,6 +3,10 @@
     <h2 class="page-title">{{ 'creditCards.bills' | translate }}</h2>
     <div class="header-actions">
       <tsi-month-picker [year]="year()" [month]="month()" (monthChanged)="onMonthChanged($event)" />
+      <button class="btn-filter-toggle" [class.is-active]="onlyWithExpenses()" (click)="onlyWithExpenses.set(!onlyWithExpenses())" title="Mostrar apenas cartões com despesas">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+        {{ onlyWithExpenses() ? 'Apenas com despesas' : 'Todos os cartões' }}
+      </button>
       <button class="btn-add" (click)="openAddBill()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Nova Fatura
@@ -14,7 +18,7 @@
     <p class="loading-text">{{ 'common.loading' | translate }}</p>
   } @else {
     <div class="bills-list">
-      @for (bill of bills(); track bill.id) {
+      @for (bill of visibleBills(); track bill.id) {
         <div class="bill-block" [class.is-closed]="bill.status === BillStatus.Closed" [class.is-paid]="bill.status === BillStatus.Paid">
 
           <!-- Bill header -->

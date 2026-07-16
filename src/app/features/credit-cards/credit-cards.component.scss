@@ -16,6 +16,19 @@
   &:hover { background: var(--color-accent-hover); }
 }
 
+.btn-filter-toggle {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .4rem .85rem; border-radius: var(--radius-md);
+  font-size: .82rem; font-weight: 600; cursor: pointer;
+  border: 1.5px solid var(--color-border); background: var(--color-surface);
+  color: var(--color-text-2); transition: all var(--transition);
+  &:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  &.is-active {
+    border-color: var(--color-accent); color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+  }
+}
+
 /* ── Month groups ───────────────────────────────────────────────────────────── */
 .month-group { margin-bottom: 2rem; }
 
