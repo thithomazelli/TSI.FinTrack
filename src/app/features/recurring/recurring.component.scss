@@ -119,3 +119,9 @@
   &:hover { opacity: 1; }
   &--danger:hover { color: #ef4444; }
 }
+
+.toggle-full-year {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .85rem; color: var(--color-text-2); cursor: pointer;
+  input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-accent); }
+}

@@ -215,16 +215,22 @@
       <h3 class="modal-title">Projetar período</h3>
       <button class="modal-close" (click)="closeProjectModal()">✕</button>
     </div>
-    <p class="modal-text">Serão criados lançamentos projetados para todos os templates ativos neste mês.</p>
-    <div class="fields-row">
-      <div class="field" [class.has-value]="projectMonth">
-        <select class="field-input" [(ngModel)]="projectMonth">
-          @for (m of allMonths; track m) {
-            <option [value]="m">{{ monthLabel(m) }}</option>
-          }
-        </select>
-        <label class="field-label">Mês</label>
-      </div>
+    <p class="modal-text">Serão criados lançamentos projetados para todos os templates ativos {{ projectFullYear ? 'no ano selecionado' : 'neste mês' }}.</p>
+    <label class="toggle-full-year">
+      <input type="checkbox" [(ngModel)]="projectFullYear" />
+      Projetar ano inteiro
+    </label>
+    <div class="fields-row" style="margin-top:.75rem">
+      @if (!projectFullYear) {
+        <div class="field" [class.has-value]="projectMonth">
+          <select class="field-input" [(ngModel)]="projectMonth">
+            @for (m of allMonths; track m) {
+              <option [value]="m">{{ monthLabel(m) }}</option>
+            }
+          </select>
+          <label class="field-label">Mês</label>
+        </div>
+      }
       <div class="field field--sm">
         <input class="field-input" type="number" placeholder=" " [(ngModel)]="projectYear" min="2020" max="2099" />
         <label class="field-label">Ano</label>

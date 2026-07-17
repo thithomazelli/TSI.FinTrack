@@ -73,6 +73,7 @@ export class RecurringComponent implements OnInit {
   // Project modal state
   projectYear = new Date().getFullYear();
   projectMonth = new Date().getMonth() + 1;
+  projectFullYear = false;
 
   readonly monthNames = MONTH_NAMES;
   readonly days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -337,6 +338,7 @@ export class RecurringComponent implements OnInit {
     const now = new Date();
     this.projectYear = now.getFullYear();
     this.projectMonth = now.getMonth() + 1;
+    this.projectFullYear = false;
     this.showProjectModal.set(true);
   }
 
@@ -346,17 +348,25 @@ export class RecurringComponent implements OnInit {
 
   projectPeriod(): void {
     this.projecting.set(true);
-    this.service.projectPeriod(this.projectYear, this.projectMonth)
-      .then(result => {
-        this.projecting.set(false);
-        this.closeProjectModal();
-        this.toast.success(`${result?.created ?? 0} lançamentos projetados com sucesso!`);
-      })
-      .catch((err: unknown) => {
-        this.logger.error('Failed to project period', err);
-        this.projecting.set(false);
-        this.toast.error('Erro ao projetar período.');
-      });
+    const months = this.projectFullYear
+      ? Array.from({ length: 12 }, (_, i) => i + 1)
+      : [this.projectMonth];
+
+    let totalCreated = 0;
+    months.reduce((p, m) =>
+      p.then(() => this.service.projectPeriod(this.projectYear, m)
+        .then(r => { totalCreated += r?.created ?? 0; })),
+      Promise.resolve()
+    ).then(() => {
+      this.projecting.set(false);
+      this.closeProjectModal();
+      const label = this.projectFullYear ? `ano ${this.projectYear}` : this.monthLabel(this.projectMonth);
+      this.toast.success(`${totalCreated} lançamentos projetados para ${label}!`);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to project period', err);
+      this.projecting.set(false);
+      this.toast.error('Erro ao projetar período.');
+    });
   }
 
   // ── Month toggle (for sporadic) ──────────────────────────────────────────────
