@@ -50,7 +50,7 @@
           <!-- Bill actions -->
           <div class="bill-actions">
             @if (bill.dueDate) {
-              <span class="bill-due">{{ 'creditCards.dueDay' | translate }}: {{ bill.dueDate | slice:0:10 }}</span>
+              <span class="bill-due">{{ 'creditCards.dueDay' | translate }}: {{ bill.dueDate | date:'dd/MM/yyyy' }}</span>
             }
             <button
               class="btn btn-sm"
