@@ -192,6 +192,37 @@
     </div>
   </div>
 
+  <!-- Gráfico de pizza por categoria -->
+  @if (!loading() && categorySpend().length > 0) {
+    <div class="pie-card">
+      <div class="pie-header" (click)="pieExpanded.set(!pieExpanded())" style="cursor:pointer">
+        <h3 class="pie-title">{{ 'movimentos.expensesByCategory' | translate }}</h3>
+        <div class="pie-header-right">
+          <span class="pie-total">{{ 'common.total' | translate }}: R$ {{ simSaidas() | number:'1.2-2' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="14" height="14"
+               [style.transform]="pieExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)'"
+               style="transition: transform .25s ease; color: var(--color-text-2)">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
+      </div>
+      <div class="pie-body pie-collapsible" [class.pie-collapsible--open]="pieExpanded()">
+        <div class="pie-chart-wrap">
+          <canvas baseChart [data]="categoryPieData()" [options]="doughnutOptions()" type="doughnut"></canvas>
+        </div>
+        <div class="pie-legend">
+          @for (cat of categorySpend(); track cat.categoryId) {
+            <div class="pie-legend-row">
+              <span class="pie-dot" [style.background]="cat.color"></span>
+              <span class="pie-legend-name">{{ cat.name }}</span>
+              <span class="pie-legend-val">R$ {{ cat.amount | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Table -->
   @if (loading()) {
     <p class="state-msg">{{ 'common.loading' | translate }}</p>
@@ -428,36 +459,6 @@
     }
   }
 
-  <!-- Gráfico de pizza por categoria -->
-  @if (!loading() && categorySpend().length > 0) {
-    <div class="pie-card">
-      <div class="pie-header" (click)="pieExpanded.set(!pieExpanded())" style="cursor:pointer">
-        <h3 class="pie-title">{{ 'movimentos.expensesByCategory' | translate }}</h3>
-        <div class="pie-header-right">
-          <span class="pie-total">{{ 'common.total' | translate }}: R$ {{ simSaidas() | number:'1.2-2' }}</span>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="14" height="14"
-               [style.transform]="pieExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)'"
-               style="transition: transform .25s ease; color: var(--color-text-2)">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-          </svg>
-        </div>
-      </div>
-      <div class="pie-body pie-collapsible" [class.pie-collapsible--open]="pieExpanded()">
-        <div class="pie-chart-wrap">
-          <canvas baseChart [data]="categoryPieData()" [options]="doughnutOptions()" type="doughnut"></canvas>
-        </div>
-        <div class="pie-legend">
-          @for (cat of categorySpend(); track cat.categoryId) {
-            <div class="pie-legend-row">
-              <span class="pie-dot" [style.background]="cat.color"></span>
-              <span class="pie-legend-name">{{ cat.name }}</span>
-              <span class="pie-legend-val">R$ {{ cat.amount | number:'1.2-2' }}</span>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-  }
 </div>
 
 <!-- Bulk modals -->
