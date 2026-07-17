@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DateLangDirective } from '../../directives/date-lang.directive';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MonthPickerComponent } from '../month-picker/month-picker.component';
 
@@ -7,7 +8,7 @@ export type PeriodMode = 'month' | 'range';
 
 @Component({
   selector: 'tsi-period-bar',
-  imports: [FormsModule, TranslatePipe, MonthPickerComponent],
+  imports: [FormsModule, TranslatePipe, MonthPickerComponent, DateLangDirective],
   templateUrl: './period-bar.component.html',
   styleUrls: ['./period-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

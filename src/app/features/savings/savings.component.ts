@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { DecimalPipe, SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DateLangDirective } from '../../shared/directives/date-lang.directive';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SavingsService } from '../../core/services/savings.service';
 import { DomainListService } from '../../core/services/domain-list.service';
@@ -22,7 +23,7 @@ import { BalanceCardComponent } from '../../shared/components/balance-card/balan
 
 @Component({
     selector: 'tsi-savings',
-    imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent],
+    imports: [DecimalPipe, SlicePipe, FormsModule, TranslatePipe, MonthPickerComponent, BalanceCardComponent, DateLangDirective],
     templateUrl: './savings.component.html',
     styleUrls: ['./savings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DateLangDirective } from '../../shared/directives/date-lang.directive';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CreditCardBillService } from '../../core/services/credit-card-bill.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
@@ -30,7 +31,7 @@ interface BillWithCard extends CreditCardBill {
 
 @Component({
     selector: 'tsi-credit-cards',
-    imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe, FormsModule, MonthPickerComponent],
+    imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe, FormsModule, MonthPickerComponent, DateLangDirective],
     templateUrl: './credit-cards.component.html',
     styleUrls: ['./credit-cards.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

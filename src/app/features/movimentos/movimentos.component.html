@@ -870,7 +870,8 @@
         </div>
       }
       <div class="field" [class.has-value]="formTxCreditCardId">
-        <select class="field-input" [(ngModel)]="formTxCreditCardId">
+        <select class="field-input" [(ngModel)]="formTxCreditCardId"
+          (ngModelChange)="$event && applyCardDates($event)">
           <option value="">—</option>
           @for (card of cards(); track card.id) {
             <option [value]="card.id">{{ card.name }}</option>

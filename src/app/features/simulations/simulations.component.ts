@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DateLangDirective } from '../../shared/directives/date-lang.directive';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -59,7 +60,7 @@ interface DiffEntry {
 
 @Component({
     selector: 'tsi-simulations',
-    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BaseChartDirective, GroupedTableComponent],
+    imports: [DecimalPipe, DatePipe, FormsModule, TranslatePipe, MonthPickerComponent, BaseChartDirective, GroupedTableComponent, DateLangDirective],
     templateUrl: './simulations.component.html',
     styleUrls: ['./simulations.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
