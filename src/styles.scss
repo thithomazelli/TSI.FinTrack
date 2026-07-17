@@ -108,7 +108,7 @@ body {
 
 .page {
   padding: 2rem;
-  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (max-width: 768px) {
     padding: 1.25rem 1rem;
