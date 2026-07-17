@@ -1,7 +1,6 @@
 {
   "_note": "Seed data for TSI.FinTrack. Run with: node supabase/seed/run-seed.mjs",
   "categories": [
-    { "name": "Alimentação",          "color": "#f59e0b", "icon": "🍔" },
     { "name": "Despesas carro",        "color": "#6366f1", "icon": "🚗" },
     { "name": "Despesas casa",         "color": "#10b981", "icon": "🏠" },
     { "name": "Despesas terreno",      "color": "#8b5cf6", "icon": "🏗️" },
@@ -365,7 +364,7 @@
       "frequency": "monthly",
       "months": [],
       "isActive": true,
-      "categoryRef": "Alimentação",
+      "categoryRef": "Alimentação/Mercado",
       "accountRef": null,
       "creditCardRef": "Crédito Latam Pass"
     },

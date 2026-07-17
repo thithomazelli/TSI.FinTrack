@@ -93,7 +93,7 @@
 }
 
 /* ── modals (local copy — global styles don't penetrate host) ── */
-.backdrop {
+.modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
@@ -210,5 +210,5 @@
 }
 
 @keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
-@keyframes scaleIn { from { opacity: 0; transform: translateY(-50%) scale(0.96) } to { opacity: 1; transform: translateY(-50%) scale(1) } }
+@keyframes scaleIn { from { opacity: 0; transform: translateY(calc(-50% + 12px)) scale(0.97) } to { opacity: 1; transform: translateY(-50%) scale(1) } }
 @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
