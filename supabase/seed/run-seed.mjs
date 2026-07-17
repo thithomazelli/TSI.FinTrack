@@ -207,16 +207,17 @@ await run('Current-month bills (OPEN)', async () => {
   const now = new Date();
   const y = now.getFullYear(), m = now.getMonth() + 1;
   const pad = n => String(n).padStart(2, '0');
+  const clampDay = (cy, cm, d) => Math.min(d, new Date(cy, cm, 0).getDate());
   const rows = data.creditCards.map(c => {
     const cardId = cardIdMap[c.name];
     if (!cardId) return null;
-    const closingDate = `${y}-${pad(m)}-${pad(c.closingDay)}`;
+    const closingDate = `${y}-${pad(m)}-${pad(clampDay(y, m, c.closingDay))}`;
     let dueYear = y, dueMonth = m;
     if (c.dueDay < c.closingDay) {
       dueMonth++;
       if (dueMonth > 12) { dueMonth = 1; dueYear++; }
     }
-    const dueDate = `${dueYear}-${pad(dueMonth)}-${pad(c.dueDay)}`;
+    const dueDate = `${dueYear}-${pad(dueMonth)}-${pad(clampDay(dueYear, dueMonth, c.dueDay))}`;
     return { owner_id: OWNER_ID, credit_card_id: cardId, year: y, month: m, total_amount: 0, closing_date: closingDate, due_date: dueDate, status: 'OPEN' };
   }).filter(Boolean);
   const { error } = await supabase.from('credit_card_bills').upsert(rows, { onConflict: 'credit_card_id,year,month', ignoreDuplicates: true });
@@ -357,13 +358,17 @@ await run('Credit card bills (all months)', async () => {
   }
 
   const pad = n => String(n).padStart(2, '0');
+  // Clamp day to the last valid day of that month/year
+  const clampDay = (y, m, d) => Math.min(d, new Date(y, m, 0).getDate());
   const rows = [];
   for (const { cardId, year, month, total } of billMap.values()) {
     const conf = cardConf[cardId] ?? { closingDay: 1, dueDay: 10 };
-    const closingDate = `${year}-${pad(month)}-${pad(conf.closingDay)}`;
+    const closingDay = clampDay(year, month, conf.closingDay);
+    const closingDate = `${year}-${pad(month)}-${pad(closingDay)}`;
     let dueYear = year, dueMonth = month;
     if (conf.dueDay < conf.closingDay) { dueMonth++; if (dueMonth > 12) { dueMonth = 1; dueYear++; } }
-    const dueDate = `${dueYear}-${pad(dueMonth)}-${pad(conf.dueDay)}`;
+    const dueDay = clampDay(dueYear, dueMonth, conf.dueDay);
+    const dueDate = `${dueYear}-${pad(dueMonth)}-${pad(dueDay)}`;
     const isPast = year < currentYear || (year === currentYear && month < currentMonth);
     rows.push({
       owner_id:       OWNER_ID,
