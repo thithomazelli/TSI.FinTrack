@@ -142,14 +142,18 @@ export class CreditCardsSettingsComponent implements OnInit {
     const db = this.supabase.client;
 
     // ── 1. Update OPEN bills from current month onwards ───────────────────
-    const { data: bills } = await db
+    const { data: allBills } = await db
       .from('credit_card_bills')
       .select('id, year, month')
       .eq('credit_card_id', cardId)
-      .eq('status', 'OPEN')
-      .or(`year.gt.${currentYear},and(year.eq.${currentYear},month.gte.${currentMonth})`);
+      .eq('status', 'OPEN');
 
-    if (bills?.length) {
+    const bills = (allBills ?? []).filter(
+      (b: { year: number; month: number }) =>
+        b.year > currentYear || (b.year === currentYear && b.month >= currentMonth)
+    );
+
+    if (bills.length) {
       await Promise.all(bills.map((b: { id: string; year: number; month: number }) => {
         const clamp = (d: number) => Math.min(d, new Date(b.year, b.month, 0).getDate());
         const due = `${b.year}-${String(b.month).padStart(2, '0')}-${String(clamp(dueDay)).padStart(2, '0')}`;
