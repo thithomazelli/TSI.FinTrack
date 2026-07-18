@@ -137,48 +137,12 @@ export class CreditCardsSettingsComponent implements OnInit {
 
   private async cascadeUpdateDueDate(cardId: string, dueDay: number): Promise<void> {
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-    const db = this.supabase.client;
-
-    // ── 1. Update OPEN bills from current month onwards ───────────────────
-    const { data: allBills } = await db
-      .from('credit_card_bills')
-      .select('id, year, month')
-      .eq('credit_card_id', cardId)
-      .eq('status', 'OPEN');
-
-    const bills = (allBills ?? []).filter(
-      (b: { year: number; month: number }) =>
-        b.year > currentYear || (b.year === currentYear && b.month >= currentMonth)
-    );
-
-    if (bills.length) {
-      await Promise.all(bills.map((b: { id: string; year: number; month: number }) => {
-        const clamp = (d: number) => Math.min(d, new Date(b.year, b.month, 0).getDate());
-        const due = `${b.year}-${String(b.month).padStart(2, '0')}-${String(clamp(dueDay)).padStart(2, '0')}`;
-        return db.from('credit_card_bills').update({ due_date: due }).eq('id', b.id);
-      }));
-    }
-
-    // ── 2. Update PROJECTED transactions from current month onwards ───────
-    const { data: txs } = await db
-      .from('transactions')
-      .select('id, date')
-      .eq('credit_card_id', cardId)
-      .eq('status', 'PROJECTED')
-      .gte('date', `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`);
-
-    if (txs?.length) {
-      await Promise.all(txs.map((t: { id: string; date: string }) => {
-        const d = new Date(t.date + 'T00:00:00');
-        const y = d.getFullYear();
-        const m = d.getMonth() + 1;
-        const clamp = (day: number) => Math.min(day, new Date(y, m, 0).getDate());
-        const newDate = `${y}-${String(m).padStart(2, '0')}-${String(clamp(dueDay)).padStart(2, '0')}`;
-        return db.from('transactions').update({ date: newDate }).eq('id', t.id);
-      }));
-    }
+    await this.supabase.client.rpc('update_card_due_dates', {
+      p_card_id:    cardId,
+      p_due_day:    dueDay,
+      p_from_year:  now.getFullYear(),
+      p_from_month: now.getMonth() + 1,
+    });
   }
 
   confirmDelete(card: CreditCard): void {
