@@ -88,7 +88,7 @@
       <label class="field-label">{{ 'common.name' | translate }}</label>
     </div>
     <div class="fields-row">
-      <div class="field field--xs">
+      <div class="field">
         <input class="field-input" placeholder=" " [(ngModel)]="formLastFour" maxlength="4" />
         <label class="field-label">{{ 'settings.last4Digits' | translate }}</label>
       </div>
@@ -98,11 +98,11 @@
       </div>
     </div>
     <div class="fields-row">
-      <div class="field field--xs">
+      <div class="field">
         <input class="field-input" type="number" min="1" max="31" placeholder=" " [(ngModel)]="formClosingDay" />
         <label class="field-label">{{ 'settings.closingDay' | translate }}</label>
       </div>
-      <div class="field field--xs">
+      <div class="field">
         <input class="field-input" type="number" min="1" max="31" placeholder=" " [(ngModel)]="formDueDay" />
         <label class="field-label">{{ 'settings.dueDay' | translate }}</label>
       </div>

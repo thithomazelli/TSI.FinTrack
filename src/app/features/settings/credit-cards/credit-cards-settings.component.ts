@@ -12,6 +12,7 @@ import { CurrencyMaskDirective } from '../../../shared/directives/currency-mask.
 import { CreditCardService } from '../../../core/services/credit-card.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { SupabaseService } from '../../../core/services/supabase.service';
 import { CreditCard } from '../../../core/models/interfaces/credit-card.interface';
 
 @Component({
@@ -23,6 +24,7 @@ import { CreditCard } from '../../../core/models/interfaces/credit-card.interfac
 })
 export class CreditCardsSettingsComponent implements OnInit {
   private readonly cardService = inject(CreditCardService);
+  private readonly supabase = inject(SupabaseService);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
 
@@ -39,6 +41,7 @@ export class CreditCardsSettingsComponent implements OnInit {
   formLimit = 0;
   formClosingDay = 1;
   formDueDay = 1;
+  private originalDueDay = 1;
 
   ngOnInit(): void {
     this.load();
@@ -77,6 +80,7 @@ export class CreditCardsSettingsComponent implements OnInit {
     this.formLimit = card.creditLimit ?? 0;
     this.formClosingDay = card.closingDay ?? 1;
     this.formDueDay = card.dueDay ?? 1;
+    this.originalDueDay = card.dueDay ?? 1;
     this.showForm.set(true);
   }
 
@@ -97,14 +101,16 @@ export class CreditCardsSettingsComponent implements OnInit {
   save(): void {
     if (!this.formName.trim()) { this.saveAttempted.set(true); return; }
     this.saving.set(true);
+    const newDueDay = this.formDueDay;
     const payload = {
       name: this.formName.trim(),
       lastFourDigits: this.formLastFour,
       creditLimit: this.formLimit,
       closingDay: this.formClosingDay,
-      dueDay: this.formDueDay,
+      dueDay: newDueDay,
     };
     const id = this.editingId();
+    const dueDayChanged = id !== null && newDueDay !== this.originalDueDay;
 
     const op$ = id
       ? this.cardService.update(id, payload)
@@ -114,14 +120,61 @@ export class CreditCardsSettingsComponent implements OnInit {
       this.cards.update(list =>
         id ? list.map(c => (c.id === id ? saved : c)) : [...list, saved]
       );
-      this.toast.success(id ? 'Cartão atualizado com sucesso!' : 'Cartão criado com sucesso!');
-      this.saving.set(false);
-      this.closeForm();
+      const after = id && dueDayChanged
+        ? this.cascadeUpdateDueDate(id, newDueDay)
+        : Promise.resolve();
+      return after.then(() => {
+        this.toast.success(id ? 'Cartão atualizado com sucesso!' : 'Cartão criado com sucesso!');
+        this.saving.set(false);
+        this.closeForm();
+      });
     }).catch((err: unknown) => {
       this.logger.error('Failed to save credit card', err);
       this.toast.error('Erro ao salvar cartão.');
       this.saving.set(false);
     });
+  }
+
+  private async cascadeUpdateDueDate(cardId: string, dueDay: number): Promise<void> {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const db = this.supabase.client;
+
+    // ── 1. Update OPEN bills from current month onwards ───────────────────
+    const { data: bills } = await db
+      .from('credit_card_bills')
+      .select('id, year, month')
+      .eq('credit_card_id', cardId)
+      .eq('status', 'OPEN')
+      .or(`year.gt.${currentYear},and(year.eq.${currentYear},month.gte.${currentMonth})`);
+
+    if (bills?.length) {
+      await Promise.all(bills.map((b: { id: string; year: number; month: number }) => {
+        const clamp = (d: number) => Math.min(d, new Date(b.year, b.month, 0).getDate());
+        const due = `${b.year}-${String(b.month).padStart(2, '0')}-${String(clamp(dueDay)).padStart(2, '0')}`;
+        return db.from('credit_card_bills').update({ due_date: due }).eq('id', b.id);
+      }));
+    }
+
+    // ── 2. Update PROJECTED transactions from current month onwards ───────
+    const { data: txs } = await db
+      .from('transactions')
+      .select('id, date')
+      .eq('credit_card_id', cardId)
+      .eq('status', 'PROJECTED')
+      .gte('date', `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`);
+
+    if (txs?.length) {
+      await Promise.all(txs.map((t: { id: string; date: string }) => {
+        const d = new Date(t.date + 'T00:00:00');
+        const y = d.getFullYear();
+        const m = d.getMonth() + 1;
+        const clamp = (day: number) => Math.min(day, new Date(y, m, 0).getDate());
+        const newDate = `${y}-${String(m).padStart(2, '0')}-${String(clamp(dueDay)).padStart(2, '0')}`;
+        return db.from('transactions').update({ date: newDate }).eq('id', t.id);
+      }));
+    }
   }
 
   confirmDelete(card: CreditCard): void {
