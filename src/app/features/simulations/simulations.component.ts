@@ -291,14 +291,14 @@ export class SimulationsComponent implements OnInit {
       const card = this.cards().find(c => c.id === cardId);
       const rawName = card?.name ?? '...';
       const isDebitCard = /^d[eé]bito/i.test(rawName);
-      const hasOpen = txs.some(t => t.status === 'PROJECTED');
+      const hasOpen = txs.some(t => t.status !== 'REALIZED');
 
       if (isDebitCard) {
         groups.push({
           id: `__debit_card_${cardId}`,
           label: rawName,
           items: txs,
-          total: txs.reduce((s, t) => s + t.amount, 0),
+          total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
           defaultExpanded: true,
         });
@@ -308,7 +308,7 @@ export class SimulationsComponent implements OnInit {
           id: cardId,
           label: `Fatura ${displayName}`,
           items: txs,
-          total: txs.reduce((s, t) => s + t.amount, 0),
+          total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
           badge: hasOpen ? 'em aberto' : 'fechada',
           badgeClass: hasOpen ? 'badge--open' : 'badge--closed',
@@ -556,8 +556,7 @@ export class SimulationsComponent implements OnInit {
     });
   }
 
-  toggleItemStatus(item: SimItem): void {
-    const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED';
+  setItemStatus(item: SimItem, newStatus: string): void {
     this.overrides.update(m => {
       const next = new Map(m);
       next.set(item.id, { ...(next.get(item.id) ?? {}), status: newStatus as TransactionStatus });

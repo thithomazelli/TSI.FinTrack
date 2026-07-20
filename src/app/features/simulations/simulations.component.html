@@ -424,10 +424,12 @@
             <select class="status-select"
               [class.status-select--realized]="item.status === 'REALIZED'"
               [class.status-select--projected]="item.status === 'PROJECTED'"
+              [class.status-select--estimated]="item.status === 'ESTIMATED'"
               [ngModel]="item.status"
-              (ngModelChange)="item.status !== $event && toggleItemStatus(item)">
+              (ngModelChange)="item.status !== $event && setItemStatus(item, $event)">
               <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
               <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
+              <option value="ESTIMATED">{{ 'movimentos.estimated' | translate }}</option>
             </select>
           </td>
           <td>

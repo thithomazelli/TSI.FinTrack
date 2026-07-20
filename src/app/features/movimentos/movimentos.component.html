@@ -302,6 +302,11 @@
                     <span class="fp-check-box"></span>
                     {{ 'movimentos.projected' | translate }}
                   </label>
+                  <label class="fp-check">
+                    <input type="checkbox" [checked]="filterStatuses().has('ESTIMATED')" (change)="toggleFilterStatus('ESTIMATED')" />
+                    <span class="fp-check-box"></span>
+                    {{ 'movimentos.estimated' | translate }}
+                  </label>
                 </div>
               </div>
               <div class="fp-divider"></div>
@@ -413,10 +418,12 @@
           <select class="status-select"
             [class.status-select--realized]="item.status === 'REALIZED'"
             [class.status-select--projected]="item.status === 'PROJECTED'"
+            [class.status-select--estimated]="item.status === 'ESTIMATED'"
             [ngModel]="item.status"
-            (ngModelChange)="item.status !== $event && toggleStatus(item)">
+            (ngModelChange)="item.status !== $event && setStatus(item, $event)">
             <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
             <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
+            <option value="ESTIMATED">{{ 'movimentos.estimated' | translate }}</option>
           </select>
         </td>
         <td>

@@ -414,8 +414,9 @@ tr:hover td { background: var(--color-surface-2); }
   padding: 0.2rem 0.6rem; border-radius: 999px;
   font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
   background-image: none;
-  &--realized { background: rgba(34,197,94,.15); color: #22c55e; }
+  &--realized  { background: rgba(34,197,94,.15);  color: #22c55e; }
   &--projected { background: rgba(245,158,11,.15); color: #f59e0b; }
+  &--estimated { background: rgba(99,102,241,.15); color: var(--color-accent); }
   option { background: var(--color-surface); color: var(--color-text); font-size: 0.85rem; }
 }
 
@@ -568,8 +569,9 @@ tr:hover td { background: var(--color-surface-2); }
 
 .status-chip {
   display: inline-block; padding: .15rem .5rem; border-radius: 999px; font-size: .72rem; font-weight: 700;
-  &--realized { background: rgba(16,185,129,.15); color: #059669; }
-  &--projected { background: rgba(245,158,11,.15); color: #b45309; }
+  &--realized  { background: rgba(16,185,129,.15);  color: #059669; }
+  &--projected { background: rgba(245,158,11,.15);  color: #b45309; }
+  &--estimated { background: rgba(99,102,241,.15);  color: var(--color-accent); }
 }
 
 .inst-pagination {

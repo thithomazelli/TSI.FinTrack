@@ -18,7 +18,7 @@ export interface TableGroup<T = any> {
   label: string;
   items: T[];
   total?: number;
-  status?: 'REALIZED' | 'PROJECTED';
+  status?: 'REALIZED' | 'PROJECTED' | 'ESTIMATED';
   badge?: string;
   badgeClass?: string;
   defaultExpanded?: boolean;

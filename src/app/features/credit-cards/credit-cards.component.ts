@@ -141,7 +141,9 @@ export class CreditCardsComponent implements OnInit {
   }
 
   billTotal(bill: BillWithCard): number {
-    return this.billTransactions(bill).reduce((s, t) => s + t.amount, 0);
+    return this.billTransactions(bill)
+      .filter(t => t.status !== TransactionStatus.Estimated)
+      .reduce((s, t) => s + t.amount, 0);
   }
 
   categoryName(id: string | null | undefined): string {

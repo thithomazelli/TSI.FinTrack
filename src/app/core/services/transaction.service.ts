@@ -230,6 +230,7 @@ export class TransactionService {
       .update({ status, updated_at: new Date().toISOString() })
       .eq('owner_id', this.ownerId)
       .eq('credit_card_id', creditCardId)
+      .neq('status', 'ESTIMATED')
       .gte('date', startDate)
       .lte('date', endDate)
       .then(({ error }) => { if (error) throw error; });

@@ -241,6 +241,13 @@
     outline-offset: -2px;
   }
   &[draggable="true"] { cursor: grab; }
+
+  &.gt-row--estimated td {
+    background: color-mix(in srgb, #f59e0b 6%, var(--color-surface));
+  }
+  &.gt-row--estimated:hover td {
+    background: color-mix(in srgb, #f59e0b 12%, var(--color-surface));
+  }
 }
 
 @keyframes rowIn {

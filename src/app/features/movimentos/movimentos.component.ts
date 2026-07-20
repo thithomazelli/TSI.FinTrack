@@ -388,7 +388,7 @@ export class MovimentosComponent implements OnInit {
       const card = this.cards().find(c => c.id === cardId);
       const rawName = card?.name ?? '...';
       const isDebitCard = /^d[eé]bito/i.test(rawName);
-      const hasOpen = txs.some(t => t.status === 'PROJECTED');
+      const hasOpen = txs.some(t => t.status !== 'REALIZED');
 
       if (isDebitCard) {
         // Treat debit-named cards as a debit group (placed before credit card groups)
@@ -396,7 +396,7 @@ export class MovimentosComponent implements OnInit {
           id: `__debit_card_${cardId}`,
           label: rawName,
           items: txs,
-          total: txs.reduce((s, t) => s + t.amount, 0),
+          total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
           defaultExpanded: true,
         });
@@ -406,7 +406,7 @@ export class MovimentosComponent implements OnInit {
           id: cardId,
           label: `Fatura ${displayName}`,
           items: txs,
-          total: txs.reduce((s, t) => s + t.amount, 0),
+          total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
           badge: hasOpen ? 'em aberto' : 'fechada',
           badgeClass: hasOpen ? 'badge--open' : 'badge--closed',
@@ -1122,20 +1122,20 @@ export class MovimentosComponent implements OnInit {
     this.deletingItem.set(null);
   }
 
-  toggleStatus(item: MovimentoItem): void {
-    const newStatus = (item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED') as TransactionStatus;
+  setStatus(item: MovimentoItem, newStatus: string): void {
+    const status = newStatus as TransactionStatus;
     const apply = () => {
       if (item.kind === 'entry') {
-        this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status: newStatus } : e));
+        this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status } : e));
       } else {
-        this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status: newStatus } : t));
+        this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status } : t));
       }
       this.balanceService.invalidate();
     };
     if (item.kind === 'entry') {
-      this.entryService.update(item.id, { status: newStatus }).then(apply).catch((err: unknown) => this.logger.error('Failed to toggle status', err));
+      this.entryService.update(item.id, { status }).then(apply).catch((err: unknown) => this.logger.error('Failed to set status', err));
     } else {
-      this.transactionService.update(item.id, { status: newStatus }).then(apply).catch((err: unknown) => this.logger.error('Failed to toggle status', err));
+      this.transactionService.update(item.id, { status }).then(apply).catch((err: unknown) => this.logger.error('Failed to set status', err));
     }
   }
 
@@ -1145,7 +1145,7 @@ export class MovimentosComponent implements OnInit {
     this.bulkSaving.set(true);
     try {
       for (const item of items) {
-        const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED';
+        const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED'; // ESTIMATED → REALIZED via bulk
         if (item.kind === 'entry') {
           await this.entryService.update(item.id, { status: newStatus as TransactionStatus });
           this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status: newStatus as TransactionStatus } : e));

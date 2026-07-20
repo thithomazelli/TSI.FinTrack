@@ -107,6 +107,7 @@
 
                     @for (tx of billTransactions(bill); track tx.id; let i = $index) {
                       <tr [class.is-drag-over]="isDragOver(bill, i)"
+                          [class.is-estimated]="tx.status === 'ESTIMATED'"
                           draggable="true"
                           (dragstart)="onDragStart(bill, i, $event)"
                           (dragover)="onDragOver(bill, i, $event)"
@@ -133,10 +134,12 @@
                           <select class="status-select"
                             [class.status-select--realized]="tx.status === 'REALIZED'"
                             [class.status-select--projected]="tx.status === 'PROJECTED'"
+                            [class.status-select--estimated]="tx.status === 'ESTIMATED'"
                             [ngModel]="tx.status"
                             (ngModelChange)="tx.status !== $event && toggleTxStatus(tx, $event)">
                             <option value="REALIZED">{{ 'movimentos.realized' | translate }}</option>
                             <option value="PROJECTED">{{ 'movimentos.projected' | translate }}</option>
+                            <option value="ESTIMATED">{{ 'movimentos.estimated' | translate }}</option>
                           </select>
                         </td>
                         <td class="td-actions">

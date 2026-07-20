@@ -1,4 +1,5 @@
 export enum TransactionStatus {
-  Realized = 'REALIZED',
+  Realized  = 'REALIZED',
   Projected = 'PROJECTED',
+  Estimated = 'ESTIMATED',
 }
