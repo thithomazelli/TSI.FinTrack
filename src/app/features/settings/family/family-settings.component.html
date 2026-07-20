@@ -80,7 +80,10 @@
 
 @if (showForm()) {
   <div class="backdrop" (click)="closeForm()"></div>
-  <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal" (click)="$event.stopPropagation()"
+       tsiModalKey
+       [tsiModalKeyEnter]="sendInvite.bind(this)"
+       [tsiModalKeyEscape]="closeForm.bind(this)">
     <h3 class="modal-title">{{ 'settings.inviteMember' | translate }}</h3>
 
     <div class="field" [class.field--invalid]="fi('email', !!formEmail().trim())" [class.field--valid]="fv('email', !!formEmail().trim())">
@@ -112,7 +115,10 @@
 
 @if (deletingItem()) {
   <div class="backdrop" (click)="cancelDelete()"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="revoke.bind(this)"
+       [tsiModalKeyEscape]="cancelDelete.bind(this)">
     <h3 class="modal-title">{{ 'settings.removeMember' | translate }}</h3>
     <p class="confirm-msg">
       {{ 'settings.removeConfirm' | translate }} <strong>{{ deletingItem()!.memberProfile.fullName || deletingItem()!.memberProfile.email }}</strong>?

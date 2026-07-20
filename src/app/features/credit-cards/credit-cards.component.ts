@@ -9,11 +9,14 @@ import {
 import { DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateLangDirective } from '../../shared/directives/date-lang.directive';
+import { ModalKeyDirective } from '../../shared/directives/modal-key.directive';
+import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CreditCardBillService } from '../../core/services/credit-card-bill.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { TransactionService, CreateTransactionPayload } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
+import { AccountService } from '../../core/services/account.service';
 import { BalanceService } from '../../core/services/balance.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -21,9 +24,11 @@ import { CreditCardBill } from '../../core/models/interfaces/credit-card-bill.in
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { Category } from '../../core/models/interfaces/category.interface';
+import { Account } from '../../core/models/interfaces/account.interface';
 import { BillStatus } from '../../core/models/enums/bill-status.enum';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
+import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
 
 interface BillWithCard extends CreditCardBill {
   credit_cards?: { name: string; last_four_digits: string };
@@ -31,7 +36,7 @@ interface BillWithCard extends CreditCardBill {
 
 @Component({
     selector: 'tsi-credit-cards',
-    imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe, FormsModule, MonthPickerComponent, DateLangDirective],
+    imports: [DecimalPipe, DatePipe, SlicePipe, TranslatePipe, FormsModule, MonthPickerComponent, DateLangDirective, ModalKeyDirective, CurrencyMaskDirective, LabelsInputComponent],
     templateUrl: './credit-cards.component.html',
     styleUrls: ['./credit-cards.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -41,6 +46,7 @@ export class CreditCardsComponent implements OnInit {
   private readonly cardService     = inject(CreditCardService);
   private readonly txService       = inject(TransactionService);
   private readonly categoryService = inject(CategoryService);
+  private readonly accountService  = inject(AccountService);
   private readonly balanceService  = inject(BalanceService);
   private readonly logger          = inject(LoggingService);
   private readonly toast           = inject(ToastService);
@@ -52,6 +58,9 @@ export class CreditCardsComponent implements OnInit {
   readonly cards        = signal<CreditCard[]>([]);
   readonly transactions = signal<Transaction[]>([]);
   readonly categories   = signal<Category[]>([]);
+  readonly accounts     = signal<Account[]>([]);
+
+  readonly checkingAccounts = computed(() => this.accounts());
   readonly loading      = signal(false);
   readonly saving       = signal(false);
   readonly updatingId   = signal<string | null>(null);
@@ -105,13 +114,19 @@ export class CreditCardsComponent implements OnInit {
   readonly formTxDate         = signal('');
   readonly formTxPurchaseDate = signal('');
   readonly formTxCategoryId   = signal('');
-  readonly formTxStatus       = signal<TransactionStatus>(TransactionStatus.Projected);
-  readonly deletingTx         = signal<Transaction | null>(null);
+  readonly formTxStatus            = signal<TransactionStatus>(TransactionStatus.Projected);
+  readonly formTxPaymentAccountId  = signal('');
+  readonly deletingTx              = signal<Transaction | null>(null);
 
-  // installment fields
-  formTxIsInstallment = false;
-  formTxInstallments  = 2;
+  // installment / international / labels fields
+  formTxIsInstallment    = false;
+  formTxInstallments     = 2;
   formTxAmountType: 'total' | 'installment' = 'total';
+  formTxIsInternational  = false;
+  formTxOriginalCurrency = 'USD';
+  formTxOriginalAmount   = 0;
+  formTxExchangeRate     = 0;
+  formTxLabels: string[] = [];
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   billTransactions(bill: BillWithCard): Transaction[] {
@@ -145,9 +160,13 @@ export class CreditCardsComponent implements OnInit {
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    Promise.all([this.cardService.getAll(false), this.categoryService.getAll()])
-      .then(([cards, cats]) => { this.cards.set(cards); this.categories.set(cats); })
-      .catch((err: unknown) => this.logger.error('Failed to load cards/cats', err));
+    Promise.all([this.cardService.getAll(false), this.categoryService.getAll(), this.accountService.getAll()])
+      .then(([cards, cats, accounts]) => {
+        this.cards.set(cards);
+        this.categories.set(cats);
+        this.accounts.set(accounts);
+      })
+      .catch((err: unknown) => this.logger.error('Failed to load cards/cats/accounts', err));
     this.loadAll();
   }
 
@@ -235,6 +254,10 @@ export class CreditCardsComponent implements OnInit {
     return ({ [BillStatus.Open]: 'status-open', [BillStatus.Closed]: 'status-closed', [BillStatus.Paid]: 'status-paid' })[status] ?? '';
   }
 
+  closeBillModal(): void       { this.billModalOpen.set(false); }
+  closeDeleteBillModal(): void { this.deletingBill.set(null); }
+  closeDeleteTxModal(): void   { this.deletingTx.set(null); }
+
   // ── Bill add / delete ────────────────────────────────────────────────────────
   openAddBill(): void {
     this.editingBillId.set(null);
@@ -292,9 +315,36 @@ export class CreditCardsComponent implements OnInit {
     this.formTxPurchaseDate.set(this.today());
     this.formTxCategoryId.set('');
     this.formTxStatus.set(TransactionStatus.Projected);
-    this.formTxIsInstallment = false;
-    this.formTxInstallments  = 2;
-    this.formTxAmountType    = 'total';
+    this.formTxPaymentAccountId.set(this.checkingAccounts()[0]?.id ?? '');
+    this.formTxIsInstallment    = false;
+    this.formTxInstallments     = 2;
+    this.formTxAmountType       = 'total';
+    this.formTxIsInternational  = false;
+    this.formTxOriginalCurrency = 'USD';
+    this.formTxOriginalAmount   = 0;
+    this.formTxExchangeRate     = 0;
+    this.formTxLabels           = [];
+    this.txModalOpen.set(true);
+  }
+
+  duplicateTx(tx: Transaction, bill: BillWithCard): void {
+    this.editingTxId.set(null);
+    this.txModalCardId.set(bill.creditCardId);
+    this.formTxDescription.set(tx.description);
+    this.formTxAmount.set(Math.abs(tx.amount));
+    this.formTxDate.set(bill.dueDate ?? this.today());
+    this.formTxPurchaseDate.set(this.today());
+    this.formTxCategoryId.set(tx.categoryId ?? '');
+    this.formTxStatus.set(tx.status);
+    this.formTxPaymentAccountId.set(tx.accountId ?? (this.checkingAccounts()[0]?.id ?? ''));
+    this.formTxIsInstallment    = false;
+    this.formTxInstallments     = 2;
+    this.formTxAmountType       = 'total';
+    this.formTxIsInternational  = !!tx.originalCurrency;
+    this.formTxOriginalCurrency = tx.originalCurrency ?? 'USD';
+    this.formTxOriginalAmount   = tx.originalAmount ?? 0;
+    this.formTxExchangeRate     = tx.exchangeRate ?? 0;
+    this.formTxLabels           = [...(tx.labels ?? [])];
     this.txModalOpen.set(true);
   }
 
@@ -307,6 +357,15 @@ export class CreditCardsComponent implements OnInit {
     this.formTxPurchaseDate.set(tx.purchaseDate ?? tx.date);
     this.formTxCategoryId.set(tx.categoryId ?? '');
     this.formTxStatus.set(tx.status);
+    this.formTxPaymentAccountId.set(tx.accountId ?? (this.checkingAccounts()[0]?.id ?? ''));
+    this.formTxIsInstallment    = !!tx.totalInstallments && tx.totalInstallments > 1;
+    this.formTxInstallments     = tx.totalInstallments ?? 2;
+    this.formTxAmountType       = 'installment';
+    this.formTxIsInternational  = !!tx.originalCurrency;
+    this.formTxOriginalCurrency = tx.originalCurrency ?? 'USD';
+    this.formTxOriginalAmount   = tx.originalAmount ?? 0;
+    this.formTxExchangeRate     = tx.exchangeRate ?? 0;
+    this.formTxLabels           = [...(tx.labels ?? [])];
     this.txModalOpen.set(true);
   }
 
@@ -320,9 +379,14 @@ export class CreditCardsComponent implements OnInit {
     this.txModalOpen.set(false);
     this.saveAttempted.set(false);
     this._touched.clear();
-    this.formTxIsInstallment = false;
-    this.formTxInstallments  = 2;
-    this.formTxAmountType    = 'total';
+    this.formTxIsInstallment    = false;
+    this.formTxInstallments     = 2;
+    this.formTxAmountType       = 'total';
+    this.formTxIsInternational  = false;
+    this.formTxOriginalCurrency = 'USD';
+    this.formTxOriginalAmount   = 0;
+    this.formTxExchangeRate     = 0;
+    this.formTxLabels           = [];
   }
 
   saveTx(): void {
@@ -341,15 +405,15 @@ export class CreditCardsComponent implements OnInit {
       date:          this.formTxDate(),
       purchaseDate:  this.formTxPurchaseDate() || null,
       categoryId:    this.formTxCategoryId() || null,
-      accountId:     null,
+      accountId:     this.formTxPaymentAccountId() || null,
       creditCardId:  this.txModalCardId(),
       status:        this.formTxStatus(),
       totalInstallments: installments,
       recurringTemplateId: null,
-      originalCurrency: null,
-      originalAmount: null,
-      exchangeRate: null,
-      labels: [],
+      originalCurrency: this.formTxIsInternational ? this.formTxOriginalCurrency : null,
+      originalAmount:   this.formTxIsInternational ? this.formTxOriginalAmount   : null,
+      exchangeRate:     this.formTxIsInternational ? this.formTxExchangeRate      : null,
+      labels: this.formTxLabels,
     };
 
     const id = this.editingTxId();

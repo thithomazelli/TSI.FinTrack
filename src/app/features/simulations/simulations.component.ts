@@ -7,8 +7,8 @@ import { DateLangDirective } from '../../shared/directives/date-lang.directive';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { EntryService } from '../../core/services/entry.service';
-import { TransactionService } from '../../core/services/transaction.service';
+import { EntryService, CreateEntryPayload } from '../../core/services/entry.service';
+import { TransactionService, CreateTransactionPayload } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
 import { AccountService } from '../../core/services/account.service';
@@ -494,6 +494,46 @@ export class SimulationsComponent implements OnInit {
       return next;
     });
     this.cancelEdit();
+  }
+
+  async duplicateItem(item: SimItem): Promise<void> {
+    try {
+      if (item.kind === 'entry') {
+        const e = item.raw as Entry;
+        await this.entryService.create({
+          description: e.description,
+          amount: Math.abs(e.amount),
+          date: e.date,
+          typeId: e.typeId ?? null,
+          accountId: e.accountId ?? null,
+          labels: e.labels ?? [],
+          status: e.status,
+        });
+      } else {
+        const t = item.raw as Transaction;
+        await this.transactionService.create({
+          description: t.description,
+          amount: Math.abs(t.amount),
+          date: t.date,
+          purchaseDate: t.purchaseDate ?? null,
+          categoryId: t.categoryId ?? null,
+          accountId: t.accountId ?? null,
+          creditCardId: t.creditCardId ?? null,
+          status: t.status as TransactionStatus,
+          totalInstallments: null,
+          recurringTemplateId: null,
+          originalCurrency: t.originalCurrency ?? null,
+          originalAmount: t.originalAmount ?? null,
+          exchangeRate: t.exchangeRate ?? null,
+          labels: t.labels ?? [],
+        });
+      }
+      this.toast.success('Duplicado com sucesso.');
+      this.load(true);
+    } catch (err) {
+      this.logger.error('Failed to duplicate item', err);
+      this.toast.error('Erro ao duplicar.');
+    }
   }
 
   deleteItem(item: SimItem): void {

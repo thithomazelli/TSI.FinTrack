@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ModalKeyDirective } from '../../../shared/directives/modal-key.directive';
 import { DomainListService } from '../../../core/services/domain-list.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -15,7 +16,7 @@ import { DomainList } from '../../../core/models/interfaces/domain-list.interfac
 
 @Component({
     selector: 'tsi-domains-settings',
-    imports: [TranslatePipe, FormsModule],
+    imports: [TranslatePipe, FormsModule, ModalKeyDirective],
     templateUrl: './domains-settings.component.html',
     styleUrls: ['./domains-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

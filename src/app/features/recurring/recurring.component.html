@@ -94,7 +94,10 @@
 <!-- Edit modal -->
 @if (editingTemplate()) {
   <div class="modal-backdrop" (click)="closeEdit()"></div>
-  <div class="modal">
+  <div class="modal"
+       tsiModalKey
+       [tsiModalKeyEnter]="save.bind(this)"
+       [tsiModalKeyEscape]="closeEdit.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">Editar recorrente</h3>
       <button class="modal-close" (click)="closeEdit()">✕</button>
@@ -192,7 +195,10 @@
 <!-- Delete confirm modal -->
 @if (deletingTemplate()) {
   <div class="modal-backdrop" (click)="cancelDelete()"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="confirmDelete.bind(this)"
+       [tsiModalKeyEscape]="cancelDelete.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">Confirmar exclusão</h3>
       <button class="modal-close" (click)="cancelDelete()">✕</button>
@@ -210,7 +216,10 @@
 <!-- Project period modal -->
 @if (showProjectModal()) {
   <div class="modal-backdrop" (click)="closeProjectModal()"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="projectPeriod.bind(this)"
+       [tsiModalKeyEscape]="closeProjectModal.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">Projetar período</h3>
       <button class="modal-close" (click)="closeProjectModal()">✕</button>

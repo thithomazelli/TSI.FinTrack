@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ModalKeyDirective } from '../../../shared/directives/modal-key.directive';
 import { PeopleService } from '../../../core/services/people.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -13,7 +14,7 @@ import { People } from '../../../core/models/interfaces/people.interface';
 
 @Component({
   selector: 'tsi-people-settings',
-  imports: [FormsModule],
+  imports: [FormsModule, ModalKeyDirective],
   templateUrl: './people-settings.component.html',
   styleUrls: ['./people-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

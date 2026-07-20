@@ -467,6 +467,7 @@ tr:hover td { background: var(--color-surface-2); }
   font-size: .75rem; font-weight: 600; cursor: pointer;
   border: 1.5px solid transparent; background: transparent; transition: all var(--transition);
   &--edit   { color: #3b82f6; border-color: rgba(59,130,246,.35); &:hover { background: rgba(59,130,246,.1); } }
+  &--copy   { color: #8b5cf6; border-color: rgba(139,92,246,.35); &:hover { background: rgba(139,92,246,.1); } }
   &--delete { color: #ef4444; border-color: rgba(239,68,68,.35);  &:hover { background: rgba(239,68,68,.1);  } }
 }
 

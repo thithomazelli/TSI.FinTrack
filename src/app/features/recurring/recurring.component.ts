@@ -26,12 +26,13 @@ import {
   GroupSearchFn,
 } from '../../shared/components/grouped-table/grouped-table.component';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
+import { ModalKeyDirective } from '../../shared/directives/modal-key.directive';
 
 const MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 @Component({
   selector: 'tsi-recurring',
-  imports: [DecimalPipe, FormsModule, GroupedTableComponent, CurrencyMaskDirective],
+  imports: [DecimalPipe, FormsModule, GroupedTableComponent, CurrencyMaskDirective, ModalKeyDirective],
   templateUrl: './recurring.component.html',
   styleUrls: ['./recurring.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

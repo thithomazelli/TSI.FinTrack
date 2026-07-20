@@ -9,6 +9,7 @@ import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CurrencyMaskDirective } from '../../../shared/directives/currency-mask.directive';
+import { ModalKeyDirective } from '../../../shared/directives/modal-key.directive';
 import { CreditCardService } from '../../../core/services/credit-card.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -17,7 +18,7 @@ import { CreditCard } from '../../../core/models/interfaces/credit-card.interfac
 
 @Component({
     selector: 'tsi-credit-cards-settings',
-    imports: [TranslatePipe, FormsModule, CurrencyPipe, CurrencyMaskDirective],
+    imports: [TranslatePipe, FormsModule, CurrencyPipe, CurrencyMaskDirective, ModalKeyDirective],
     templateUrl: './credit-cards-settings.component.html',
     styleUrls: ['./credit-cards-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

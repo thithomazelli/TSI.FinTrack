@@ -37,6 +37,7 @@ import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
+import { ModalKeyDirective } from '../../shared/directives/modal-key.directive';
 import { DateLangDirective } from '../../shared/directives/date-lang.directive';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
@@ -67,7 +68,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 
 @Component({
     selector: 'tsi-movimentos',
-    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BalanceCardComponent, SavingsBalanceCardComponent, BaseChartDirective, TranslatePipe, GroupedTableComponent, CurrencyMaskDirective, DateLangDirective],
+    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BalanceCardComponent, SavingsBalanceCardComponent, BaseChartDirective, TranslatePipe, GroupedTableComponent, CurrencyMaskDirective, DateLangDirective, ModalKeyDirective],
     templateUrl: './movimentos.component.html',
     styleUrls: ['./movimentos.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -445,17 +446,15 @@ export class MovimentosComponent implements OnInit {
     const todayStr = today.toISOString().split('T')[0];
     this.formTxPurchaseDate = todayStr;
     if (!card || /^d[eé]bito/i.test(card.name)) {
-      // Debit: payment date = purchase date
       this.formTxDate = todayStr;
       return;
     }
-    // Credit: payment date = next card due date
-    let dueYear = today.getFullYear();
-    let dueMonth = today.getMonth() + 1;
-    if (today.getDate() > card.dueDay) dueMonth++;
-    if (dueMonth > 12) { dueMonth = 1; dueYear++; }
-    const dueDay = String(card.dueDay).padStart(2, '0');
-    this.formTxDate = `${dueYear}-${String(dueMonth).padStart(2, '0')}-${dueDay}`;
+    // Credit: payment date = selected month + card due day (clamped to last day of month)
+    const y = this.year();
+    const m = this.month();
+    const lastDay = new Date(y, m, 0).getDate();
+    const dueDay = Math.min(card.dueDay, lastDay);
+    this.formTxDate = `${y}-${String(m).padStart(2, '0')}-${String(dueDay).padStart(2, '0')}`;
   }
 
   private computeInsertPosition(items: MovimentoItem[]): number | undefined {
@@ -860,6 +859,50 @@ export class MovimentosComponent implements OnInit {
     this.formTxExchangeRate = 0;
     this.formTxLabels = [];
     this.modalMode.set('transaction');
+  }
+
+  duplicate(item: MovimentoItem): void {
+    if (item.kind === 'entry') {
+      const e = item.raw as Entry;
+      this.editingId.set(null);
+      this.editModalTab.set('details');
+      this.editInstallments.set([]);
+      this.installmentsPage.set(0);
+      this.editingHasInstallments.set(false);
+      this.formEntryDescription = e.description;
+      this.formEntryAmount = Math.abs(e.amount);
+      this.formEntryDate = e.date;
+      this.formEntryStatus = e.status ?? 'REALIZED';
+      this.formEntryTypeId = e.typeId ?? '';
+      this.formEntryAccountId = e.accountId ?? '';
+      this.formEntryLabels = [...e.labels];
+      this.modalMode.set('entry');
+    } else {
+      const t = item.raw as Transaction;
+      this.editingId.set(null);
+      this.editModalTab.set('details');
+      this.editInstallments.set([]);
+      this.installmentsPage.set(0);
+      this.editingHasInstallments.set(false);
+      this.formTxDescription = t.description;
+      this.formTxAmount = Math.abs(t.amount);
+      this.formTxDate = t.date;
+      this.formTxStatus = t.status;
+      this.formTxCategoryId = t.categoryId ?? '';
+      this.formTxCreditCardId = t.creditCardId ?? '';
+      this.formTxAccountId = t.creditCardId ? '' : (t.accountId ?? '');
+      this.formTxPaymentAccountId = t.creditCardId ? (t.accountId ?? '') : (this.checkingAccounts()[0]?.id ?? '');
+      this.formTxPurchaseDate = t.purchaseDate ?? t.date;
+      this.formTxIsInstallment = false;
+      this.formTxInstallments = 2;
+      this.formTxAmountType = 'total';
+      this.formTxIsInternational = !!t.originalCurrency;
+      this.formTxOriginalCurrency = t.originalCurrency ?? 'USD';
+      this.formTxOriginalAmount = t.originalAmount ?? 0;
+      this.formTxExchangeRate = t.exchangeRate ?? 0;
+      this.formTxLabels = [...t.labels];
+      this.modalMode.set('transaction');
+    }
   }
 
   openEdit(item: MovimentoItem): void {

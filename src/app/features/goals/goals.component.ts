@@ -18,6 +18,7 @@ import { Goal } from '../../core/models/interfaces/goal.interface';
 import { Category } from '../../core/models/interfaces/category.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
+import { ModalKeyDirective } from '../../shared/directives/modal-key.directive';
 
 interface GoalRow {
   goal: Goal;
@@ -30,7 +31,7 @@ interface GoalRow {
 
 @Component({
     selector: 'tsi-goals',
-    imports: [DecimalPipe, FormsModule, TranslatePipe, MonthPickerComponent],
+    imports: [DecimalPipe, FormsModule, TranslatePipe, MonthPickerComponent, ModalKeyDirective],
     templateUrl: './goals.component.html',
     styleUrls: ['./goals.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -139,6 +140,8 @@ export class GoalsComponent implements OnInit {
   markTouched(f: string): void { this._touched.add(f); this.touchedTick.update(n => n + 1); }
   fi(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && !v; }
   fv(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && v; }
+
+  cancelDeleteGoal(): void { this.deletingGoalId.set(null); }
 
   closeForm(): void {
     this.showForm.set(false);

@@ -51,7 +51,10 @@
 
 @if (deletingGoalId()) {
   <div class="modal-backdrop" (click)="deletingGoalId.set(null)"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="confirmDeleteGoal.bind(this)"
+       [tsiModalKeyEscape]="cancelDeleteGoal.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
       <button class="modal-close" (click)="deletingGoalId.set(null)">✕</button>
@@ -66,7 +69,10 @@
 
 @if (showForm()) {
   <div class="modal-backdrop" (click)="closeForm()"></div>
-  <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal" (click)="$event.stopPropagation()"
+       tsiModalKey
+       [tsiModalKeyEnter]="saveGoal.bind(this)"
+       [tsiModalKeyEscape]="closeForm.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ (editingId() ? 'goals.edit' : 'goals.add') | translate }}</h3>
       <button class="modal-close" (click)="closeForm()">✕</button>

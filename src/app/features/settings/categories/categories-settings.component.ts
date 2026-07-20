@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ModalKeyDirective } from '../../../shared/directives/modal-key.directive';
 import { CategoryService } from '../../../core/services/category.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -16,7 +17,7 @@ const DEFAULT_COLOR = '#6366f1';
 
 @Component({
     selector: 'tsi-categories-settings',
-    imports: [FormsModule, TranslatePipe],
+    imports: [FormsModule, TranslatePipe, ModalKeyDirective],
     templateUrl: './categories-settings.component.html',
     styleUrls: ['./categories-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

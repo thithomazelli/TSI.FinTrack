@@ -145,6 +145,10 @@
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
                               {{ 'common.edit' | translate }}
                             </button>
+                            <button class="action-btn action-btn--copy" (click)="duplicateTx(tx, bill)" title="{{ 'common.duplicate' | translate }}">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                              {{ 'common.duplicate' | translate }}
+                            </button>
                             <button class="action-btn action-btn--delete" (click)="openDeleteTx(tx)">
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                               {{ 'common.delete' | translate }}
@@ -193,7 +197,10 @@
 <!-- ── Add bill modal ───────────────────────────────────────────────────────── -->
 @if (billModalOpen()) {
   <div class="modal-backdrop" (click)="billModalOpen.set(false)"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="saveBill.bind(this)"
+       [tsiModalKeyEscape]="closeBillModal.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">Nova Fatura</h3>
       <button class="modal-close" (click)="billModalOpen.set(false)">✕</button>
@@ -219,7 +226,10 @@
 <!-- ── Delete bill confirm modal ────────────────────────────────────────────── -->
 @if (deletingBill()) {
   <div class="modal-backdrop" (click)="deletingBill.set(null)"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="confirmDeleteBill.bind(this)"
+       [tsiModalKeyEscape]="closeDeleteBillModal.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
       <button class="modal-close" (click)="deletingBill.set(null)">✕</button>
@@ -234,8 +244,11 @@
 
 <!-- ── Add / Edit transaction modal ─────────────────────────────────────────── -->
 @if (txModalOpen()) {
-  <div class="modal-backdrop" (click)="txModalOpen.set(false)"></div>
-  <div class="modal">
+  <div class="modal-backdrop" (click)="closeTxModal()"></div>
+  <div class="modal"
+       tsiModalKey
+       [tsiModalKeyEnter]="saveTx.bind(this)"
+       [tsiModalKeyEscape]="closeTxModal.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ editingTxId() ? 'Editar Lançamento' : 'Novo Lançamento' }}</h3>
       <button class="modal-close" (click)="closeTxModal()">✕</button>
@@ -248,7 +261,7 @@
 
     <div class="fields-row">
       <div class="field" [class.field--invalid]="fi('amt', formTxAmount() > 0)" [class.field--valid]="fv('amt', formTxAmount() > 0)">
-        <input class="field-input" type="number" min="0.01" step="0.01" placeholder=" " [ngModel]="formTxAmount()" (ngModelChange)="formTxAmount.set(+$event)" (blur)="markTouched('amt')" />
+        <input class="field-input" tsiCurrencyMask placeholder=" " [ngModel]="formTxAmount()" (ngModelChange)="formTxAmount.set(+$event)" (blur)="markTouched('amt')" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
       <div class="field field--sm" [class.has-value]="formTxStatus()">
@@ -281,35 +294,71 @@
       <label class="field-label">{{ 'common.category' | translate }}</label>
     </div>
 
-    @if (!editingTxId()) {
-      <div class="form-toggles">
+    <div class="field" [class.has-value]="formTxPaymentAccountId()">
+      <select class="field-input" [ngModel]="formTxPaymentAccountId()" (ngModelChange)="formTxPaymentAccountId.set($event)">
+        <option value="">—</option>
+        @for (acc of checkingAccounts(); track acc.id) {
+          <option [value]="acc.id">{{ acc.name }}</option>
+        }
+      </select>
+      <label class="field-label">{{ 'movimentos.paymentAccount' | translate }}</label>
+    </div>
+
+    <div class="form-toggles">
+      @if (!editingTxId()) {
         <label class="toggle-label">
           <input type="checkbox" [(ngModel)]="formTxIsInstallment" />
           {{ 'movimentos.installment' | translate }}
         </label>
-      </div>
+      }
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="formTxIsInternational" />
+        {{ 'movimentos.international' | translate }}
+      </label>
+    </div>
 
-      @if (formTxIsInstallment) {
-        <div class="fields-row">
-          <div class="field field--xs">
-            <input class="field-input" type="number" min="2" max="48" placeholder=" " [(ngModel)]="formTxInstallments" />
-            <label class="field-label">{{ 'movimentos.installmentsCount' | translate }}</label>
-          </div>
-          <div class="field">
-            <div class="radio-group" style="padding: 0.6rem 0">
-              <label class="radio-label">
-                <input type="radio" name="ccAmountType" value="total" [(ngModel)]="formTxAmountType" />
-                {{ 'movimentos.amountTotal' | translate }}
-              </label>
-              <label class="radio-label">
-                <input type="radio" name="ccAmountType" value="installment" [(ngModel)]="formTxAmountType" />
-                {{ 'movimentos.amountInstallment' | translate }}
-              </label>
-            </div>
+    @if (!editingTxId() && formTxIsInstallment) {
+      <div class="fields-row">
+        <div class="field field--xs">
+          <input class="field-input" type="number" min="2" max="48" placeholder=" " [(ngModel)]="formTxInstallments" />
+          <label class="field-label">{{ 'movimentos.installmentsCount' | translate }}</label>
+        </div>
+        <div class="field">
+          <div class="radio-group" style="padding: 0.6rem 0">
+            <label class="radio-label">
+              <input type="radio" name="ccAmountType" value="total" [(ngModel)]="formTxAmountType" />
+              {{ 'movimentos.amountTotal' | translate }}
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="ccAmountType" value="installment" [(ngModel)]="formTxAmountType" />
+              {{ 'movimentos.amountInstallment' | translate }}
+            </label>
           </div>
         </div>
-      }
+      </div>
     }
+
+    @if (formTxIsInternational) {
+      <div class="fields-row">
+        <div class="field field--xs">
+          <input class="field-input" placeholder=" " [(ngModel)]="formTxOriginalCurrency" maxlength="3" />
+          <label class="field-label">{{ 'movimentos.currency' | translate }}</label>
+        </div>
+        <div class="field">
+          <input class="field-input" type="number" min="0" step="0.01" placeholder=" " [(ngModel)]="formTxOriginalAmount" />
+          <label class="field-label">{{ 'movimentos.originalAmount' | translate }}</label>
+        </div>
+        <div class="field">
+          <input class="field-input" type="number" min="0" step="0.0001" placeholder=" " [(ngModel)]="formTxExchangeRate" />
+          <label class="field-label">{{ 'movimentos.exchangeRate' | translate }}</label>
+        </div>
+      </div>
+    }
+
+    <div class="field-labels-wrap">
+      <span class="field-section-label">{{ 'movimentos.labels' | translate }}</span>
+      <tsi-labels-input [(labels)]="formTxLabels" />
+    </div>
 
     <div class="modal-actions">
       <button class="btn btn-ghost" (click)="closeTxModal()">{{ 'common.cancel' | translate }}</button>
@@ -323,7 +372,10 @@
 <!-- ── Delete transaction confirm modal ─────────────────────────────────────── -->
 @if (deletingTx()) {
   <div class="modal-backdrop" (click)="deletingTx.set(null)"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="confirmDeleteTx.bind(this)"
+       [tsiModalKeyEscape]="closeDeleteTxModal.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ 'common.confirmDeleteTitle' | translate }}</h3>
       <button class="modal-close" (click)="deletingTx.set(null)">✕</button>

@@ -78,7 +78,10 @@
 
 @if (showForm()) {
   <div class="modal-backdrop" (click)="closeForm()"></div>
-  <div class="modal">
+  <div class="modal"
+       tsiModalKey
+       [tsiModalKeyEnter]="save.bind(this)"
+       [tsiModalKeyEscape]="closeForm.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ (editingId() ? 'settings.editCard' : 'settings.newCard') | translate }}</h3>
       <button class="modal-close" (click)="closeForm()">✕</button>
@@ -118,7 +121,10 @@
 
 @if (deletingItem()) {
   <div class="modal-backdrop" (click)="cancelDelete()"></div>
-  <div class="modal modal--sm">
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="archive.bind(this)"
+       [tsiModalKeyEscape]="cancelDelete.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ 'settings.archiveCard' | translate }}</h3>
       <button class="modal-close" (click)="cancelDelete()">✕</button>
