@@ -133,10 +133,14 @@ export class CreditCardsComponent implements OnInit {
     return this.transactions()
       .filter(t => t.creditCardId === bill.creditCardId)
       .sort((a, b) => {
+        const pa = a.position ?? null;
+        const pb = b.position ?? null;
+        if (pa !== null && pb !== null) return pa - pb;
+        if (pa !== null) return -1;
+        if (pb !== null) return 1;
         const da = a.purchaseDate ?? a.date;
         const db = b.purchaseDate ?? b.date;
-        if (da !== db) return da.localeCompare(db);
-        return (a.position ?? 0) - (b.position ?? 0);
+        return da.localeCompare(db);
       });
   }
 
