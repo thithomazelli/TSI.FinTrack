@@ -244,6 +244,12 @@ tfoot td {
   }
 }
 
+/* ── Installment form ────────────────────────────────────────────────────── */
+.form-toggles { display: flex; gap: 1.5rem; margin-top: 1rem; margin-bottom: .25rem; }
+.toggle-label { display: flex; align-items: center; gap: .5rem; font-size: .875rem; cursor: pointer; }
+.radio-group  { display: flex; gap: 1.25rem; margin-top: .35rem; }
+.radio-label  { display: flex; align-items: center; gap: .4rem; font-size: .875rem; cursor: pointer; }
+
 /* ── Modal helpers ───────────────────────────────────────────────────────── */
 .modal-text   { font-size: .9rem; color: var(--color-text-2); margin: 0 0 1rem; }
 .modal-footer { display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.25rem; }

@@ -277,6 +277,36 @@
       <label class="field-label">{{ 'common.category' | translate }}</label>
     </div>
 
+    @if (!editingTxId()) {
+      <div class="form-toggles">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="formTxIsInstallment" />
+          {{ 'movimentos.installment' | translate }}
+        </label>
+      </div>
+
+      @if (formTxIsInstallment) {
+        <div class="fields-row">
+          <div class="field field--xs">
+            <input class="field-input" type="number" min="2" max="48" placeholder=" " [(ngModel)]="formTxInstallments" />
+            <label class="field-label">{{ 'movimentos.installmentsCount' | translate }}</label>
+          </div>
+          <div class="field">
+            <div class="radio-group" style="padding: 0.6rem 0">
+              <label class="radio-label">
+                <input type="radio" name="ccAmountType" value="total" [(ngModel)]="formTxAmountType" />
+                {{ 'movimentos.amountTotal' | translate }}
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="ccAmountType" value="installment" [(ngModel)]="formTxAmountType" />
+                {{ 'movimentos.amountInstallment' | translate }}
+              </label>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
     <div class="modal-actions">
       <button class="btn btn-ghost" (click)="closeTxModal()">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary" (click)="saveTx()" [disabled]="saving() || !formTxDescription().trim() || formTxAmount() <= 0">

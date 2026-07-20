@@ -108,6 +108,11 @@ export class CreditCardsComponent implements OnInit {
   readonly formTxStatus       = signal<TransactionStatus>(TransactionStatus.Projected);
   readonly deletingTx         = signal<Transaction | null>(null);
 
+  // installment fields
+  formTxIsInstallment = false;
+  formTxInstallments  = 2;
+  formTxAmountType: 'total' | 'installment' = 'total';
+
   // ── Helpers ─────────────────────────────────────────────────────────────────
   billTransactions(bill: BillWithCard): Transaction[] {
     return this.transactions()
@@ -278,10 +283,13 @@ export class CreditCardsComponent implements OnInit {
     this.txModalCardId.set(bill.creditCardId);
     this.formTxDescription.set('');
     this.formTxAmount.set(0);
-    this.formTxDate.set(this.today());
+    this.formTxDate.set(bill.dueDate ?? this.today());
     this.formTxPurchaseDate.set(this.today());
     this.formTxCategoryId.set('');
     this.formTxStatus.set(TransactionStatus.Projected);
+    this.formTxIsInstallment = false;
+    this.formTxInstallments  = 2;
+    this.formTxAmountType    = 'total';
     this.txModalOpen.set(true);
   }
 
@@ -303,22 +311,35 @@ export class CreditCardsComponent implements OnInit {
   markTouched(f: string): void { this._touched.add(f); this.touchedTick.update(n => n + 1); }
   fi(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && !v; }
   fv(k: string, v: boolean): boolean { this.touchedTick(); return (this.saveAttempted() || this._touched.has(k)) && v; }
-  closeTxModal(): void { this.txModalOpen.set(false); this.saveAttempted.set(false); this._touched.clear(); }
+  closeTxModal(): void {
+    this.txModalOpen.set(false);
+    this.saveAttempted.set(false);
+    this._touched.clear();
+    this.formTxIsInstallment = false;
+    this.formTxInstallments  = 2;
+    this.formTxAmountType    = 'total';
+  }
 
   saveTx(): void {
     if (!this.formTxDescription().trim() || this.formTxAmount() <= 0) { this.saveAttempted.set(true); return; }
     this.saving.set(true);
 
+    const rawAmount = this.formTxAmount();
+    const installments = this.formTxIsInstallment ? this.formTxInstallments : null;
+    const amount = this.formTxIsInstallment && this.formTxAmountType === 'total' && installments
+      ? rawAmount / installments
+      : rawAmount;
+
     const payload: Partial<CreateTransactionPayload> = {
       description:   this.formTxDescription().trim(),
-      amount:        this.formTxAmount(),
+      amount,
       date:          this.formTxDate(),
       purchaseDate:  this.formTxPurchaseDate() || null,
       categoryId:    this.formTxCategoryId() || null,
       accountId:     null,
       creditCardId:  this.txModalCardId(),
       status:        this.formTxStatus(),
-      totalInstallments: null,
+      totalInstallments: installments,
       recurringTemplateId: null,
       originalCurrency: null,
       originalAmount: null,
