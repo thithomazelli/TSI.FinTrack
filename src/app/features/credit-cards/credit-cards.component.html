@@ -258,12 +258,12 @@
 
     <div class="fields-row">
       <div class="field field--date">
-        <input class="field-input" type="date" placeholder=" " [ngModel]="formTxDate()" (ngModelChange)="formTxDate.set($event)" />
-        <label class="field-label">{{ 'movimentos.paymentDate' | translate }}</label>
-      </div>
-      <div class="field field--date">
         <input class="field-input" type="date" placeholder=" " [ngModel]="formTxPurchaseDate()" (ngModelChange)="formTxPurchaseDate.set($event)" />
         <label class="field-label">{{ 'movimentos.purchaseDate' | translate }}</label>
+      </div>
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [ngModel]="formTxDate()" (ngModelChange)="formTxDate.set($event)" />
+        <label class="field-label">{{ 'movimentos.paymentDate' | translate }}</label>
       </div>
     </div>
 
