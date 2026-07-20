@@ -242,12 +242,15 @@
   }
   &[draggable="true"] { cursor: grab; }
 
-  &.gt-row--estimated td {
-    background: color-mix(in srgb, #f59e0b 6%, var(--color-surface));
-  }
-  &.gt-row--estimated:hover td {
-    background: color-mix(in srgb, #f59e0b 12%, var(--color-surface));
-  }
+}
+
+// ng-deep needed: <td> elements come from parent template and carry parent's
+// encapsulation attribute, so a scoped td selector won't match them.
+:host ::ng-deep .gt-row--estimated td {
+  background: color-mix(in srgb, #f59e0b 6%, var(--color-surface));
+}
+:host ::ng-deep .gt-row--estimated:hover td {
+  background: color-mix(in srgb, #f59e0b 12%, var(--color-surface));
 }
 
 @keyframes rowIn {

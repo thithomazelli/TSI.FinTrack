@@ -1,77 +1,78 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- mark_estimated.sql
--- Marks recurring/budgeted credit-card transactions as ESTIMATED.
--- Run AFTER applying migration 006_add_estimated_status.sql.
+-- Marca como ESTIMATED as despesas recorrentes/estimadas de cartão de crédito.
+-- Aplica apenas a registros de agosto/2026 em diante (status != 'REALIZED').
 --
--- Targets transactions where:
---   • owner_id  = the user's owner ID
---   • status   != 'REALIZED'  (never touch already-realized records)
---   • description matches one of the known recurring patterns below
+-- Descrições com sufixo "MM/AAAA" (ex: "Netflix - 12/2026") são casadas pelo
+-- nome-base, sem fixar o mês, então cobrem todos os meses futuros.
 --
--- Execute in the Supabase SQL editor. Review the DRY-RUN SELECT first,
--- then uncomment the UPDATE when satisfied.
+-- EXECUÇÃO:
+--   1. Rode o bloco de DRY RUN primeiro (SELECT) para conferir os registros.
+--   2. Quando satisfeito, rode o UPDATE.
 -- ─────────────────────────────────────────────────────────────────────────────
 
-DO $$
-DECLARE
-  v_owner_id UUID := '69f852bc-af5a-4f11-b293-37bf2f809018';
-BEGIN
+-- ── DRY RUN — rode isso primeiro ─────────────────────────────────────────────
+SELECT
+  id,
+  date,
+  description,
+  amount,
+  status
+FROM transactions
+WHERE owner_id = '69f852bc-af5a-4f11-b293-37bf2f809018'
+  AND status  != 'REALIZED'
+  AND date    >= '2026-08-01'
+  AND (
+      -- Seguros (parcelados, sem sufixo MM/AAAA)
+      description ILIKE '%Tokio Marine%Seguro Residencial%'
+   OR description ILIKE '%Tokio Marine%Seguro Carro%'
 
-  -- ── DRY RUN ─────────────────────────────────────────────────────────────────
-  -- Run this first to see which rows will be affected:
-  --
-  -- SELECT id, date, description, amount, status
-  -- FROM transactions
-  -- WHERE owner_id = v_owner_id
-  --   AND status != 'REALIZED'
-  --   AND (
-  --       description ILIKE '%Tokio Marine%Seguro Residencial%'
-  --    OR description ILIKE '%Tokio Marine%Seguro Carro%'
-  --    OR description ILIKE '%ifood Club%'
-  --    OR description ILIKE '%iFood Club%'
-  --    OR description ILIKE '%Apple Bill%iCloud%'
-  --    OR description ILIKE '%ClaroFlex%'
-  --    OR description ILIKE '%Amazon Prime%'
-  --    OR description ILIKE '%Youtube Premium%'
-  --    OR description ILIKE '%Spotify%'
-  --    OR description ILIKE '%Google Drive%'
-  --    OR description ILIKE '%Netflix%'
-  --    OR description ILIKE '%Mercado Livre Plus%'
-  --    OR description ILIKE '%Abastece a%Etanol%'
-  --    OR description ILIKE '%Cobasi%Areia%'
-  --    OR description ILIKE '%Cobasi%Ração%'
-  --    OR description ILIKE '%Petlove%'
-  --   )
-  -- ORDER BY date DESC, description;
+      -- Assinaturas sem sufixo de mês
+   OR description ILIKE '%ifood Club%'
+   OR description ILIKE '%iFood Club%'
+   OR description ILIKE '%Apple Bill%iCloud%'
+   OR description ILIKE '%Apple%Youtube Premium%'
+   OR description ILIKE '%Mercado Livre Plus%'
+   OR description ILIKE '%Petlove%'
+   OR description ILIKE '%Cobasi%Areia%'
+   OR description ILIKE '%Cobasi%Ração%'
+   OR description ILIKE '%Cobasi%Racao%'
+   OR description ILIKE '%Abastece a%Etanol%'
 
-  -- ── ACTUAL UPDATE ────────────────────────────────────────────────────────────
-  UPDATE transactions
-  SET
-    status     = 'ESTIMATED',
-    updated_at = NOW()
-  WHERE owner_id = v_owner_id
-    AND status  != 'REALIZED'
-    AND (
-        description ILIKE '%Tokio Marine%Seguro Residencial%'
-     OR description ILIKE '%Tokio Marine%Seguro Carro%'
-     OR description ILIKE '%ifood Club%'
-     OR description ILIKE '%iFood Club%'
-     OR description ILIKE '%Apple Bill%iCloud%'
-     OR description ILIKE '%ClaroFlex%'
-     OR description ILIKE '%Amazon Prime%'
-     OR description ILIKE '%Youtube Premium%'
-     OR description ILIKE '%Spotify%'
-     OR description ILIKE '%Google Drive%'
-     OR description ILIKE '%Netflix%'
-     OR description ILIKE '%Mercado Livre Plus%'
-     OR description ILIKE '%Abastece a%Etanol%'
-     OR description ILIKE '%Cobasi%Areia%'
-     OR description ILIKE '%Cobasi%Ração%'
-     OR description ILIKE '%Cobasi%Racao%'
-     OR description ILIKE '%Petlove%'
-    );
+      -- Assinaturas com sufixo "MM/AAAA" — casa pelo nome-base ignorando o mês
+   OR description ~ '^ClaroFlex'
+   OR description ~ '^Amazon Prime'
+   OR description ~ '^Spotify'
+   OR description ~ '^Google Drive'
+   OR description ~ '^Netflix'
+  )
+ORDER BY date, description;
 
-  RAISE NOTICE 'Rows affected: %', (SELECT COUNT(*) FROM transactions
-    WHERE owner_id = v_owner_id AND status = 'ESTIMATED');
 
-END $$;
+-- ── UPDATE — rode depois de confirmar o DRY RUN ───────────────────────────────
+UPDATE transactions
+SET
+  status     = 'ESTIMATED',
+  updated_at = NOW()
+WHERE owner_id = '69f852bc-af5a-4f11-b293-37bf2f809018'
+  AND status  != 'REALIZED'
+  AND date    >= '2026-08-01'
+  AND (
+      description ILIKE '%Tokio Marine%Seguro Residencial%'
+   OR description ILIKE '%Tokio Marine%Seguro Carro%'
+   OR description ILIKE '%ifood Club%'
+   OR description ILIKE '%iFood Club%'
+   OR description ILIKE '%Apple Bill%iCloud%'
+   OR description ILIKE '%Apple%Youtube Premium%'
+   OR description ILIKE '%Mercado Livre Plus%'
+   OR description ILIKE '%Petlove%'
+   OR description ILIKE '%Cobasi%Areia%'
+   OR description ILIKE '%Cobasi%Ração%'
+   OR description ILIKE '%Cobasi%Racao%'
+   OR description ILIKE '%Abastece a%Etanol%'
+   OR description ~ '^ClaroFlex'
+   OR description ~ '^Amazon Prime'
+   OR description ~ '^Spotify'
+   OR description ~ '^Google Drive'
+   OR description ~ '^Netflix'
+  );
