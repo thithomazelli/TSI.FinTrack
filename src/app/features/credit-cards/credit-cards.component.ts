@@ -117,7 +117,12 @@ export class CreditCardsComponent implements OnInit {
   billTransactions(bill: BillWithCard): Transaction[] {
     return this.transactions()
       .filter(t => t.creditCardId === bill.creditCardId)
-      .sort((a, b) => (b.purchaseDate ?? b.date).localeCompare(a.purchaseDate ?? a.date));
+      .sort((a, b) => {
+        const da = a.purchaseDate ?? a.date;
+        const db = b.purchaseDate ?? b.date;
+        if (da !== db) return da.localeCompare(db);
+        return (a.position ?? 0) - (b.position ?? 0);
+      });
   }
 
   billTotal(bill: BillWithCard): number {

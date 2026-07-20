@@ -97,7 +97,9 @@
             <tr class="gt-insert-zone"
                 [class.gt-insert-zone--active]="isActiveInsert(group.id, null) || isEdgeHovered(group.id, null)"
                 (mousemove)="onRowMouseMove(group.id, null, $event)"
-                (mouseleave)="onRowMouseLeave()">
+                (mouseleave)="onRowMouseLeave()"
+                (dragover)="onDragOver(group.id, 0, $event)"
+                (drop)="onDrop(group.id, 0, $event)">
               <td colspan="99" class="gt-insert-td">
                 <div class="gt-insert-line">
                   <button class="gt-insert-btn gt-insert-btn--left" (click)="requestInsert(group.id, null)" title="Inserir aqui">
@@ -146,7 +148,9 @@
               <tr class="gt-insert-zone"
                   [class.gt-insert-zone--active]="isActiveInsert(group.id, item.id) || isEdgeHovered(group.id, item.id)"
                   (mousemove)="onRowMouseMove(group.id, item.id, $event)"
-                  (mouseleave)="onRowMouseLeave()">
+                  (mouseleave)="onRowMouseLeave()"
+                  (dragover)="onDragOver(group.id, i, $event)"
+                  (drop)="onDrop(group.id, i, $event)">
                 <td colspan="99" class="gt-insert-td">
                   <div class="gt-insert-line">
                     <button class="gt-insert-btn gt-insert-btn--left" (click)="requestInsert(group.id, item.id)" title="Inserir aqui">

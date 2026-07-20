@@ -93,7 +93,9 @@
                     <!-- Insert zone before first row -->
                     <tr class="tx-insert-zone" [class.tx-insert-zone--active]="isInsertHovered(bill.id, null)"
                         (mousemove)="onTxRowMouseMove(bill.id, null, $event)"
-                        (mouseleave)="onTxRowMouseLeave()">
+                        (mouseleave)="onTxRowMouseLeave()"
+                        (dragover)="onDragOver(bill, 0, $event)"
+                        (drop)="onDrop(bill, 0, $event)">
                       <td colspan="7" class="tx-insert-td">
                         <div class="tx-insert-line">
                           <button class="tx-insert-btn" (click)="openAddTx(bill); $event.stopPropagation()" title="Inserir aqui">
@@ -154,7 +156,9 @@
                       <!-- Insert zone after each row -->
                       <tr class="tx-insert-zone" [class.tx-insert-zone--active]="isInsertHovered(bill.id, tx.id)"
                           (mousemove)="onTxRowMouseMove(bill.id, tx.id, $event)"
-                          (mouseleave)="onTxRowMouseLeave()">
+                          (mouseleave)="onTxRowMouseLeave()"
+                          (dragover)="onDragOver(bill, i, $event)"
+                          (drop)="onDrop(bill, i, $event)">
                         <td colspan="7" class="tx-insert-td">
                           <div class="tx-insert-line">
                             <button class="tx-insert-btn" (click)="openAddTx(bill); $event.stopPropagation()" title="Inserir aqui">
