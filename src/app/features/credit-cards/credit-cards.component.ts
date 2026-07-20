@@ -57,6 +57,22 @@ export class CreditCardsComponent implements OnInit {
   readonly updatingId   = signal<string | null>(null);
   readonly expandedBillIds = signal<Set<string>>(new Set());
 
+  // ── Insert zone hover ────────────────────────────────────────────────────────
+  readonly insertHoverKey = signal<string | null>(null);
+  private readonly EDGE_PX = 48;
+
+  onTxRowMouseMove(billId: string, txId: string | null, event: MouseEvent): void {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const key = `${billId}:${txId}`;
+    this.insertHoverKey.set(event.clientX - rect.left <= this.EDGE_PX ? key : null);
+  }
+
+  onTxRowMouseLeave(): void { this.insertHoverKey.set(null); }
+
+  isInsertHovered(billId: string, txId: string | null): boolean {
+    return this.insertHoverKey() === `${billId}:${txId}`;
+  }
+
   // ── Drag state ───────────────────────────────────────────────────────────────
   private dragBillId: string | null = null;
   private dragFromIdx = -1;

@@ -161,6 +161,7 @@
   td { padding: .75rem 1rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--color-surface-2); }
+  tr.tx-insert-zone:hover td { background: transparent; }
 }
 
 .status-select {
@@ -207,6 +208,41 @@ tfoot td {
 }
 .tfoot-label { color: var(--color-text-2); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .tfoot-total { text-align: right; font-weight: 800; color: var(--color-text); font-variant-numeric: tabular-nums; }
+
+/* ── Insert zones ────────────────────────────────────────────────────────── */
+.tx-insert-zone {
+  height: 6px;
+
+  .tx-insert-td { padding: 0; border-bottom: none; }
+
+  .tx-insert-line {
+    height: 6px; position: relative; display: flex; align-items: center;
+    transition: height .15s ease;
+    &::before {
+      content: ''; position: absolute; inset: 0; height: 2px; top: 50%;
+      transform: translateY(-50%); background: transparent;
+      transition: background .15s ease; pointer-events: none;
+    }
+  }
+
+  .tx-insert-btn {
+    display: none; position: absolute; top: 50%; transform: translateY(-50%);
+    left: .75rem; width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--color-accent); background: var(--color-surface);
+    color: var(--color-accent); cursor: pointer; align-items: center;
+    justify-content: center; padding: 0; z-index: 1; transition: background .15s ease;
+    &:hover { background: var(--color-accent); color: #fff; }
+  }
+
+  &.tx-insert-zone--active {
+    height: 22px;
+    .tx-insert-line {
+      height: 22px;
+      &::before { background: var(--color-accent); opacity: .4; }
+    }
+    .tx-insert-btn { display: flex; }
+  }
+}
 
 /* ── Modal helpers ───────────────────────────────────────────────────────── */
 .modal-text   { font-size: .9rem; color: var(--color-text-2); margin: 0 0 1rem; }
