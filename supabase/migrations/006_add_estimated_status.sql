@@ -21,14 +21,16 @@ ALTER TABLE entries
   CHECK (status IN ('REALIZED', 'PROJECTED', 'ESTIMATED'));
 
 -- 3. Add ESTIMATED to domain_lists for all existing owners
-INSERT INTO domain_lists (owner_id, list_key, label, value, sort_order)
+INSERT INTO domain_lists (owner_id, code, name, value, is_system, is_default, sort_order)
 SELECT
   owner_id,
   'transaction_status',
   'Estimado',
   'ESTIMATED',
+  true,
+  false,
   3
 FROM domain_lists
-WHERE list_key = 'transaction_status'
+WHERE code  = 'transaction_status'
   AND value = 'REALIZED'
 ON CONFLICT DO NOTHING;
