@@ -137,12 +137,62 @@ export class CreditCardsSettingsComponent implements OnInit {
 
   private async cascadeUpdateDueDate(cardId: string, dueDay: number): Promise<void> {
     const now = new Date();
-    await this.supabase.client.rpc('update_card_due_dates', {
-      p_card_id:    cardId,
-      p_due_day:    dueDay,
-      p_from_year:  now.getFullYear(),
-      p_from_month: now.getMonth() + 1,
-    });
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const db = this.supabase.client;
+
+    const daysInMonth = (y: number, m: number) => new Date(y, m, 0).getDate();
+    const clampDay = (y: number, m: number) => Math.min(dueDay, daysInMonth(y, m));
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    // ── 1. OPEN bills from current month onwards ──────────────────────────
+    const { data: allBills } = await db
+      .from('credit_card_bills')
+      .select('id, year, month')
+      .eq('credit_card_id', cardId)
+      .eq('status', 'OPEN');
+
+    const bills = (allBills ?? []).filter(
+      (b: { year: number; month: number }) =>
+        b.year > currentYear || (b.year === currentYear && b.month >= currentMonth)
+    );
+
+    if (bills.length) {
+      // Group by computed due_date → one UPDATE … IN (ids) per unique date
+      const billsByDate = new Map<string, string[]>();
+      for (const b of bills as { id: string; year: number; month: number }[]) {
+        const due = `${b.year}-${pad(b.month)}-${pad(clampDay(b.year, b.month))}`;
+        if (!billsByDate.has(due)) billsByDate.set(due, []);
+        billsByDate.get(due)!.push(b.id);
+      }
+      await Promise.all([...billsByDate.entries()].map(([due, ids]) =>
+        db.from('credit_card_bills').update({ due_date: due }).in('id', ids)
+      ));
+    }
+
+    // ── 2. PROJECTED transactions from current month onwards ──────────────
+    const { data: txs } = await db
+      .from('transactions')
+      .select('id, date')
+      .eq('credit_card_id', cardId)
+      .eq('status', 'PROJECTED')
+      .gte('date', `${currentYear}-${pad(currentMonth)}-01`);
+
+    if (txs?.length) {
+      // Group by computed new date → one UPDATE … IN (ids) per unique date
+      const txsByDate = new Map<string, string[]>();
+      for (const t of txs as { id: string; date: string }[]) {
+        const d = new Date(t.date + 'T00:00:00');
+        const y = d.getFullYear();
+        const m = d.getMonth() + 1;
+        const newDate = `${y}-${pad(m)}-${pad(clampDay(y, m))}`;
+        if (!txsByDate.has(newDate)) txsByDate.set(newDate, []);
+        txsByDate.get(newDate)!.push(t.id);
+      }
+      await Promise.all([...txsByDate.entries()].map(([date, ids]) =>
+        db.from('transactions').update({ date }).in('id', ids)
+      ));
+    }
   }
 
   confirmDelete(card: CreditCard): void {
