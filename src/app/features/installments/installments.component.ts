@@ -96,14 +96,35 @@ export class InstallmentsComponent implements OnInit {
       const totalInstallments = sorted[0].totalInstallments ?? sorted.length;
       const unitValue = Number(thisMonthTxs[0].amount);
 
-      // Paid = installments before the selected month
-      const paid = sorted.filter(t => d(t.date) < start).length;
-      const remaining = sorted.filter(t => d(t.date) >= start);
-      const pending = remaining.length;
+      // When the DB has fewer records than the total (e.g. only one installment was imported),
+      // derive paid/pending from the installment_number encoded in the record rather than
+      // counting actual rows — counting rows gives 0 paid / 1 pending for a "04/07" record.
+      const isPartialData = sorted.length < totalInstallments;
+      let paid: number;
+      let pending: number;
+      let totalToPayOff: number;
+      let lastInstallmentDate: string;
+
+      if (isPartialData) {
+        const minInstNum = Math.min(...sorted.map(t => t.installmentNumber ?? 1));
+        paid    = minInstNum - 1;
+        pending = totalInstallments - paid;
+        totalToPayOff    = unitValue * pending;
+        // Extrapolate last installment date: add (totalInstallments - minInstNum) months
+        const refDate  = new Date(d(sorted[0].date) + 'T12:00:00');
+        const lastDate = new Date(refDate);
+        lastDate.setMonth(lastDate.getMonth() + (totalInstallments - minInstNum));
+        lastInstallmentDate = lastDate.toISOString().slice(0, 10);
+      } else {
+        paid    = sorted.filter(t => d(t.date) < start).length;
+        const remaining = sorted.filter(t => d(t.date) >= start);
+        pending = remaining.length;
+        totalToPayOff    = remaining.reduce((s, t) => s + Number(t.amount), 0);
+        lastInstallmentDate = sorted[sorted.length - 1].date.slice(0, 10);
+      }
+
       if (pending <= 0) continue;
       const monthlyValue = thisMonthTxs.reduce((s, t) => s + Number(t.amount), 0);
-      const totalToPayOff = remaining.reduce((s, t) => s + Number(t.amount), 0);
-      const lastInstallmentDate = sorted[sorted.length - 1].date.slice(0, 10);
       const creditCardId = thisMonthTxs[0].creditCardId ?? sorted[sorted.length - 1].creditCardId;
       const creditCardName = (creditCardId ? ccMap.get(creditCardId) : null) ?? '—';
 
