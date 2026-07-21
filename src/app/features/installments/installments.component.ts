@@ -96,37 +96,52 @@ export class InstallmentsComponent implements OnInit {
       const totalInstallments = sorted[0].totalInstallments ?? sorted.length;
       const unitValue = Number(thisMonthTxs[0].amount);
 
-      // When the DB has fewer records than the total (e.g. only one installment was imported),
-      // derive paid/pending from the installment_number encoded in the record rather than
-      // counting actual rows — counting rows gives 0 paid / 1 pending for a "04/07" record.
-      const isPartialData = sorted.length < totalInstallments;
+      // When DB has MORE records than declared total (leftover from a bad import),
+      // trim to the oldest N so calculations stay consistent.
+      const capped = sorted.length > totalInstallments
+        ? sorted.slice(0, totalInstallments)
+        : sorted;
+
+      // Parse installment numbers from ALL existing records so we get the true min/max.
+      const parseInstNum = (t: Transaction): number => {
+        const dm = instRe.exec(t.description?.trim() ?? '');
+        return dm ? parseInt(dm[2], 10) : (t.installmentNumber ?? 1);
+      };
+      const instNums = capped.map(parseInstNum);
+      const minInstNum = Math.min(...instNums);
+      const maxInstNum = Math.max(...instNums);
+
+      const isPartialData = capped.length < totalInstallments;
       let paid: number;
       let pending: number;
       let totalToPayOff: number;
       let lastInstallmentDate: string;
 
       if (isPartialData) {
-        // Prefer the number encoded in the description ("04/07" → 4) over the
-        // DB column, which may be null or incorrect for manually-imported records.
-        const firstDesc = sorted[0].description?.trim() ?? '';
-        const descNum   = instRe.exec(firstDesc);
-        const minInstNum = descNum
-          ? parseInt(descNum[2], 10)
-          : Math.min(...sorted.map(t => t.installmentNumber ?? 1));
-        paid    = minInstNum - 1;
+        // Inferred installments before the first known one (not in DB, already paid)
+        const inferredPaid = minInstNum - 1;
+        // Existing records whose date already passed this month's start
+        const existingPast = capped.filter(t => d(t.date) < start).length;
+        paid    = inferredPaid + existingPast;
         pending = totalInstallments - paid;
-        totalToPayOff    = unitValue * pending;
-        // Extrapolate last installment date: add (totalInstallments - minInstNum) months
-        const refDate  = new Date(d(sorted[0].date) + 'T12:00:00');
+
+        // Extrapolate last date from the highest-numbered known record
+        const maxRecord = capped[instNums.indexOf(maxInstNum)];
+        const refDate  = new Date(d(maxRecord.date) + 'T12:00:00');
         const lastDate = new Date(refDate);
-        lastDate.setMonth(lastDate.getMonth() + (totalInstallments - minInstNum));
+        lastDate.setMonth(lastDate.getMonth() + (totalInstallments - maxInstNum));
         lastInstallmentDate = lastDate.toISOString().slice(0, 10);
+
+        // Sum known future amounts + estimate unknowns at unit value
+        const knownFuture = capped.filter(t => d(t.date) >= start);
+        const knownFutureTotal = knownFuture.reduce((s, t) => s + Number(t.amount), 0);
+        totalToPayOff = knownFutureTotal + Math.max(0, pending - knownFuture.length) * unitValue;
       } else {
-        paid    = sorted.filter(t => d(t.date) < start).length;
-        const remaining = sorted.filter(t => d(t.date) >= start);
+        paid    = capped.filter(t => d(t.date) < start).length;
+        const remaining = capped.filter(t => d(t.date) >= start);
         pending = remaining.length;
         totalToPayOff    = remaining.reduce((s, t) => s + Number(t.amount), 0);
-        lastInstallmentDate = sorted[sorted.length - 1].date.slice(0, 10);
+        lastInstallmentDate = capped[capped.length - 1].date.slice(0, 10);
       }
 
       if (pending <= 0) continue;
