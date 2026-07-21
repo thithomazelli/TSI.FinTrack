@@ -721,19 +721,28 @@ export class MovimentosComponent implements OnInit {
         } as Entry;
       }));
 
-      this.allTransactions.set((txsRes.data ?? []).map((r: any) => ({
-        id: r.id, ownerId: r.owner_id, description: r.description,
-        amount: r.amount, date: r.date, purchaseDate: r.purchase_date ?? null, status: r.status,
-        categoryId: r.category_id, accountId: r.account_id,
-        creditCardId: r.credit_card_id, creditCardBillId: r.credit_card_bill_id,
-        installmentNumber: r.installment_number, totalInstallments: r.total_installments,
-        installmentGroupId: r.installment_group_id, recurringTemplateId: r.recurring_template_id,
-        originalCurrency: r.original_currency, originalAmount: r.original_amount,
-        exchangeRate: r.exchange_rate, paymentDate: r.payment_date,
-        paymentMethod: r.payment_method, labels: r.labels ?? [],
-        position: r.position ?? undefined,
-        createdAt: r.created_at, updatedAt: r.updated_at,
-      }) as Transaction));
+      this.allTransactions.set((txsRes.data ?? []).map((r: any) => {
+        const total: number | null = r.total_installments ?? null;
+        let instNum: number | null = r.installment_number ?? null;
+        if (total && total > 1) {
+          const m = /\s(\d{1,3})\/\d{1,3}$/.exec((r.description ?? '').trim());
+          if (m) instNum = parseInt(m[1], 10);
+        }
+        const tx: Transaction = {
+          id: r.id, ownerId: r.owner_id, description: r.description,
+          amount: r.amount, date: r.date, purchaseDate: r.purchase_date ?? null, status: r.status,
+          categoryId: r.category_id, accountId: r.account_id,
+          creditCardId: r.credit_card_id, creditCardBillId: r.credit_card_bill_id,
+          installmentNumber: instNum, totalInstallments: total,
+          installmentGroupId: r.installment_group_id, recurringTemplateId: r.recurring_template_id,
+          originalCurrency: r.original_currency, originalAmount: r.original_amount,
+          exchangeRate: r.exchange_rate, paymentDate: r.payment_date,
+          paymentMethod: r.payment_method, labels: r.labels ?? [],
+          position: r.position ?? undefined,
+          createdAt: r.created_at, updatedAt: r.updated_at,
+        };
+        return tx;
+      }));
       this.balanceService.invalidate();
     } catch (err) {
       this.logger.error('Failed to load movimentos', err);

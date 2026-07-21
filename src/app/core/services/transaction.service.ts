@@ -271,12 +271,22 @@ export class TransactionService {
   }
 
   private toModel(r: any): Transaction {
+    // For manually-imported records installment_number may be null or 1 even when
+    // the description encodes the real number (e.g. "Vans - 04/07").
+    // Parse the description suffix as the authoritative source when total > 1.
+    let installmentNumber: number | null = r.installment_number ?? null;
+    const total: number | null = r.total_installments ?? null;
+    if (total && total > 1) {
+      const m = /\s(\d{1,3})\/\d{1,3}$/.exec((r.description ?? '').trim());
+      if (m) installmentNumber = parseInt(m[1], 10);
+    }
+
     return {
       id: r.id, ownerId: r.owner_id, description: r.description,
       amount: r.amount, date: r.date, purchaseDate: r.purchase_date ?? null, status: r.status,
       categoryId: r.category_id, accountId: r.account_id,
       creditCardId: r.credit_card_id, creditCardBillId: r.credit_card_bill_id,
-      installmentNumber: r.installment_number, totalInstallments: r.total_installments,
+      installmentNumber, totalInstallments: total,
       installmentGroupId: r.installment_group_id, recurringTemplateId: r.recurring_template_id,
       originalCurrency: r.original_currency, originalAmount: r.original_amount,
       exchangeRate: r.exchange_rate, paymentDate: r.payment_date,
