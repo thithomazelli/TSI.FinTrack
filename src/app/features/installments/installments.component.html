@@ -23,6 +23,12 @@
           <span class="mini-label">{{ 'installments.groupsPending' | translate }}</span>
           <span class="mini-value">{{ countPending() }}</span>
         </div>
+        @if (endingCount() > 0) {
+          <div class="mini-kpi mini-kpi--ending">
+            <span class="mini-label">Encerrando</span>
+            <span class="mini-value mini-value--ending">{{ endingCount() }} · R$ {{ endingTotal() | number:'1.2-2' }}</span>
+          </div>
+        }
       </div>
     </div>
 
@@ -32,6 +38,17 @@
       <span class="kpi-hint">{{ selectionTotals().count }} de {{ installmentGroups().length }} selecionado(s)</span>
     </div>
   </div>
+
+  @if (!loading()) {
+    <div class="view-tabs">
+      <button class="view-tab" [class.view-tab--active]="activeTab() === 'all'" (click)="activeTab.set('all')">
+        Todas <span class="view-tab-count">{{ installmentGroups().length }}</span>
+      </button>
+      <button class="view-tab" [class.view-tab--active]="activeTab() === 'ending'" (click)="activeTab.set('ending')">
+        Encerrando este mês <span class="view-tab-count view-tab-count--ending">{{ endingCount() }}</span>
+      </button>
+    </div>
+  }
 
   @if (!loading()) {
     <div class="search-bar">

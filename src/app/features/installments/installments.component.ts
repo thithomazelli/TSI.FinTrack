@@ -211,12 +211,13 @@ export class InstallmentsComponent implements OnInit {
     const col = this.sortCol();
     const asc = this.sortAsc();
     const q = this.searchQuery().trim().toLowerCase();
+    const base = this.activeTab() === 'ending' ? this.endingGroups() : this.installmentGroups();
     const groups = q
-      ? this.installmentGroups().filter(g =>
+      ? base.filter(g =>
           g.description.toLowerCase().includes(q) ||
           g.creditCardName.toLowerCase().includes(q)
         )
-      : this.installmentGroups();
+      : base;
     return [...groups].sort((a, b) => {
       const va = a[col], vb = b[col];
       const cmp = typeof va === 'string' ? va.localeCompare(vb as string) : (va as number) - (vb as number);
@@ -240,6 +241,21 @@ export class InstallmentsComponent implements OnInit {
 
   readonly countPending = computed(() =>
     this.installmentGroups().filter(g => g.pending > 0).length
+  );
+
+  readonly activeTab = signal<'all' | 'ending'>('all');
+
+  readonly endingGroups = computed(() => {
+    const start = this.startOfMonth();
+    const end = this.endOfMonth();
+    return this.installmentGroups().filter(g =>
+      g.lastInstallmentDate >= start && g.lastInstallmentDate <= end
+    );
+  });
+
+  readonly endingCount = computed(() => this.endingGroups().length);
+  readonly endingTotal = computed(() =>
+    this.endingGroups().reduce((s, g) => s + g.monthlyValue, 0)
   );
 
   ngOnInit(): void {
