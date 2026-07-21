@@ -106,7 +106,13 @@ export class InstallmentsComponent implements OnInit {
       let lastInstallmentDate: string;
 
       if (isPartialData) {
-        const minInstNum = Math.min(...sorted.map(t => t.installmentNumber ?? 1));
+        // Prefer the number encoded in the description ("04/07" → 4) over the
+        // DB column, which may be null or incorrect for manually-imported records.
+        const firstDesc = sorted[0].description?.trim() ?? '';
+        const descNum   = instRe.exec(firstDesc);
+        const minInstNum = descNum
+          ? parseInt(descNum[2], 10)
+          : Math.min(...sorted.map(t => t.installmentNumber ?? 1));
         paid    = minInstNum - 1;
         pending = totalInstallments - paid;
         totalToPayOff    = unitValue * pending;
