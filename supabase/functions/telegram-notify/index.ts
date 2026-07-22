@@ -81,13 +81,13 @@ async function notifyPendingDebits(today: Date) {
   soon7.setDate(soon7.getDate() + 7);
 
   for (const sub of subs) {
-    // Lançamentos individuais pendentes (status PROJECTED) que não são de cartão
+    // Lançamentos individuais pendentes (PROJECTED ou ESTIMATED) que não são de cartão
     // — ex.: aluguel, água, inglês. Cartão é coberto pela notificação de faturas.
     const { data: txs } = await supabase
       .from('transactions')
       .select('description, amount, date, status, credit_card_id')
       .eq('owner_id', sub.user_id)
-      .eq('status', 'PROJECTED')
+      .in('status', ['PROJECTED', 'ESTIMATED'])
       .is('credit_card_id', null)
       .lte('date', soon7.toISOString().split('T')[0])
       .order('date', { ascending: true });
@@ -136,7 +136,8 @@ async function sendDailyDigest(today: Date) {
       .select('amount, status')
       .eq('owner_id', sub.user_id)
       .gte('date', start)
-      .lte('date', end);
+      .lte('date', end)
+      .in('status', ['REALIZED', 'PROJECTED', 'ESTIMATED']);
 
     const { data: entries } = await supabase
       .from('entries')
@@ -145,12 +146,12 @@ async function sendDailyDigest(today: Date) {
       .gte('date', start)
       .lte('date', end);
 
-    const realized = (txs ?? []).filter((t) => t.status === 'REALIZED');
-    const projected = (txs ?? []).filter((t) => t.status === 'PROJECTED');
-    const totalIncome = (entries ?? []).reduce((s, e) => s + e.amount, 0);
-    const spentRealized = realized.reduce((s, t) => s + t.amount, 0);
-    const spentProjected = projected.reduce((s, t) => s + t.amount, 0);
-    const monthBalance = totalIncome - spentRealized;
+    const realized  = (txs ?? []).filter((t) => t.status === 'REALIZED');
+    const pending   = (txs ?? []).filter((t) => t.status === 'PROJECTED' || t.status === 'ESTIMATED');
+    const totalIncome    = (entries ?? []).reduce((s, e) => s + e.amount, 0);
+    const spentRealized  = realized.reduce((s, t) => s + t.amount, 0);
+    const spentPending   = pending.reduce((s, t) => s + t.amount, 0);
+    const monthBalance   = totalIncome - spentRealized;
 
     // Saldo realmente disponível (acumulado, todo o histórico) — via view
     const { data: balRow } = await supabase
@@ -183,14 +184,13 @@ async function sendDailyDigest(today: Date) {
       .from('transactions')
       .select('date')
       .eq('owner_id', sub.user_id)
-      .eq('status', 'PROJECTED')
+      .in('status', ['PROJECTED', 'ESTIMATED'])
       .is('credit_card_id', null)
       .lte('date', soon7.toISOString().split('T')[0]);
     const debitOverdue = (pendingTxs ?? []).filter((t) => t.date < todayStr).length;
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
-    const balanceProjected = totalIncome - (spentRealized + spentProjected);
-    const pending = spentProjected - spentRealized;
+    const projectedMonthBalance = totalIncome - (spentRealized + spentPending);
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
     msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
     msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} <b>Saldo projetado: ${fmt(projectedBalance)}</b>\n`;
@@ -198,12 +198,11 @@ async function sendDailyDigest(today: Date) {
     msg += `<b>Este mês:</b>\n`;
     msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
     msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
-    if (spentProjected > 0) {
-      msg += `📋 Gastos projetados: ${fmt(spentProjected)}\n`;
-      msg += `⏳ Pendente a pagar: ${fmt(spentProjected)}\n`;
+    if (spentPending > 0) {
+      msg += `⏳ A pagar (projetado + estimado): ${fmt(spentPending)}\n`;
     }
-    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
-    msg += `${balanceProjected >= 0 ? '📊' : '⚠️'} Saldo projetado do mês: ${fmt(balanceProjected)}\n`;
+    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo realizado: ${fmt(monthBalance)}\n`;
+    msg += `${projectedMonthBalance >= 0 ? '📊' : '⚠️'} Saldo projetado do mês: ${fmt(projectedMonthBalance)}\n`;
     if (overdueCount || dueSoonCount) {
       msg += `\n<b>Faturas:</b>\n`;
       if (overdueCount) msg += `  🚨 ${overdueCount} vencida(s)\n`;
