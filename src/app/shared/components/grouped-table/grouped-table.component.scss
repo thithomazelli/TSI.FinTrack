@@ -252,6 +252,14 @@
 :host ::ng-deep .gt-row--estimated:hover td {
   background: color-mix(in srgb, #f59e0b 12%, var(--color-surface));
 }
+[data-theme='dark'] :host ::ng-deep .gt-row--estimated td,
+:host-context([data-theme='dark']) ::ng-deep .gt-row--estimated td {
+  background: color-mix(in srgb, #f59e0b 14%, var(--color-surface));
+}
+[data-theme='dark'] :host ::ng-deep .gt-row--estimated:hover td,
+:host-context([data-theme='dark']) ::ng-deep .gt-row--estimated:hover td {
+  background: color-mix(in srgb, #f59e0b 22%, var(--color-surface));
+}
 
 @keyframes rowIn {
   from { opacity: 0; transform: translateY(6px); }

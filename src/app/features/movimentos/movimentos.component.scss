@@ -585,3 +585,9 @@ tr:hover td { background: var(--color-surface-2); }
   &:not(:disabled):hover { background: var(--color-hover); }
 }
 .inst-page-info { color: var(--color-text-2); }
+
+[data-theme='dark'] {
+  .status-pill--estimated  { background: rgba(129,140,248,.25); color: #a5b4fc; }
+  .status-select--estimated { background: rgba(129,140,248,.25); color: #a5b4fc; }
+  .status-chip--estimated  { background: rgba(129,140,248,.25); color: #a5b4fc; }
+}
