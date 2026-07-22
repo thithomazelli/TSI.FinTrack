@@ -33,9 +33,16 @@
     </div>
 
     <div class="summary-card summary-card--payoff">
-      <span class="kpi-label">{{ 'installments.totalPayoff' | translate }}</span>
-      <span class="kpi-value kpi-value--accent">R$ {{ selectionTotals().totalToPayOff | number:'1.2-2' }}</span>
-      <span class="kpi-hint">{{ selectionTotals().count }} de {{ installmentGroups().length }} selecionado(s)</span>
+      <div class="card-kpi">
+        <span class="kpi-label">{{ 'installments.totalPayoff' | translate }}</span>
+        <span class="kpi-value kpi-value--accent">R$ {{ selectionTotals().totalToPayOff | number:'1.2-2' }}</span>
+      </div>
+      <div class="card-kpi-row">
+        <div class="mini-kpi">
+          <span class="mini-label">{{ selectionTotals().count }} de {{ installmentGroups().length }} selecionado(s)</span>
+          <span class="mini-value mini-value--accent">R$ {{ selectionTotals().monthlyValue | number:'1.2-2' }}<span class="mini-suffix">/mês</span></span>
+        </div>
+      </div>
     </div>
   </div>
 

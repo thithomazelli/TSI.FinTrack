@@ -29,6 +29,8 @@
 .mini-kpi { display: flex; flex-direction: column; gap: 2px; }
 .mini-label { font-size: .7rem; color: var(--color-text-2); }
 .mini-value { font-size: 1.1rem; font-weight: 700; color: var(--color-text); }
+.mini-value--accent { color: #6366f1; }
+.mini-suffix { font-size: .72rem; font-weight: 500; opacity: .75; margin-left: .15rem; }
 
 .table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; font-size: .875rem; min-width: 960px; }
