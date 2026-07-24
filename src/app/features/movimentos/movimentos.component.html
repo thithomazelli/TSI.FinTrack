@@ -852,6 +852,7 @@
         <select class="field-input" [(ngModel)]="formTxStatus">
           <option [value]="TransactionStatus.Realized">{{ 'movimentos.realized' | translate }}</option>
           <option [value]="TransactionStatus.Projected">{{ 'movimentos.projected' | translate }}</option>
+          <option [value]="TransactionStatus.Estimated">{{ 'movimentos.estimated' | translate }}</option>
         </select>
         <label class="field-label">{{ 'common.status' | translate }}</label>
       </div>
