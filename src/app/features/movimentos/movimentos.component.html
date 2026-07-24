@@ -382,7 +382,7 @@
 
       <ng-template #row let-item>
         <td class="col-check" (click)="$event.stopPropagation()">
-          <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggleItem(item.id)" class="row-check" />
+          <input type="checkbox" [checked]="isSelected(item.id)" (click)="toggleItem(item.id, $event)" class="row-check" />
         </td>
         <td class="col-date" (dblclick)="openEdit(item)">
           {{ (item.purchaseDate ?? item.date) | date:'dd/MM/yyyy' }}

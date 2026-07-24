@@ -1183,12 +1183,29 @@ export class MovimentosComponent implements OnInit {
     }
   }
 
-  toggleItem(id: string): void {
-    this.selectedIds.update(s => {
-      const next = new Set(s);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  private lastClickedIndex = -1;
+
+  toggleItem(id: string, event?: MouseEvent): void {
+    const items = this.filteredItems();
+    const idx = items.findIndex(i => i.id === id);
+
+    if (event?.shiftKey && this.lastClickedIndex >= 0) {
+      const from = Math.min(this.lastClickedIndex, idx);
+      const to   = Math.max(this.lastClickedIndex, idx);
+      const rangeIds = items.slice(from, to + 1).map(i => i.id);
+      this.selectedIds.update(s => {
+        const next = new Set(s);
+        rangeIds.forEach(rid => next.add(rid));
+        return next;
+      });
+    } else {
+      this.selectedIds.update(s => {
+        const next = new Set(s);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+      this.lastClickedIndex = idx;
+    }
   }
 
   isSelected(id: string): boolean {

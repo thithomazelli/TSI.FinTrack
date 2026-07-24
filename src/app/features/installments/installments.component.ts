@@ -202,12 +202,29 @@ export class InstallmentsComponent implements OnInit {
     return groups.length > 0 && groups.every(g => this.selectedIds().has(g.groupId));
   });
 
-  toggleRow(groupId: string): void {
-    this.selectedIds.update(set => {
-      const next = new Set(set);
-      next.has(groupId) ? next.delete(groupId) : next.add(groupId);
-      return next;
-    });
+  private lastClickedIndex = -1;
+
+  toggleRow(groupId: string, event?: MouseEvent): void {
+    const groups = this.sortedGroups();
+    const idx = groups.findIndex(g => g.groupId === groupId);
+
+    if (event?.shiftKey && this.lastClickedIndex >= 0) {
+      const from = Math.min(this.lastClickedIndex, idx);
+      const to   = Math.max(this.lastClickedIndex, idx);
+      const rangeIds = groups.slice(from, to + 1).map(g => g.groupId);
+      this.selectedIds.update(set => {
+        const next = new Set(set);
+        rangeIds.forEach(id => next.add(id));
+        return next;
+      });
+    } else {
+      this.selectedIds.update(set => {
+        const next = new Set(set);
+        next.has(groupId) ? next.delete(groupId) : next.add(groupId);
+        return next;
+      });
+      this.lastClickedIndex = idx;
+    }
   }
 
   toggleAll(): void {

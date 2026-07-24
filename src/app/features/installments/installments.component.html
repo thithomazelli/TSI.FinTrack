@@ -94,9 +94,9 @@
         </thead>
         <tbody>
           @for (g of sortedGroups(); track g.groupId) {
-            <tr [class.row-this-month]="g.hasInstallmentThisMonth" [class.row-selected]="selectedIds().has(g.groupId)" (click)="toggleRow(g.groupId)">
+            <tr [class.row-this-month]="g.hasInstallmentThisMonth" [class.row-selected]="selectedIds().has(g.groupId)" (click)="toggleRow(g.groupId, $event)">
               <td class="td-check" (click)="$event.stopPropagation()">
-                <input type="checkbox" [checked]="selectedIds().has(g.groupId)" (change)="toggleRow(g.groupId)" />
+                <input type="checkbox" [checked]="selectedIds().has(g.groupId)" (click)="toggleRow(g.groupId, $event)" />
               </td>
               <td class="col-desc">
                 <div class="desc-main">
