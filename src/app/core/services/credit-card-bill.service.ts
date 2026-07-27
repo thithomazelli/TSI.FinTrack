@@ -90,7 +90,7 @@ export class CreditCardBillService {
         },
         { onConflict: 'credit_card_id,year,month' }
       )
-      .select()
+      .select('*, credit_cards(name, last_four_digits)')
       .single()
       .then(({ data, error }) => {
         if (error) throw error;
@@ -125,7 +125,7 @@ export class CreditCardBillService {
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id)
       .eq('owner_id', this.ownerId)
-      .select()
+      .select('*, credit_cards(name, last_four_digits)')
       .single()
       .then(({ data, error }) => {
         if (error) throw error;
