@@ -625,7 +625,7 @@
   <div class="modal-backdrop" (click)="closeModal()"></div>
   <div class="modal"
        tsiModalKey
-       [tsiModalKeyEnter]="saveTransaction.bind(this)"
+       [tsiModalKeyEnter]="saveEntry.bind(this)"
        [tsiModalKeyEscape]="closeModal.bind(this)">
     <div class="modal-header">
       <h3 class="modal-title">{{ (editingId() ? 'movimentos.editEntry' : 'movimentos.newEntry') | translate }}</h3>
