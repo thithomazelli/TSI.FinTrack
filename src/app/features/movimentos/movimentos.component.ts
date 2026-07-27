@@ -1119,6 +1119,7 @@ export class MovimentosComponent implements OnInit {
     this.saving.set(true);
 
     const insertPosition = this.computeInsertPosition(this.allItems());
+    const id = this.editingId();
 
     const payload: CreateTransactionPayload = {
       description: this.formTxDescription.trim(),
@@ -1138,8 +1139,6 @@ export class MovimentosComponent implements OnInit {
       labels: this.formTxLabels,
       position: insertPosition ?? null,
     };
-
-    const id = this.editingId();
 
     if (id) {
       this.transactionService.update(id, payload).then((saved: Transaction) => {
