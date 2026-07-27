@@ -200,6 +200,7 @@
     "edit": "Editar Transação",
     "projected": "Projetada",
     "realized": "Realizada",
+    "estimated": "Estimada",
     "installment": "Parcela {{current}} de {{total}}",
     "installments": "Parcelamento",
     "installmentCount": "Número de parcelas",

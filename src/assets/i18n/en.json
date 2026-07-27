@@ -200,6 +200,7 @@
     "edit": "Edit Transaction",
     "projected": "Projected",
     "realized": "Realized",
+    "estimated": "Estimated",
     "installment": "Installment {{current}} of {{total}}",
     "installments": "Installments",
     "installmentCount": "Number of installments",

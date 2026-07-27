@@ -519,9 +519,10 @@ export class ReportsComponent implements OnInit {
       Promise.all(ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))).then((r) => r.flat()),
       Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Realized }))).then((r) => r.flat()),
       Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Projected }))).then((r) => r.flat()),
+      Promise.all(ALL_MONTHS.map((m) => this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Estimated }))).then((r) => r.flat()),
     ])
-      .then(([openingBalance, entries, realized, projected]) => {
-        const transactions = [...realized, ...projected];
+      .then(([openingBalance, entries, realized, projected, estimated]) => {
+        const transactions = [...realized, ...projected, ...estimated];
         const allSavings = this.savingsMovements();
         let running = openingBalance;
         let savingsRunning = 0;
@@ -688,6 +689,11 @@ export class ReportsComponent implements OnInit {
         )
       ).then((r) => r.flat()),
       Promise.all(
+        ALL_MONTHS.map((m) =>
+          this.transactionService.getByMonth({ year, month: m, status: TransactionStatus.Estimated })
+        )
+      ).then((r) => r.flat()),
+      Promise.all(
         ALL_MONTHS.map((m) => this.entryService.getByMonth({ year, month: m }))
       ).then((r) => r.flat()),
       Promise.all(
@@ -701,12 +707,12 @@ export class ReportsComponent implements OnInit {
       this.savingsService.getAll(),
       this.categoryService.getAll(),
     ])
-      .then(([realized, projected, entries, prevRealized, prevEntries, savings, categories]) => {
+      .then(([realized, projected, estimated, entries, prevRealized, prevEntries, savings, categories]) => {
         this.categories.set(categories);
         this.savingsMovements.set(savings);
-        this.realizedTransactions.set([...realized, ...projected]);
+        this.realizedTransactions.set([...realized, ...projected, ...estimated]);
         this.yearEntries.set(entries);
-        this.buildCharts(year, realized, projected, entries, prevRealized, prevEntries, categories);
+        this.buildCharts(year, [...realized, ...projected, ...estimated], [], entries, prevRealized, prevEntries, categories);
         this.loading.set(false);
       })
       .catch((err: unknown) => {

@@ -246,6 +246,10 @@ export class MovimentosComponent implements OnInit {
 
   readonly totalEntradas = computed(() => this.allEntries().reduce((s, e) => s + e.amount, 0));
   readonly totalSaidas   = computed(() => this.allTransactions().reduce((s, t) => s + t.amount, 0));
+  readonly totalSaidasRealizadas = computed(() =>
+    this.allTransactions().filter(t => t.status === 'REALIZED').reduce((s, t) => s + t.amount, 0));
+  readonly totalSaidasProjetadas = computed(() =>
+    this.allTransactions().filter(t => t.status === 'PROJECTED' || t.status === 'ESTIMATED').reduce((s, t) => s + t.amount, 0));
   readonly saldo         = computed(() => this.totalEntradas() - this.totalSaidas());
   readonly totalSavingsDeposits    = computed(() => this.savingsPeriodTotals().deposits);
   readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
@@ -674,7 +678,8 @@ export class MovimentosComponent implements OnInit {
           .gte('date', from)
           .lte('date', to)
           .order('date', { ascending: true })
-          .order('position', { ascending: true, nullsFirst: false }),
+          .order('position', { ascending: true, nullsFirst: false })
+          .range(0, 9999),
         this.supabase.client
           .from('transactions')
           .select('*')
@@ -682,7 +687,8 @@ export class MovimentosComponent implements OnInit {
           .gte('date', from)
           .lte('date', to)
           .order('date', { ascending: true })
-          .order('position', { ascending: true, nullsFirst: false }),
+          .order('position', { ascending: true, nullsFirst: false })
+          .range(0, 9999),
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
         this.supabase.client.rpc('get_balance_in_range', { start_date: from, end_date: to }),
         this.savingsService.getPeriodTotals(from, to),
