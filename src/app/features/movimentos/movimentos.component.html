@@ -119,8 +119,14 @@
         </div>
         <div class="sm-row">
           <span class="sm-sublabel">{{ 'movimentos.totalExpenses' | translate }}</span>
-          <span class="sm-value sm-neg">R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+          <span class="sm-value sm-neg">R$ {{ totalSaidasRealizadas() | number:'1.2-2' }}</span>
         </div>
+        @if (totalSaidasProjetadas() > 0) {
+          <div class="sm-row sm-row--projected">
+            <span class="sm-sublabel">{{ 'movimentos.projected' | translate }}</span>
+            <span class="sm-value sm-neg sm-projected">R$ {{ totalSaidasProjetadas() | number:'1.2-2' }}</span>
+          </div>
+        }
       </div>
     </div>
 

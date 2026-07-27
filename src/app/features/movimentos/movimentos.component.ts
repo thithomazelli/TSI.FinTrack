@@ -240,6 +240,10 @@ export class MovimentosComponent implements OnInit {
 
   readonly totalEntradas = computed(() => this.periodTotals()?.totalEntries ?? 0);
   readonly totalSaidas   = computed(() => this.periodTotals()?.totalTransactions ?? 0);
+  readonly totalSaidasRealizadas = computed(() =>
+    this.allTransactions().filter(t => t.status === 'REALIZED').reduce((s, t) => s + t.amount, 0));
+  readonly totalSaidasProjetadas = computed(() =>
+    this.allTransactions().filter(t => t.status === 'PROJECTED' || t.status === 'ESTIMATED').reduce((s, t) => s + t.amount, 0));
   readonly saldo         = this.balanceInRange;
   readonly totalSavingsDeposits    = computed(() => this.savingsPeriodTotals().deposits);
   readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
