@@ -66,6 +66,7 @@ export class TransactionService {
     if (filter.accountId) query = query.eq('account_id', filter.accountId);
     if (filter.creditCardId) query = query.eq('credit_card_id', filter.creditCardId);
     if (filter.status) query = query.eq('status', filter.status);
+    query = query.range(0, 9999);
 
     return from(
       query.then(({ data, error }) => {

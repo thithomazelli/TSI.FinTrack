@@ -557,7 +557,8 @@ export class MovimentosComponent implements OnInit {
           .gte('date', from)
           .lte('date', to)
           .order('date', { ascending: true })
-          .order('position', { ascending: true, nullsFirst: false }),
+          .order('position', { ascending: true, nullsFirst: false })
+          .range(0, 9999),
         this.supabase.client
           .from('transactions')
           .select('*')
@@ -565,7 +566,8 @@ export class MovimentosComponent implements OnInit {
           .gte('date', from)
           .lte('date', to)
           .order('date', { ascending: true })
-          .order('position', { ascending: true, nullsFirst: false }),
+          .order('position', { ascending: true, nullsFirst: false })
+          .range(0, 9999),
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
         this.supabase.client.rpc('get_balance_in_range', { start_date: from, end_date: to }),
         this.savingsService.getPeriodTotals(from, to).toPromise(),
