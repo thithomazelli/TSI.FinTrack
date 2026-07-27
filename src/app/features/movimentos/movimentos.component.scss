@@ -593,3 +593,13 @@ tr:hover td { background: var(--color-surface-2); }
   .status-select--estimated { background: rgba(129,140,248,.25); color: #a5b4fc; }
   .status-chip--estimated  { background: rgba(129,140,248,.25); color: #a5b4fc; }
 }
+
+.btn-bill {
+  padding: .3rem .75rem; border-radius: var(--radius-md); font-size: .78rem;
+  font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all .15s;
+  white-space: nowrap;
+
+  &.btn-ghost   { border-color: var(--color-border); background: transparent; color: var(--color-text-2); &:hover { background: var(--color-surface-2); color: var(--color-text); } }
+  &.btn-success { background: rgba(34,197,94,.15); border-color: rgba(34,197,94,.4); color: #16a34a; &:hover { background: rgba(34,197,94,.25); } }
+  &:disabled { opacity: .5; cursor: default; }
+}

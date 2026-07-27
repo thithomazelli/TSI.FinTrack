@@ -120,7 +120,7 @@ export class GroupedTableComponent {
         const next = new Map(map);
         for (const g of groups) {
           if (!next.has(g.id)) {
-            next.set(g.id, g.defaultExpanded ?? true);
+            next.set(g.id, g.defaultExpanded ?? false);
           }
         }
         return next;

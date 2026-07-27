@@ -457,7 +457,7 @@
       <ng-template #groupActions let-group>
         @if (group.meta && periodMode() === 'month') {
           <button
-            class="btn"
+            class="btn-bill"
             [class.btn-ghost]="group.meta.status !== BillStatus.Closed"
             [class.btn-success]="group.meta.status === BillStatus.Closed"
             [disabled]="billUpdatingId() === group.meta.id"
