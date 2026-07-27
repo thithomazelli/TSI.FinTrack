@@ -659,10 +659,12 @@ export class MovimentosComponent implements OnInit {
   }
 
   async load(silent = false): Promise<void> {
-    if (!silent) this.loading.set(true);
-    const uid = this.auth.currentUser!.id;
     const from = this.dateFrom();
     const to = this.dateTo();
+    if (!from || !to || from > to) return;
+
+    if (!silent) this.loading.set(true);
+    const uid = this.auth.currentUser!.id;
 
     try {
       const now = new Date();
