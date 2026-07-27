@@ -378,7 +378,7 @@ export class MovimentosComponent implements OnInit {
         items: entries,
         total: entries.reduce((s, e) => s + e.amount, 0),
         status: entries.some(e => e.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
-        defaultExpanded: true,
+        defaultExpanded: false,
       });
     }
 
@@ -390,7 +390,7 @@ export class MovimentosComponent implements OnInit {
         items: txs,
         total: txs.reduce((s, t) => s + t.amount, 0),
         status: txs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
-        defaultExpanded: true,
+        defaultExpanded: false,
       });
     }
 
@@ -409,7 +409,7 @@ export class MovimentosComponent implements OnInit {
           items: txs,
           total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
-          defaultExpanded: true,
+          defaultExpanded: false,
         });
       } else {
         const displayName = rawName.replace(/^cr[eé]dito\s*/i, '');
