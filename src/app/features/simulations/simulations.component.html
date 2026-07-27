@@ -93,18 +93,21 @@
             @if (applying()) { {{ 'common.saving' | translate }} }
             @else { {{ 'simulations.apply' | translate }} ({{ diff().length }}) }
           </button>
+
         </div>
       </div>
 
       <div class="diff-list">
         @for (d of diff(); track d.item.id + d.type) {
-          <div class="diff-row" [class.diff-row--deleted]="d.type === 'deleted'">
+          <div class="diff-row" [class.diff-row--deleted]="d.type === 'deleted'" [class.diff-row--new]="d.item.isNew">
             <span class="diff-kind" [class.kind-entry]="d.item.kind === 'entry'" [class.kind-tx]="d.item.kind === 'transaction'">
               {{ d.item.kind === 'entry' ? '↑' : '↓' }}
             </span>
             <span class="diff-desc">{{ d.item.description }}</span>
             <span class="diff-change">
-              @if (d.type === 'deleted') {
+              @if (d.item.isNew) {
+                <span class="diff-tag diff-tag--new">Novo • {{ d.newValue }}</span>
+              } @else if (d.type === 'deleted') {
                 <span class="diff-tag diff-tag--deleted">{{ 'simulations.diffDeleted' | translate }}</span>
               } @else if (d.type === 'amount') {
                 <span class="diff-old">{{ d.originalValue }}</span>
@@ -120,7 +123,11 @@
                 <span class="diff-new">{{ d.newValue | date:'dd/MM/yy' }}</span>
               }
             </span>
-            <button class="diff-undo" (click)="removeDiff(d)" [title]="'simulations.undoChange' | translate">↺</button>
+            @if (!d.item.isNew) {
+              <button class="diff-undo" (click)="removeDiff(d)" [title]="'simulations.undoChange' | translate">↺</button>
+            } @else {
+              <button class="diff-undo" (click)="removeNewItem(d.item.id)" title="Remover">↺</button>
+            }
           </div>
         }
       </div>
@@ -253,6 +260,14 @@
       (rowReordered)="onRowReordered($event)"
     >
       <ng-template #filterBtn>
+        <button class="btn-new-item btn-new-entry" (click)="openNewItemModal('entry')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nova Entrada
+        </button>
+        <button class="btn-new-item btn-new-tx" (click)="openNewItemModal('transaction')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nova Saída
+        </button>
         <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
@@ -402,10 +417,11 @@
               {{ item.kind === 'entry' ? 'Entrada' : 'Saída' }}
             </span>
           </td>
-          <td (dblclick)="startEdit(item)">
+          <td (dblclick)="!item.isNew && startEdit(item)">
             <div class="desc-cell">
               <span>{{ item.description }}</span>
-              @if (isModified(item.id)) { <span class="mod-badge">{{ 'simulations.modified' | translate }}</span> }
+              @if (item.isNew) { <span class="mod-badge mod-badge--new">Novo</span> }
+              @else if (isModified(item.id)) { <span class="mod-badge">{{ 'simulations.modified' | translate }}</span> }
             </div>
           </td>
           <td (dblclick)="startEdit(item)">
@@ -434,15 +450,21 @@
           </td>
           <td>
             <div class="action-btns" (click)="$event.stopPropagation()">
-              <button class="action-btn action-btn--edit" (click)="startEdit(item)" [title]="'simulations.editHint' | translate">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-              </button>
-              <button class="action-btn action-btn--copy" (click)="duplicateItem(item)" [title]="'common.duplicate' | translate">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-              </button>
-              <button class="action-btn action-btn--delete" (click)="deleteItem(item)" [title]="'simulations.deleteHint' | translate">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-              </button>
+              @if (!item.isNew) {
+                <button class="action-btn action-btn--edit" (click)="startEdit(item)" [title]="'simulations.editHint' | translate">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                </button>
+                <button class="action-btn action-btn--copy" (click)="duplicateItem(item)" [title]="'common.duplicate' | translate">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                </button>
+                <button class="action-btn action-btn--delete" (click)="deleteItem(item)" [title]="'simulations.deleteHint' | translate">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                </button>
+              } @else {
+                <button class="action-btn action-btn--delete" (click)="removeNewItem(item.id)" title="Remover">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                </button>
+              }
             </div>
           </td>
         }
@@ -524,6 +546,83 @@
     <div class="modal-footer">
       <button class="btn btn-ghost" (click)="clearSelection()">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary" (click)="bulkSimMove()">{{ 'common.confirm' | translate }}</button>
+    </div>
+  </div>
+}
+
+<!-- Nova Entrada / Nova Saída modal -->
+@if (newItemModal()) {
+  <div class="modal-backdrop" (click)="closeNewItemModal()"></div>
+  <div class="modal modal--md">
+    <h3 class="modal-title">{{ newItemModal() === 'entry' ? 'Nova Entrada' : 'Nova Saída' }}</h3>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Descrição</label>
+        <input class="input" type="text" [(ngModel)]="newItemDescription" placeholder="Descrição" (keydown.enter)="saveNewItem()" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">Valor (R$)</label>
+        <input class="input" type="number" min="0.01" step="0.01" [(ngModel)]="newItemAmount" (keydown.enter)="saveNewItem()" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">Data</label>
+        <input class="input" type="date" [(ngModel)]="newItemDate" (keydown.enter)="saveNewItem()" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">Status</label>
+        <select class="input" [(ngModel)]="newItemStatus">
+          <option value="REALIZED">Realizado</option>
+          <option value="PROJECTED">Projetado</option>
+          <option value="ESTIMATED">Estimado</option>
+        </select>
+      </div>
+      @if (newItemModal() === 'transaction') {
+        <div class="form-row">
+          <label class="form-label">Categoria</label>
+          <select class="input" [(ngModel)]="newItemCategoryId">
+            <option value="">Sem categoria</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Cartão / Conta</label>
+          <select class="input" [(ngModel)]="newItemCreditCardId" (ngModelChange)="newItemCreditCardId = $event; newItemAccountId = ''">
+            <option value="">Sem cartão</option>
+            @for (card of cards(); track card.id) {
+              <option [value]="card.id">{{ card.name }}</option>
+            }
+          </select>
+        </div>
+        @if (!newItemCreditCardId) {
+          <div class="form-row">
+            <label class="form-label">Conta</label>
+            <select class="input" [(ngModel)]="newItemAccountId">
+              <option value="">Sem conta</option>
+              @for (acc of accounts(); track acc.id) {
+                <option [value]="acc.id">{{ acc.name }}</option>
+              }
+            </select>
+          </div>
+        }
+      } @else {
+        <div class="form-row">
+          <label class="form-label">Conta</label>
+          <select class="input" [(ngModel)]="newItemAccountId">
+            <option value="">Sem conta</option>
+            @for (acc of accounts(); track acc.id) {
+              <option [value]="acc.id">{{ acc.name }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="closeNewItemModal()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="saveNewItem()" [disabled]="!newItemDescription.trim() || newItemAmount <= 0 || !newItemDate">
+        Adicionar à Simulação
+      </button>
     </div>
   </div>
 }

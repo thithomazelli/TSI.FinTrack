@@ -40,7 +40,20 @@ export interface SimItem {
   categoryId?: string;
   creditCardId?: string | null;
   accountId?: string | null;
-  raw: Entry | Transaction;
+  raw: Entry | Transaction | null;
+  isNew?: boolean;
+}
+
+export interface SimNewItem {
+  tempId: string;
+  kind: 'entry' | 'transaction';
+  description: string;
+  amount: number;
+  date: string;
+  status: TransactionStatus;
+  categoryId: string | null;
+  accountId: string | null;
+  creditCardId: string | null;
 }
 
 interface SimOverride {
@@ -127,6 +140,19 @@ export class SimulationsComponent implements OnInit {
   // Overrides: id → {amount?, date?, deleted?}
   readonly overrides = signal<Map<string, SimOverride>>(new Map());
 
+  // New items to be created on applySimulation
+  readonly simNewItems = signal<SimNewItem[]>([]);
+
+  // Modal state for new entry/transaction
+  readonly newItemModal = signal<'entry' | 'transaction' | null>(null);
+  newItemDescription = '';
+  newItemAmount = 0;
+  newItemDate = '';
+  newItemStatus: TransactionStatus = TransactionStatus.Projected;
+  newItemCategoryId = '';
+  newItemAccountId = '';
+  newItemCreditCardId = '';
+
   // Inline edit state
   readonly editingId = signal<string | null>(null);
   editAmount = 0;
@@ -171,13 +197,28 @@ export class SimulationsComponent implements OnInit {
   // Apply overrides (no filters yet)
   readonly simulatedItems = computed<SimItem[]>(() => {
     const ovr = this.overrides();
-    return this.realItems()
+    const existing = this.realItems()
       .filter(i => !ovr.get(i.id)?.deleted)
       .map(i => {
         const o = ovr.get(i.id);
         if (!o) return i;
         return { ...i, amount: o.amount ?? i.amount, date: o.date ?? i.date, description: o.description ?? i.description, status: o.status ?? i.status };
-      })
+      });
+    const newItems: SimItem[] = this.simNewItems().map(n => ({
+      kind: n.kind,
+      id: n.tempId,
+      date: n.date,
+      purchaseDate: null,
+      description: n.description,
+      amount: n.amount,
+      status: n.status,
+      categoryId: n.categoryId ?? undefined,
+      creditCardId: n.creditCardId,
+      accountId: n.accountId,
+      raw: null,
+      isNew: true,
+    }));
+    return [...existing, ...newItems]
       .sort((a, b) => (b.purchaseDate ?? b.date).localeCompare(a.purchaseDate ?? a.date));
   });
 
@@ -212,6 +253,15 @@ export class SimulationsComponent implements OnInit {
           result.push({ item, type: 'description', originalValue: item.description, newValue: o.description });
       }
     }
+    for (const n of this.simNewItems()) {
+      const item: SimItem = {
+        kind: n.kind, id: n.tempId, date: n.date, purchaseDate: null,
+        description: n.description, amount: n.amount, status: n.status,
+        categoryId: n.categoryId ?? undefined, creditCardId: n.creditCardId,
+        accountId: n.accountId, raw: null, isNew: true,
+      };
+      result.push({ item, type: 'amount', originalValue: '—', newValue: `R$ ${n.amount.toFixed(2)}` });
+    }
     return result;
   });
 
@@ -227,7 +277,7 @@ export class SimulationsComponent implements OnInit {
     this.realItems().filter(i => i.kind === 'transaction').reduce((s, i) => s + i.amount, 0));
   readonly realSaldo = computed(() => this.realEntradas() - this.realSaidas());
 
-  readonly hasChanges = computed(() => this.overrides().size > 0);
+  readonly hasChanges = computed(() => this.overrides().size > 0 || this.simNewItems().length > 0);
   readonly deletedItems = computed(() =>
     this.realItems().filter(i => this.overrides().get(i.id)?.deleted));
 
@@ -592,7 +642,7 @@ export class SimulationsComponent implements OnInit {
     });
   }
 
-  resetSim(): void { this.overrides.set(new Map()); this.editingId.set(null); this.clearSelection(); }
+  resetSim(): void { this.overrides.set(new Map()); this.simNewItems.set([]); this.editingId.set(null); this.clearSelection(); }
 
   // ── Multi-select ─────────────────────────────────────────────────────────────
   toggleAll(): void {
@@ -682,14 +732,51 @@ export class SimulationsComponent implements OnInit {
     this.toast.success(`${count} ${this.tr('movimentos.bulk.moved')}`);
   }
 
+  // ── New item modal ──────────────────────────────────────────────────────────
+  openNewItemModal(kind: 'entry' | 'transaction'): void {
+    this.newItemDescription = '';
+    this.newItemAmount = 0;
+    this.newItemDate = this.dateFrom();
+    this.newItemStatus = TransactionStatus.Projected;
+    this.newItemCategoryId = '';
+    this.newItemAccountId = '';
+    this.newItemCreditCardId = '';
+    this.newItemModal.set(kind);
+  }
+
+  closeNewItemModal(): void { this.newItemModal.set(null); }
+
+  saveNewItem(): void {
+    const kind = this.newItemModal();
+    if (!kind || !this.newItemDescription.trim() || this.newItemAmount <= 0 || !this.newItemDate) return;
+    this.simNewItems.update(list => [...list, {
+      tempId: crypto.randomUUID(),
+      kind,
+      description: this.newItemDescription.trim(),
+      amount: this.newItemAmount,
+      date: this.newItemDate,
+      status: this.newItemStatus,
+      categoryId: this.newItemCategoryId || null,
+      accountId: this.newItemAccountId || null,
+      creditCardId: this.newItemCreditCardId || null,
+    }]);
+    this.closeNewItemModal();
+  }
+
+  removeNewItem(tempId: string): void {
+    this.simNewItems.update(list => list.filter(n => n.tempId !== tempId));
+  }
+
   // ── Apply to DB ─────────────────────────────────────────────────────────────
   async applySimulation(): Promise<void> {
-    const changes = this.diff();
-    if (!changes.length) return;
+    if (!this.hasChanges()) return;
     this.applying.set(true);
+    const changes = this.diff();
     try {
+      // Handle overrides on existing items
       for (const d of changes) {
         const { item } = d;
+        if (item.isNew) continue;
         if (d.type === 'deleted') {
           if (item.kind === 'entry') await this.entryService.delete(item.id);
           else await this.transactionService.delete(item.id);
@@ -703,7 +790,39 @@ export class SimulationsComponent implements OnInit {
           else await this.transactionService.update(item.id, payload);
         }
       }
-      this.toast.success(this.tr('simulations.applied', { count: changes.length }));
+      // Create new items
+      for (const n of this.simNewItems()) {
+        if (n.kind === 'entry') {
+          await this.entryService.create({
+            description: n.description,
+            amount: n.amount,
+            date: n.date,
+            typeId: null,
+            accountId: n.accountId,
+            labels: [],
+            status: n.status,
+          });
+        } else {
+          await this.transactionService.create({
+            description: n.description,
+            amount: n.amount,
+            date: n.date,
+            purchaseDate: null,
+            categoryId: n.categoryId,
+            accountId: n.accountId,
+            creditCardId: n.creditCardId,
+            status: n.status,
+            totalInstallments: null,
+            recurringTemplateId: null,
+            originalCurrency: null,
+            originalAmount: null,
+            exchangeRate: null,
+            labels: [],
+          });
+        }
+      }
+      const total = changes.filter(d => !d.item.isNew).length + this.simNewItems().length;
+      this.toast.success(this.tr('simulations.applied', { count: total }));
       this.resetSim();
       this.load(true);
       this.balanceService.invalidate();
