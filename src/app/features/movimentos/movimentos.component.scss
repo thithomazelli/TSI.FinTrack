@@ -358,6 +358,8 @@ tsi-month-picker ::ng-deep .month-picker {
 
 .sm-values { display: flex; flex-direction: column; gap: .55rem; }
 .sm-row    { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.sm-row--projected { opacity: .65; }
+.sm-projected { font-size: .75rem !important; font-weight: 500 !important; }
 .sm-sublabel { font-size: .6rem; color: var(--color-text-2); white-space: nowrap; text-transform: uppercase; letter-spacing: .04em; }
 .sm-value {
   font-size: .88rem;
