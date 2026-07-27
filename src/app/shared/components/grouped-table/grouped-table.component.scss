@@ -214,19 +214,14 @@
   gap: .4rem;
 }
 
-.btn-bill-action {
-  font-size: .7rem;
-  font-weight: 600;
-  padding: .2rem .6rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid currentColor;
-  background: transparent;
-  color: var(--color-primary);
-  cursor: pointer;
+.gt-group-actions .btn {
+  padding: .3rem .75rem; border-radius: var(--radius-md); font-size: .78rem;
+  font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all .15s;
   white-space: nowrap;
 
-  &:disabled { opacity: .5; cursor: not-allowed; }
-  &:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 10%, transparent); }
+  &.btn-ghost   { border-color: var(--color-border); background: transparent; color: var(--color-text-2); &:hover { background: var(--color-surface-2); color: var(--color-text); } }
+  &.btn-success { background: rgba(34,197,94,.15); border-color: rgba(34,197,94,.4); color: #16a34a; &:hover { background: rgba(34,197,94,.25); } }
+  &:disabled { opacity: .5; cursor: default; }
 }
 
 .gt-group-status {
