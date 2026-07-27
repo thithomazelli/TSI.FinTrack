@@ -35,6 +35,9 @@ import { Account } from '../../core/models/interfaces/account.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
 import { DomainList } from '../../core/models/interfaces/domain-list.interface';
 import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
+import { CreditCardBillService } from '../../core/services/credit-card-bill.service';
+import { CreditCardBill } from '../../core/models/interfaces/credit-card-bill.interface';
+import { BillStatus } from '../../core/models/enums/bill-status.enum';
 import { LabelsInputComponent } from '../../shared/components/labels-input/labels-input.component';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
 import { ModalKeyDirective } from '../../shared/directives/modal-key.directive';
@@ -86,6 +89,7 @@ export class MovimentosComponent implements OnInit {
   private readonly supabase = inject(SupabaseService);
   private readonly balanceService = inject(BalanceService);
   private readonly savingsService = inject(SavingsService);
+  private readonly billService = inject(CreditCardBillService);
   private readonly auth = inject(AuthService);
   readonly themeService = inject(ThemeService);
   private readonly t = inject(TranslateService);
@@ -95,6 +99,7 @@ export class MovimentosComponent implements OnInit {
   }
 
   readonly TransactionStatus = TransactionStatus;
+  readonly BillStatus = BillStatus;
 
   // Data
   readonly allEntries = signal<Entry[]>([]);
@@ -102,11 +107,13 @@ export class MovimentosComponent implements OnInit {
   readonly categories = signal<Category[]>([]);
   readonly accounts = signal<Account[]>([]);
   readonly cards = signal<CreditCard[]>([]);
+  readonly bills = signal<CreditCardBill[]>([]);
   readonly entryTypes    = signal<DomainList[]>([]);
   readonly accountTypes  = signal<DomainList[]>([]);
 
   readonly loading = signal(false);
   readonly saving = signal(false);
+  readonly billUpdatingId = signal<string | null>(null);
 
   // Filters
   readonly filterTipos      = signal<Set<string>>(new Set());
@@ -406,15 +413,21 @@ export class MovimentosComponent implements OnInit {
         });
       } else {
         const displayName = rawName.replace(/^cr[eé]dito\s*/i, '');
+        const bill = this.bills().find(b => b.creditCardId === cardId);
+        const billBadge = bill?.status === BillStatus.Paid ? 'paga'
+          : bill?.status === BillStatus.Closed ? 'fechada' : 'em aberto';
+        const billBadgeClass = bill?.status === BillStatus.Paid ? 'badge--paid'
+          : bill?.status === BillStatus.Closed ? 'badge--closed' : 'badge--open';
         cardGroups.push({
           id: cardId,
           label: `Fatura ${displayName}`,
           items: txs,
           total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
-          badge: hasOpen ? 'em aberto' : 'fechada',
-          badgeClass: hasOpen ? 'badge--open' : 'badge--closed',
+          badge: billBadge,
+          badgeClass: billBadgeClass,
           defaultExpanded: false,
+          meta: bill ?? null,
         });
       }
     }
@@ -658,6 +671,47 @@ export class MovimentosComponent implements OnInit {
     }
   }
 
+  updateBillStatus(bill: CreditCardBill, status: BillStatus): void {
+    this.billUpdatingId.set(bill.id);
+    this.billService.updateStatus(bill.id, status)
+      .then(updated => {
+        this.bills.update(list => list.map(b => b.id === updated.id ? { ...b, ...updated } : b));
+        const txStatus = status === BillStatus.Paid ? TransactionStatus.Realized
+          : status === BillStatus.Open ? TransactionStatus.Projected : null;
+        if (txStatus && bill.creditCardId) {
+          this.transactionService.bulkUpdateStatusByCardMonth(
+            bill.creditCardId, this.year(), this.month(), txStatus
+          ).then(() => {
+            this.allTransactions.update(list =>
+              list.map(t => t.creditCardId === bill.creditCardId ? { ...t, status: txStatus } : t)
+            );
+            this.balanceService.invalidate();
+            this.cdr.markForCheck();
+          }).catch((err: unknown) => this.logger.error('Bulk status update failed', err));
+        }
+        this.billUpdatingId.set(null);
+        this.toast.success('Status da fatura atualizado.');
+        this.cdr.markForCheck();
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed to update bill status', err);
+        this.billUpdatingId.set(null);
+        this.toast.error('Erro ao atualizar status da fatura.');
+      });
+  }
+
+  nextBillStatus(current: BillStatus): BillStatus {
+    return current === BillStatus.Open ? BillStatus.Closed
+      : current === BillStatus.Closed ? BillStatus.Paid
+      : BillStatus.Open;
+  }
+
+  nextBillStatusLabel(current: BillStatus): string {
+    return current === BillStatus.Open ? 'Fechar Fatura'
+      : current === BillStatus.Closed ? 'Marcar como Pago'
+      : 'Reabrir';
+  }
+
   async load(silent = false): Promise<void> {
     const from = this.dateFrom();
     const to = this.dateTo();
@@ -752,6 +806,14 @@ export class MovimentosComponent implements OnInit {
         return tx;
       }));
       this.balanceService.invalidate();
+
+      if (this.periodMode() === 'month') {
+        this.billService.getByMonth(this.year(), this.month())
+          .then(bills => { this.bills.set(bills); this.cdr.markForCheck(); })
+          .catch(() => {});
+      } else {
+        this.bills.set([]);
+      }
     } catch (err) {
       this.logger.error('Failed to load movimentos', err);
       this.toast.error(this.tr('movimentos.toast.loadError'));

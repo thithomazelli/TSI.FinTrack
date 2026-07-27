@@ -453,6 +453,17 @@
           </div>
         </td>
       </ng-template>
+
+      <ng-template #groupActions let-group>
+        @if (group.meta && periodMode() === 'month') {
+          <button
+            class="btn-bill-action"
+            [disabled]="billUpdatingId() === group.meta.id"
+            (click)="updateBillStatus(group.meta, nextBillStatus(group.meta.status))">
+            {{ nextBillStatusLabel(group.meta.status) }}
+          </button>
+        }
+      </ng-template>
     </tsi-grouped-table>
   }
 

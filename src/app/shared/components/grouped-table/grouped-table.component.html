@@ -90,6 +90,11 @@
                   </span>
                 }
                 <span class="gt-group-count">{{ group.items.length }} itens</span>
+                @if (groupActionsTpl) {
+                  <span class="gt-group-actions" (click)="$event.stopPropagation()">
+                    <ng-container [ngTemplateOutlet]="groupActionsTpl" [ngTemplateOutletContext]="{ $implicit: group }" />
+                  </span>
+                }
               </div>
             </td>
           </tr>

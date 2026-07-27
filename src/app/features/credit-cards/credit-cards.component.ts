@@ -187,12 +187,7 @@ export class CreditCardsComponent implements OnInit {
         const cardTxs = txs.filter(t => !!t.creditCardId);
         this.bills.set(bills as BillWithCard[]);
         this.transactions.set(cardTxs);
-        const withTx = new Set(
-          (bills as BillWithCard[])
-            .filter(b => cardTxs.some(t => t.creditCardId === b.creditCardId))
-            .map(b => b.id)
-        );
-        this.expandedBillIds.set(withTx);
+        this.expandedBillIds.set(new Set());
         this.loading.set(false);
       })
       .catch((err: unknown) => { this.logger.error('Failed to load', err); this.loading.set(false); });
@@ -215,7 +210,9 @@ export class CreditCardsComponent implements OnInit {
     this.updatingId.set(bill.id);
     this.billService.updateStatus(bill.id, status)
       .then(updated => {
-        this.bills.update(list => list.map(b => b.id === updated.id ? { ...b, ...updated } : b));
+        this.bills.update(list => list.map(b => b.id === updated.id
+          ? { ...b, ...updated, credit_cards: (updated as BillWithCard).credit_cards ?? b.credit_cards }
+          : b));
         const txStatus = status === BillStatus.Paid  ? TransactionStatus.Realized
                        : status === BillStatus.Open  ? TransactionStatus.Projected
                        : null;

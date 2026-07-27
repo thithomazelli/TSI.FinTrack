@@ -60,12 +60,13 @@ export class GroupedTableComponent {
   readonly rowReordered    = output<GroupReorderEvent>();
   readonly insertRequested = output<GroupInsertEvent>();
 
-  @ContentChild('theadRow')   theadRowTpl?:    TemplateRef<void>;
-  @ContentChild('row')         rowTpl!:          TemplateRef<{ $implicit: any }>;
-  @ContentChild('insertForm')  insertFormTpl?:   TemplateRef<{ groupId: string; afterItemId: string | null }>;
-  @ContentChild('filterBtn')   filterBtnTpl?:    TemplateRef<void>;
-  @ContentChild('filterPanel') filterPanelTpl?:  TemplateRef<void>;
-  @ContentChild('totals')      totalsTpl?:       TemplateRef<{ $implicit: any[] }>;
+  @ContentChild('theadRow')    theadRowTpl?:    TemplateRef<void>;
+  @ContentChild('row')          rowTpl!:          TemplateRef<{ $implicit: any }>;
+  @ContentChild('insertForm')   insertFormTpl?:   TemplateRef<{ groupId: string; afterItemId: string | null }>;
+  @ContentChild('filterBtn')    filterBtnTpl?:    TemplateRef<void>;
+  @ContentChild('filterPanel')  filterPanelTpl?:  TemplateRef<void>;
+  @ContentChild('totals')       totalsTpl?:       TemplateRef<{ $implicit: any[] }>;
+  @ContentChild('groupActions') groupActionsTpl?: TemplateRef<{ $implicit: TableGroup }>;
 
   readonly query = signal('');
   readonly currentPage = signal(0);
