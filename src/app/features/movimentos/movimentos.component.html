@@ -162,11 +162,11 @@
       <div class="sm-values">
         <div class="sm-row">
           <span class="sm-sublabel">{{ 'movimentos.totalIncome' | translate }}</span>
-          <span class="sm-value sm-pos">R$ {{ totalEntradas() | number:'1.2-2' }}</span>
+          <span class="sm-value sm-pos">R$ {{ (periodTotals()?.totalEntries ?? 0) | number:'1.2-2' }}</span>
         </div>
         <div class="sm-row">
           <span class="sm-sublabel">{{ 'movimentos.totalExpenses' | translate }}</span>
-          <span class="sm-value sm-neg">R$ {{ totalSaidas() | number:'1.2-2' }}</span>
+          <span class="sm-value sm-neg">R$ {{ (periodTotals()?.totalTransactions ?? 0) | number:'1.2-2' }}</span>
         </div>
         @if (totalSaidasProjetadas() > 0) {
           <div class="sm-row sm-row--projected">
