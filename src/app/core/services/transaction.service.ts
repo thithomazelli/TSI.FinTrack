@@ -25,7 +25,7 @@ export interface CreateTransactionPayload {
   accountId: string | null;
   creditCardId: string | null;
   status: TransactionStatus;
-  totalInstallments: number | null;
+  totalInstallments?: number | null;
   /** When true, `amount` is already the per-installment value — do not divide. */
   installmentAmountIsFixed?: boolean;
   recurringTemplateId: string | null;

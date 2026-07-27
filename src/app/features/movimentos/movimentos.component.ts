@@ -931,7 +931,7 @@ export class MovimentosComponent implements OnInit {
     this.formTxPurchaseDate = new Date().toISOString().split('T')[0];
     this.formTxIsInstallment = false;
     this.formTxInstallments = 2;
-    this.formTxAmountType = 'total';
+    this.formTxAmountType = 'installment';
     this.formTxIsInternational = false;
     this.formTxOriginalCurrency = 'USD';
     this.formTxOriginalAmount = 0;
@@ -974,7 +974,7 @@ export class MovimentosComponent implements OnInit {
       this.formTxPurchaseDate = t.purchaseDate ?? t.date;
       this.formTxIsInstallment = false;
       this.formTxInstallments = 2;
-      this.formTxAmountType = 'total';
+      this.formTxAmountType = 'installment';
       this.formTxIsInternational = !!t.originalCurrency;
       this.formTxOriginalCurrency = t.originalCurrency ?? 'USD';
       this.formTxOriginalAmount = t.originalAmount ?? 0;
@@ -1021,6 +1021,7 @@ export class MovimentosComponent implements OnInit {
       this.formTxPurchaseDate = t.purchaseDate ?? t.date;
       this.formTxIsInstallment = !!t.totalInstallments && t.totalInstallments > 1;
       this.formTxInstallments = t.totalInstallments ?? 1;
+      this.formTxAmountType = 'installment';
       this.formTxIsInternational = !!t.originalCurrency;
       this.formTxOriginalCurrency = t.originalCurrency ?? 'USD';
       this.formTxOriginalAmount = t.originalAmount ?? 0;
@@ -1128,8 +1129,8 @@ export class MovimentosComponent implements OnInit {
       accountId: this.formTxCreditCardId ? (this.formTxPaymentAccountId || null) : (this.formTxAccountId || null),
       creditCardId: this.formTxCreditCardId || null,
       status: this.formTxStatus,
-      totalInstallments: this.formTxIsInstallment ? this.formTxInstallments : null,
-      installmentAmountIsFixed: this.formTxIsInstallment && this.formTxAmountType === 'installment',
+      totalInstallments: id ? undefined : (this.formTxIsInstallment ? this.formTxInstallments : null),
+      installmentAmountIsFixed: !id && this.formTxIsInstallment && this.formTxAmountType === 'installment',
       recurringTemplateId: null,
       originalCurrency: this.formTxIsInternational ? this.formTxOriginalCurrency : null,
       originalAmount: this.formTxIsInternational ? this.formTxOriginalAmount : null,

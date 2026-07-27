@@ -942,12 +942,12 @@
         <div class="field">
           <div class="radio-group" style="padding: 0.6rem 0">
             <label class="radio-label">
-              <input type="radio" name="txAmountType" value="total" [(ngModel)]="formTxAmountType" />
-              {{ 'movimentos.amountTotal' | translate }}
-            </label>
-            <label class="radio-label">
               <input type="radio" name="txAmountType" value="installment" [(ngModel)]="formTxAmountType" />
               {{ 'movimentos.amountInstallment' | translate }}
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="txAmountType" value="total" [(ngModel)]="formTxAmountType" />
+              {{ 'movimentos.amountTotal' | translate }}
             </label>
           </div>
         </div>
