@@ -83,9 +83,17 @@ export class DateLangDirective implements OnInit {
       if (digits.length > 4) masked = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
       else if (digits.length > 2) masked = `${digits.slice(0, 2)}/${digits.slice(2)}`;
 
-      const sel = input.selectionStart ?? masked.length;
+      // Recompute cursor from digit count before old cursor to handle
+      // auto-inserted slashes shifting positions.
+      const rawSel    = input.selectionStart ?? raw.length;
+      const digitsBefore = raw.slice(0, rawSel).replace(/\D/g, '').length;
+      const maskedCursor = digitsBefore <= 2 ? digitsBefore
+                         : digitsBefore <= 4 ? digitsBefore + 1
+                         :                     digitsBefore + 2;
+
       nativeSet.call(input, masked);
-      input.setSelectionRange(Math.min(sel, masked.length), Math.min(sel, masked.length));
+      const clampedCursor = Math.min(maskedCursor, masked.length);
+      input.setSelectionRange(clampedCursor, clampedCursor);
 
       isoValue = toISO(masked);
       hiddenDate.value = isoValue;
