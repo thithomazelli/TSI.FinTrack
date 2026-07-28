@@ -31,6 +31,19 @@ export class DateLangDirective implements OnInit, OnDestroy {
       },
     }) as Instance;
 
+    // When Angular writes to ngModel it sets input.value directly (no DOM event).
+    // Override the value setter so flatpickr stays in sync with model changes.
+    const fp = this.fp!;
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!;
+    Object.defineProperty(input, 'value', {
+      get: descriptor.get,
+      set(v: string) {
+        descriptor.set!.call(this, v);
+        if (v) fp.setDate(v, false);   // false = don't fire onChange again
+        else   fp.clear(false);
+      },
+    });
+
     // The altInput is created outside Angular's view, so it has no _ngcontent-*
     // attribute and component-scoped CSS won't apply. Copy all attributes from
     // the original input (including _ngcontent-* and placeholder) so scoped
