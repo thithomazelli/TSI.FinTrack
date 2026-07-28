@@ -18,11 +18,11 @@ export class DateLangDirective implements OnInit, OnDestroy {
 
     this.fp = flatpickr(input, {
       locale: Portuguese,
-      dateFormat: 'Y-m-d',       // ISO value kept for ngModel
-      altInput: true,            // visible input shows friendly format
+      dateFormat: 'Y-m-d',
+      altInput: true,
       altFormat: 'd/m/Y',
       altInputClass: input.className,
-      allowInput: true,
+      allowInput: false,
       disableMobile: true,
       onChange: (_dates, dateStr) => {
         input.value = dateStr;
@@ -31,9 +31,17 @@ export class DateLangDirective implements OnInit, OnDestroy {
       },
     }) as Instance;
 
-    // Copy placeholder to the alt input after flatpickr creates it
+    // The altInput is created outside Angular's view, so it has no _ngcontent-*
+    // attribute and component-scoped CSS won't apply. Copy all attributes from
+    // the original input (including _ngcontent-* and placeholder) so scoped
+    // styles work correctly.
     const alt = input.nextElementSibling as HTMLInputElement | null;
-    if (alt && input.placeholder) alt.placeholder = input.placeholder;
+    if (alt) {
+      for (const attr of Array.from(input.attributes)) {
+        if (attr.name === 'type' || attr.name === 'class' || attr.name === 'style') continue;
+        alt.setAttribute(attr.name, attr.value);
+      }
+    }
   }
 
   ngOnDestroy(): void {
