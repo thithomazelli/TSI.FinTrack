@@ -62,8 +62,10 @@ type SessionStep =
   | 'awaiting_amount'
   | 'awaiting_date'
   | 'awaiting_category'
-  | 'awaiting_card'
+  | 'awaiting_payment_type'
   | 'awaiting_account'
+  | 'awaiting_card'
+  | 'awaiting_source_account'
   | 'awaiting_people'
   | 'awaiting_confirm';
 
@@ -73,11 +75,16 @@ interface SessionData {
   date?: string;
   categoryId?: string | null;
   categoryName?: string;
-  creditCardId?: string | null;
-  creditCardName?: string;
+  paymentType?: 'debit' | 'credit';
+  // débito: conta debitada (= fonte pagadora)
   accountId?: string | null;
   accountName?: string;
-  people?: string[];           // selected label names
+  // crédito: cartão + conta que paga a fatura
+  creditCardId?: string | null;
+  creditCardName?: string;
+  sourceAccountId?: string | null;
+  sourceAccountName?: string;
+  people?: string[];
 }
 
 async function getSession(chatId: number): Promise<{ step: SessionStep; data: SessionData } | null> {
@@ -191,6 +198,44 @@ async function askCategory(chatId: number, userId: string, data: SessionData) {
   );
 }
 
+async function askPaymentType(chatId: number, data: SessionData) {
+  await setSession(chatId, 'awaiting_payment_type', data);
+  const catLabel = data.categoryName ? `📁 ${data.categoryName}` : '📁 Sem categoria';
+  await send(chatId,
+    `✅ ${catLabel}\n\n💰 Forma de <b>pagamento</b>?`,
+    {
+      reply_markup: {
+        keyboard: [
+          [{ text: '🏦 Débito' }, { text: '💳 Crédito' }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    }
+  );
+}
+
+async function askAccount(chatId: number, userId: string, data: SessionData) {
+  await setSession(chatId, 'awaiting_account', data);
+  const { data: accounts } = await supabase
+    .from('accounts')
+    .select('id, name')
+    .eq('owner_id', userId)
+    .order('name');
+
+  const rows: { text: string }[][] = [];
+  const items = (accounts ?? []) as { id: string; name: string }[];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2).map(a => ({ text: a.name })));
+  }
+  rows.push([{ text: '➡️ Sem conta' }]);
+
+  await send(chatId,
+    `🏦 Débito\n\n🏦 Em qual <b>conta</b> foi debitado? (= fonte pagadora)`,
+    { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: true } }
+  );
+}
+
 async function askCard(chatId: number, userId: string, data: SessionData) {
   await setSession(chatId, 'awaiting_card', data);
   const { data: cards } = await supabase
@@ -204,11 +249,32 @@ async function askCard(chatId: number, userId: string, data: SessionData) {
   for (let i = 0; i < items.length; i += 2) {
     rows.push(items.slice(i, i + 2).map(c => ({ text: `${c.name} ****${c.last_four_digits}` })));
   }
-  rows.push([{ text: '➡️ Sem cartão' }]);
+  rows.push([{ text: '➡️ Pular cartão' }]);
 
-  const catLabel = data.categoryName ? `📁 ${data.categoryName}` : '📁 Sem categoria';
   await send(chatId,
-    `✅ ${catLabel}\n\n💳 Em qual <b>cartão</b>?`,
+    `💳 Crédito\n\n💳 Em qual <b>cartão</b>?`,
+    { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: true } }
+  );
+}
+
+async function askSourceAccount(chatId: number, userId: string, data: SessionData) {
+  await setSession(chatId, 'awaiting_source_account', data);
+  const { data: accounts } = await supabase
+    .from('accounts')
+    .select('id, name')
+    .eq('owner_id', userId)
+    .order('name');
+
+  const rows: { text: string }[][] = [];
+  const items = (accounts ?? []) as { id: string; name: string }[];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2).map(a => ({ text: a.name })));
+  }
+  rows.push([{ text: '➡️ Sem conta vinculada' }]);
+
+  const cardLabel = data.creditCardName ? `💳 ${data.creditCardName}` : '💳 Cartão';
+  await send(chatId,
+    `✅ ${cardLabel}\n\n🏦 Qual <b>conta</b> paga a fatura? (fonte pagadora)`,
     { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: true } }
   );
 }
@@ -259,10 +325,10 @@ async function askPeople(chatId: number, userId: string, data: SessionData) {
 
   const rows = await buildPeopleKeyboard(userId, people);
   const cardLabel = data.creditCardName
-    ? `💳 ${data.creditCardName}`
+    ? `💳 ${data.creditCardName}${data.sourceAccountName ? ` · 🏦 ${data.sourceAccountName}` : ''}`
     : data.accountName
       ? `🏦 ${data.accountName}`
-      : '💳 Sem cartão / Sem conta';
+      : '—';
   await send(chatId,
     `✅ ${cardLabel}\n\n👥 Selecione as <b>pessoas</b> envolvidas (pode escolher várias):\n\n` +
     '<i>Toque nos nomes ou <b>digite um nome</b> e envie. Depois toque em "Confirmar pessoas".</i>',
@@ -274,8 +340,10 @@ async function askConfirm(chatId: number, data: SessionData) {
   await setSession(chatId, 'awaiting_confirm', data);
 
   const peopleLabel = data.people?.length ? data.people.join(', ') : '—';
-  const cardLabel   = data.creditCardName ?? (data.accountName ? `🏦 ${data.accountName}` : '—');
-  const catLabel    = data.categoryName   ?? '—';
+  const catLabel    = data.categoryName ?? '—';
+  const paymentLines = data.paymentType === 'credit'
+    ? `💳 ${data.creditCardName ?? 'Cartão'}\n🏦 Fonte: ${data.sourceAccountName ?? '—'}`
+    : `🏦 ${data.accountName ?? '—'}`;
 
   await send(chatId,
     `📋 <b>Confirmar lançamento?</b>\n\n` +
@@ -283,7 +351,7 @@ async function askConfirm(chatId: number, data: SessionData) {
     `💰 ${fmt(data.amount!)}\n` +
     `📅 ${formatDateBR(data.date!)}\n` +
     `📁 ${catLabel}\n` +
-    `💳 ${cardLabel}\n` +
+    `${paymentLines}\n` +
     `👥 ${peopleLabel}`,
     {
       reply_markup: {
@@ -300,18 +368,22 @@ async function askConfirm(chatId: number, data: SessionData) {
 async function finishFlow(chatId: number, userId: string, data: SessionData, status: string) {
   await clearSession(chatId);
 
+  const accountIdToSave = data.paymentType === 'credit'
+    ? (data.sourceAccountId ?? null)
+    : (data.accountId ?? null);
+
   const { error } = await supabase
     .from('transactions')
     .insert({
-      owner_id:           userId,
-      description:        data.description,
-      amount:             data.amount,
-      date:               data.date ?? todayStr(),
-      category_id:        data.categoryId ?? null,
-      credit_card_id:     data.creditCardId ?? null,
-      account_id:         data.accountId ?? null,
+      owner_id:       userId,
+      description:    data.description,
+      amount:         data.amount,
+      date:           data.date ?? todayStr(),
+      category_id:    data.categoryId ?? null,
+      credit_card_id: data.creditCardId ?? null,
+      account_id:     accountIdToSave,
       status,
-      labels:             data.people ?? [],
+      labels:         data.people ?? [],
     });
 
   if (error) {
@@ -321,18 +393,17 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
 
   const statusLabel = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
   const peopleLabel = data.people?.length ? `\n👥 ${data.people.join(', ')}` : '';
-  const cardLabel   = data.creditCardName
-    ? `\n💳 ${data.creditCardName}`
-    : data.accountName
-      ? `\n🏦 ${data.accountName}`
-      : '';
+  const paymentLabel = data.paymentType === 'credit'
+    ? `\n💳 ${data.creditCardName ?? 'Cartão'}` +
+      (data.sourceAccountName ? `\n🏦 Fonte: ${data.sourceAccountName}` : '')
+    : data.accountName ? `\n🏦 ${data.accountName}` : '';
   await send(chatId,
     `🎉 <b>Lançamento salvo!</b>\n\n` +
     `📌 ${data.description}\n` +
     `💰 ${fmt(data.amount!)}\n` +
     `📅 ${formatDateBR(data.date ?? todayStr())}\n` +
     `📁 ${data.categoryName ?? 'Sem categoria'}` +
-    `${cardLabel}${peopleLabel}\n` +
+    `${paymentLabel}${peopleLabel}\n` +
     `📊 ${statusLabel}`,
     removeKeyboard()
   );
@@ -395,26 +466,17 @@ async function handleSessionMessage(
         );
         if (matched) { categoryId = matched.id; categoryName = matched.name; }
       }
-      await askCard(chatId, userId, { ...data, categoryId, categoryName });
+      await askPaymentType(chatId, { ...data, categoryId, categoryName });
       break;
     }
 
-    case 'awaiting_card': {
-      let creditCardId: string | null = null;
-      let creditCardName: string | undefined;
-      if (text !== '➡️ Sem cartão') {
-        const { data: cards } = await supabase
-          .from('credit_cards').select('id, name, last_four_digits').eq('owner_id', userId);
-        const matched = (cards ?? [] as { id: string; name: string; last_four_digits: string }[]).find(
-          (c: { name: string; last_four_digits: string }) =>
-            text === `${c.name} ****${c.last_four_digits}`
-        );
-        if (matched) { creditCardId = matched.id; creditCardName = `${matched.name} ****${matched.last_four_digits}`; }
-      }
-      if (creditCardId) {
-        await askPeople(chatId, userId, { ...data, creditCardId, creditCardName });
+    case 'awaiting_payment_type': {
+      if (text === '🏦 Débito') {
+        await askAccount(chatId, userId, { ...data, paymentType: 'debit' });
+      } else if (text === '💳 Crédito') {
+        await askCard(chatId, userId, { ...data, paymentType: 'credit' });
       } else {
-        await askAccount(chatId, userId, { ...data, creditCardId: null, creditCardName: undefined });
+        await send(chatId, '❌ Escolha uma opção: <b>🏦 Débito</b> ou <b>💳 Crédito</b>.');
       }
       break;
     }
@@ -431,6 +493,37 @@ async function handleSessionMessage(
         if (matched) { accountId = matched.id; accountName = matched.name; }
       }
       await askPeople(chatId, userId, { ...data, accountId, accountName });
+      break;
+    }
+
+    case 'awaiting_card': {
+      let creditCardId: string | null = null;
+      let creditCardName: string | undefined;
+      if (text !== '➡️ Pular cartão') {
+        const { data: cards } = await supabase
+          .from('credit_cards').select('id, name, last_four_digits').eq('owner_id', userId);
+        const matched = (cards ?? [] as { id: string; name: string; last_four_digits: string }[]).find(
+          (c: { name: string; last_four_digits: string }) =>
+            text === `${c.name} ****${c.last_four_digits}`
+        );
+        if (matched) { creditCardId = matched.id; creditCardName = `${matched.name} ****${matched.last_four_digits}`; }
+      }
+      await askSourceAccount(chatId, userId, { ...data, creditCardId, creditCardName });
+      break;
+    }
+
+    case 'awaiting_source_account': {
+      let sourceAccountId: string | null = null;
+      let sourceAccountName: string | undefined;
+      if (text !== '➡️ Sem conta vinculada') {
+        const { data: accounts } = await supabase
+          .from('accounts').select('id, name').eq('owner_id', userId);
+        const matched = (accounts ?? [] as { id: string; name: string }[]).find(
+          (a: { name: string }) => a.name.toLowerCase() === text.trim().toLowerCase()
+        );
+        if (matched) { sourceAccountId = matched.id; sourceAccountName = matched.name; }
+      }
+      await askPeople(chatId, userId, { ...data, sourceAccountId, sourceAccountName });
       break;
     }
 
