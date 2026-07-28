@@ -63,6 +63,7 @@ type SessionStep =
   | 'awaiting_date'
   | 'awaiting_category'
   | 'awaiting_card'
+  | 'awaiting_account'
   | 'awaiting_people'
   | 'awaiting_confirm';
 
@@ -74,6 +75,8 @@ interface SessionData {
   categoryName?: string;
   creditCardId?: string | null;
   creditCardName?: string;
+  accountId?: string | null;
+  accountName?: string;
   people?: string[];           // selected label names
 }
 
@@ -229,12 +232,37 @@ async function buildPeopleKeyboard(userId: string, selected: string[]): Promise<
   return rows;
 }
 
+async function askAccount(chatId: number, userId: string, data: SessionData) {
+  await setSession(chatId, 'awaiting_account', data);
+  const { data: accounts } = await supabase
+    .from('accounts')
+    .select('id, name')
+    .eq('owner_id', userId)
+    .order('name');
+
+  const rows: { text: string }[][] = [];
+  const items = (accounts ?? []) as { id: string; name: string }[];
+  for (let i = 0; i < items.length; i += 2) {
+    rows.push(items.slice(i, i + 2).map(a => ({ text: a.name })));
+  }
+  rows.push([{ text: '➡️ Sem conta' }]);
+
+  await send(chatId,
+    `💳 Sem cartão\n\n🏦 Em qual <b>conta</b> saiu o débito?`,
+    { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: true } }
+  );
+}
+
 async function askPeople(chatId: number, userId: string, data: SessionData) {
   const people: string[] = [];
   await setSession(chatId, 'awaiting_people', { ...data, people });
 
   const rows = await buildPeopleKeyboard(userId, people);
-  const cardLabel = data.creditCardName ? `💳 ${data.creditCardName}` : '💳 Sem cartão';
+  const cardLabel = data.creditCardName
+    ? `💳 ${data.creditCardName}`
+    : data.accountName
+      ? `🏦 ${data.accountName}`
+      : '💳 Sem cartão / Sem conta';
   await send(chatId,
     `✅ ${cardLabel}\n\n👥 Selecione as <b>pessoas</b> envolvidas (pode escolher várias):\n\n` +
     '<i>Toque nos nomes ou <b>digite um nome</b> e envie. Depois toque em "Confirmar pessoas".</i>',
@@ -246,7 +274,7 @@ async function askConfirm(chatId: number, data: SessionData) {
   await setSession(chatId, 'awaiting_confirm', data);
 
   const peopleLabel = data.people?.length ? data.people.join(', ') : '—';
-  const cardLabel   = data.creditCardName ?? '—';
+  const cardLabel   = data.creditCardName ?? (data.accountName ? `🏦 ${data.accountName}` : '—');
   const catLabel    = data.categoryName   ?? '—';
 
   await send(chatId,
@@ -281,7 +309,7 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
       date:               data.date ?? todayStr(),
       category_id:        data.categoryId ?? null,
       credit_card_id:     data.creditCardId ?? null,
-      account_id:         null,
+      account_id:         data.accountId ?? null,
       status,
       labels:             data.people ?? [],
     });
@@ -293,7 +321,11 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
 
   const statusLabel = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
   const peopleLabel = data.people?.length ? `\n👥 ${data.people.join(', ')}` : '';
-  const cardLabel   = data.creditCardName ? `\n💳 ${data.creditCardName}` : '';
+  const cardLabel   = data.creditCardName
+    ? `\n💳 ${data.creditCardName}`
+    : data.accountName
+      ? `\n🏦 ${data.accountName}`
+      : '';
   await send(chatId,
     `🎉 <b>Lançamento salvo!</b>\n\n` +
     `📌 ${data.description}\n` +
@@ -379,7 +411,26 @@ async function handleSessionMessage(
         );
         if (matched) { creditCardId = matched.id; creditCardName = `${matched.name} ****${matched.last_four_digits}`; }
       }
-      await askPeople(chatId, userId, { ...data, creditCardId, creditCardName });
+      if (creditCardId) {
+        await askPeople(chatId, userId, { ...data, creditCardId, creditCardName });
+      } else {
+        await askAccount(chatId, userId, { ...data, creditCardId: null, creditCardName: undefined });
+      }
+      break;
+    }
+
+    case 'awaiting_account': {
+      let accountId: string | null = null;
+      let accountName: string | undefined;
+      if (text !== '➡️ Sem conta') {
+        const { data: accounts } = await supabase
+          .from('accounts').select('id, name').eq('owner_id', userId);
+        const matched = (accounts ?? [] as { id: string; name: string }[]).find(
+          (a: { name: string }) => a.name.toLowerCase() === text.trim().toLowerCase()
+        );
+        if (matched) { accountId = matched.id; accountName = matched.name; }
+      }
+      await askPeople(chatId, userId, { ...data, accountId, accountName });
       break;
     }
 
@@ -563,7 +614,7 @@ async function handleAddOneShot(chatId: number, userId: string, args: string) {
 
   const date = todayStr();
   // Store in session and show confirmation
-  const sessionData: SessionData = { description, amount, date, categoryId, categoryName, creditCardId: null, people: [] };
+  const sessionData: SessionData = { description, amount, date, categoryId, categoryName, creditCardId: null, accountId: null, people: [] };
   await askConfirm(chatId, sessionData);
 }
 
