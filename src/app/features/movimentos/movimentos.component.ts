@@ -495,16 +495,17 @@ export class MovimentosComponent implements OnInit {
     const draggedItem = allItems.find(i => i.id === event.id);
     if (!draggedItem) return;
 
-    const aboveItem = event.aboveId ? allItems.find(i => i.id === event.aboveId) : null;
-    const belowItem = event.belowId ? allItems.find(i => i.id === event.belowId) : null;
+    // Use the group's current visual order for position synthesis so that items with the
+    // same date get consistent relative positions (not global allItems indices).
+    const groupItems = (this.tableGroups().find(g => g.id === event.groupId)?.items ?? []) as MovimentoItem[];
 
-    const posOf = (item: (typeof allItems)[0] | null | undefined) => {
-      if (!item) return null;
-      return item.position ?? (allItems.indexOf(item) + 1) * 1000;
-    };
+    // Build effective position map: use saved position or visual-index-based synthetic.
+    const effectivePos = new Map<string, number>();
+    groupItems.forEach((gi, idx) => effectivePos.set(gi.id, gi.position ?? (idx + 1) * 1000));
 
-    const ap = posOf(aboveItem);
-    const bp = posOf(belowItem);
+    const posOf = (id: string | null | undefined) => id ? (effectivePos.get(id) ?? null) : null;
+    const ap = posOf(event.aboveId);
+    const bp = posOf(event.belowId);
 
     let newPosition: number;
     if (ap == null && bp == null) {
@@ -517,23 +518,41 @@ export class MovimentosComponent implements OnInit {
       newPosition = (ap + bp) / 2;
     }
 
+    // Items without positions that share the same group need synthetic positions assigned
+    // so future drags and the sort comparator can place them correctly.
+    const neighborsToSave = groupItems.filter(gi => gi.id !== event.id && gi.position == null);
+
+    // Apply all local state updates atomically
+    this.zone.run(() => {
+      let entries = this.allEntries();
+      let txs = this.allTransactions();
+
+      for (const gi of neighborsToSave) {
+        const pos = effectivePos.get(gi.id)!;
+        if (gi.kind === 'entry') entries = entries.map(e => e.id === gi.id ? { ...e, position: pos } : e);
+        else txs = txs.map(t => t.id === gi.id ? { ...t, position: pos } : t);
+      }
+
+      if (draggedItem.kind === 'entry') entries = entries.map(e => e.id === event.id ? { ...e, position: newPosition } : e);
+      else txs = txs.map(t => t.id === event.id ? { ...t, position: newPosition } : t);
+
+      this.allEntries.set(entries);
+      this.allTransactions.set(txs);
+      this.cdr.markForCheck();
+    });
+
+    // Persist neighbor positions (fire-and-forget)
+    for (const gi of neighborsToSave) {
+      const pos = effectivePos.get(gi.id)!;
+      const p = gi.kind === 'entry'
+        ? this.entryService.updatePosition(gi.id, pos)
+        : this.transactionService.updatePosition(gi.id, pos);
+      p.catch((err: unknown) => this.logger.error('Failed to save neighbor position', err));
+    }
+
     const save$ = draggedItem.kind === 'entry'
       ? this.entryService.updatePosition(event.id, newPosition)
       : this.transactionService.updatePosition(event.id, newPosition);
-
-    // Apply position locally and force CD so the view updates immediately
-    this.zone.run(() => {
-      if (draggedItem.kind === 'entry') {
-        this.allEntries.set(
-          this.allEntries().map(e => e.id === event.id ? { ...e, position: newPosition } : e)
-        );
-      } else {
-        this.allTransactions.set(
-          this.allTransactions().map(t => t.id === event.id ? { ...t, position: newPosition } : t)
-        );
-      }
-      this.cdr.markForCheck();
-    });
 
     // Persist and reload to guarantee visual consistency (silent = no loading spinner)
     save$.then(() => this.load(true)).catch((err: unknown) => this.logger.error('Failed to update position', err));
