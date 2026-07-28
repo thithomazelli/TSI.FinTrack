@@ -348,16 +348,6 @@ export class MovimentosComponent implements OnInit {
 
   readonly activeInsert = signal<GroupInsertEvent | null>(null);
 
-  // Re-sorts group items by position (primary) when any item has a position set.
-  // For items without a saved position, synthesizes position from their date-sorted index.
-  private reorderByPosition(items: MovimentoItem[]): MovimentoItem[] {
-    if (!items.some(i => i.position != null)) return items;
-    return items
-      .map((item, idx) => ({ item, pos: item.position ?? (idx + 1) * 1000 }))
-      .sort((a, b) => a.pos - b.pos)
-      .map(x => x.item);
-  }
-
   readonly tableGroups = computed<TableGroup<MovimentoItem>[]>(() => {
     const items = this.filteredItems();
     const entries   = items.filter(i => i.kind === 'entry');
@@ -385,7 +375,7 @@ export class MovimentosComponent implements OnInit {
       groups.push({
         id: '__entries',
         label: 'Entradas',
-        items: this.reorderByPosition(entries),
+        items: entries,
         total: entries.reduce((s, e) => s + e.amount, 0),
         status: entries.some(e => e.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
         defaultExpanded: false,
@@ -397,7 +387,7 @@ export class MovimentosComponent implements OnInit {
       groups.push({
         id: `__debit_${accountId}`,
         label: account ? `Débito ${account.name}` : 'Débito',
-        items: this.reorderByPosition(txs),
+        items: txs,
         total: txs.reduce((s, t) => s + t.amount, 0),
         status: txs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
         defaultExpanded: false,
@@ -416,7 +406,7 @@ export class MovimentosComponent implements OnInit {
         groups.push({
           id: `__debit_card_${cardId}`,
           label: rawName,
-          items: this.reorderByPosition(txs),
+          items: txs,
           total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
           defaultExpanded: false,
@@ -431,7 +421,7 @@ export class MovimentosComponent implements OnInit {
         cardGroups.push({
           id: cardId,
           label: `Fatura ${displayName}`,
-          items: this.reorderByPosition(txs),
+          items: txs,
           total: txs.filter(t => t.status !== 'ESTIMATED').reduce((s, t) => s + t.amount, 0),
           status: hasOpen ? 'PROJECTED' : 'REALIZED',
           badge: billBadge,
@@ -505,17 +495,12 @@ export class MovimentosComponent implements OnInit {
     const draggedItem = allItems.find(i => i.id === event.id);
     if (!draggedItem) return;
 
-    // Use group-relative order (position-sorted) for synthesis so items with different
-    // purchaseDates can still be reordered by drag within the same group.
-    const groupItems = this.tableGroups().find(g => g.id === event.groupId)?.items ?? allItems;
-    const aboveItem = event.aboveId ? (groupItems.find(i => i.id === event.aboveId) ?? null) : null;
-    const belowItem = event.belowId ? (groupItems.find(i => i.id === event.belowId) ?? null) : null;
+    const aboveItem = event.aboveId ? allItems.find(i => i.id === event.aboveId) : null;
+    const belowItem = event.belowId ? allItems.find(i => i.id === event.belowId) : null;
 
-    // Synthesize position from group-relative index so the midpoint stays within group range.
-    const posOf = (item: MovimentoItem | null | undefined) => {
+    const posOf = (item: (typeof allItems)[0] | null | undefined) => {
       if (!item) return null;
-      const idx = groupItems.findIndex(i => i.id === item.id);
-      return item.position ?? (idx + 1) * 1000;
+      return item.position ?? (allItems.indexOf(item) + 1) * 1000;
     };
 
     const ap = posOf(aboveItem);
