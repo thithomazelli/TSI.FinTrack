@@ -553,10 +553,15 @@ export class MovimentosComponent implements OnInit {
       ? this.entryService.updatePosition(event.id, newPosition)
       : this.transactionService.updatePosition(event.id, newPosition);
 
+    this.toast.info(`Drag: nova posição ${newPosition.toFixed(2)} (acima=${ap?.toFixed(2) ?? 'null'}, abaixo=${bp?.toFixed(2) ?? 'null'})`);
+
     // Wait for ALL saves before reloading so the DB reflects the full new order
     Promise.all([...neighborSaves, save$])
       .then(() => this.load(true))
-      .catch((err: unknown) => this.logger.error('Failed to update position', err));
+      .catch((err: unknown) => {
+        this.logger.error('Failed to update position', err);
+        this.toast.error('Erro ao salvar posição: ' + ((err as { message?: string })?.message ?? String(err)));
+      });
   }
 
   selectedCardIsCredit(): boolean {
