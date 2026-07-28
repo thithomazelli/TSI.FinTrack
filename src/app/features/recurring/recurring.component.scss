@@ -120,8 +120,96 @@
   &--danger:hover { color: #ef4444; }
 }
 
-.toggle-full-year {
-  display: flex; align-items: center; gap: .5rem;
-  font-size: .85rem; color: var(--color-text-2); cursor: pointer;
-  input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-accent); }
+// ── Project modal ─────────────────────────────────────────────────────────────
+
+.modal--project {
+  width: min(520px, calc(100vw - 2rem));
+}
+
+.project-templates {
+  margin-top: .85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.project-templates-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .45rem .75rem;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.project-templates-label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: .8rem;
+  color: var(--color-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  &:hover { opacity: .75; }
+}
+
+.project-templates-list {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.project-template-item {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .45rem .75rem;
+  cursor: pointer;
+  transition: background .12s;
+  border-bottom: 1px solid var(--color-border);
+  font-size: .875rem;
+
+  &:last-child { border-bottom: none; }
+
+  &:hover { background: var(--color-bg); }
+
+  &--checked { background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface)); }
+
+  input[type=checkbox] {
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+  }
+}
+
+.project-template-desc {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text);
+}
+
+.project-template-amount {
+  flex-shrink: 0;
+  font-size: .82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.project-templates-empty {
+  padding: 1rem .75rem;
+  font-size: .85rem;
+  color: var(--color-text-2);
+  text-align: center;
 }

@@ -216,7 +216,7 @@
 <!-- Project period modal -->
 @if (showProjectModal()) {
   <div class="modal-backdrop" (click)="closeProjectModal()"></div>
-  <div class="modal modal--sm"
+  <div class="modal modal--project"
        tsiModalKey
        [tsiModalKeyEnter]="projectPeriod.bind(this)"
        [tsiModalKeyEscape]="closeProjectModal.bind(this)">
@@ -224,30 +224,60 @@
       <h3 class="modal-title">Projetar período</h3>
       <button class="modal-close" (click)="closeProjectModal()">✕</button>
     </div>
-    <p class="modal-text">Serão criados lançamentos projetados para todos os templates ativos {{ projectFullYear ? 'no ano selecionado' : 'neste mês' }}.</p>
-    <label class="toggle-full-year">
-      <input type="checkbox" [(ngModel)]="projectFullYear" />
-      Projetar ano inteiro
-    </label>
-    <div class="fields-row" style="margin-top:.75rem">
-      @if (!projectFullYear) {
-        <div class="field" [class.has-value]="projectMonth">
-          <select class="field-input" [(ngModel)]="projectMonth">
-            @for (m of allMonths; track m) {
-              <option [value]="m">{{ monthLabel(m) }}</option>
-            }
-          </select>
-          <label class="field-label">Mês</label>
-        </div>
-      }
+
+    <!-- Date range -->
+    <div class="fields-row" style="margin-top:.25rem">
+      <div class="field" [class.has-value]="projectFromMonth">
+        <select class="field-input" [(ngModel)]="projectFromMonth" (ngModelChange)="onProjectRangeChange()">
+          @for (m of allMonths; track m) {
+            <option [value]="m">{{ monthLabel(m) }}</option>
+          }
+        </select>
+        <label class="field-label">De</label>
+      </div>
+      <div class="field" [class.has-value]="projectToMonth">
+        <select class="field-input" [(ngModel)]="projectToMonth" (ngModelChange)="onProjectRangeChange()">
+          @for (m of allMonths; track m) {
+            <option [value]="m" [disabled]="m < projectFromMonth">{{ monthLabel(m) }}</option>
+          }
+        </select>
+        <label class="field-label">Até</label>
+      </div>
       <div class="field field--sm">
         <input class="field-input" type="number" placeholder=" " [(ngModel)]="projectYear" min="2020" max="2099" />
         <label class="field-label">Ano</label>
       </div>
     </div>
+
+    <!-- Template list -->
+    <div class="project-templates">
+      <div class="project-templates-header">
+        <span class="project-templates-label">
+          Recorrentes ({{ projectSelectedIds().size }}/{{ projectableTemplates().length }})
+        </span>
+        <button class="btn-link" (click)="toggleAllProjectTemplates()">
+          {{ allProjectableSelected ? 'Desmarcar todos' : 'Selecionar todos' }}
+        </button>
+      </div>
+      <div class="project-templates-list">
+        @for (t of projectableTemplates(); track t.id) {
+          <label class="project-template-item" [class.project-template-item--checked]="isProjectSelected(t.id)">
+            <input type="checkbox" [checked]="isProjectSelected(t.id)" (change)="toggleProjectTemplate(t.id)" />
+            <span class="project-template-desc">{{ t.description }}</span>
+            <span class="project-template-amount" [class.amount-positive]="t.amount > 0" [class.amount-negative]="t.amount < 0">
+              R$ {{ t.amount | number:'1.2-2' }}
+            </span>
+          </label>
+        }
+        @if (projectableTemplates().length === 0) {
+          <p class="project-templates-empty">Nenhum recorrente ativo para o período selecionado.</p>
+        }
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="closeProjectModal()">Cancelar</button>
-      <button class="btn btn-primary" (click)="projectPeriod()" [disabled]="projecting()">
+      <button class="btn btn-primary" (click)="projectPeriod()" [disabled]="projecting() || projectSelectedIds().size === 0">
         {{ projecting() ? 'Projetando...' : 'Projetar' }}
       </button>
     </div>

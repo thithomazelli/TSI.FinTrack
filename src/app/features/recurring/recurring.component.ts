@@ -73,8 +73,9 @@ export class RecurringComponent implements OnInit {
 
   // Project modal state
   projectYear = new Date().getFullYear();
-  projectMonth = new Date().getMonth() + 1;
-  projectFullYear = false;
+  projectFromMonth = new Date().getMonth() + 1;
+  projectToMonth = new Date().getMonth() + 1;
+  readonly projectSelectedIds = signal(new Set<string>());
 
   readonly monthNames = MONTH_NAMES;
   readonly days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -336,11 +337,30 @@ export class RecurringComponent implements OnInit {
 
   // ── Project period ───────────────────────────────────────────────────────────
 
+  /** Active templates that apply to at least one month in the selected range. */
+  readonly projectableTemplates = computed(() => {
+    const from = this.projectFromMonth;
+    const to   = this.projectToMonth;
+    const monthsInRange = Array.from(
+      { length: Math.max(0, to - from + 1) },
+      (_, i) => from + i
+    );
+    return this.templates().filter(t =>
+      t.isActive && (
+        t.frequency === 'monthly' ||
+        t.months.some(m => monthsInRange.includes(m))
+      )
+    );
+  });
+
   openProjectModal(): void {
     const now = new Date();
-    this.projectYear = now.getFullYear();
-    this.projectMonth = now.getMonth() + 1;
-    this.projectFullYear = false;
+    this.projectYear     = now.getFullYear();
+    this.projectFromMonth = now.getMonth() + 1;
+    this.projectToMonth   = now.getMonth() + 1;
+    // Pre-select all projectable templates
+    const ids = new Set(this.projectableTemplates().map(t => t.id));
+    this.projectSelectedIds.set(ids);
     this.showProjectModal.set(true);
   }
 
@@ -348,22 +368,70 @@ export class RecurringComponent implements OnInit {
     this.showProjectModal.set(false);
   }
 
+  isProjectSelected(id: string): boolean {
+    return this.projectSelectedIds().has(id);
+  }
+
+  toggleProjectTemplate(id: string): void {
+    this.projectSelectedIds.update(set => {
+      const next = new Set(set);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  get allProjectableSelected(): boolean {
+    const ids = this.projectSelectedIds();
+    return this.projectableTemplates().length > 0 &&
+           this.projectableTemplates().every(t => ids.has(t.id));
+  }
+
+  toggleAllProjectTemplates(): void {
+    if (this.allProjectableSelected) {
+      this.projectSelectedIds.set(new Set());
+    } else {
+      this.projectSelectedIds.set(new Set(this.projectableTemplates().map(t => t.id)));
+    }
+  }
+
+  onProjectRangeChange(): void {
+    if (this.projectToMonth < this.projectFromMonth) {
+      this.projectToMonth = this.projectFromMonth;
+    }
+    // Re-sync selection to new projectable set
+    const projectable = this.projectableTemplates();
+    this.projectSelectedIds.update(set => {
+      const valid = new Set(projectable.map(t => t.id));
+      const next = new Set<string>();
+      for (const id of set) if (valid.has(id)) next.add(id);
+      // Auto-add newly projectable templates that weren't excluded before
+      for (const id of valid) if (!set.size || set.has(id)) next.add(id);
+      return next;
+    });
+  }
+
   projectPeriod(): void {
+    const selectedIds = [...this.projectSelectedIds()];
+    if (selectedIds.length === 0) {
+      this.toast.error('Selecione ao menos um recorrente para projetar.');
+      return;
+    }
     this.projecting.set(true);
-    const months = this.projectFullYear
-      ? Array.from({ length: 12 }, (_, i) => i + 1)
-      : [this.projectMonth];
+    const months: number[] = [];
+    for (let m = this.projectFromMonth; m <= this.projectToMonth; m++) months.push(m);
 
     let totalCreated = 0;
     months.reduce((p, m) =>
-      p.then(() => this.service.projectPeriod(this.projectYear, m)
+      p.then(() => this.service.projectPeriod(this.projectYear, m, selectedIds)
         .then(r => { totalCreated += r?.created ?? 0; })),
       Promise.resolve()
     ).then(() => {
       this.projecting.set(false);
       this.closeProjectModal();
-      const label = this.projectFullYear ? `ano ${this.projectYear}` : this.monthLabel(this.projectMonth);
-      this.toast.success(`${totalCreated} lançamentos projetados para ${label}!`);
+      const rangeLabel = this.projectFromMonth === this.projectToMonth
+        ? `${this.monthLabel(this.projectFromMonth)}/${this.projectYear}`
+        : `${this.monthLabel(this.projectFromMonth)} a ${this.monthLabel(this.projectToMonth)}/${this.projectYear}`;
+      this.toast.success(`${totalCreated} lançamentos projetados para ${rangeLabel}!`);
     }).catch((err: unknown) => {
       this.logger.error('Failed to project period', err);
       this.projecting.set(false);

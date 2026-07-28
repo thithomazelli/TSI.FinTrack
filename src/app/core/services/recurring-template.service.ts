@@ -93,9 +93,12 @@ export class RecurringTemplateService {
       .then(({ error }) => { if (error) throw error; });
   }
 
-  /** Project all active templates for a given year/month via RPC */
-  async projectPeriod(year: number, month: number): Promise<{ created: number }> {
-    return this.supabase.client.rpc('project_recurring_period', { p_year: year, p_month: month })
+  /** Project active templates for a given year/month via RPC.
+   *  Pass templateIds to restrict which templates are projected; omit to project all active. */
+  async projectPeriod(year: number, month: number, templateIds?: string[]): Promise<{ created: number }> {
+    const params: Record<string, unknown> = { p_year: year, p_month: month };
+    if (templateIds && templateIds.length > 0) params['p_template_ids'] = templateIds;
+    return this.supabase.client.rpc('project_recurring_period', params)
       .then(({ data, error }) => {
         if (error) throw error;
         return data as { created: number };
