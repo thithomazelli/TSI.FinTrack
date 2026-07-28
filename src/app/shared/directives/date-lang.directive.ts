@@ -46,6 +46,8 @@ export class DateLangDirective implements OnInit {
       if (!nav && !/^\d$/.test(e.key)) e.preventDefault();
     });
 
+    // capture: true → fires before Angular's bubble-phase ngModel listener,
+    // so isoValue is up-to-date when Angular reads input.value.
     input.addEventListener('input', () => {
       const raw    = nativeGet.call(input);          // what browser shows
       const digits = raw.replace(/\D/g, '').slice(0, 8);
@@ -57,10 +59,9 @@ export class DateLangDirective implements OnInit {
       nativeSet.call(input, masked);
       input.setSelectionRange(Math.min(sel, masked.length), Math.min(sel, masked.length));
 
-      // Update ISO store and notify Angular.
+      // Update ISO store before Angular reads input.value via its own listener.
       isoValue = toISO(masked);
-      input.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    }, { capture: true });
   }
 }
 
