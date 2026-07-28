@@ -30,14 +30,27 @@ export class DateLangDirective implements OnInit {
 
     if (isoValue) nativeSet.call(input, toDisplay(isoValue));
 
+    // ── Ensure parent is a positioning context for the absolute button ─────────
+    const parent = input.parentElement;
+    if (parent && getComputedStyle(parent).position === 'static') {
+      parent.style.position = 'relative';
+    }
+
     // ── Hidden date input for the native calendar picker ─────────────────────
+    // Wrapped in a <span lang="pt-BR"> so Chrome's picker inherits the locale
+    // regardless of whether the document lang is set.
+    const langWrap = document.createElement('span');
+    langWrap.lang = 'pt-BR';
+    langWrap.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;top:0;left:0;';
+
     const hiddenDate = document.createElement('input');
     hiddenDate.type = 'date';
     hiddenDate.lang = 'pt-BR';
     hiddenDate.style.cssText =
       'position:absolute;width:1px;height:1px;opacity:.01;pointer-events:none;' +
-      'overflow:hidden;border:0;padding:0;margin:0;top:0;left:0;';
-    input.insertAdjacentElement('afterend', hiddenDate);
+      'overflow:hidden;border:0;padding:0;margin:0;';
+    langWrap.appendChild(hiddenDate);
+    input.insertAdjacentElement('afterend', langWrap);
     if (isoValue) hiddenDate.value = isoValue;
 
     // ── Calendar icon button ──────────────────────────────────────────────────
@@ -52,7 +65,7 @@ export class DateLangDirective implements OnInit {
       '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">' +
       '<path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>' +
       '</svg>';
-    hiddenDate.insertAdjacentElement('afterend', btn);
+    langWrap.insertAdjacentElement('afterend', btn);
 
     // Reserve space on the right so text doesn't overlap the icon.
     input.style.paddingRight = '2.2rem';
