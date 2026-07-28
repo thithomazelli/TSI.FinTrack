@@ -463,6 +463,7 @@ body {
   }
 
   /* date inputs always show a value — always float the label */
+  /* date inputs always show a value — always float the label */
   &:has(input[type="date"].field-input) .field-label {
     top: 0;
     transform: translateY(-50%);
