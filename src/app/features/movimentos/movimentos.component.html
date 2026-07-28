@@ -536,19 +536,36 @@
   </div>
 }
 
-<!-- Bulk toggle status confirm modal -->
+<!-- Bulk set status modal -->
 @if (bulkActionOpen() === 'status') {
   <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
   <div class="modal modal--sm">
     <div class="modal-header">
-      <h3 class="modal-title">{{ 'movimentos.bulk.confirmToggleStatus' | translate }}</h3>
+      <h3 class="modal-title">Alterar status</h3>
       <button class="modal-close" (click)="bulkActionOpen.set(null)">✕</button>
     </div>
-    <p class="modal-text">{{ 'movimentos.bulk.confirmToggleStatusMsg' | translate: { count: selectionCount() } }}</p>
+    <p class="modal-text">Defina o novo status para os {{ selectionCount() }} registro(s) selecionados:</p>
+    <div class="bulk-status-options">
+      <label class="bulk-status-option" [class.selected]="bulkNewStatus === 'REALIZED'">
+        <input type="radio" name="bulkStatus" value="REALIZED" [(ngModel)]="bulkNewStatus" />
+        <span class="status-dot status-dot--realized"></span>
+        Realizado
+      </label>
+      <label class="bulk-status-option" [class.selected]="bulkNewStatus === 'PROJECTED'">
+        <input type="radio" name="bulkStatus" value="PROJECTED" [(ngModel)]="bulkNewStatus" />
+        <span class="status-dot status-dot--projected"></span>
+        Projetado
+      </label>
+      <label class="bulk-status-option" [class.selected]="bulkNewStatus === 'ESTIMATED'">
+        <input type="radio" name="bulkStatus" value="ESTIMATED" [(ngModel)]="bulkNewStatus" />
+        <span class="status-dot status-dot--estimated"></span>
+        Estimado
+      </label>
+    </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">Cancelar</button>
       <button class="btn btn-primary" (click)="bulkToggleStatus()" [disabled]="bulkSaving()">
-        {{ bulkSaving() ? ('common.saving' | translate) : ('movimentos.bulk.toggleStatus' | translate) }}
+        {{ bulkSaving() ? 'Salvando...' : 'Alterar status' }}
       </button>
     </div>
   </div>

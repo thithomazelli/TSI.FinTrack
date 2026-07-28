@@ -619,6 +619,7 @@ export class MovimentosComponent implements OnInit {
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
   bulkNewDate = '';
+  bulkNewStatus: TransactionStatus = 'REALIZED';
   readonly bulkSaving = signal(false);
 
   // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
@@ -1243,16 +1244,16 @@ export class MovimentosComponent implements OnInit {
   async bulkToggleStatus(): Promise<void> {
     const ids = [...this.selectedIds()];
     const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const newStatus = this.bulkNewStatus;
     this.bulkSaving.set(true);
     try {
       for (const item of items) {
-        const newStatus = item.status === 'REALIZED' ? 'PROJECTED' : 'REALIZED'; // ESTIMATED → REALIZED via bulk
         if (item.kind === 'entry') {
-          await this.entryService.update(item.id, { status: newStatus as TransactionStatus });
-          this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status: newStatus as TransactionStatus } : e));
+          await this.entryService.update(item.id, { status: newStatus });
+          this.allEntries.update(list => list.map(e => e.id === item.id ? { ...e, status: newStatus } : e));
         } else {
-          await this.transactionService.update(item.id, { status: newStatus as TransactionStatus });
-          this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status: newStatus as TransactionStatus } : t));
+          await this.transactionService.update(item.id, { status: newStatus });
+          this.allTransactions.update(list => list.map(t => t.id === item.id ? { ...t, status: newStatus } : t));
         }
       }
       this.clearSelection();
