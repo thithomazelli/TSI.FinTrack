@@ -298,27 +298,6 @@ async function buildPeopleKeyboard(userId: string, selected: string[]): Promise<
   return rows;
 }
 
-async function askAccount(chatId: number, userId: string, data: SessionData) {
-  await setSession(chatId, 'awaiting_account', data);
-  const { data: accounts } = await supabase
-    .from('accounts')
-    .select('id, name')
-    .eq('owner_id', userId)
-    .order('name');
-
-  const rows: { text: string }[][] = [];
-  const items = (accounts ?? []) as { id: string; name: string }[];
-  for (let i = 0; i < items.length; i += 2) {
-    rows.push(items.slice(i, i + 2).map(a => ({ text: a.name })));
-  }
-  rows.push([{ text: '➡️ Sem conta' }]);
-
-  await send(chatId,
-    `💳 Sem cartão\n\n🏦 Em qual <b>conta</b> saiu o débito?`,
-    { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: true } }
-  );
-}
-
 async function askPeople(chatId: number, userId: string, data: SessionData) {
   const people: string[] = [];
   await setSession(chatId, 'awaiting_people', { ...data, people });
