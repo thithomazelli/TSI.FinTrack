@@ -495,22 +495,29 @@ export class MovimentosComponent implements OnInit {
     const draggedItem = allItems.find(i => i.id === event.id);
     if (!draggedItem) return;
 
-    // Use the group's current visual order for position synthesis so that items with the
-    // same date get consistent relative positions (not global allItems indices).
+    const sortDateOf = (item: MovimentoItem) => item.purchaseDate ?? item.date;
+    const draggedSortDate = sortDateOf(draggedItem);
+
     const groupItems = (this.tableGroups().find(g => g.id === event.groupId)?.items ?? []) as MovimentoItem[];
 
-    // Build effective position map: use saved position or visual-index-based synthetic.
+    // Positions are only meaningful as tiebreakers within items sharing the same sort-date.
+    // Using neighbors from different dates produces incorrect midpoint values.
+    const sameDateItems = groupItems.filter(gi => sortDateOf(gi) === draggedSortDate);
+
     const effectivePos = new Map<string, number>();
-    groupItems.forEach((gi, idx) => effectivePos.set(gi.id, gi.position ?? (idx + 1) * 1000));
+    sameDateItems.forEach((gi, idx) => {
+      effectivePos.set(gi.id, gi.position ?? (idx + 1) * 1000);
+    });
 
     const posOf = (id: string | null | undefined) => id ? (effectivePos.get(id) ?? null) : null;
     const ap = posOf(event.aboveId);
     const bp = posOf(event.belowId);
 
+    // If neither neighbor shares the dragged item's date, the drag has no ordering effect.
+    if (ap == null && bp == null) return;
+
     let newPosition: number;
-    if (ap == null && bp == null) {
-      newPosition = 1000;
-    } else if (ap == null) {
+    if (ap == null) {
       newPosition = bp! - 1000;
     } else if (bp == null) {
       newPosition = ap + 1000;
@@ -518,30 +525,24 @@ export class MovimentosComponent implements OnInit {
       newPosition = (ap + bp) / 2;
     }
 
-    // Items without positions that share the same group need synthetic positions assigned
-    // so future drags and the sort comparator can place them correctly.
-    const neighborsToSave = groupItems.filter(gi => gi.id !== event.id && gi.position == null);
+    // Assign synthetic positions to same-date peers that currently lack one.
+    const neighborsToSave = sameDateItems.filter(gi => gi.id !== event.id && gi.position == null);
 
-    // Apply all local state updates atomically
     this.zone.run(() => {
       let entries = this.allEntries();
       let txs = this.allTransactions();
-
       for (const gi of neighborsToSave) {
         const pos = effectivePos.get(gi.id)!;
         if (gi.kind === 'entry') entries = entries.map(e => e.id === gi.id ? { ...e, position: pos } : e);
         else txs = txs.map(t => t.id === gi.id ? { ...t, position: pos } : t);
       }
-
       if (draggedItem.kind === 'entry') entries = entries.map(e => e.id === event.id ? { ...e, position: newPosition } : e);
       else txs = txs.map(t => t.id === event.id ? { ...t, position: newPosition } : t);
-
       this.allEntries.set(entries);
       this.allTransactions.set(txs);
       this.cdr.markForCheck();
     });
 
-    // Persist all positions (neighbors + dragged) together so the reload sees a consistent state
     const neighborSaves = neighborsToSave.map(gi => {
       const pos = effectivePos.get(gi.id)!;
       return gi.kind === 'entry'
@@ -553,9 +554,6 @@ export class MovimentosComponent implements OnInit {
       ? this.entryService.updatePosition(event.id, newPosition)
       : this.transactionService.updatePosition(event.id, newPosition);
 
-    this.toast.info(`Drag: nova posição ${newPosition.toFixed(2)} (acima=${ap?.toFixed(2) ?? 'null'}, abaixo=${bp?.toFixed(2) ?? 'null'})`);
-
-    // Wait for ALL saves before reloading so the DB reflects the full new order
     Promise.all([...neighborSaves, save$])
       .then(() => this.load(true))
       .catch((err: unknown) => {
