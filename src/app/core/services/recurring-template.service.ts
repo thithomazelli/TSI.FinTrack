@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { AuthService } from '../auth/auth.service';
 import { RecurringTemplate } from '../models/interfaces/recurring-template.interface';
 
 const TABLE = 'recurring_templates';
@@ -26,9 +27,12 @@ function mapRow(r: Record<string, unknown>): RecurringTemplate {
 @Injectable({ providedIn: 'root' })
 export class RecurringTemplateService {
   private readonly supabase = inject(SupabaseService);
+  private readonly auth = inject(AuthService);
+
+  private get ownerId(): string { return this.auth.currentUser!.id; }
 
   async getAll(): Promise<RecurringTemplate[]> {
-    return this.supabase.client.from(TABLE).select('*').order('created_at')
+    return this.supabase.client.from(TABLE).select('*').eq('owner_id', this.ownerId).order('created_at')
       .then(({ data, error }) => {
         if (error) throw error;
         const rows = (data as Record<string, unknown>[]).map(mapRow);
@@ -38,7 +42,8 @@ export class RecurringTemplateService {
   }
 
   async create(payload: Omit<RecurringTemplate, 'id' | 'ownerId' | 'createdAt'>): Promise<RecurringTemplate> {
-    const row = {
+    const row: Record<string, unknown> = {
+      owner_id: this.ownerId,
       description: payload.description,
       amount: payload.amount,
       category_id: payload.categoryId,
@@ -49,8 +54,8 @@ export class RecurringTemplateService {
       is_active: payload.isActive,
       frequency: payload.frequency,
       months: payload.months,
-      position: payload.position,
     };
+    if (payload.position != null) row['position'] = payload.position;
     return this.supabase.client.from(TABLE).insert(row).select().single()
       .then(({ data, error }) => {
         if (error) throw error;
@@ -71,7 +76,7 @@ export class RecurringTemplateService {
     if (payload.frequency !== undefined) row['frequency'] = payload.frequency;
     if (payload.months !== undefined) row['months'] = payload.months;
     if (payload.position !== undefined) row['position'] = payload.position;
-    return this.supabase.client.from(TABLE).update(row).eq('id', id).select().single()
+    return this.supabase.client.from(TABLE).update(row).eq('id', id).eq('owner_id', this.ownerId).select().single()
       .then(({ data, error }) => {
         if (error) throw error;
         return mapRow(data as Record<string, unknown>);
@@ -79,12 +84,12 @@ export class RecurringTemplateService {
   }
 
   async updatePosition(id: string, position: number): Promise<void> {
-    return this.supabase.client.from(TABLE).update({ position }).eq('id', id)
+    return this.supabase.client.from(TABLE).update({ position }).eq('id', id).eq('owner_id', this.ownerId)
       .then(({ error }) => { if (error) throw error; });
   }
 
   async delete(id: string): Promise<void> {
-    return this.supabase.client.from(TABLE).delete().eq('id', id)
+    return this.supabase.client.from(TABLE).delete().eq('id', id).eq('owner_id', this.ownerId)
       .then(({ error }) => { if (error) throw error; });
   }
 

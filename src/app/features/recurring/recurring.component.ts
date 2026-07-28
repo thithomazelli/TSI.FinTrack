@@ -254,7 +254,8 @@ export class RecurringComponent implements OnInit {
       .catch((err: unknown) => {
         this.logger.error('Failed to save recurring template', err);
         this.saving.set(false);
-        this.toast.error('Erro ao salvar recorrente.');
+        const msg = (err as { message?: string })?.message ?? String(err);
+        this.toast.error(`Erro ao salvar recorrente: ${msg}`);
       });
   }
 
