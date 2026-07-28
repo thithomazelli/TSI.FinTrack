@@ -541,21 +541,22 @@ export class MovimentosComponent implements OnInit {
       this.cdr.markForCheck();
     });
 
-    // Persist neighbor positions (fire-and-forget)
-    for (const gi of neighborsToSave) {
+    // Persist all positions (neighbors + dragged) together so the reload sees a consistent state
+    const neighborSaves = neighborsToSave.map(gi => {
       const pos = effectivePos.get(gi.id)!;
-      const p = gi.kind === 'entry'
+      return gi.kind === 'entry'
         ? this.entryService.updatePosition(gi.id, pos)
         : this.transactionService.updatePosition(gi.id, pos);
-      p.catch((err: unknown) => this.logger.error('Failed to save neighbor position', err));
-    }
+    });
 
     const save$ = draggedItem.kind === 'entry'
       ? this.entryService.updatePosition(event.id, newPosition)
       : this.transactionService.updatePosition(event.id, newPosition);
 
-    // Persist and reload to guarantee visual consistency (silent = no loading spinner)
-    save$.then(() => this.load(true)).catch((err: unknown) => this.logger.error('Failed to update position', err));
+    // Wait for ALL saves before reloading so the DB reflects the full new order
+    Promise.all([...neighborSaves, save$])
+      .then(() => this.load(true))
+      .catch((err: unknown) => this.logger.error('Failed to update position', err));
   }
 
   selectedCardIsCredit(): boolean {
