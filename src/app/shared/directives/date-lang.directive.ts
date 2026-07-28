@@ -33,6 +33,7 @@ export class DateLangDirective implements OnInit {
     // ── Hidden date input for the native calendar picker ─────────────────────
     const hiddenDate = document.createElement('input');
     hiddenDate.type = 'date';
+    hiddenDate.lang = 'pt-BR';
     hiddenDate.style.cssText =
       'position:absolute;width:1px;height:1px;opacity:.01;pointer-events:none;' +
       'overflow:hidden;border:0;padding:0;margin:0;top:0;left:0;';
