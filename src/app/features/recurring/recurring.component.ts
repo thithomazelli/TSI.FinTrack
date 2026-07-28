@@ -71,10 +71,13 @@ export class RecurringComponent implements OnInit {
   formFrequency: 'monthly' | 'sporadic' = 'monthly';
   formMonths: number[] = [];
 
+  // Row-level selection (checkboxes in main list)
+  readonly rowSelectedIds = signal(new Set<string>());
+
   // Project modal state
   projectYear = new Date().getFullYear();
-  projectFromMonth = new Date().getMonth() + 1;
-  projectToMonth = new Date().getMonth() + 1;
+  readonly projectFromMonth = signal(new Date().getMonth() + 1);
+  readonly projectToMonth   = signal(new Date().getMonth() + 1);
   readonly projectSelectedIds = signal(new Set<string>());
 
   readonly monthNames = MONTH_NAMES;
@@ -339,12 +342,9 @@ export class RecurringComponent implements OnInit {
 
   /** Active templates that apply to at least one month in the selected range. */
   readonly projectableTemplates = computed(() => {
-    const from = this.projectFromMonth;
-    const to   = this.projectToMonth;
-    const monthsInRange = Array.from(
-      { length: Math.max(0, to - from + 1) },
-      (_, i) => from + i
-    );
+    const from = this.projectFromMonth();
+    const to   = this.projectToMonth();
+    const monthsInRange = Array.from({ length: Math.max(0, to - from + 1) }, (_, i) => from + i);
     return this.templates().filter(t =>
       t.isActive && (
         t.frequency === 'monthly' ||
@@ -353,24 +353,56 @@ export class RecurringComponent implements OnInit {
     );
   });
 
-  openProjectModal(): void {
+  readonly allProjectableSelected = computed(() => {
+    const ids = this.projectSelectedIds();
+    const list = this.projectableTemplates();
+    return list.length > 0 && list.every(t => ids.has(t.id));
+  });
+
+  // ── Row checkboxes ───────────────────────────────────────────────────────────
+
+  isRowSelected(id: string): boolean { return this.rowSelectedIds().has(id); }
+
+  toggleRowSelect(id: string): void {
+    this.rowSelectedIds.update(set => {
+      const next = new Set(set);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  // ── Project modal ────────────────────────────────────────────────────────────
+
+  openProjectModal(preselectedIds?: string[]): void {
     const now = new Date();
-    this.projectYear     = now.getFullYear();
-    this.projectFromMonth = now.getMonth() + 1;
-    this.projectToMonth   = now.getMonth() + 1;
-    // Pre-select all projectable templates
-    const ids = new Set(this.projectableTemplates().map(t => t.id));
-    this.projectSelectedIds.set(ids);
+    this.projectYear = now.getFullYear();
+    this.projectFromMonth.set(now.getMonth() + 1);
+    this.projectToMonth.set(now.getMonth() + 1);
+    // Use provided IDs (from row checkboxes or single-row button), else select all
+    if (preselectedIds && preselectedIds.length > 0) {
+      this.projectSelectedIds.set(new Set(preselectedIds));
+    } else {
+      this.projectSelectedIds.set(new Set(this.projectableTemplates().map(t => t.id)));
+    }
     this.showProjectModal.set(true);
+  }
+
+  /** Open modal with only this template pre-selected. */
+  projectSingle(t: RecurringTemplate): void {
+    this.openProjectModal([t.id]);
+  }
+
+  /** Open modal pre-selecting whatever is checked in the main list. */
+  openProjectModalFromSelection(): void {
+    const ids = [...this.rowSelectedIds()];
+    this.openProjectModal(ids.length > 0 ? ids : undefined);
   }
 
   closeProjectModal(): void {
     this.showProjectModal.set(false);
   }
 
-  isProjectSelected(id: string): boolean {
-    return this.projectSelectedIds().has(id);
-  }
+  isProjectSelected(id: string): boolean { return this.projectSelectedIds().has(id); }
 
   toggleProjectTemplate(id: string): void {
     this.projectSelectedIds.update(set => {
@@ -380,31 +412,31 @@ export class RecurringComponent implements OnInit {
     });
   }
 
-  get allProjectableSelected(): boolean {
-    const ids = this.projectSelectedIds();
-    return this.projectableTemplates().length > 0 &&
-           this.projectableTemplates().every(t => ids.has(t.id));
-  }
-
   toggleAllProjectTemplates(): void {
-    if (this.allProjectableSelected) {
+    if (this.allProjectableSelected()) {
       this.projectSelectedIds.set(new Set());
     } else {
       this.projectSelectedIds.set(new Set(this.projectableTemplates().map(t => t.id)));
     }
   }
 
-  onProjectRangeChange(): void {
-    if (this.projectToMonth < this.projectFromMonth) {
-      this.projectToMonth = this.projectFromMonth;
-    }
-    // Re-sync selection to new projectable set
+  setProjectFrom(m: number): void {
+    this.projectFromMonth.set(m);
+    if (this.projectToMonth() < m) this.projectToMonth.set(m);
+    this._syncProjectSelection();
+  }
+
+  setProjectTo(m: number): void {
+    this.projectToMonth.set(m);
+    this._syncProjectSelection();
+  }
+
+  private _syncProjectSelection(): void {
     const projectable = this.projectableTemplates();
     this.projectSelectedIds.update(set => {
       const valid = new Set(projectable.map(t => t.id));
       const next = new Set<string>();
       for (const id of set) if (valid.has(id)) next.add(id);
-      // Auto-add newly projectable templates that weren't excluded before
       for (const id of valid) if (!set.size || set.has(id)) next.add(id);
       return next;
     });
@@ -417,8 +449,10 @@ export class RecurringComponent implements OnInit {
       return;
     }
     this.projecting.set(true);
+    const from = this.projectFromMonth();
+    const to   = this.projectToMonth();
     const months: number[] = [];
-    for (let m = this.projectFromMonth; m <= this.projectToMonth; m++) months.push(m);
+    for (let m = from; m <= to; m++) months.push(m);
 
     let totalCreated = 0;
     months.reduce((p, m) =>
@@ -428,9 +462,9 @@ export class RecurringComponent implements OnInit {
     ).then(() => {
       this.projecting.set(false);
       this.closeProjectModal();
-      const rangeLabel = this.projectFromMonth === this.projectToMonth
-        ? `${this.monthLabel(this.projectFromMonth)}/${this.projectYear}`
-        : `${this.monthLabel(this.projectFromMonth)} a ${this.monthLabel(this.projectToMonth)}/${this.projectYear}`;
+      const rangeLabel = from === to
+        ? `${this.monthLabel(from)}/${this.projectYear}`
+        : `${this.monthLabel(from)} a ${this.monthLabel(to)}/${this.projectYear}`;
       this.toast.success(`${totalCreated} lançamentos projetados para ${rangeLabel}!`);
     }).catch((err: unknown) => {
       this.logger.error('Failed to project period', err);

@@ -120,6 +120,21 @@
   &--danger:hover { color: #ef4444; }
 }
 
+// ── Row checkbox & project button ─────────────────────────────────────────────
+
+.col-check {
+  width: 32px;
+  padding-right: 0;
+}
+
+.row-checkbox {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: var(--color-accent);
+  display: block;
+}
+
 // ── Project modal ─────────────────────────────────────────────────────────────
 
 .modal--project {

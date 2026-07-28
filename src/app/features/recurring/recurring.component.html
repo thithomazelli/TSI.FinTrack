@@ -2,7 +2,13 @@
 <div class="page-header">
   <h2 class="page-title">Recorrentes</h2>
   <div class="header-actions">
-    <button class="btn btn-secondary" (click)="openProjectModal()">▶ Projetar período</button>
+    @if (rowSelectedIds().size > 0) {
+      <button class="btn btn-secondary" (click)="openProjectModalFromSelection()">
+        ▶ Projetar selecionados ({{ rowSelectedIds().size }})
+      </button>
+    } @else {
+      <button class="btn btn-secondary" (click)="openProjectModal()">▶ Projetar período</button>
+    }
     <button class="btn btn-primary" (click)="onInsertRequested({ groupId: '__entries', afterItemId: null })">+ Novo</button>
   </div>
 </div>
@@ -21,6 +27,7 @@
     (insertRequested)="onInsertRequested($event)"
   >
     <ng-template #theadRow>
+      <th class="col-check"></th>
       <th>Descrição</th>
       <th>Frequência</th>
       <th>Dia</th>
@@ -31,6 +38,9 @@
     </ng-template>
 
     <ng-template #row let-t>
+      <td class="col-check" (click)="$event.stopPropagation()">
+        <input type="checkbox" class="row-checkbox" [checked]="isRowSelected(t.id)" (change)="toggleRowSelect(t.id)" />
+      </td>
       <td [class.col-inactive]="!t.isActive" (dblclick)="openEdit(t)">{{ t.description }}</td>
       <td class="col-muted col-freq" (dblclick)="openEdit(t)">{{ frequencyLabel(t) }}</td>
       <td class="col-muted" (dblclick)="openEdit(t)">dia {{ t.dayOfMonth }}</td>
@@ -44,6 +54,7 @@
         </button>
       </td>
       <td class="text-right">
+        <button class="btn-icon" (click)="projectSingle(t)" title="Projetar">▶</button>
         <button class="btn-icon" (click)="openEdit(t)" title="Editar">✏️</button>
         <button class="btn-icon btn-icon--danger" (click)="delete(t)" title="Excluir">🗑️</button>
       </td>
@@ -227,18 +238,18 @@
 
     <!-- Date range -->
     <div class="fields-row" style="margin-top:.25rem">
-      <div class="field" [class.has-value]="projectFromMonth">
-        <select class="field-input" [(ngModel)]="projectFromMonth" (ngModelChange)="onProjectRangeChange()">
+      <div class="field" [class.has-value]="projectFromMonth()">
+        <select class="field-input" [ngModel]="projectFromMonth()" (ngModelChange)="setProjectFrom(+$event)">
           @for (m of allMonths; track m) {
             <option [value]="m">{{ monthLabel(m) }}</option>
           }
         </select>
         <label class="field-label">De</label>
       </div>
-      <div class="field" [class.has-value]="projectToMonth">
-        <select class="field-input" [(ngModel)]="projectToMonth" (ngModelChange)="onProjectRangeChange()">
+      <div class="field" [class.has-value]="projectToMonth()">
+        <select class="field-input" [ngModel]="projectToMonth()" (ngModelChange)="setProjectTo(+$event)">
           @for (m of allMonths; track m) {
-            <option [value]="m" [disabled]="m < projectFromMonth">{{ monthLabel(m) }}</option>
+            <option [value]="m" [disabled]="m < projectFromMonth()">{{ monthLabel(m) }}</option>
           }
         </select>
         <label class="field-label">Até</label>
@@ -256,7 +267,7 @@
           Recorrentes ({{ projectSelectedIds().size }}/{{ projectableTemplates().length }})
         </span>
         <button class="btn-link" (click)="toggleAllProjectTemplates()">
-          {{ allProjectableSelected ? 'Desmarcar todos' : 'Selecionar todos' }}
+          {{ allProjectableSelected() ? 'Desmarcar todos' : 'Selecionar todos' }}
         </button>
       </div>
       <div class="project-templates-list">
