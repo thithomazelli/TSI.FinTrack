@@ -43,8 +43,6 @@ import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.dir
 import { ModalKeyDirective } from '../../shared/directives/modal-key.directive';
 import { DateLangDirective } from '../../shared/directives/date-lang.directive';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
-import { BalanceCardComponent } from '../../shared/components/balance-card/balance-card.component';
-import { SavingsBalanceCardComponent } from '../../shared/components/savings-balance-card/savings-balance-card.component';
 import { GroupedTableComponent, TableGroup, GroupInsertEvent, GroupReorderEvent, GroupSearchFn } from '../../shared/components/grouped-table/grouped-table.component';
 import { ThemeService } from '../../core/services/theme.service';
 
@@ -71,7 +69,7 @@ type ModalMode = 'entry' | 'transaction' | null;
 
 @Component({
     selector: 'tsi-movimentos',
-    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BalanceCardComponent, SavingsBalanceCardComponent, BaseChartDirective, TranslatePipe, GroupedTableComponent, CurrencyMaskDirective, DateLangDirective, ModalKeyDirective],
+    imports: [DecimalPipe, DatePipe, FormsModule, LabelsInputComponent, MonthPickerComponent, BaseChartDirective, TranslatePipe, GroupedTableComponent, CurrencyMaskDirective, DateLangDirective, ModalKeyDirective],
     templateUrl: './movimentos.component.html',
     styleUrls: ['./movimentos.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -619,7 +617,7 @@ export class MovimentosComponent implements OnInit {
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
   bulkNewDate = '';
-  bulkNewStatus: TransactionStatus = 'REALIZED';
+  bulkNewStatus: TransactionStatus = TransactionStatus.Realized;
   readonly bulkSaving = signal(false);
 
   // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
