@@ -1085,7 +1085,7 @@ export class MovimentosComponent implements OnInit {
   }
 
   saveEntry(): void {
-    if (!this.formEntryDescription.trim() || this.formEntryAmount <= 0) {
+    if (!this.formEntryDescription.trim() || this.formEntryAmount === 0) {
       this.saveAttempted = true;
       this.cdr.markForCheck();
       return;
@@ -1133,7 +1133,7 @@ export class MovimentosComponent implements OnInit {
   }
 
   saveTransaction(): void {
-    if (!this.formTxDescription.trim() || this.formTxAmount <= 0) {
+    if (!this.formTxDescription.trim() || this.formTxAmount === 0) {
       this.saveAttempted = true;
       this.cdr.markForCheck();
       return;
