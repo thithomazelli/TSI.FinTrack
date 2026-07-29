@@ -450,6 +450,7 @@ tr:hover td { background: var(--color-surface-2); }
   &:hover { background: rgba(255,255,255,.28); }
   &--date   { border-color: rgba(34,211,238,.5);  background: rgba(6,182,212,.2); }
   &--delete { border-color: rgba(255,100,100,.5); background: rgba(239,68,68,.25); }
+  &--category { border-color: rgba(251,146,60,.5); background: rgba(249,115,22,.2); }
   &--status { border-color: rgba(139,92,246,.5); background: rgba(139,92,246,.2); }
   &--clear { border: none; background: transparent; opacity: .7; font-size: 1rem; padding: .2rem .5rem; }
 }

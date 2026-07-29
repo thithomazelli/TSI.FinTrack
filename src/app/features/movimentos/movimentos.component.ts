@@ -612,12 +612,13 @@ export class MovimentosComponent implements OnInit {
   readonly deletingItem = signal<MovimentoItem | null>(null);
 
   // Bulk actions
-  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | 'date' | null>(null);
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | 'date' | 'category' | null>(null);
   bulkNewAmount = 0;
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
   bulkNewDate = '';
   bulkNewStatus: TransactionStatus = TransactionStatus.Realized;
+  bulkNewCategoryId = '';
   readonly bulkSaving = signal(false);
 
   // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
@@ -1308,7 +1309,7 @@ export class MovimentosComponent implements OnInit {
     this.bulkActionOpen.set(null);
   }
 
-  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status' | 'date'): void {
+  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status' | 'date' | 'category'): void {
     this.bulkNewAmount = 0;
     this.bulkTargetYear = new Date().getFullYear();
     this.bulkTargetMonth = new Date().getMonth() + 1;
@@ -1381,6 +1382,31 @@ export class MovimentosComponent implements OnInit {
       this.load();
     } catch (err) {
       this.logger.error('Bulk date change failed', err);
+      this.toast.error(this.tr('movimentos.toast.txUpdateError'));
+    } finally {
+      this.bulkSaving.set(false);
+    }
+  }
+
+  // ── Bulk change category ──────────────────────────────────────────────────
+  async bulkChangeCategory(): Promise<void> {
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const categoryId = this.bulkNewCategoryId || null;
+    this.bulkSaving.set(true);
+    try {
+      for (const item of items) {
+        if (item.kind === 'entry') {
+          await this.entryService.update(item.id, { category_id: categoryId } as any);
+        } else {
+          await this.transactionService.update(item.id, { category_id: categoryId } as any);
+        }
+      }
+      this.clearSelection();
+      this.toast.success(`${items.length} registro(s) com categoria alterada`);
+      this.load();
+    } catch (err) {
+      this.logger.error('Bulk category change failed', err);
       this.toast.error(this.tr('movimentos.toast.txUpdateError'));
     } finally {
       this.bulkSaving.set(false);

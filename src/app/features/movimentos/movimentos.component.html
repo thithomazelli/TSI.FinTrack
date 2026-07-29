@@ -236,6 +236,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
             {{ 'movimentos.bulk.editAmount' | translate }}
           </button>
+          <button class="bulk-btn bulk-btn--category" (click)="openBulkAction('category')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Alterar categoria
+          </button>
           <button class="bulk-btn bulk-btn--status" (click)="openBulkAction('status')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
             {{ 'movimentos.bulk.toggleStatus' | translate }}
@@ -531,6 +535,33 @@
       <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-danger" (click)="bulkDelete()" [disabled]="bulkSaving()">
         {{ bulkSaving() ? ('common.saving' | translate) : ('common.delete' | translate) }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Bulk change category modal -->
+@if (bulkActionOpen() === 'category') {
+  <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
+  <div class="modal modal--sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Alterar categoria</h3>
+      <button class="modal-close" (click)="bulkActionOpen.set(null)">✕</button>
+    </div>
+    <p class="modal-text">Defina a nova categoria para os {{ selectionCount() }} registro(s) selecionados:</p>
+    <div class="field" [class.has-value]="bulkNewCategoryId">
+      <select class="field-input" [(ngModel)]="bulkNewCategoryId">
+        <option value="">— Sem categoria —</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+      <label class="field-label">{{ 'common.category' | translate }}</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="bulkChangeCategory()" [disabled]="bulkSaving()">
+        {{ bulkSaving() ? ('common.saving' | translate) : 'Alterar categoria' }}
       </button>
     </div>
   </div>
