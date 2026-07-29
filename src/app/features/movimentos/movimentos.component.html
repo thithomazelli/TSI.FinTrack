@@ -752,7 +752,7 @@
     </div>
 
     <div class="fields-row">
-      <div class="field" [class.field--invalid]="fi('eAmt', formEntryAmount > 0)" [class.field--valid]="fv('eAmt', formEntryAmount > 0)">
+      <div class="field" [class.field--invalid]="fi('eAmt', formEntryAmount !== 0)" [class.field--valid]="fv('eAmt', formEntryAmount !== 0)">
         <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formEntryAmount" (blur)="markTouched('eAmt')" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
@@ -826,7 +826,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-ghost" (click)="closeModal()">{{ 'common.cancel' | translate }}</button>
-      <button class="btn btn-primary" (click)="saveEntry()" [disabled]="saving() || !formEntryDescription.trim() || formEntryAmount <= 0">
+      <button class="btn btn-primary" (click)="saveEntry()" [disabled]="saving() || !formEntryDescription.trim() || formEntryAmount === 0">
         {{ 'common.save' | translate }}
       </button>
     </div>
@@ -901,7 +901,7 @@
         <input class="field-input" placeholder=" " [(ngModel)]="formTxDescription" (blur)="markTouched('tDesc')" />
         <label class="field-label">{{ 'common.description' | translate }}</label>
       </div>
-      <div class="field field--sm" [class.field--invalid]="fi('tAmt', formTxAmount > 0)" [class.field--valid]="fv('tAmt', formTxAmount > 0)">
+      <div class="field field--sm" [class.field--invalid]="fi('tAmt', formTxAmount !== 0)" [class.field--valid]="fv('tAmt', formTxAmount !== 0)">
         <input class="field-input" type="text" inputmode="numeric" tsiCurrencyMask placeholder=" " [(ngModel)]="formTxAmount" (blur)="markTouched('tAmt')" />
         <label class="field-label">{{ 'common.amount' | translate }}</label>
       </div>
@@ -1029,7 +1029,7 @@
 
     <div class="modal-actions">
       <button class="btn btn-ghost" (click)="closeModal()">{{ 'common.cancel' | translate }}</button>
-      <button class="btn btn-primary" (click)="saveTransaction()" [disabled]="saving() || !formTxDescription.trim() || formTxAmount <= 0">
+      <button class="btn btn-primary" (click)="saveTransaction()" [disabled]="saving() || !formTxDescription.trim() || formTxAmount === 0">
         {{ 'common.save' | translate }}
       </button>
     </div>
