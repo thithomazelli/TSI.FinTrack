@@ -13,11 +13,31 @@ export class CurrencyMaskDirective implements ControlValueAccessor {
 
   @HostListener('input', ['$event'])
   onInput(event: Event): void {
-    const raw = (event.target as HTMLInputElement).value ?? '';
+    const raw    = (event.target as HTMLInputElement).value ?? '';
+    const negative = raw.trimStart().startsWith('-');
     const digits = raw.replace(/\D/g, '');
-    const num = parseInt(digits || '0', 10) / 100;
+    const num    = (parseInt(digits || '0', 10) / 100) * (negative ? -1 : 1);
     this.el.nativeElement.value = this.fmt(num);
     this.onChange(num);
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    // Allow "-" only at position 0 when the field is empty or all selected
+    if (event.key === '-') {
+      const input = this.el.nativeElement;
+      const val   = input.value;
+      const alreadyNegative = val.trimStart().startsWith('-');
+      // Toggle sign: if already negative remove it, otherwise allow insertion at start
+      if (alreadyNegative) {
+        event.preventDefault();
+        const digits = val.replace(/\D/g, '');
+        const num    = parseInt(digits || '0', 10) / 100;
+        input.value  = this.fmt(num);
+        this.onChange(num);
+      }
+      // else: let the browser insert '-' and onInput will handle it
+    }
   }
 
   @HostListener('focus')
