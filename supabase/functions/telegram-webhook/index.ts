@@ -66,6 +66,7 @@ type SessionStep =
   | 'awaiting_account'
   | 'awaiting_card'
   | 'awaiting_source_account'
+  | 'awaiting_installments'
   | 'awaiting_people'
   | 'awaiting_confirm';
 
@@ -84,6 +85,7 @@ interface SessionData {
   creditCardName?: string;
   sourceAccountId?: string | null;
   sourceAccountName?: string;
+  totalInstallments?: number | null;
   people?: string[];
 }
 
@@ -279,6 +281,27 @@ async function askSourceAccount(chatId: number, userId: string, data: SessionDat
   );
 }
 
+async function askInstallments(chatId: number, data: SessionData) {
+  await setSession(chatId, 'awaiting_installments', data);
+  const cardLabel = data.creditCardName ? `✅ 💳 ${data.creditCardName}` : '✅ 💳 Cartão';
+  const sourceLabel = data.sourceAccountName ? `\n✅ 🏦 ${data.sourceAccountName}` : '';
+  await send(chatId,
+    `${cardLabel}${sourceLabel}\n\n🔢 Quantas <b>parcelas</b>?`,
+    {
+      reply_markup: {
+        keyboard: [
+          [{ text: '1' }, { text: '2' }, { text: '3' }, { text: '4' }],
+          [{ text: '5' }, { text: '6' }, { text: '7' }, { text: '8' }],
+          [{ text: '9' }, { text: '10' }, { text: '11' }, { text: '12' }],
+          [{ text: '🔢 Outro (digitar)' }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    }
+  );
+}
+
 async function buildPeopleKeyboard(userId: string, selected: string[]): Promise<{ text: string }[][]> {
   const { data: people } = await supabase
     .from('people')
@@ -320,8 +343,11 @@ async function askConfirm(chatId: number, data: SessionData) {
 
   const peopleLabel = data.people?.length ? data.people.join(', ') : '—';
   const catLabel    = data.categoryName ?? '—';
+  const installLabel = data.totalInstallments && data.totalInstallments > 1
+    ? ` (${data.totalInstallments}x)`
+    : '';
   const paymentLines = data.paymentType === 'credit'
-    ? `💳 ${data.creditCardName ?? 'Cartão'}\n🏦 Fonte: ${data.sourceAccountName ?? '—'}`
+    ? `💳 ${data.creditCardName ?? 'Cartão'}${installLabel}\n🏦 Fonte: ${data.sourceAccountName ?? '—'}`
     : `🏦 ${data.accountName ?? '—'}`;
 
   await send(chatId,
@@ -354,15 +380,16 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
   const { error } = await supabase
     .from('transactions')
     .insert({
-      owner_id:       userId,
-      description:    data.description,
-      amount:         data.amount,
-      date:           data.date ?? todayStr(),
-      category_id:    data.categoryId ?? null,
-      credit_card_id: data.creditCardId ?? null,
-      account_id:     accountIdToSave,
+      owner_id:         userId,
+      description:      data.description,
+      amount:           data.amount,
+      date:             data.date ?? todayStr(),
+      category_id:      data.categoryId ?? null,
+      credit_card_id:   data.creditCardId ?? null,
+      account_id:       accountIdToSave,
       status,
-      labels:         data.people ?? [],
+      labels:           data.people ?? [],
+      total_installments: data.totalInstallments ?? null,
     });
 
   if (error) {
@@ -372,8 +399,10 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
 
   const statusLabel = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
   const peopleLabel = data.people?.length ? `\n👥 ${data.people.join(', ')}` : '';
+  const instSuffix = data.totalInstallments && data.totalInstallments > 1
+    ? ` (${data.totalInstallments}x)` : '';
   const paymentLabel = data.paymentType === 'credit'
-    ? `\n💳 ${data.creditCardName ?? 'Cartão'}` +
+    ? `\n💳 ${data.creditCardName ?? 'Cartão'}${instSuffix}` +
       (data.sourceAccountName ? `\n🏦 Fonte: ${data.sourceAccountName}` : '')
     : data.accountName ? `\n🏦 ${data.accountName}` : '';
   await send(chatId,
@@ -502,7 +531,23 @@ async function handleSessionMessage(
         );
         if (matched) { sourceAccountId = matched.id; sourceAccountName = matched.name; }
       }
-      await askPeople(chatId, userId, { ...data, sourceAccountId, sourceAccountName });
+      await askInstallments(chatId, { ...data, sourceAccountId, sourceAccountName });
+      break;
+    }
+
+    case 'awaiting_installments': {
+      let totalInstallments: number | null = null;
+      if (text === '🔢 Outro (digitar)') {
+        await send(chatId, '🔢 Digite o número de parcelas:', removeKeyboard());
+        return;
+      }
+      const parsed = parseInt(text.trim(), 10);
+      if (isNaN(parsed) || parsed < 1) {
+        await send(chatId, '❌ Número inválido. Digite um número maior que zero.');
+        return;
+      }
+      totalInstallments = parsed;
+      await askPeople(chatId, userId, { ...data, totalInstallments });
       break;
     }
 
