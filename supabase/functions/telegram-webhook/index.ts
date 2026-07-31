@@ -340,23 +340,19 @@ async function askPeople(chatId: number, userId: string, data: SessionData) {
 async function askConfirm(chatId: number, data: SessionData) {
   await setSession(chatId, 'awaiting_confirm', data);
 
-  const peopleLabel = data.people?.length ? data.people.join(', ') : '—';
-  const catLabel    = data.categoryName ?? '—';
-  const installLabel = data.totalInstallments && data.totalInstallments > 1
-    ? ` (${data.totalInstallments}x)`
-    : '';
+  const instLabel = data.totalInstallments ? `${data.totalInstallments}x` : '1x';
   const paymentLines = data.paymentType === 'credit'
-    ? `💳 ${data.creditCardName ?? 'Cartão'}${installLabel}\n🏦 Fonte: ${data.sourceAccountName ?? '—'}`
+    ? `💳 ${data.creditCardName ?? 'Cartão'} · ${instLabel}\n🏦 ${data.sourceAccountName ?? '—'}`
     : `🏦 ${data.accountName ?? '—'}`;
 
   await send(chatId,
     `📋 <b>Confirmar lançamento?</b>\n\n` +
     `📌 <b>${data.description}</b>\n` +
+    `${paymentLines}\n` +
     `💰 ${fmt(data.amount!)}\n` +
     `📅 ${formatDateBR(data.date!)}\n` +
-    `📁 ${catLabel}\n` +
-    `${paymentLines}\n` +
-    `👥 ${peopleLabel}`,
+    `📁 ${data.categoryName ?? '—'}\n` +
+    `👥 ${data.people?.length ? data.people.join(', ') : '—'}`,
     {
       reply_markup: {
         inline_keyboard: [[
@@ -397,20 +393,19 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
   }
 
   const statusLabel = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
-  const peopleLabel = data.people?.length ? `\n👥 ${data.people.join(', ')}` : '';
-  const instSuffix = data.totalInstallments && data.totalInstallments > 1
-    ? ` (${data.totalInstallments}x)` : '';
+  const instLabel = data.totalInstallments ? `${data.totalInstallments}x` : '1x';
   const paymentLabel = data.paymentType === 'credit'
-    ? `\n💳 ${data.creditCardName ?? 'Cartão'}${instSuffix}` +
-      (data.sourceAccountName ? `\n🏦 Fonte: ${data.sourceAccountName}` : '')
-    : data.accountName ? `\n🏦 ${data.accountName}` : '';
+    ? `💳 ${data.creditCardName ?? 'Cartão'} · ${instLabel}\n🏦 ${data.sourceAccountName ?? '—'}`
+    : `🏦 ${data.accountName ?? '—'}`;
+  const peopleLabel = data.people?.length ? `\n👥 ${data.people.join(', ')}` : '';
   await send(chatId,
     `🎉 <b>Lançamento salvo!</b>\n\n` +
     `📌 ${data.description}\n` +
+    `${paymentLabel}\n` +
     `💰 ${fmt(data.amount!)}\n` +
     `📅 ${formatDateBR(data.date ?? todayStr())}\n` +
     `📁 ${data.categoryName ?? 'Sem categoria'}` +
-    `${paymentLabel}${peopleLabel}\n` +
+    `${peopleLabel}\n` +
     `📊 ${statusLabel}`,
     removeKeyboard()
   );
