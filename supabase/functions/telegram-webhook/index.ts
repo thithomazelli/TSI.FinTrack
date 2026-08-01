@@ -69,6 +69,7 @@ type SessionStep =
   | 'awaiting_source_account'
   | 'awaiting_installments'
   | 'awaiting_people'
+  | 'awaiting_status'
   | 'awaiting_confirm';
 
 interface SessionData {
@@ -89,6 +90,7 @@ interface SessionData {
   sourceAccountName?: string;
   totalInstallments?: number | null;
   people?: string[];
+  status?: string;
 }
 
 async function getSession(chatId: number): Promise<{ step: SessionStep; data: SessionData } | null> {
@@ -365,27 +367,49 @@ async function askPeople(chatId: number, userId: string, data: SessionData) {
   );
 }
 
+async function askStatus(chatId: number, data: SessionData) {
+  await setSession(chatId, 'awaiting_status', data);
+  await send(chatId,
+    `✅ 👥 ${data.people?.length ? data.people.join(', ') : 'Sem pessoas'}\n\n📊 Qual o <b>status</b> do lançamento?`,
+    {
+      reply_markup: {
+        keyboard: [
+          [{ text: '✅ Realizado' }, { text: '📋 Projetado' }, { text: '🗓️ Agendado' }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    }
+  );
+}
+
 async function askConfirm(chatId: number, data: SessionData) {
   await setSession(chatId, 'awaiting_confirm', data);
 
-  const instLabel = data.totalInstallments ? `${data.totalInstallments}x` : '1x';
+  const instLabel = (data.totalInstallments ?? 1) > 1 ? `${data.totalInstallments}x` : '1x';
   const paymentLines = data.paymentType === 'credit'
     ? `💳 ${data.creditCardName ?? 'Cartão'} · ${instLabel}\n🏦 ${data.sourceAccountName ?? '—'}`
     : `🏦 ${data.accountName ?? '—'}`;
+  const isInstallment = (data.totalInstallments ?? 1) > 1 && data.paymentType === 'credit';
+  const dateLines = isInstallment
+    ? `🛒 ${formatDateBR(data.date!)}\n📅 1ª parcela: ${formatDateBR(data.firstInstallmentDate ?? data.date!)}`
+    : `📅 ${formatDateBR(data.date!)}`;
+  const statusLabels: Record<string, string> = { REALIZED: '✅ Realizado', PROJECTED: '📋 Projetado', SCHEDULED: '🗓️ Agendado' };
+  const statusLine = statusLabels[data.status ?? ''] ?? data.status ?? '—';
 
   await send(chatId,
     `📋 <b>Confirmar lançamento?</b>\n\n` +
     `📌 <b>${data.description}</b>\n` +
     `${paymentLines}\n` +
     `💰 ${fmt(data.amount!)}\n` +
-    `📅 ${formatDateBR(data.date!)}\n` +
+    `${dateLines}\n` +
     `📁 ${data.categoryName ?? '—'}\n` +
-    `👥 ${data.people?.length ? data.people.join(', ') : '—'}`,
+    `👥 ${data.people?.length ? data.people.join(', ') : '—'}\n` +
+    `📊 ${statusLine}`,
     {
       reply_markup: {
         inline_keyboard: [[
-          { text: '✅ Realizado', callback_data: 'flow_status:REALIZED' },
-          { text: '📋 Projetado', callback_data: 'flow_status:PROJECTED' },
+          { text: '✅ Confirmar', callback_data: 'flow_confirm' },
           { text: '❌ Cancelar',  callback_data: 'flow_cancel' },
         ]],
       },
@@ -457,7 +481,8 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
     return;
   }
 
-  const statusLabel = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
+  const statusLabels: Record<string, string> = { REALIZED: 'Realizado ✅', PROJECTED: 'Projetado 📋', SCHEDULED: 'Agendado 🗓️' };
+  const statusLabel = statusLabels[status] ?? status;
   const instLabel = total > 1 ? `${total}x` : '1x';
   const paymentLabel = data.paymentType === 'credit'
     ? `💳 ${data.creditCardName ?? 'Cartão'} · ${instLabel}\n🏦 ${data.sourceAccountName ?? '—'}`
@@ -644,7 +669,7 @@ async function handleSessionMessage(
 
     case 'awaiting_people': {
       if (text === '➡️ Pular' || text === '✅ Confirmar pessoas') {
-        await askConfirm(chatId, data);
+        await askStatus(chatId, data);
         return;
       }
       // Strip leading checkmark if user tapped a selected name button (e.g. "✅ João")
@@ -667,6 +692,21 @@ async function handleSessionMessage(
       await send(chatId, `${msg}${selectedLabel}`,
         { reply_markup: { keyboard: rows, resize_keyboard: true, one_time_keyboard: false } }
       );
+      break;
+    }
+
+    case 'awaiting_status': {
+      const statusMap: Record<string, string> = {
+        '✅ Realizado': 'REALIZED',
+        '📋 Projetado': 'PROJECTED',
+        '🗓️ Agendado':  'SCHEDULED',
+      };
+      const status = statusMap[text];
+      if (!status) {
+        await send(chatId, '❌ Escolha uma das opções: <b>✅ Realizado</b>, <b>📋 Projetado</b> ou <b>🗓️ Agendado</b>.');
+        return;
+      }
+      await askConfirm(chatId, { ...data, status });
       break;
     }
 
@@ -837,8 +877,7 @@ async function handleCallback(cq: { id: string; data: string; message: { chat: {
     return;
   }
 
-  if (cbData.startsWith('flow_status:')) {
-    const status = cbData.split(':')[1];
+  if (cbData === 'flow_confirm' || cbData.startsWith('flow_status:')) {
     const userId = await getUserIdFromChat(chatId);
     if (!userId) { await answerCallback(cq.id, 'Conta não vinculada'); return; }
     const session = await getSession(chatId);
@@ -847,6 +886,10 @@ async function handleCallback(cq: { id: string; data: string; message: { chat: {
       await send(chatId, '⚠️ Sessão expirada. Use /add para começar novamente.');
       return;
     }
+    // Legacy flow_status: kept for backward compat; new flow uses data.status
+    const status = cbData.startsWith('flow_status:')
+      ? cbData.split(':')[1]
+      : (session.data.status ?? 'PROJECTED');
     await answerCallback(cq.id);
     await finishFlow(chatId, userId, session.data, status);
     return;
