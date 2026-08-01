@@ -15,7 +15,7 @@
   z-index: 200;
   transition: transform var(--transition), background var(--transition);
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
     transform: translateX(-100%);
     box-shadow: var(--shadow-lg);
 

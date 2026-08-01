@@ -21,7 +21,7 @@
   background: color-mix(in srgb, var(--color-surface) 92%, transparent);
   transition: background var(--transition), border-color var(--transition), left var(--transition);
 
-  @media (max-width: 768px) {
+  @media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
     left: 0;
     padding: 0 1rem;
   }
@@ -49,14 +49,14 @@
 
   &:hover { background: var(--color-surface-2); color: var(--color-text); }
 
-  @media (max-width: 768px) { display: flex; }
+  @media (max-width: 768px), (max-height: 500px) and (orientation: landscape) { display: flex; }
 }
 
 .breadcrumb {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text);
-  @media (max-width: 768px) { display: none; }
+  @media (max-width: 768px), (max-height: 500px) and (orientation: landscape) { display: none; }
 }
 
 .header-right {
