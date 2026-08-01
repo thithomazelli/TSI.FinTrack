@@ -61,6 +61,7 @@ type SessionStep =
   | 'awaiting_description'
   | 'awaiting_amount'
   | 'awaiting_date'
+  | 'awaiting_first_installment_date'
   | 'awaiting_category'
   | 'awaiting_payment_type'
   | 'awaiting_account'
@@ -73,14 +74,15 @@ type SessionStep =
 interface SessionData {
   description?: string;
   amount?: number;
+  /** Data da compra (purchase_date no DB) */
   date?: string;
+  /** Data da primeira parcela/fatura (date no DB) — só crédito parcelado */
+  firstInstallmentDate?: string;
   categoryId?: string | null;
   categoryName?: string;
   paymentType?: 'debit' | 'credit';
-  // débito: conta debitada (= fonte pagadora)
   accountId?: string | null;
   accountName?: string;
-  // crédito: cartão + conta que paga a fatura
   creditCardId?: string | null;
   creditCardName?: string;
   sourceAccountId?: string | null;
@@ -280,6 +282,32 @@ async function askDate(chatId: number, data: SessionData) {
   );
 }
 
+async function askFirstInstallmentDate(chatId: number, data: SessionData) {
+  await setSession(chatId, 'awaiting_first_installment_date', data);
+  const now  = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  const nextDate  = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const nextMonth = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-01`;
+  const fmtMonth  = (iso: string) => {
+    const [y, m] = iso.split('-');
+    const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    return `${MONTHS[parseInt(m) - 1]}/${y}`;
+  };
+  await send(chatId,
+    `✅ Data da compra: <b>${formatDateBR(data.date!)}</b>\n\n📅 Em qual mês cai a <b>1ª parcela</b>?`,
+    {
+      reply_markup: {
+        keyboard: [
+          [{ text: `Este mês (${fmtMonth(thisMonth)})` }, { text: `Próximo mês (${fmtMonth(nextMonth)})` }],
+          [{ text: 'Outra (MM/AAAA)' }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    }
+  );
+}
+
 async function askCategory(chatId: number, userId: string, data: SessionData) {
   await setSession(chatId, 'awaiting_category', data);
   const { data: cats } = await supabase
@@ -372,20 +400,57 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
     ? (data.sourceAccountId ?? null)
     : (data.accountId ?? null);
 
-  const { error } = await supabase
-    .from('transactions')
-    .insert({
-      owner_id:         userId,
-      description:      data.description,
-      amount:           data.amount,
-      date:             data.date ?? todayStr(),
-      category_id:      data.categoryId ?? null,
-      credit_card_id:   data.creditCardId ?? null,
-      account_id:       accountIdToSave,
-      status,
-      labels:           data.people ?? [],
-      total_installments: data.totalInstallments ?? null,
+  const total = data.totalInstallments ?? 1;
+  const isInstallment = total > 1 && data.paymentType === 'credit';
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  let error: { message?: string } | null = null;
+
+  if (isInstallment) {
+    const groupId = crypto.randomUUID();
+    const installmentAmount = Math.round((data.amount! / total) * 100) / 100;
+    const baseDate = new Date((data.firstInstallmentDate ?? data.date ?? todayStr()) + 'T00:00:00');
+    const purchaseDate = data.date ?? null;
+
+    const rows = Array.from({ length: total }, (_, i) => {
+      const d = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+      const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      d.setDate(Math.min(baseDate.getDate(), lastDay));
+      const num = i + 1;
+      return {
+        owner_id:              userId,
+        description:           `${data.description} - ${pad(num)}/${pad(total)}`,
+        amount:                installmentAmount,
+        date:                  d.toISOString().split('T')[0],
+        purchase_date:         purchaseDate,
+        category_id:           data.categoryId ?? null,
+        credit_card_id:        data.creditCardId ?? null,
+        account_id:            accountIdToSave,
+        status,
+        labels:                data.people ?? [],
+        total_installments:    total,
+        installment_number:    num,
+        installment_group_id:  groupId,
+      };
     });
+
+    const result = await supabase.from('transactions').insert(rows);
+    error = result.error;
+  } else {
+    const result = await supabase.from('transactions').insert({
+      owner_id:           userId,
+      description:        data.description,
+      amount:             data.amount,
+      date:               data.date ?? todayStr(),
+      category_id:        data.categoryId ?? null,
+      credit_card_id:     data.creditCardId ?? null,
+      account_id:         accountIdToSave,
+      status,
+      labels:             data.people ?? [],
+      total_installments: total === 1 ? 1 : null,
+    });
+    error = result.error;
+  }
 
   if (error) {
     await send(chatId, '❌ Erro ao salvar lançamento. Tente novamente.', removeKeyboard());
@@ -393,17 +458,20 @@ async function finishFlow(chatId: number, userId: string, data: SessionData, sta
   }
 
   const statusLabel = status === 'REALIZED' ? 'Realizado ✅' : 'Projetado 📋';
-  const instLabel = data.totalInstallments ? `${data.totalInstallments}x` : '1x';
+  const instLabel = total > 1 ? `${total}x` : '1x';
   const paymentLabel = data.paymentType === 'credit'
     ? `💳 ${data.creditCardName ?? 'Cartão'} · ${instLabel}\n🏦 ${data.sourceAccountName ?? '—'}`
     : `🏦 ${data.accountName ?? '—'}`;
+  const dateLabel = isInstallment
+    ? `🛒 Compra: ${formatDateBR(data.date ?? todayStr())}\n📅 1ª parcela: ${formatDateBR(data.firstInstallmentDate ?? todayStr())}`
+    : `📅 ${formatDateBR(data.date ?? todayStr())}`;
   const peopleLabel = data.people?.length ? `\n👥 ${data.people.join(', ')}` : '';
   await send(chatId,
     `🎉 <b>Lançamento salvo!</b>\n\n` +
     `📌 ${data.description}\n` +
     `${paymentLabel}\n` +
     `💰 ${fmt(data.amount!)}\n` +
-    `📅 ${formatDateBR(data.date ?? todayStr())}\n` +
+    `${dateLabel}\n` +
     `📁 ${data.categoryName ?? 'Sem categoria'}` +
     `${peopleLabel}\n` +
     `📊 ${statusLabel}`,
@@ -525,7 +593,38 @@ async function handleSessionMessage(
         await send(chatId, '❌ Data inválida. Use <code>DD/MM</code> ou <code>DD/MM/AAAA</code>.');
         return;
       }
-      await askCategory(chatId, userId, { ...data, date });
+      const newData = { ...data, date };
+      if (newData.paymentType === 'credit' && (newData.totalInstallments ?? 1) > 1) {
+        await askFirstInstallmentDate(chatId, newData);
+      } else {
+        await askCategory(chatId, userId, newData);
+      }
+      break;
+    }
+
+    case 'awaiting_first_installment_date': {
+      if (text === 'Outra (MM/AAAA)') {
+        await send(chatId, '📅 Digite o mês no formato <code>MM/AAAA</code>:', removeKeyboard());
+        return;
+      }
+      let firstInstallmentDate: string | null = null;
+      // "Este mês (Ago/2026)" or "Próximo mês (Set/2026)" — extract the ISO date from option or parse typed input
+      const nowRef = new Date();
+      if (text.startsWith('Este mês')) {
+        firstInstallmentDate = `${nowRef.getFullYear()}-${String(nowRef.getMonth() + 1).padStart(2, '0')}-01`;
+      } else if (text.startsWith('Próximo mês')) {
+        const next = new Date(nowRef.getFullYear(), nowRef.getMonth() + 1, 1);
+        firstInstallmentDate = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`;
+      } else {
+        // Parse MM/AAAA
+        const m = text.trim().match(/^(\d{1,2})\/(\d{4})$/);
+        if (!m) {
+          await send(chatId, '❌ Formato inválido. Use <code>MM/AAAA</code> (ex: <code>09/2026</code>).');
+          return;
+        }
+        firstInstallmentDate = `${m[2]}-${String(m[1]).padStart(2, '0')}-01`;
+      }
+      await askCategory(chatId, userId, { ...data, firstInstallmentDate });
       break;
     }
 
