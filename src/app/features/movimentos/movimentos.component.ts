@@ -1118,7 +1118,15 @@ export class MovimentosComponent implements OnInit {
         this.saving.set(false);
         this.closeModal();
         if (id) {
-          this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
+          const from = this.dateFrom();
+          const to   = this.dateTo();
+          const inPeriod = saved.date >= (from ?? '') && saved.date <= (to ?? '');
+          if (inPeriod) {
+            this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
+          } else {
+            // Date moved outside current period — remove from view
+            this.allEntries.update(list => list.filter(e => e.id !== id));
+          }
           this.cdr.markForCheck();
         } else {
           this.load(true);
@@ -1167,7 +1175,15 @@ export class MovimentosComponent implements OnInit {
         this.toast.success(this.tr('movimentos.toast.txUpdated'));
         this.saving.set(false);
         this.closeModal();
-        this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
+        const from = this.dateFrom();
+        const to   = this.dateTo();
+        const dateToCheck = saved.purchaseDate ?? saved.date;
+        const inPeriod = dateToCheck >= (from ?? '') && dateToCheck <= (to ?? '');
+        if (inPeriod) {
+          this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
+        } else {
+          this.allTransactions.update(list => list.filter(t => t.id !== id));
+        }
         this.balanceService.invalidate();
       }).catch((err: unknown) => {
         this.logger.error('Failed to update transaction', err);
