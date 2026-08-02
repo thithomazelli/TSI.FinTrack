@@ -249,7 +249,7 @@ export class DateLangDirective implements OnInit {
 
     // Close on outside click
     document.addEventListener('click', (e: MouseEvent) => {
-      if (popup && !popup.contains(e.target as Node) && e.target !== btn) {
+      if (popup && !popup.contains(e.target as Node) && !btn.contains(e.target as Node)) {
         closePopup();
       }
     });
