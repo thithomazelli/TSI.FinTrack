@@ -1177,7 +1177,8 @@ export class MovimentosComponent implements OnInit {
         this.closeModal();
         const from = this.dateFrom();
         const to   = this.dateTo();
-        const dateToCheck = saved.purchaseDate ?? saved.date;
+        // Credit card transactions are grouped by invoice date (date), not purchase date
+        const dateToCheck = saved.date;
         const inPeriod = dateToCheck >= (from ?? '') && dateToCheck <= (to ?? '');
         if (inPeriod) {
           this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
