@@ -147,7 +147,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   signOut(): void {
     this.closeUserMenu();
-    this.authService.signOut();
+    this.authService.signOut().then(() => {
+      this.router.navigate(['/auth/login']);
+    });
   }
 
   readonly Language = Language;
