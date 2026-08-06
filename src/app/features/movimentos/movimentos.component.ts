@@ -158,7 +158,7 @@ export class MovimentosComponent implements OnInit {
   formEntryLabels: string[] = [];
   formEntryIsInstallment = false;
   formEntryInstallments = 2;
-  formEntryAmountType: 'total' | 'installment' = 'total';
+  formEntryAmountType: 'total' | 'installment' = 'installment';
 
   // Transaction form fields
   formTxDescription = '';
@@ -936,7 +936,7 @@ export class MovimentosComponent implements OnInit {
     this.formEntryLabels = [];
     this.formEntryIsInstallment = false;
     this.formEntryInstallments = 2;
-    this.formEntryAmountType = 'total';
+    this.formEntryAmountType = 'installment';
     this.modalMode.set('entry');
   }
 
