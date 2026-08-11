@@ -183,6 +183,58 @@ export class TransactionService {
       });
   }
 
+  async updateByGroup(
+    groupId: string,
+    currentId: string,
+    payload: Partial<CreateTransactionPayload>,
+    currentInstallmentNumber: number | null,
+    currentTotalInstallments: number | null,
+  ): Promise<Transaction[]> {
+    this.logger.info('Updating all installments in group', groupId);
+    // Fields that are safe to propagate to all installments (exclude date — each has its own)
+    const sharedRow: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (payload.description !== undefined && currentInstallmentNumber && currentTotalInstallments) {
+      // Strip existing suffix and re-apply per installment below
+    }
+    if (payload.categoryId !== undefined) sharedRow['category_id'] = payload.categoryId;
+    if (payload.accountId !== undefined) sharedRow['account_id'] = payload.accountId;
+    if (payload.creditCardId !== undefined) sharedRow['credit_card_id'] = payload.creditCardId;
+    if (payload.status !== undefined) sharedRow['status'] = payload.status;
+    if (payload.labels !== undefined) sharedRow['labels'] = payload.labels;
+    if (payload.originalCurrency !== undefined) sharedRow['original_currency'] = payload.originalCurrency;
+    if (payload.originalAmount !== undefined) sharedRow['original_amount'] = payload.originalAmount;
+    if (payload.exchangeRate !== undefined) sharedRow['exchange_rate'] = payload.exchangeRate;
+
+    // Fetch all siblings first so we can recompute description suffixes
+    const siblings = await this.getByInstallmentGroup(groupId);
+    const total = siblings.length;
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const updates = siblings.map(sib => {
+      const row: Record<string, unknown> = { ...sharedRow };
+      // Recompute description: strip old suffix and apply new base + new suffix
+      if (payload.description !== undefined) {
+        const base = payload.description.trim().replace(/\s+-\s+\d{1,3}\/\d{1,3}$/, '');
+        const num = sib.installmentNumber ?? 1;
+        row['description'] = `${base} - ${pad(num)}/${pad(total)}`;
+      }
+      if (payload.amount !== undefined) row['amount'] = payload.amount;
+      return this.supabase.client
+        .from(TABLE)
+        .update(row)
+        .eq('id', sib.id)
+        .eq('owner_id', this.ownerId)
+        .select()
+        .single()
+        .then(({ data, error }: { data: any; error: any }) => {
+          if (error) throw error;
+          return this.toModel(data);
+        });
+    });
+
+    return Promise.all(updates);
+  }
+
   async getAllInstallments(): Promise<Transaction[]> {
     const PAGE = 1000;
     const fetchPage = (offset: number): Promise<Transaction[]> =>

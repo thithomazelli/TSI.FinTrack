@@ -174,6 +174,7 @@ export class MovimentosComponent implements OnInit {
   formTxInstallments = 2;
   formTxAmountType: 'total' | 'installment' = 'total';
   formTxIsInternational = false;
+  formTxApplyToGroup = false;
   formTxOriginalCurrency = 'USD';
   formTxOriginalAmount = 0;
   formTxExchangeRate = 0;
@@ -955,6 +956,7 @@ export class MovimentosComponent implements OnInit {
     this.formTxInstallments = 2;
     this.formTxAmountType = 'installment';
     this.formTxIsInternational = false;
+    this.formTxApplyToGroup = false;
     this.formTxOriginalCurrency = 'USD';
     this.formTxOriginalAmount = 0;
     this.formTxExchangeRate = 0;
@@ -997,6 +999,7 @@ export class MovimentosComponent implements OnInit {
       this.formTxIsInstallment = false;
       this.formTxInstallments = 2;
       this.formTxAmountType = 'installment';
+      this.formTxApplyToGroup = false;
       this.formTxIsInternational = !!t.originalCurrency;
       this.formTxOriginalCurrency = t.originalCurrency ?? 'USD';
       this.formTxOriginalAmount = t.originalAmount ?? 0;
@@ -1044,6 +1047,7 @@ export class MovimentosComponent implements OnInit {
       this.formTxIsInstallment = !!t.totalInstallments && t.totalInstallments > 1;
       this.formTxInstallments = t.totalInstallments ?? 1;
       this.formTxAmountType = 'installment';
+      this.formTxApplyToGroup = false;
       this.formTxIsInternational = !!t.originalCurrency;
       this.formTxOriginalCurrency = t.originalCurrency ?? 'USD';
       this.formTxOriginalAmount = t.originalAmount ?? 0;
@@ -1171,19 +1175,37 @@ export class MovimentosComponent implements OnInit {
     };
 
     if (id) {
-      this.transactionService.update(id, payload).then((saved: Transaction) => {
+      const editingTx = this.allTransactions().find(t => t.id === id);
+      const groupId = editingTx?.installmentGroupId ?? null;
+      const applyToGroup = this.formTxApplyToGroup && !!groupId;
+
+      const updatePromise = applyToGroup
+        ? this.transactionService.updateByGroup(
+            groupId!,
+            id,
+            payload,
+            editingTx?.installmentNumber ?? null,
+            editingTx?.totalInstallments ?? null,
+          ).then((saved: Transaction[]) => saved.find(t => t.id === id) ?? saved[0])
+        : this.transactionService.update(id, payload);
+
+      updatePromise.then((saved: Transaction) => {
         this.toast.success(this.tr('movimentos.toast.txUpdated'));
         this.saving.set(false);
         this.closeModal();
-        const from = this.dateFrom();
-        const to   = this.dateTo();
-        // Credit card transactions are grouped by invoice date (date), not purchase date
-        const dateToCheck = saved.date;
-        const inPeriod = dateToCheck >= (from ?? '') && dateToCheck <= (to ?? '');
-        if (inPeriod) {
-          this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
+        if (applyToGroup) {
+          // Reload all — multiple rows changed across potentially different periods
+          this.load(true);
         } else {
-          this.allTransactions.update(list => list.filter(t => t.id !== id));
+          const from = this.dateFrom();
+          const to   = this.dateTo();
+          const dateToCheck = saved.date;
+          const inPeriod = dateToCheck >= (from ?? '') && dateToCheck <= (to ?? '');
+          if (inPeriod) {
+            this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
+          } else {
+            this.allTransactions.update(list => list.filter(t => t.id !== id));
+          }
         }
         this.balanceService.invalidate();
       }).catch((err: unknown) => {
