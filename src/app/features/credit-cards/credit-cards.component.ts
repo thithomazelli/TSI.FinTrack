@@ -431,11 +431,28 @@ export class CreditCardsComponent implements OnInit {
       this.txService.create(payload as CreateTransactionPayload)
         .then((created: Transaction[]) => {
           this.transactions.update(list => [...list, ...created]);
+          this.billService.ensureBillsForTransactions(
+            created.map(t => ({ creditCardId: t.creditCardId, date: t.date }))
+          ).then(() => this.loadAll()).catch((e: unknown) => this.logger.error('Failed to ensure bill', e));
           this.toast.success('Lançamento adicionado.');
           done();
         })
         .catch(fail);
     }
+  }
+
+  reconcileBills(): void {
+    const txs = this.transactions().filter(t => t.creditCardId);
+    if (!txs.length) { this.toast.info('Nenhuma despesa de cartão para reconciliar.'); return; }
+    this.billService.ensureBillsForTransactions(
+      txs.map(t => ({ creditCardId: t.creditCardId, date: t.date }))
+    ).then(() => {
+      this.toast.success('Faturas reconciliadas com sucesso.');
+      return this.loadAll();
+    }).catch((err: unknown) => {
+      this.logger.error('Reconcile failed', err);
+      this.toast.error('Erro ao reconciliar faturas.');
+    });
   }
 
   toggleTxStatus(tx: Transaction, newStatus: TransactionStatus): void {

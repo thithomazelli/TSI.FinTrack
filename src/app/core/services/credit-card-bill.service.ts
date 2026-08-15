@@ -109,6 +109,29 @@ export class CreditCardBillService {
       .then(({ error }) => { if (error) throw error; });
   }
 
+  /**
+   * Ensures a bill exists for every (creditCardId, year, month) combination
+   * present in the given list of transactions. Creates missing bills via upsert.
+   * Safe to call after creating/updating credit card transactions.
+   */
+  async ensureBillsForTransactions(
+    txs: Array<{ creditCardId: string | null | undefined; date: string }>
+  ): Promise<void> {
+    const seen = new Set<string>();
+    const toCreate: Array<{ creditCardId: string; year: number; month: number }> = [];
+
+    for (const tx of txs) {
+      if (!tx.creditCardId) continue;
+      const [y, m] = tx.date.split('-').map(Number);
+      const key = `${tx.creditCardId}:${y}:${m}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      toCreate.push({ creditCardId: tx.creditCardId, year: y, month: m });
+    }
+
+    await Promise.all(toCreate.map(p => this.upsert(p)));
+  }
+
   async delete(id: string): Promise<void> {
     return this.supabase.client
       .from(TABLE)

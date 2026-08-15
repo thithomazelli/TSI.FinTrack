@@ -1214,7 +1214,13 @@ export class MovimentosComponent implements OnInit {
         this.toast.error(this.tr('movimentos.toast.txUpdateError'));
       });
     } else {
-      this.transactionService.create(payload).then(() => {
+      this.transactionService.create(payload).then((created) => {
+        const txs = Array.isArray(created) ? created : [created];
+        if (payload.creditCardId) {
+          this.billService.ensureBillsForTransactions(
+            txs.map(t => ({ creditCardId: t.creditCardId, date: t.date }))
+          ).catch((e: unknown) => this.logger.error('Failed to ensure bill', e));
+        }
         this.zone.run(() => {
           this.toast.success(this.tr('movimentos.toast.txAdded'));
           this.saving.set(false);

@@ -16,6 +16,15 @@
   &:hover { background: var(--color-accent-hover); }
 }
 
+.btn-reconcile {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .4rem .85rem; border-radius: var(--radius-md);
+  font-size: .82rem; font-weight: 600; cursor: pointer;
+  background: transparent; border: 1px solid var(--color-border);
+  color: var(--color-text-2);
+  &:hover { background: var(--color-surface-2); color: var(--color-text); }
+}
+
 .btn-filter-toggle {
   display: inline-flex; align-items: center; gap: .4rem;
   padding: .4rem .85rem; border-radius: var(--radius-md);
