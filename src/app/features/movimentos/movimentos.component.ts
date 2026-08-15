@@ -1063,6 +1063,25 @@ export class MovimentosComponent implements OnInit {
     }
   }
 
+  openInstallmentEdit(inst: Entry | Transaction): void {
+    const mode = this.modalMode();
+    const item: MovimentoItem = {
+      kind: mode === 'entry' ? 'entry' : 'transaction',
+      id: inst.id,
+      date: inst.date,
+      purchaseDate: (inst as Transaction).purchaseDate ?? null,
+      description: inst.description,
+      amount: inst.amount,
+      status: inst.status ?? '',
+      categoryId: (inst as Transaction).categoryId ?? undefined,
+      accountId: (inst as Transaction).accountId ?? null,
+      creditCardId: (inst as Transaction).creditCardId ?? null,
+      typeId: (inst as Entry).typeId ?? undefined,
+      raw: inst,
+    };
+    this.openEdit(item);
+  }
+
   // ── Field validation ──────────────────────────────────────────────────────
   saveAttempted = false;
   readonly touchedFields = new Set<string>();

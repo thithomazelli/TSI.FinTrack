@@ -330,6 +330,7 @@ body {
 
   &.modal-lg  { width: min(720px, calc(100vw - 2rem)); }
   &.modal--sm { width: min(420px, calc(100vw - 2rem)); }
+  &.modal--installments { width: min(900px, calc(100vw - 2rem)); }
 
   @media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
     left: 0;

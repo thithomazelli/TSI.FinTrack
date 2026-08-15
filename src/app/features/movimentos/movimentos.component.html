@@ -687,7 +687,7 @@
 <!-- Entry Modal -->
 @if (modalMode() === 'entry') {
   <div class="modal-backdrop" (click)="closeModal()"></div>
-  <div class="modal"
+  <div class="modal" [class.modal--installments]="editModalTab() === 'installments'"
        tsiModalKey
        [tsiModalKeyEnter]="saveEntry.bind(this)"
        [tsiModalKeyEscape]="closeModal.bind(this)">
@@ -720,7 +720,7 @@
             </thead>
             <tbody>
               @for (inst of installmentsPageData(); track $any(inst).id) {
-                <tr [class.inst-row--current]="$any(inst).id === editingId()">
+                <tr [class.inst-row--current]="$any(inst).id === editingId()" class="inst-row--clickable" (dblclick)="openInstallmentEdit($any(inst))">
                   <td>{{ $any(inst).description }}</td>
                   <td>{{ $any(inst).date | date:'dd/MM/yyyy' }}</td>
                   <td class="text-center">{{ $any(inst).installmentNumber }}/{{ $any(inst).totalInstallments }}</td>
@@ -734,6 +734,7 @@
               }
             </tbody>
           </table>
+          <p class="inst-hint">Clique duas vezes em uma linha para editar aquela parcela.</p>
           @if (installmentsTotalPages() > 1) {
             <div class="inst-pagination">
               <button class="inst-page-btn" [disabled]="installmentsPage() === 0" (click)="installmentsPage.set(installmentsPage() - 1)">‹</button>
@@ -837,7 +838,7 @@
 <!-- Transaction Modal -->
 @if (modalMode() === 'transaction') {
   <div class="modal-backdrop" (click)="closeModal()"></div>
-  <div class="modal modal-lg"
+  <div class="modal modal-lg" [class.modal--installments]="editModalTab() === 'installments'"
        tsiModalKey
        [tsiModalKeyEnter]="saveTransaction.bind(this)"
        [tsiModalKeyEscape]="closeModal.bind(this)">
@@ -870,7 +871,7 @@
             </thead>
             <tbody>
               @for (inst of installmentsPageData(); track $any(inst).id) {
-                <tr [class.inst-row--current]="$any(inst).id === editingId()">
+                <tr [class.inst-row--current]="$any(inst).id === editingId()" class="inst-row--clickable" (dblclick)="openInstallmentEdit($any(inst))">
                   <td>{{ $any(inst).description }}</td>
                   <td>{{ $any(inst).date | date:'dd/MM/yyyy' }}</td>
                   <td class="text-center">{{ $any(inst).installmentNumber }}/{{ $any(inst).totalInstallments }}</td>
@@ -884,6 +885,7 @@
               }
             </tbody>
           </table>
+          <p class="inst-hint">Clique duas vezes em uma linha para editar aquela parcela.</p>
           @if (installmentsTotalPages() > 1) {
             <div class="inst-pagination">
               <button class="inst-page-btn" [disabled]="installmentsPage() === 0" (click)="installmentsPage.set(installmentsPage() - 1)">‹</button>
