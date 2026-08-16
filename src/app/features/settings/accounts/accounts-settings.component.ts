@@ -9,6 +9,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateLangDirective } from '../../../shared/directives/date-lang.directive';
 import { ModalKeyDirective } from '../../../shared/directives/modal-key.directive';
+import { CurrencyMaskDirective } from '../../../shared/directives/currency-mask.directive';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AccountService } from '../../../core/services/account.service';
 import { DomainListService } from '../../../core/services/domain-list.service';
@@ -19,7 +20,7 @@ import { DomainList } from '../../../core/models/interfaces/domain-list.interfac
 
 @Component({
     selector: 'tsi-accounts-settings',
-    imports: [TranslatePipe, CurrencyPipe, DatePipe, FormsModule, DateLangDirective, ModalKeyDirective],
+    imports: [TranslatePipe, CurrencyPipe, DatePipe, FormsModule, DateLangDirective, ModalKeyDirective, CurrencyMaskDirective],
     templateUrl: './accounts-settings.component.html',
     styleUrls: ['./accounts-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
