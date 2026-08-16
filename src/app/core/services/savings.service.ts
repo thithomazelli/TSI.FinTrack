@@ -154,6 +154,18 @@ export class SavingsService {
       });
   }
 
+  async createDeposit(description: string, amount: number, date: string, accountId: string): Promise<void> {
+    const { data: types } = await this.supabase.client
+      .from('domain_lists')
+      .select('id')
+      .eq('owner_id', this.ownerId)
+      .eq('list_code', 'savings_movement_type')
+      .eq('value', 'DEPOSIT')
+      .single();
+    if (!types?.id) throw new Error('DEPOSIT type not found');
+    await this.create({ description, amount, date, typeId: types.id, accountId });
+  }
+
   async delete(id: string): Promise<void> {
     return this.supabase.client
       .from(TABLE)

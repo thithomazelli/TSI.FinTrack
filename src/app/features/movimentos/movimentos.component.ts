@@ -1231,15 +1231,19 @@ export class MovimentosComponent implements OnInit {
           this.balanceService.invalidate();
         };
         if (isTransferEdit) {
-          this.entryService.create({
-            description: saved.description,
-            amount: Math.abs(saved.amount),
-            date: saved.date,
-            typeId: null,
-            accountId: transferToAccountId,
-            labels: saved.labels ?? [],
-            status: saved.status,
-          }).then(finish).catch(finish);
+          const destIsSavings = this.savingsAccounts().some(a => a.id === transferToAccountId);
+          const transferOp = destIsSavings
+            ? this.savingsService.createDeposit(saved.description, Math.abs(saved.amount), saved.date, transferToAccountId)
+            : this.entryService.create({
+                description: saved.description,
+                amount: Math.abs(saved.amount),
+                date: saved.date,
+                typeId: null,
+                accountId: transferToAccountId,
+                labels: saved.labels ?? [],
+                status: saved.status,
+              });
+          transferOp.then(finish).catch(finish);
         } else {
           finish();
         }
@@ -1267,15 +1271,19 @@ export class MovimentosComponent implements OnInit {
         });
         if (isTransfer && txs[0]) {
           const tx = txs[0];
-          this.entryService.create({
-            description: tx.description,
-            amount: Math.abs(tx.amount),
-            date: tx.date,
-            typeId: null,
-            accountId: transferToAccountId,
-            labels: tx.labels ?? [],
-            status: tx.status,
-          }).then(afterCreate).catch(afterCreate);
+          const destIsSavings = this.savingsAccounts().some(a => a.id === transferToAccountId);
+          const transferOp = destIsSavings
+            ? this.savingsService.createDeposit(tx.description, Math.abs(tx.amount), tx.date, transferToAccountId)
+            : this.entryService.create({
+                description: tx.description,
+                amount: Math.abs(tx.amount),
+                date: tx.date,
+                typeId: null,
+                accountId: transferToAccountId,
+                labels: tx.labels ?? [],
+                status: tx.status,
+              });
+          transferOp.then(afterCreate).catch(afterCreate);
         } else {
           afterCreate();
         }
