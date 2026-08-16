@@ -27,6 +27,7 @@ import { ToastService } from '../../shared/services/toast.service';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { BalanceService } from '../../core/services/balance.service';
 import { SavingsService } from '../../core/services/savings.service';
+import { SavingsMovement } from '../../core/models/interfaces/savings-movement.interface';
 import { AuthService } from '../../core/auth/auth.service';
 import { Entry } from '../../core/models/interfaces/entry.interface';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
@@ -49,7 +50,7 @@ import { ThemeService } from '../../core/services/theme.service';
 Chart.register(...registerables);
 
 export interface MovimentoItem {
-  kind: 'entry' | 'transaction';
+  kind: 'entry' | 'transaction' | 'savings';
   id: string;
   date: string;
   /** Purchase date for credit card transactions; null for others. */
@@ -62,7 +63,7 @@ export interface MovimentoItem {
   creditCardId?: string | null;
   typeId?: string;
   position?: number;
-  raw: Entry | Transaction;
+  raw: Entry | Transaction | SavingsMovement;
 }
 
 type ModalMode = 'entry' | 'transaction' | null;
@@ -102,6 +103,7 @@ export class MovimentosComponent implements OnInit {
   // Data
   readonly allEntries = signal<Entry[]>([]);
   readonly allTransactions = signal<Transaction[]>([]);
+  readonly allSavingsMovements = signal<SavingsMovement[]>([]);
   readonly categories = signal<Category[]>([]);
   readonly accounts = signal<Account[]>([]);
   readonly cards = signal<CreditCard[]>([]);
@@ -217,9 +219,22 @@ export class MovimentosComponent implements OnInit {
       raw: t,
     }));
 
+    const savings: MovimentoItem[] = this.allSavingsMovements().map(s => ({
+      kind: 'savings' as const,
+      id: s.id,
+      date: s.date,
+      purchaseDate: null,
+      description: s.description,
+      amount: s.typeCode === 'DEPOSIT' ? s.amount : -s.amount,
+      status: 'REALIZED',
+      accountId: s.accountId,
+      typeId: s.typeId,
+      raw: s,
+    }));
+
     const sortDate = (i: MovimentoItem) => i.purchaseDate ?? i.date;
 
-    const all = [...entries, ...txs];
+    const all = [...entries, ...txs, ...savings];
     return all.sort((a, b) => {
       const dateCmp = sortDate(a).localeCompare(sortDate(b));
       if (dateCmp !== 0) return dateCmp;
@@ -341,9 +356,10 @@ export class MovimentosComponent implements OnInit {
 
   readonly tableGroups = computed<TableGroup<MovimentoItem>[]>(() => {
     const items = this.filteredItems();
-    const entries   = items.filter(i => i.kind === 'entry');
-    const debitTxs  = items.filter(i => i.kind === 'transaction' && !i.creditCardId);
-    const cardTxs   = items.filter(i => i.kind === 'transaction' && !!i.creditCardId);
+    const entries     = items.filter(i => i.kind === 'entry');
+    const debitTxs    = items.filter(i => i.kind === 'transaction' && !i.creditCardId);
+    const cardTxs     = items.filter(i => i.kind === 'transaction' && !!i.creditCardId);
+    const savingsItems = items.filter(i => i.kind === 'savings');
 
     const cardMap = new Map<string, MovimentoItem[]>();
     for (const tx of cardTxs) {
@@ -424,7 +440,26 @@ export class MovimentosComponent implements OnInit {
     }
     cardGroups.sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
 
-    return [...groups, ...cardGroups];
+    const savingsMap = new Map<string, MovimentoItem[]>();
+    for (const s of savingsItems) {
+      const key = s.accountId ?? '__savings';
+      if (!savingsMap.has(key)) savingsMap.set(key, []);
+      savingsMap.get(key)!.push(s);
+    }
+    const savingsGroups: TableGroup<MovimentoItem>[] = [];
+    for (const [accountId, movs] of savingsMap) {
+      const account = this.accounts().find(a => a.id === accountId);
+      savingsGroups.push({
+        id: `__savings_${accountId}`,
+        label: account?.name ?? 'Poupança',
+        items: movs,
+        total: movs.reduce((s, m) => s + m.amount, 0),
+        status: 'REALIZED',
+        defaultExpanded: false,
+      });
+    }
+
+    return [...groups, ...cardGroups, ...savingsGroups];
   });
 
   toggleDndMode(): void {
@@ -746,7 +781,7 @@ export class MovimentosComponent implements OnInit {
       const endOfMonth = new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0];
       const today = now.toISOString().split('T')[0];
 
-      const [entriesRes, txsRes, totalsRes, rangeBalanceRes, savingsTotals, availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = await Promise.all([
+      const [entriesRes, txsRes, totalsRes, rangeBalanceRes, savingsTotals, savingsMovsRes, availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = await Promise.all([
         this.supabase.client
           .from('entries')
           .select('*')
@@ -768,6 +803,7 @@ export class MovimentosComponent implements OnInit {
         this.supabase.client.rpc('get_period_totals', { start_date: from, end_date: to }),
         this.supabase.client.rpc('get_balance_in_range', { start_date: from, end_date: to }),
         this.savingsService.getPeriodTotals(from, to),
+        this.savingsService.getByDateRange(from, to),
         // Para o balance card: busca available e projected em paralelo com o resto
         isCurrent
           ? this.balanceService.getAvailableBalance()
@@ -787,6 +823,7 @@ export class MovimentosComponent implements OnInit {
       });
       this.balanceInRange.set(Number(rangeBalanceRes.data ?? 0));
       this.savingsPeriodTotals.set(savingsTotals ?? { deposits: 0, withdrawals: 0 });
+      this.allSavingsMovements.set(savingsMovsRes);
       this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
       this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
 

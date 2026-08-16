@@ -28,6 +28,20 @@ export class SavingsService {
       });
   }
 
+  async getByDateRange(from: string, to: string): Promise<SavingsMovement[]> {
+    return this.supabase.client
+      .from(TABLE)
+      .select('*, domain_lists(value)')
+      .eq('owner_id', this.ownerId)
+      .gte('date', from)
+      .lte('date', to)
+      .order('date', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((r: any) => this.toModel(r));
+      });
+  }
+
   async getByMonth(year: number, month: number): Promise<SavingsMovement[]> {
     const start = `${year}-${String(month).padStart(2, '0')}-01`;
     const end = new Date(year, month, 0).toISOString().split('T')[0];
