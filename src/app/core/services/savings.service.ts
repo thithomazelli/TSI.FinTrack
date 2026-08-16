@@ -159,7 +159,7 @@ export class SavingsService {
       .from('domain_lists')
       .select('id')
       .eq('owner_id', this.ownerId)
-      .eq('list_code', 'savings_movement_type')
+      .eq('code', 'savings_movement_type')
       .eq('value', 'DEPOSIT')
       .single();
     if (!types?.id) throw new Error('DEPOSIT type not found');
