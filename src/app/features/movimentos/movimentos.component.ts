@@ -174,6 +174,8 @@ export class MovimentosComponent implements OnInit {
   formTxInstallments = 2;
   formTxAmountType: 'total' | 'installment' = 'total';
   formTxIsInternational = false;
+  formTxIsTransfer = false;
+  formTxTransferToAccountId = '';
   formTxApplyToGroup = false;
   formTxOriginalCurrency = 'USD';
   formTxOriginalAmount = 0;
@@ -567,6 +569,12 @@ export class MovimentosComponent implements OnInit {
     return !!card && !/^d[eé]bito/i.test(card.name);
   }
 
+  isTransferCategory(): boolean {
+    if (!this.formTxCategoryId) return false;
+    const cat = this.categories().find(c => c.id === this.formTxCategoryId);
+    return !!cat && /transfer[eê]ncia/i.test(cat.name);
+  }
+
   toggleFilterTipo(kind: string): void {
     this.filterTipos.update(s => { const n = new Set(s); n.has(kind) ? n.delete(kind) : n.add(kind); return n; });
   }
@@ -956,6 +964,8 @@ export class MovimentosComponent implements OnInit {
     this.formTxInstallments = 2;
     this.formTxAmountType = 'installment';
     this.formTxIsInternational = false;
+    this.formTxIsTransfer = false;
+    this.formTxTransferToAccountId = '';
     this.formTxApplyToGroup = false;
     this.formTxOriginalCurrency = 'USD';
     this.formTxOriginalAmount = 0;
@@ -1234,6 +1244,8 @@ export class MovimentosComponent implements OnInit {
         this.toast.error(this.tr('movimentos.toast.txUpdateError'));
       });
     } else {
+      const isTransfer = this.formTxIsTransfer && !!this.formTxTransferToAccountId;
+      const transferToAccountId = this.formTxTransferToAccountId;
       this.transactionService.create(payload).then((created) => {
         const txs = Array.isArray(created) ? created : [created];
         if (payload.creditCardId) {
@@ -1241,13 +1253,27 @@ export class MovimentosComponent implements OnInit {
             txs.map(t => ({ creditCardId: t.creditCardId, date: t.date }))
           ).catch((e: unknown) => this.logger.error('Failed to ensure bill', e));
         }
-        this.zone.run(() => {
+        const afterCreate = () => this.zone.run(() => {
           this.toast.success(this.tr('movimentos.toast.txAdded'));
           this.saving.set(false);
           this.closeModal();
           this.load(true);
           this.balanceService.invalidate();
         });
+        if (isTransfer && txs[0]) {
+          const tx = txs[0];
+          this.entryService.create({
+            description: tx.description,
+            amount: Math.abs(tx.amount),
+            date: tx.date,
+            typeId: null,
+            accountId: transferToAccountId,
+            labels: tx.labels ?? [],
+            status: tx.status,
+          }).then(afterCreate).catch(afterCreate);
+        } else {
+          afterCreate();
+        }
       }).catch((err: unknown) => {
         this.logger.error('Failed to create transaction', err);
         this.saving.set(false);

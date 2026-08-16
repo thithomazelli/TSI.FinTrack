@@ -932,7 +932,8 @@
     </div>
 
     <div class="field" [class.has-value]="formTxCategoryId">
-      <select class="field-input" [(ngModel)]="formTxCategoryId">
+      <select class="field-input" [(ngModel)]="formTxCategoryId"
+        (ngModelChange)="isTransferCategory() || (formTxIsTransfer = false)">
         <option value="">—</option>
         @for (cat of categories(); track cat.id) {
           <option [value]="cat.id">{{ cat.name }}</option>
@@ -940,6 +941,28 @@
       </select>
       <label class="field-label">{{ 'common.category' | translate }}</label>
     </div>
+
+    @if (isTransferCategory() && !editingId()) {
+      <div class="transfer-block">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="formTxIsTransfer" />
+          Transferência para conta própria
+        </label>
+        @if (formTxIsTransfer) {
+          <div class="field" [class.has-value]="formTxTransferToAccountId">
+            <select class="field-input" [(ngModel)]="formTxTransferToAccountId">
+              <option value="">— Selecione a conta destino —</option>
+              @for (acc of checkingAccounts(); track acc.id) {
+                @if (acc.id !== formTxAccountId) {
+                  <option [value]="acc.id">{{ acc.name }}</option>
+                }
+              }
+            </select>
+            <label class="field-label">Conta destino</label>
+          </div>
+        }
+      </div>
+    }
 
     <div class="fields-row">
       @if (!formTxCreditCardId) {
