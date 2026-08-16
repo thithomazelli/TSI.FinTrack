@@ -824,8 +824,12 @@ export class MovimentosComponent implements OnInit {
       this.balanceInRange.set(Number(rangeBalanceRes.data ?? 0));
       this.savingsPeriodTotals.set(savingsTotals ?? { deposits: 0, withdrawals: 0 });
       this.allSavingsMovements.set(savingsMovsRes);
+      const savInitial = this.savingsAccounts().reduce((s, a) => s + (a.balance ?? 0), 0);
       this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
-      this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
+      this.savingsBalance.set({
+        available: Number(savingsAvailableRes ?? 0) + savInitial,
+        projected: Number(savingsProjectedRes ?? 0) + savInitial,
+      });
 
       this.allEntries.set((entriesRes.data ?? []).map((r: any) => {
         const installMatch = r.description?.match(/ - (\d+)\/(\d+)$/);
@@ -913,8 +917,13 @@ export class MovimentosComponent implements OnInit {
     const results = await Promise.all([...baseQueries, ...ccPerAccQueries, ...savPerAccQueries]);
     const [availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = results;
 
+    const savingsInitial = savAccs.reduce((s, a) => s + (a.balance ?? 0), 0);
+
     this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
-    this.savingsBalance.set({ available: Number(savingsAvailableRes ?? 0), projected: Number(savingsProjectedRes ?? 0) });
+    this.savingsBalance.set({
+      available: Number(savingsAvailableRes ?? 0) + savingsInitial,
+      projected: Number(savingsProjectedRes ?? 0) + savingsInitial,
+    });
 
     if (ccAccs.length >= 2) {
       const nc = ccAccs.length;
@@ -931,8 +940,8 @@ export class MovimentosComponent implements OnInit {
       const off = 4 + (ccAccs.length >= 2 ? ccAccs.length * 2 : 0);
       this.savingsPerAccountBalances.set(savAccs.map((acc, i) => ({
         account: acc,
-        available: results[off + i],
-        projected: results[off + ns + i],
+        available: results[off + i] + (acc.balance ?? 0),
+        projected: results[off + ns + i] + (acc.balance ?? 0),
       })));
     }
   }
