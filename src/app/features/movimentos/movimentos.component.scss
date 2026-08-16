@@ -529,11 +529,13 @@ tr:hover td { background: var(--color-surface-2); }
 .toggle-label { display: flex; align-items: center; gap: 0.5rem; font-size: .875rem; cursor: pointer; }
 .transfer-block {
   display: flex; flex-direction: column; gap: .6rem;
+  margin-top: -.75rem;
   margin-bottom: .75rem;
   padding: .6rem .75rem;
   background: var(--color-accent-soft);
   border: 1px solid rgba(99,102,241,.2);
-  border-radius: var(--radius-sm);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   .toggle-label { font-size: .85rem; }
   .field { margin-bottom: 0; }
 }

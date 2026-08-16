@@ -1218,26 +1218,42 @@ export class MovimentosComponent implements OnInit {
           ).then((saved: Transaction[]) => saved.find(t => t.id === id) ?? saved[0])
         : this.transactionService.update(id, payload);
 
+      const isTransferEdit = this.formTxIsTransfer && !!this.formTxTransferToAccountId;
+      const transferToAccountId = this.formTxTransferToAccountId;
+
       updatePromise.then((saved: Transaction) => {
-        this.toast.success(this.tr('movimentos.toast.txUpdated'));
-        this.saving.set(false);
-        this.closeModal();
-        if (applyToGroup) {
-          // Reload all — multiple rows changed across potentially different periods
-          this.load(true);
-        } else {
-          const from = this.dateFrom();
-          const to   = this.dateTo();
-          const dateToCheck = saved.date;
-          const inPeriod = dateToCheck >= (from ?? '') && dateToCheck <= (to ?? '');
-          if (inPeriod) {
-            this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
-          } else {
-            // Date moved outside current period — reload so list stays consistent
+        const finish = () => {
+          this.toast.success(this.tr('movimentos.toast.txUpdated'));
+          this.saving.set(false);
+          this.closeModal();
+          if (applyToGroup) {
             this.load(true);
+          } else {
+            const from = this.dateFrom();
+            const to   = this.dateTo();
+            const dateToCheck = saved.date;
+            const inPeriod = dateToCheck >= (from ?? '') && dateToCheck <= (to ?? '');
+            if (inPeriod) {
+              this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
+            } else {
+              this.load(true);
+            }
           }
+          this.balanceService.invalidate();
+        };
+        if (isTransferEdit) {
+          this.entryService.create({
+            description: saved.description,
+            amount: Math.abs(saved.amount),
+            date: saved.date,
+            typeId: null,
+            accountId: transferToAccountId,
+            labels: saved.labels ?? [],
+            status: saved.status,
+          }).then(finish).catch(finish);
+        } else {
+          finish();
         }
-        this.balanceService.invalidate();
       }).catch((err: unknown) => {
         this.logger.error('Failed to update transaction', err);
         this.saving.set(false);
