@@ -505,16 +505,19 @@ tr:hover td { background: var(--color-surface-2); }
   &:hover { opacity: .85; } &:disabled { opacity: .5; cursor: default; }
 }
 
-.action-btns { display: flex; gap: 0.5rem; align-items: center; }
+.action-btns {
+  display: flex; flex-direction: column; gap: 0.25rem; align-items: stretch;
+}
 .action-btn {
-  display: inline-flex; align-items: center; gap: 0.35rem;
-  padding: 0.3rem 0.6rem; border-radius: var(--radius-sm);
-  font-size: .75rem; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);
+  font-size: .72rem; font-weight: 600; cursor: pointer; white-space: nowrap;
   border: 1.5px solid transparent; background: transparent; transition: all var(--transition);
   &--edit   { color: #3b82f6; border-color: rgba(59,130,246,.35); &:hover { background: rgba(59,130,246,.1); } }
   &--copy   { color: #8b5cf6; border-color: rgba(139,92,246,.35); &:hover { background: rgba(139,92,246,.1); } }
   &--delete { color: #ef4444; border-color: rgba(239,68,68,.35);  &:hover { background: rgba(239,68,68,.1);  } }
 }
+.col-actions { width: 100px; padding-right: 1.25rem !important; }
 
 .state-msg { text-align: center; color: var(--color-text-2); padding: 3rem 0; }
 
