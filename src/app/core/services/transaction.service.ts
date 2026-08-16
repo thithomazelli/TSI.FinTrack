@@ -210,15 +210,6 @@ export class TransactionService {
     const total = siblings.length;
     const pad = (n: number) => String(n).padStart(2, '0');
 
-    // Compute date delta (in days) from the edited installment's original date to the new date
-    let dateDeltaMs = 0;
-    if (payload.date !== undefined) {
-      const edited = siblings.find(s => s.id === currentId);
-      if (edited) {
-        dateDeltaMs = new Date(payload.date).getTime() - new Date(edited.date).getTime();
-      }
-    }
-
     const updates = siblings.map(sib => {
       const row: Record<string, unknown> = { ...sharedRow };
       // Recompute description: strip old suffix and apply new base + new suffix
@@ -228,11 +219,7 @@ export class TransactionService {
         row['description'] = `${base} - ${pad(num)}/${pad(total)}`;
       }
       if (payload.amount !== undefined) row['amount'] = payload.amount;
-      // Shift each sibling's date by the same delta as the edited installment
-      if (dateDeltaMs !== 0) {
-        const shifted = new Date(new Date(sib.date).getTime() + dateDeltaMs);
-        row['date'] = shifted.toISOString().split('T')[0];
-      }
+      // date is intentionally NOT propagated — each installment keeps its own payment date
       return this.supabase.client
         .from(TABLE)
         .update(row)
