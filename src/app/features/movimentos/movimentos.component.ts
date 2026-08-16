@@ -1223,7 +1223,8 @@ export class MovimentosComponent implements OnInit {
           if (inPeriod) {
             this.allTransactions.update(list => list.map(t => t.id === id ? saved : t));
           } else {
-            this.allTransactions.update(list => list.filter(t => t.id !== id));
+            // Date moved outside current period — reload so list stays consistent
+            this.load(true);
           }
         }
         this.balanceService.invalidate();
