@@ -14,7 +14,7 @@ import { AccountService } from '../../../core/services/account.service';
 import { DomainListService } from '../../../core/services/domain-list.service';
 import { LoggingService } from '../../../core/services/logging.service';
 import { ToastService } from '../../../shared/services/toast.service';
-import { Account } from '../../../core/models/interfaces/account.interface';
+import { Account, AccountKind } from '../../../core/models/interfaces/account.interface';
 import { DomainList } from '../../../core/models/interfaces/domain-list.interface';
 
 @Component({
@@ -41,6 +41,7 @@ export class AccountsSettingsComponent implements OnInit {
 
   formName = '';
   formTypeId = '';
+  formKind: AccountKind = 'checking';
   formBalance = 0;
   formOpenedAt = '';
 
@@ -69,6 +70,7 @@ export class AccountsSettingsComponent implements OnInit {
     this.editingId.set(null);
     this.formName = '';
     this.formTypeId = this.accountTypes()[0]?.id ?? '';
+    this.formKind = 'checking';
     this.formBalance = 0;
     this.formOpenedAt = '';
     this.showForm.set(true);
@@ -78,6 +80,7 @@ export class AccountsSettingsComponent implements OnInit {
     this.editingId.set(account.id);
     this.formName = account.name;
     this.formTypeId = account.typeId ?? '';
+    this.formKind = account.kind ?? 'checking';
     this.formBalance = account.balance;
     this.formOpenedAt = account.openedAt ?? '';
     this.showForm.set(true);
@@ -100,7 +103,7 @@ export class AccountsSettingsComponent implements OnInit {
   save(): void {
     if (!this.formName.trim()) { this.saveAttempted.set(true); return; }
     this.saving.set(true);
-    const payload = { name: this.formName.trim(), typeId: this.formTypeId, balance: this.formBalance, openedAt: this.formOpenedAt || null };
+    const payload = { name: this.formName.trim(), typeId: this.formTypeId, kind: this.formKind, balance: this.formBalance, openedAt: this.formOpenedAt || null };
     const id = this.editingId();
 
     const op$ = id

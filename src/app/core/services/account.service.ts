@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { LoggingService } from './logging.service';
 import { AuthService } from '../auth/auth.service';
-import { Account } from '../models/interfaces/account.interface';
+import { Account, AccountKind } from '../models/interfaces/account.interface';
 
 const TABLE = 'accounts';
 
@@ -13,6 +13,7 @@ function fromDb(row: any): Account {
     ownerId: row.owner_id,
     name: row.name,
     typeId: row.type_id,
+    kind: (row.kind ?? 'checking') as AccountKind,
     balance: row.balance,
     openedAt: row.opened_at ?? null,
     isArchived: row.is_archived,
@@ -47,13 +48,14 @@ export class AccountService {
     });
   }
 
-  async create(payload: Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>): Promise<Account> {
+  async create(payload: Pick<Account, 'name' | 'typeId' | 'kind' | 'balance' | 'openedAt'>): Promise<Account> {
     this.logger.info('Creating account', payload.name);
     return this.supabase.client
       .from(TABLE)
       .insert({
         name: payload.name,
         type_id: payload.typeId,
+        kind: payload.kind,
         balance: payload.balance,
         opened_at: payload.openedAt || null,
         owner_id: this.ownerId,
@@ -66,13 +68,14 @@ export class AccountService {
       });
   }
 
-  async update(id: string, payload: Partial<Pick<Account, 'name' | 'typeId' | 'balance' | 'openedAt'>>): Promise<Account> {
+  async update(id: string, payload: Partial<Pick<Account, 'name' | 'typeId' | 'kind' | 'balance' | 'openedAt'>>): Promise<Account> {
     this.logger.info('Updating account', id);
     return this.supabase.client
       .from(TABLE)
       .update({
         ...(payload.name !== undefined && { name: payload.name }),
         ...(payload.typeId !== undefined && { type_id: payload.typeId }),
+        ...(payload.kind !== undefined && { kind: payload.kind }),
         ...(payload.balance !== undefined && { balance: payload.balance }),
         ...(payload.openedAt !== undefined && { opened_at: payload.openedAt || null }),
         updated_at: new Date().toISOString(),

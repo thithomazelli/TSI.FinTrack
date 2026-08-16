@@ -82,6 +82,19 @@
       </select>
       <label class="field-label">{{ 'common.type' | translate }}</label>
     </div>
+    <div class="kind-field">
+      <span class="kind-label">Classificação</span>
+      <div class="kind-options">
+        <label class="radio-label">
+          <input type="radio" name="accountKind" value="checking" [(ngModel)]="formKind" />
+          Conta Corrente / Carteira
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="accountKind" value="savings" [(ngModel)]="formKind" />
+          Poupança / Investimento
+        </label>
+      </div>
+    </div>
     <div class="fields-row">
       <div class="field">
         <input class="field-input" type="number" placeholder=" " [(ngModel)]="formBalance" />

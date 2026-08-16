@@ -106,8 +106,7 @@ export class MovimentosComponent implements OnInit {
   readonly accounts = signal<Account[]>([]);
   readonly cards = signal<CreditCard[]>([]);
   readonly bills = signal<CreditCardBill[]>([]);
-  readonly entryTypes    = signal<DomainList[]>([]);
-  readonly accountTypes  = signal<DomainList[]>([]);
+  readonly entryTypes = signal<DomainList[]>([]);
 
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -263,17 +262,8 @@ export class MovimentosComponent implements OnInit {
   readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
   readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
 
-  // Account type separation
-  private isSavingsType(typeId: string): boolean {
-    const type = this.accountTypes().find(t => t.id === typeId);
-    if (!type) return false;
-    const v = type.value.toLowerCase();
-    const n = type.name.toLowerCase();
-    return v.includes('saving') || v.includes('poupan') || n.includes('poupan') || n.includes('saving');
-  }
-
-  readonly checkingAccounts = computed(() => this.accounts().filter(a => !this.isSavingsType(a.typeId)));
-  readonly savingsAccounts  = computed(() => this.accounts().filter(a =>  this.isSavingsType(a.typeId)));
+  readonly checkingAccounts = computed(() => this.accounts().filter(a => a.kind !== 'savings'));
+  readonly savingsAccounts  = computed(() => this.accounts().filter(a => a.kind === 'savings'));
 
   // Carousel state
   readonly ccIndex      = signal(0);
@@ -694,7 +684,6 @@ export class MovimentosComponent implements OnInit {
     this.accountService.getAll().then(d => this.accounts.set(d));
     this.cardService.getAll().then(d => this.cards.set(d));
     this.domainListService.getByCode('entry_type').then(d => this.entryTypes.set(d));
-    this.domainListService.getByCode('account_type').then(d => this.accountTypes.set(d));
     if (qYear || qMonth) {
       this.applyMonth(this.year(), this.month());
     } else {
