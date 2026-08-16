@@ -18,6 +18,7 @@
         <tr>
           <th>{{ 'common.name' | translate }}</th>
           <th>{{ 'common.type' | translate }}</th>
+          <th>Classificação</th>
           <th class="th-right">{{ 'settings.balance' | translate }}</th>
           <th class="th-right">{{ 'settings.openedAt' | translate }}</th>
           <th class="th-right td-actions">{{ 'common.actions' | translate }}</th>
@@ -33,6 +34,7 @@
               }
             </td>
             <td>{{ typeName(acc.typeId) }}</td>
+            <td>{{ acc.kind === 'savings' ? 'Poupança / Investimento' : 'Conta Corrente' }}</td>
             <td [style.color]="acc.balance >= 0 ? '#059669' : '#dc2626'" style="text-align:right; font-weight:600">
               {{ acc.balance | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
             </td>

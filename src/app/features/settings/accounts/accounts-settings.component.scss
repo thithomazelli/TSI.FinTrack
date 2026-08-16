@@ -15,9 +15,9 @@
 
 .modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
   z-index: 401;
   width: min(520px, calc(100vw - 2rem));
   background: var(--color-surface);
@@ -170,6 +170,8 @@
   }
 }
 
+
+.kind-field + .fields-row { margin-top: 1rem; }
 
 .kind-field {
   margin-top: 1rem;
