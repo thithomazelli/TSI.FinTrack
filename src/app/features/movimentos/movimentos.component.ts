@@ -273,8 +273,18 @@ export class MovimentosComponent implements OnInit {
   readonly totalSaidasProjetadas = computed(() =>
     this.allTransactions().filter(t => t.status === 'PROJECTED' || t.status === 'ESTIMATED').reduce((s, t) => s + t.amount, 0));
   readonly saldo         = computed(() => this.totalEntradas() - this.totalSaidas());
-  readonly totalSavingsDeposits    = computed(() => this.savingsPeriodTotals().deposits);
-  readonly totalSavingsWithdrawals = computed(() => this.savingsPeriodTotals().withdrawals);
+  readonly totalSavingsDeposits = computed(() => {
+    const savIds = new Set(this.savingsAccounts().map(a => a.id));
+    const fromMovs = this.savingsPeriodTotals().deposits;
+    const fromEntries = this.allEntries().filter(e => savIds.has(e.accountId ?? '')).reduce((s, e) => s + e.amount, 0);
+    return fromMovs + fromEntries;
+  });
+  readonly totalSavingsWithdrawals = computed(() => {
+    const savIds = new Set(this.savingsAccounts().map(a => a.id));
+    const fromMovs = this.savingsPeriodTotals().withdrawals;
+    const fromTxs = this.allTransactions().filter(t => savIds.has(t.accountId ?? '')).reduce((s, t) => s + t.amount, 0);
+    return fromMovs + fromTxs;
+  });
   readonly saldoPoupanca = computed(() => this.totalSavingsDeposits() - this.totalSavingsWithdrawals());
 
   readonly checkingAccounts = computed(() => this.accounts().filter(a => a.kind !== 'savings'));
