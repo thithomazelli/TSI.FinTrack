@@ -839,11 +839,16 @@ export class MovimentosComponent implements OnInit {
       this.balanceInRange.set(Number(rangeBalanceRes.data ?? 0));
       this.savingsPeriodTotals.set(savingsTotals ?? { deposits: 0, withdrawals: 0 });
       this.allSavingsMovements.set(savingsMovsRes);
-      const savInitial = this.savingsAccounts().reduce((s, a) => s + (a.balance ?? 0), 0);
+      const savAccs = this.savingsAccounts();
+      const savInitial = savAccs.reduce((s, a) => s + (a.balance ?? 0), 0);
+      const now2 = new Date();
+      const today2 = now2.toISOString().split('T')[0];
+      const savCashAvail = (await Promise.all(savAccs.map(a => this.balanceService.getAvailableBalanceByAccount(a.id)))).reduce((s, v) => s + v, 0);
+      const savCashProj  = (await Promise.all(savAccs.map(a => this.balanceService.getBalanceUpToByAccount(new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0], a.id)))).reduce((s, v) => s + v, 0);
       this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
       this.savingsBalance.set({
-        available: Number(savingsAvailableRes ?? 0) + savInitial,
-        projected: Number(savingsProjectedRes ?? 0) + savInitial,
+        available: Number(savingsAvailableRes ?? 0) + savInitial + savCashAvail,
+        projected: Number(savingsProjectedRes ?? 0) + savInitial + savCashProj,
       });
 
       this.allEntries.set((entriesRes.data ?? []).map((r: any) => {
@@ -917,6 +922,14 @@ export class MovimentosComponent implements OnInit {
       this.savingsService.getBalanceUpTo(endOfMonth),
     ];
 
+    // entries+transactions cashflow for each savings account (to add to savings_movements balance)
+    const savCashflowQueries: Promise<number>[] = [
+      ...savAccs.map(a => isCurrent
+        ? this.balanceService.getAvailableBalanceByAccount(a.id)
+        : this.balanceService.getBalanceUpToByAccount(today, a.id)),
+      ...savAccs.map(a => this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id)),
+    ];
+
     const ccPerAccQueries: Promise<number>[] = ccAccs.length >= 2 ? [
       ...ccAccs.map(a => isCurrent
         ? this.balanceService.getAvailableBalanceByAccount(a.id, a.balance)
@@ -929,20 +942,24 @@ export class MovimentosComponent implements OnInit {
       ...savAccs.map(a => this.savingsService.getBalanceUpToByAccount(endOfMonth, a.id)),
     ] : [];
 
-    const results = await Promise.all([...baseQueries, ...ccPerAccQueries, ...savPerAccQueries]);
+    const results = await Promise.all([...baseQueries, ...savCashflowQueries, ...ccPerAccQueries, ...savPerAccQueries]);
     const [availableRes, projectedRes, savingsAvailableRes, savingsProjectedRes] = results;
 
     const savingsInitial = savAccs.reduce((s, a) => s + (a.balance ?? 0), 0);
+    // sum entries+transactions cashflow for all savings accounts
+    const savCashAvailable = savAccs.reduce((s, _, i) => s + results[4 + i], 0);
+    const savCashProjected = savAccs.reduce((s, _, i) => s + results[4 + savAccs.length + i], 0);
+    const savCashOff = savAccs.length * 2; // offset consumed by savCashflowQueries
 
     this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
     this.savingsBalance.set({
-      available: Number(savingsAvailableRes ?? 0) + savingsInitial,
-      projected: Number(savingsProjectedRes ?? 0) + savingsInitial,
+      available: Number(savingsAvailableRes ?? 0) + savingsInitial + savCashAvailable,
+      projected: Number(savingsProjectedRes ?? 0) + savingsInitial + savCashProjected,
     });
 
     if (ccAccs.length >= 2) {
       const nc = ccAccs.length;
-      const off = 4;
+      const off = 4 + savCashOff;
       this.ccPerAccountBalances.set(ccAccs.map((acc, i) => ({
         account: acc,
         available: results[off + i],
@@ -952,11 +969,11 @@ export class MovimentosComponent implements OnInit {
 
     if (savAccs.length >= 2) {
       const ns = savAccs.length;
-      const off = 4 + (ccAccs.length >= 2 ? ccAccs.length * 2 : 0);
+      const off = 4 + savCashOff + (ccAccs.length >= 2 ? ccAccs.length * 2 : 0);
       this.savingsPerAccountBalances.set(savAccs.map((acc, i) => ({
         account: acc,
-        available: results[off + i] + (acc.balance ?? 0),
-        projected: results[off + ns + i] + (acc.balance ?? 0),
+        available: results[off + i] + (acc.balance ?? 0) + results[4 + i],
+        projected: results[off + ns + i] + (acc.balance ?? 0) + results[4 + savAccs.length + i],
       })));
     }
   }
