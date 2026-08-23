@@ -977,7 +977,7 @@
         <div class="field" [class.has-value]="formTxAccountId">
           <select class="field-input" [(ngModel)]="formTxAccountId">
             <option value="">—</option>
-            @for (acc of checkingAccounts(); track acc.id) {
+            @for (acc of accounts(); track acc.id) {
               <option [value]="acc.id">{{ acc.name }}</option>
             }
           </select>

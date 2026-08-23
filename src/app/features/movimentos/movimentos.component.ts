@@ -356,10 +356,11 @@ export class MovimentosComponent implements OnInit {
 
   readonly tableGroups = computed<TableGroup<MovimentoItem>[]>(() => {
     const items = this.filteredItems();
-    const entries     = items.filter(i => i.kind === 'entry');
-    const debitTxs    = items.filter(i => i.kind === 'transaction' && !i.creditCardId);
+    const savingsAccountIds = new Set(this.savingsAccounts().map(a => a.id));
+    const entries     = items.filter(i => i.kind === 'entry' && !savingsAccountIds.has(i.accountId ?? ''));
+    const debitTxs    = items.filter(i => i.kind === 'transaction' && !i.creditCardId && !savingsAccountIds.has(i.accountId ?? ''));
     const cardTxs     = items.filter(i => i.kind === 'transaction' && !!i.creditCardId);
-    const savingsItems = items.filter(i => i.kind === 'savings');
+    const savingsItems = items.filter(i => i.kind === 'savings' || ((i.kind === 'entry' || (i.kind === 'transaction' && !i.creditCardId)) && savingsAccountIds.has(i.accountId ?? '')));
 
     const cardMap = new Map<string, MovimentoItem[]>();
     for (const tx of cardTxs) {
