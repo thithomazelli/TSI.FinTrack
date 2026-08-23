@@ -477,6 +477,10 @@ export class MovimentosComponent implements OnInit {
       this.openCreateTransaction();
       const accountId = event.groupId.replace('__debit_', '').replace('card_', '');
       if (accountId !== '__no_account') this.formTxAccountId = accountId;
+    } else if (event.groupId.startsWith('__savings_')) {
+      this.openCreateTransaction();
+      const accountId = event.groupId.replace('__savings_', '');
+      this.formTxAccountId = accountId;
     } else {
       this.openCreateTransaction();
       this.formTxCreditCardId = event.groupId;
