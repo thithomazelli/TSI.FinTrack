@@ -660,6 +660,24 @@ export class MovimentosComponent implements OnInit {
   // Single delete confirm
   readonly deletingItem = signal<MovimentoItem | null>(null);
 
+  // Context menu
+  readonly ctxMenu = signal<{ x: number; y: number } | null>(null);
+
+  onRowContextMenu(event: MouseEvent, item: MovimentoItem): void {
+    event.preventDefault();
+    if (!this.selectedIds().has(item.id)) {
+      this.selectedIds.set(new Set([item.id]));
+    }
+    this.ctxMenu.set({ x: event.clientX, y: event.clientY });
+  }
+
+  closeCtxMenu(): void { this.ctxMenu.set(null); }
+
+  ctxAction(action: 'delete' | 'amount' | 'move' | 'status' | 'date' | 'category'): void {
+    this.closeCtxMenu();
+    this.openBulkAction(action);
+  }
+
   // Bulk actions
   readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | 'date' | 'category' | null>(null);
   bulkNewAmount = 0;
