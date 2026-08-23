@@ -394,7 +394,7 @@
         <td class="col-check" (click)="$event.stopPropagation()">
           <input type="checkbox" [checked]="isSelected(item.id)" (click)="toggleItem(item.id, $event)" class="row-check" />
         </td>
-        <td class="col-date" (dblclick)="item.kind !== 'savings' && openEdit(item)">
+        <td class="col-date" (dblclick)="item.kind !== 'savings' && openEdit(item)" (contextmenu)="onRowContextMenu($event, item)">
           {{ (item.purchaseDate ?? item.date) | date:'dd/MM/yyyy' }}
         </td>
         <td class="col-tipo" (dblclick)="item.kind !== 'savings' && openEdit(item)">
@@ -548,6 +548,19 @@
         {{ bulkSaving() ? ('common.saving' | translate) : ('common.delete' | translate) }}
       </button>
     </div>
+  </div>
+}
+
+<!-- Context menu -->
+@if (ctxMenu()) {
+  <div class="ctx-backdrop" (click)="closeCtxMenu()"></div>
+  <div class="ctx-menu" [style.left.px]="ctxMenu()!.x" [style.top.px]="ctxMenu()!.y">
+    <button class="ctx-item" (click)="ctxAction('date')">Alterar data</button>
+    <button class="ctx-item" (click)="ctxAction('move')">Mover mês</button>
+    <button class="ctx-item" (click)="ctxAction('amount')">Editar valor</button>
+    <button class="ctx-item" (click)="ctxAction('category')">Alterar categoria</button>
+    <button class="ctx-item" (click)="ctxAction('status')">Alterar status</button>
+    <button class="ctx-item ctx-item--danger" (click)="ctxAction('delete')">Excluir</button>
   </div>
 }
 

@@ -420,6 +420,38 @@ tr:hover td { background: var(--color-surface-2); }
   font-size: .7rem; color: var(--color-text-3); font-style: italic; padding: 2px 4px;
 }
 
+.ctx-backdrop {
+  position: fixed; inset: 0; z-index: 999;
+}
+
+.ctx-menu {
+  position: fixed;
+  z-index: 1000;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  padding: 4px 0;
+  min-width: 180px;
+}
+
+.ctx-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .875rem;
+  color: var(--color-text);
+  transition: background .1s;
+
+  &:hover { background: var(--color-hover); }
+
+  &--danger { color: #dc2626; }
+}
+
 .status-select {
   appearance: none; border: none; outline: none; cursor: pointer;
   padding: 0.2rem 0.6rem; border-radius: 999px;
