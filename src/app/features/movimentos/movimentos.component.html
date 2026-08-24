@@ -397,12 +397,12 @@
         <td class="col-date" (dblclick)="item.kind !== 'savings' && openEdit(item)" (contextmenu)="onRowContextMenu($event, item)">
           {{ (item.purchaseDate ?? item.date) | date:'dd/MM/yyyy' }}
         </td>
-        <td class="col-tipo" (dblclick)="item.kind !== 'savings' && openEdit(item)">
+        <td class="col-tipo" (dblclick)="item.kind !== 'savings' && openEdit(item)" (contextmenu)="onRowContextMenu($event, item)">
           <span class="tipo-badge" [class.tipo-badge--entrada]="item.kind === 'entry' || (item.kind === 'savings' && item.amount > 0)" [class.tipo-badge--saida]="item.kind === 'transaction' || (item.kind === 'savings' && item.amount < 0)" [class.tipo-badge--savings]="item.kind === 'savings'">
             {{ item.kind === 'entry' ? 'Entrada' : item.kind === 'savings' ? (item.amount >= 0 ? 'Depósito' : 'Retirada') : 'Saída' }}
           </span>
         </td>
-        <td (dblclick)="item.kind !== 'savings' && openEdit(item)">
+        <td (dblclick)="item.kind !== 'savings' && openEdit(item)" (contextmenu)="onRowContextMenu($event, item)">
           <div class="desc-cell">
             <span>{{ item.description }}</span>
             @if ($any(item.raw).totalInstallments > 1) {
@@ -410,7 +410,7 @@
             }
           </div>
         </td>
-        <td (dblclick)="item.kind !== 'savings' && openEdit(item)">
+        <td (dblclick)="item.kind !== 'savings' && openEdit(item)" (contextmenu)="onRowContextMenu($event, item)">
           @if (item.kind === 'transaction') {
             <div class="cat-cell">
               <span class="cat-dot" [style.background]="categoryColor(item.categoryId)"></span>
@@ -420,11 +420,12 @@
             <span class="col-muted">{{ typeName(item.typeId) }}</span>
           }
         </td>
-        <td class="col-muted" (dblclick)="item.kind !== 'savings' && openEdit(item)">{{ payerName(item) }}</td>
+        <td class="col-muted" (dblclick)="item.kind !== 'savings' && openEdit(item)" (contextmenu)="onRowContextMenu($event, item)">{{ payerName(item) }}</td>
         <td class="col-amount text-right"
             [class.amount-positivo]="item.amount > 0 && item.kind !== 'transaction'"
             [class.amount-negativo]="item.kind === 'transaction' ? item.amount > 0 : item.amount < 0"
-            (dblclick)="item.kind !== 'savings' && openEdit(item)">
+            (dblclick)="item.kind !== 'savings' && openEdit(item)"
+            (contextmenu)="onRowContextMenu($event, item)">
           R$ {{ item.amount | number:'1.2-2' }}
         </td>
         <td (click)="$event.stopPropagation()">

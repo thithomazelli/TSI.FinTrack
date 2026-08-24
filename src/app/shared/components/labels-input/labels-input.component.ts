@@ -36,10 +36,14 @@ export class LabelsInputComponent implements OnInit {
 
   readonly suggestions = computed(() => {
     const val = this.inputValue().toLowerCase().trim();
-    if (!val) return [];
     const existing = new Set(this.labels());
-    const fromFamily = this.familyNames()
-      .filter(n => n.toLowerCase().includes(val) && !existing.has(n));
+    if (!val) {
+      // no input: show family names first, then recent people, excluding already-added
+      const fromFamily = this.familyNames().filter(n => !existing.has(n));
+      const fromPeople = this.allPeople().map(p => p.name).filter(n => !existing.has(n) && !fromFamily.includes(n));
+      return [...fromFamily, ...fromPeople].slice(0, 6);
+    }
+    const fromFamily = this.familyNames().filter(n => n.toLowerCase().includes(val) && !existing.has(n));
     const fromPeople = this.allPeople()
       .map(p => p.name)
       .filter(n => n.toLowerCase().includes(val) && !existing.has(n) && !fromFamily.includes(n));
@@ -52,14 +56,23 @@ export class LabelsInputComponent implements OnInit {
 
   onInput(value: string): void {
     this.inputValue.set(value);
-    this.showDropdown.set(value.trim().length > 0);
+    this.showDropdown.set(true);
+  }
+
+  onFocus(): void {
+    this.showDropdown.set(true);
   }
 
   onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault();
+      event.stopPropagation(); // prevent modal submit
       const val = this.inputValue().trim();
-      if (val) this.addLabel(val);
+      if (val) {
+        this.addLabel(val);
+      } else if (this.suggestions().length > 0) {
+        this.addLabel(this.suggestions()[0]);
+      }
     } else if (event.key === 'Backspace' && !this.inputValue() && this.labels().length > 0) {
       this.removeLabel(this.labels()[this.labels().length - 1]);
     }
