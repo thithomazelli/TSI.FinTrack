@@ -78,6 +78,11 @@
 
 // ── Table ─────────────────────────────────────────────────────────────────────
 .gt-table-wrap {
+  // No overflow here — must NOT create a scroll container so position:sticky works on page scroll
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.gt-table-scroll {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);

@@ -44,6 +44,7 @@
   @if (visibleGroups().length === 0) {
     <p class="gt-empty">{{ emptyMsg() }}</p>
   } @else {
+  <div class="gt-table-scroll">
     <table class="gt-table">
       <thead #theadEl [style.top.px]="stickyGroupTop()">
         <tr>
@@ -188,6 +189,7 @@
         </tfoot>
       }
     </table>
+  </div>
   }
 </div>
 
