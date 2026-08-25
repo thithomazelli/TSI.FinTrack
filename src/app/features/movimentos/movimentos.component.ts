@@ -869,10 +869,10 @@ export class MovimentosComponent implements OnInit {
       this.allSavingsMovements.set(savingsMovsRes);
       const savAccs = this.savingsAccounts();
       const savInitial = savAccs.reduce((s, a) => s + (a.balance ?? 0), 0);
-      const now2 = new Date();
-      const today2 = now2.toISOString().split('T')[0];
-      const savCashAvail = (await Promise.all(savAccs.map(a => this.balanceService.getAvailableBalanceByAccount(a.id)))).reduce((s, v) => s + v, 0);
-      const savCashProj  = (await Promise.all(savAccs.map(a => this.balanceService.getBalanceUpToByAccount(new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0], a.id)))).reduce((s, v) => s + v, 0);
+      const savCashAvail = (await Promise.all(savAccs.map(a => isCurrent
+        ? this.balanceService.getAvailableBalanceByAccount(a.id)
+        : this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id)))).reduce((s, v) => s + v, 0);
+      const savCashProj  = (await Promise.all(savAccs.map(a => this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id)))).reduce((s, v) => s + v, 0);
       this.preloadedBalance.set({
         available: Number(availableRes ?? 0) - savCashAvail,
         projected: Number(projectedRes ?? 0) - savCashProj,
@@ -957,7 +957,7 @@ export class MovimentosComponent implements OnInit {
     const savCashflowQueries: Promise<number>[] = [
       ...savAccs.map(a => isCurrent
         ? this.balanceService.getAvailableBalanceByAccount(a.id)
-        : this.balanceService.getBalanceUpToByAccount(today, a.id)),
+        : this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id)),
       ...savAccs.map(a => this.balanceService.getBalanceUpToByAccount(endOfMonth, a.id)),
     ];
 
