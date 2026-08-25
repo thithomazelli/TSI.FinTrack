@@ -447,7 +447,10 @@
         <td class="col-actions">
           <div class="action-btns" (click)="$event.stopPropagation()">
           @if (item.kind === 'savings') {
-            <span class="action-btn-muted">ver poupança</span>
+            <button class="action-btn action-btn--edit" (click)="openSavingsEdit(item)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+              Editar
+            </button>
           } @else {
             <button class="action-btn action-btn--edit" (click)="openEdit(item)">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14">
@@ -547,6 +550,40 @@
       <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-danger" (click)="bulkDelete()" [disabled]="bulkSaving()">
         {{ bulkSaving() ? ('common.saving' | translate) : ('common.delete' | translate) }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Savings movement edit modal -->
+@if (editingSavingsItem()) {
+  <div class="modal-backdrop" (click)="closeSavingsEdit()"></div>
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="saveSavingsMovement.bind(this)"
+       [tsiModalKeyEscape]="closeSavingsEdit.bind(this)">
+    <div class="modal-header">
+      <h3 class="modal-title">Editar {{ editingSavingsItem()!.amount >= 0 ? 'depósito' : 'retirada' }}</h3>
+      <button class="modal-close" (click)="closeSavingsEdit()">✕</button>
+    </div>
+    <div class="field">
+      <input class="field-input" placeholder=" " [(ngModel)]="savingsFormDescription" />
+      <label class="field-label">{{ 'common.description' | translate }}</label>
+    </div>
+    <div class="fields-row">
+      <div class="field">
+        <input class="field-input" tsiCurrencyMask placeholder=" " [(ngModel)]="savingsFormAmount" />
+        <label class="field-label">{{ 'common.amount' | translate }}</label>
+      </div>
+      <div class="field field--date">
+        <input class="field-input" type="date" placeholder=" " [(ngModel)]="savingsFormDate" />
+        <label class="field-label">{{ 'common.date' | translate }}</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeSavingsEdit()">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="saveSavingsMovement()" [disabled]="savingsFormSaving()">
+        {{ savingsFormSaving() ? ('common.saving' | translate) : ('common.save' | translate) }}
       </button>
     </div>
   </div>

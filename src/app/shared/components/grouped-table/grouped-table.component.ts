@@ -1,7 +1,10 @@
 import {
+  AfterViewInit,
   Component,
   ContentChild,
+  ElementRef,
   TemplateRef,
+  ViewChild,
   effect,
   inject,
   input,
@@ -45,8 +48,18 @@ export type GroupSearchFn<T = any> = (item: T, query: string) => boolean;
   templateUrl: './grouped-table.component.html',
   styleUrls: ['./grouped-table.component.scss'],
 })
-export class GroupedTableComponent {
+export class GroupedTableComponent implements AfterViewInit {
+  @ViewChild('theadEl') theadEl?: ElementRef<HTMLTableSectionElement>;
+  readonly theadHeight = signal(0);
+
+  ngAfterViewInit(): void {
+    // measure thead height so group headers can stick just below it
+    const h = this.theadEl?.nativeElement.getBoundingClientRect().height ?? 0;
+    this.theadHeight.set(Math.round(h));
+  }
+
   readonly groups             = input<TableGroup[]>([]);
+  readonly stickyGroupTop     = input<number>(0);
   readonly draggable          = input<boolean>(false);
   readonly searchFn           = input<GroupSearchFn | null>(null);
   readonly searchPlaceholder  = input<string>('Buscar...');

@@ -474,7 +474,7 @@ export class MovimentosComponent implements OnInit {
         id: `__savings_${accountId}`,
         label: account?.name ?? 'Poupança',
         items: movs,
-        total: movs.reduce((s, m) => s + m.amount, 0),
+        total: movs.reduce((s, m) => s + (m.kind === 'transaction' ? -m.amount : m.amount), 0),
         status: 'REALIZED',
         defaultExpanded: false,
       });
@@ -669,6 +669,44 @@ export class MovimentosComponent implements OnInit {
 
   // Single delete confirm
   readonly deletingItem = signal<MovimentoItem | null>(null);
+
+  // Savings movement edit
+  readonly editingSavingsItem = signal<MovimentoItem | null>(null);
+  savingsFormDescription = '';
+  savingsFormAmount = 0;
+  savingsFormDate = '';
+  readonly savingsFormSaving = signal(false);
+
+  openSavingsEdit(item: MovimentoItem): void {
+    this.editingSavingsItem.set(item);
+    this.savingsFormDescription = item.description;
+    this.savingsFormAmount = Math.abs(item.amount);
+    this.savingsFormDate = item.date;
+  }
+
+  closeSavingsEdit(): void { this.editingSavingsItem.set(null); }
+
+  saveSavingsMovement(): void {
+    const item = this.editingSavingsItem();
+    if (!item) return;
+    const raw = item.raw as SavingsMovement;
+    this.savingsFormSaving.set(true);
+    const signedAmount = item.amount < 0 ? -this.savingsFormAmount : this.savingsFormAmount;
+    this.savingsService.update(item.id, {
+      description: this.savingsFormDescription.trim(),
+      amount: signedAmount,
+      date: this.savingsFormDate,
+      typeId: raw.typeId,
+      accountId: raw.accountId ?? '',
+    }).then(updated => {
+      this.allSavingsMovements.update(list => list.map(s => s.id === updated.id ? updated : s));
+      this.closeSavingsEdit();
+      this.savingsFormSaving.set(false);
+    }).catch((err: unknown) => {
+      this.logger.error('Failed to update savings movement', err);
+      this.savingsFormSaving.set(false);
+    });
+  }
 
   // Context menu
   readonly ctxMenu = signal<{ x: number; y: number } | null>(null);
