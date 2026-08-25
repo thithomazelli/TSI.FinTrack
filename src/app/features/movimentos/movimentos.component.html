@@ -1,6 +1,6 @@
 <div class="page">
   <!-- Sticky collapsible header -->
-  <div class="sticky-header">
+  <div class="sticky-header" #stickyHeaderEl>
     <div class="page-header">
       <h2 class="page-title">{{ 'movimentos.title' | translate }}</h2>
       <div class="header-actions">
@@ -261,6 +261,7 @@
       [activeInsert]="activeInsert()"
       [pageSize]="150"
       [pageSizeOptions]="[50, 100, 150, 250]"
+      [stickyGroupTop]="stickyHeaderHeight()"
       (rowReordered)="onRowReordered($event)"
       (insertRequested)="onInsertRequested($event)"
     >

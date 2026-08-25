@@ -1,9 +1,12 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   NgZone,
   OnInit,
+  ViewChild,
   inject,
   signal,
   computed,
@@ -75,7 +78,9 @@ type ModalMode = 'entry' | 'transaction' | null;
     styleUrls: ['./movimentos.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MovimentosComponent implements OnInit {
+export class MovimentosComponent implements OnInit, AfterViewInit {
+  @ViewChild('stickyHeaderEl') stickyHeaderEl?: ElementRef<HTMLElement>;
+  readonly stickyHeaderHeight = signal(0);
   private readonly entryService = inject(EntryService);
   private readonly transactionService = inject(TransactionService);
   private readonly categoryService = inject(CategoryService);
@@ -804,6 +809,16 @@ export class MovimentosComponent implements OnInit {
       this.applyMonth(this.year(), this.month());
     } else {
       this.load();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    const el = this.stickyHeaderEl?.nativeElement;
+    if (el) {
+      this.stickyHeaderHeight.set(Math.round(el.getBoundingClientRect().height));
+      new ResizeObserver(() => {
+        this.stickyHeaderHeight.set(Math.round(el.getBoundingClientRect().height));
+      }).observe(el);
     }
   }
 
