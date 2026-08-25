@@ -863,7 +863,10 @@ export class MovimentosComponent implements OnInit {
       const today2 = now2.toISOString().split('T')[0];
       const savCashAvail = (await Promise.all(savAccs.map(a => this.balanceService.getAvailableBalanceByAccount(a.id)))).reduce((s, v) => s + v, 0);
       const savCashProj  = (await Promise.all(savAccs.map(a => this.balanceService.getBalanceUpToByAccount(new Date(+this.year(), +this.month(), 0).toISOString().split('T')[0], a.id)))).reduce((s, v) => s + v, 0);
-      this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
+      this.preloadedBalance.set({
+        available: Number(availableRes ?? 0) - savCashAvail,
+        projected: Number(projectedRes ?? 0) - savCashProj,
+      });
       this.savingsBalance.set({
         available: Number(savingsAvailableRes ?? 0) + savInitial + savCashAvail,
         projected: Number(savingsProjectedRes ?? 0) + savInitial + savCashProj,
@@ -969,7 +972,11 @@ export class MovimentosComponent implements OnInit {
     const savCashProjected = savAccs.reduce((s, _, i) => s + results[4 + savAccs.length + i], 0);
     const savCashOff = savAccs.length * 2; // offset consumed by savCashflowQueries
 
-    this.preloadedBalance.set({ available: Number(availableRes ?? 0), projected: Number(projectedRes ?? 0) });
+    // getAvailableBalance sums ALL accounts; subtract savings portion so checking card is isolated
+    this.preloadedBalance.set({
+      available: Number(availableRes ?? 0) - savCashAvailable,
+      projected: Number(projectedRes ?? 0) - savCashProjected,
+    });
     this.savingsBalance.set({
       available: Number(savingsAvailableRes ?? 0) + savingsInitial + savCashAvailable,
       projected: Number(savingsProjectedRes ?? 0) + savingsInitial + savCashProjected,
