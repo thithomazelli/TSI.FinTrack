@@ -266,12 +266,22 @@ export class MovimentosComponent implements OnInit {
   readonly preloadedBalance = signal<{ available: number; projected: number } | null>(null);
   readonly savingsBalance = signal<{ available: number; projected: number } | null>(null);
 
-  readonly totalEntradas = computed(() => this.allEntries().reduce((s, e) => s + e.amount, 0));
-  readonly totalSaidas   = computed(() => this.allTransactions().reduce((s, t) => s + t.amount, 0));
-  readonly totalSaidasRealizadas = computed(() =>
-    this.allTransactions().filter(t => t.status === 'REALIZED').reduce((s, t) => s + t.amount, 0));
-  readonly totalSaidasProjetadas = computed(() =>
-    this.allTransactions().filter(t => t.status === 'PROJECTED' || t.status === 'ESTIMATED').reduce((s, t) => s + t.amount, 0));
+  readonly totalEntradas = computed(() => {
+    const savIds = new Set(this.savingsAccounts().map(a => a.id));
+    return this.allEntries().filter(e => !savIds.has(e.accountId ?? '')).reduce((s, e) => s + e.amount, 0);
+  });
+  readonly totalSaidas   = computed(() => {
+    const savIds = new Set(this.savingsAccounts().map(a => a.id));
+    return this.allTransactions().filter(t => !savIds.has(t.accountId ?? '')).reduce((s, t) => s + t.amount, 0);
+  });
+  readonly totalSaidasRealizadas = computed(() => {
+    const savIds = new Set(this.savingsAccounts().map(a => a.id));
+    return this.allTransactions().filter(t => t.status === 'REALIZED' && !savIds.has(t.accountId ?? '')).reduce((s, t) => s + t.amount, 0);
+  });
+  readonly totalSaidasProjetadas = computed(() => {
+    const savIds = new Set(this.savingsAccounts().map(a => a.id));
+    return this.allTransactions().filter(t => (t.status === 'PROJECTED' || t.status === 'ESTIMATED') && !savIds.has(t.accountId ?? '')).reduce((s, t) => s + t.amount, 0);
+  });
   readonly saldo         = computed(() => this.totalEntradas() - this.totalSaidas());
   readonly totalSavingsDeposits = computed(() => {
     const savIds = new Set(this.savingsAccounts().map(a => a.id));
