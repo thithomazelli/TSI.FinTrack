@@ -21,6 +21,29 @@
     }
   </div>
 
+  <!-- Faturas por cartão -->
+  @if (bills().length > 0) {
+    <div class="bill-status-bar">
+      @for (bill of bills(); track bill.id) {
+        <div class="bill-status-item">
+          <span class="bill-card-name">{{ cardName(bill.creditCardId) }}</span>
+          <span class="bill-badge"
+            [class.bill-badge--open]="bill.status === BillStatus.Open"
+            [class.bill-badge--closed]="bill.status === BillStatus.Closed"
+            [class.bill-badge--paid]="bill.status === BillStatus.Paid">
+            {{ bill.status === BillStatus.Paid ? 'paga' : bill.status === BillStatus.Closed ? 'fechada' : 'em aberto' }}
+          </span>
+          <button class="btn-bill-action"
+            [class.btn-bill-action--primary]="bill.status === BillStatus.Closed"
+            [disabled]="billUpdatingId() === bill.id"
+            (click)="updateBillStatus(bill, nextBillStatus(bill.status))">
+            {{ nextBillStatusLabel(bill.status) }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
   <!-- Gráfico por categoria -->
   @if (categorySpend().length > 0) {
     <div class="pie-card">

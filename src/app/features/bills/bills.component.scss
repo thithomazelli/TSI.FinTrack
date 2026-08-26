@@ -192,3 +192,80 @@ tfoot td {
   width: 28px; min-width: 28px; padding: 0 4px; text-align: center;
   color: var(--color-text-2); cursor: grab;
 }
+
+.bill-status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+
+.bill-status-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: .4rem .75rem;
+}
+
+.bill-card-name {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bill-badge {
+  font-size: .7rem;
+  font-weight: 600;
+  padding: .15rem .45rem;
+  border-radius: var(--radius-sm);
+  text-transform: lowercase;
+  background: color-mix(in srgb, var(--color-text-2) 15%, transparent);
+  color: var(--color-text-2);
+
+  &--open {
+    background: color-mix(in srgb, #f59e0b 15%, transparent);
+    color: #d97706;
+  }
+  &--closed {
+    background: color-mix(in srgb, #22c55e 15%, transparent);
+    color: #16a34a;
+  }
+  &--paid {
+    background: color-mix(in srgb, #3b82f6 15%, transparent);
+    color: #2563eb;
+  }
+}
+
+.btn-bill-action {
+  font-size: .75rem;
+  font-weight: 600;
+  padding: .2rem .55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-accent);
+  }
+
+  &--primary {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+
+    &:hover:not(:disabled) {
+      opacity: .88;
+      color: #fff;
+    }
+  }
+
+  &:disabled { opacity: .4; cursor: default; }
+}

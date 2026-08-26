@@ -6,12 +6,17 @@ import { ChartConfiguration, ChartData, Chart, registerables } from 'chart.js';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionService } from '../../core/services/transaction.service';
 import { CreditCardService } from '../../core/services/credit-card.service';
+import { CreditCardBillService } from '../../core/services/credit-card-bill.service';
 import { CategoryService } from '../../core/services/category.service';
 import { LoggingService } from '../../core/services/logging.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { MonthPickerComponent } from '../../shared/components/month-picker/month-picker.component';
 import { Transaction } from '../../core/models/interfaces/transaction.interface';
 import { CreditCard } from '../../core/models/interfaces/credit-card.interface';
+import { CreditCardBill } from '../../core/models/interfaces/credit-card-bill.interface';
+import { BillStatus } from '../../core/models/enums/bill-status.enum';
+import { TransactionStatus } from '../../core/models/enums/transaction-status.enum';
 import { Category } from '../../core/models/interfaces/category.interface';
 
 Chart.register(...registerables);
@@ -26,16 +31,21 @@ Chart.register(...registerables);
 export class BillsComponent implements OnInit {
   private readonly txService = inject(TransactionService);
   private readonly cardService = inject(CreditCardService);
+  private readonly billService = inject(CreditCardBillService);
   private readonly categoryService = inject(CategoryService);
   private readonly logger = inject(LoggingService);
+  private readonly toast = inject(ToastService);
   private readonly cdr = inject(ChangeDetectorRef);
   readonly themeService = inject(ThemeService);
 
   readonly transactions = signal<Transaction[]>([]);
   readonly cards = signal<CreditCard[]>([]);
+  readonly bills = signal<CreditCardBill[]>([]);
   readonly categories = signal<Category[]>([]);
   readonly loading = signal(false);
+  readonly billUpdatingId = signal<string | null>(null);
   readonly selectedCardId = signal<string | 'all'>('all');
+  readonly BillStatus = BillStatus;
   readonly year = signal(new Date().getFullYear());
   readonly month = signal(new Date().getMonth() + 1);
   readonly dndMode = signal(false);
@@ -126,6 +136,51 @@ export class BillsComponent implements OnInit {
     this.load();
   }
 
+  billForCard(cardId: string | null): CreditCardBill | undefined {
+    if (!cardId) return undefined;
+    return this.bills().find(b => b.creditCardId === cardId);
+  }
+
+  nextBillStatus(current: BillStatus): BillStatus {
+    return current === BillStatus.Open ? BillStatus.Closed
+      : current === BillStatus.Closed ? BillStatus.Paid
+      : BillStatus.Open;
+  }
+
+  nextBillStatusLabel(current: BillStatus): string {
+    return current === BillStatus.Open ? 'Fechar Fatura'
+      : current === BillStatus.Closed ? 'Marcar como Pago'
+      : 'Reabrir';
+  }
+
+  updateBillStatus(bill: CreditCardBill, status: BillStatus): void {
+    this.billUpdatingId.set(bill.id);
+    this.billService.updateStatus(bill.id, status)
+      .then(updated => {
+        this.bills.update(list => list.map(b => b.id === updated.id ? { ...b, ...updated } : b));
+        const txStatus = status === BillStatus.Paid ? TransactionStatus.Realized
+          : status === BillStatus.Open ? TransactionStatus.Projected : null;
+        if (txStatus && bill.creditCardId) {
+          this.txService.bulkUpdateStatusByCardMonth(
+            bill.creditCardId, this.year(), this.month(), txStatus
+          ).then(() => {
+            this.transactions.update(list =>
+              list.map(t => t.creditCardId === bill.creditCardId ? { ...t, status: txStatus } : t)
+            );
+            this.cdr.markForCheck();
+          }).catch((err: unknown) => this.logger.error('Bulk status update failed', err));
+        }
+        this.billUpdatingId.set(null);
+        this.toast.success('Status da fatura atualizado.');
+        this.cdr.markForCheck();
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed to update bill status', err);
+        this.billUpdatingId.set(null);
+        this.toast.error('Erro ao atualizar status da fatura.');
+      });
+  }
+
   categoryName(id: string | null): string {
     if (!id) return '—';
     return this.categories().find(c => c.id === id)?.name ?? '—';
@@ -138,9 +193,15 @@ export class BillsComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.txService.getByMonth({ year: this.year(), month: this.month() })
-      .then(data => { this.transactions.set(data); this.loading.set(false); })
-      .catch((err: unknown) => { this.logger.error('Failed to load bills', err); this.loading.set(false); });
+    Promise.all([
+      this.txService.getByMonth({ year: this.year(), month: this.month() }),
+      this.billService.getByMonth(this.year(), this.month()),
+    ]).then(([txs, bills]) => {
+      this.transactions.set(txs);
+      this.bills.set(bills);
+      this.loading.set(false);
+      this.cdr.markForCheck();
+    }).catch((err: unknown) => { this.logger.error('Failed to load bills', err); this.loading.set(false); });
   }
 
   onMonthChanged(e: { year: number; month: number }): void {
