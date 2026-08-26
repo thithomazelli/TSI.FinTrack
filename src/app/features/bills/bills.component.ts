@@ -167,8 +167,16 @@ export class BillsComponent implements OnInit {
             this.transactions.update(list =>
               list.map(t => t.creditCardId === bill.creditCardId ? { ...t, status: txStatus } : t)
             );
+            this.billUpdatingId.set(null);
+            this.toast.success('Status da fatura atualizado.');
             this.cdr.markForCheck();
-          }).catch((err: unknown) => this.logger.error('Bulk status update failed', err));
+          }).catch((err: unknown) => {
+            this.logger.error('Bulk status update failed', err);
+            this.billUpdatingId.set(null);
+            this.toast.error('Erro ao atualizar despesas da fatura.');
+            this.cdr.markForCheck();
+          });
+          return;
         }
         this.billUpdatingId.set(null);
         this.toast.success('Status da fatura atualizado.');
