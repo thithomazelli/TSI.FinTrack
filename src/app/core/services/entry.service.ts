@@ -150,6 +150,46 @@ export class EntryService {
       });
   }
 
+  async updateByDescriptionPrefix(
+    baseDescription: string,
+    currentId: string,
+    payload: Partial<CreateEntryPayload>,
+  ): Promise<Entry[]> {
+    this.logger.info('Updating all installments for entry group', baseDescription);
+    const siblings = await this.getByDescriptionPrefix(baseDescription);
+    const total = siblings.length;
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const updates = siblings.map(sib => {
+      const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (payload.description !== undefined) {
+        const base = payload.description.trim().replace(/ - \d+\/\d+$/, '');
+        const num = sib.installmentNumber ?? 1;
+        row['description'] = `${base} - ${pad(num)}/${pad(total)}`;
+      }
+      if (payload.amount !== undefined) row['amount'] = payload.amount;
+      if (payload.typeId !== undefined) row['type_id'] = payload.typeId;
+      if (payload.accountId !== undefined) row['account_id'] = payload.accountId;
+      if (payload.labels !== undefined) row['labels'] = payload.labels;
+      if (payload.status !== undefined) row['status'] = payload.status;
+      // date is intentionally NOT propagated — each installment keeps its own date
+
+      return this.supabase.client
+        .from(TABLE)
+        .update(row)
+        .eq('id', sib.id)
+        .eq('owner_id', this.ownerId)
+        .select()
+        .single()
+        .then(({ data, error }: { data: any; error: any }) => {
+          if (error) throw error;
+          return this.toModel(data);
+        });
+    });
+
+    return Promise.all(updates);
+  }
+
   async updatePosition(id: string, position: number): Promise<void> {
     return this.supabase.client
       .from(TABLE)

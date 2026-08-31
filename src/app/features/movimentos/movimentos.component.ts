@@ -183,6 +183,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
   formTxIsTransfer = false;
   formTxTransferToAccountId = '';
   formTxApplyToGroup = false;
+  formEntryApplyToGroup = false;
   formTxOriginalCurrency = 'USD';
   formTxOriginalAmount = 0;
   formTxExchangeRate = 0;
@@ -1198,6 +1199,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
       this.formEntryTypeId = e.typeId ?? '';
       this.formEntryAccountId = e.accountId ?? '';
       this.formEntryLabels = [...e.labels];
+      this.formEntryApplyToGroup = false;
       this.modalMode.set('entry');
 
       if (e.totalInstallments && e.totalInstallments > 1) {
@@ -1304,23 +1306,33 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
     };
 
     const id = this.editingId();
-    const op$ = id
-      ? this.entryService.update(id, payload)
+    const editingEntry = id ? this.allEntries().find(e => e.id === id) : null;
+    const applyToGroup = this.formEntryApplyToGroup && !!id && !!editingEntry?.totalInstallments;
+    const baseDescription = applyToGroup
+      ? editingEntry!.description.replace(/ - \d+\/\d+$/, '')
+      : null;
+
+    const op$: Promise<Entry | Entry[]> = id
+      ? (applyToGroup
+          ? this.entryService.updateByDescriptionPrefix(baseDescription!, id, payload)
+          : this.entryService.update(id, payload))
       : this.entryService.create(payload);
 
-    op$.then((saved: Entry) => {
+    op$.then((result: Entry | Entry[]) => {
       this.zone.run(() => {
         this.toast.success(this.tr(id ? 'movimentos.toast.entryUpdated' : 'movimentos.toast.entryAdded'));
         this.saving.set(false);
         this.closeModal();
-        if (id) {
+        if (applyToGroup) {
+          this.load(true);
+        } else if (id) {
+          const saved = result as Entry;
           const from = this.dateFrom();
           const to   = this.dateTo();
           const inPeriod = saved.date >= (from ?? '') && saved.date <= (to ?? '');
           if (inPeriod) {
             this.allEntries.update(list => list.map(e => e.id === id ? saved : e));
           } else {
-            // Date moved outside current period — remove from view
             this.allEntries.update(list => list.filter(e => e.id !== id));
           }
           this.cdr.markForCheck();

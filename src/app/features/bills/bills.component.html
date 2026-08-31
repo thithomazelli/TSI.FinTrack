@@ -127,7 +127,7 @@
               </span>
             </td>
             <td class="td-card">{{ cardName(tx.creditCardId) }}</td>
-            <td class="td-amount amount-negativo">R$ {{ tx.amount | number:'1.2-2' }}</td>
+            <td class="td-amount" [class.amount-negativo]="tx.amount > 0" [class.amount-positivo]="tx.amount < 0">R$ {{ tx.amount | number:'1.2-2' }}</td>
             <td class="td-status">
               <span class="status-badge" [class.status-badge--realized]="tx.status === 'REALIZED'" [class.status-badge--projected]="tx.status === 'PROJECTED'">
                 {{ (tx.status === 'REALIZED' ? 'movimentos.realized' : 'movimentos.projected') | translate }}
@@ -139,7 +139,7 @@
       <tfoot>
         <tr>
           <td [attr.colspan]="dndMode() ? 6 : 5" class="tfoot-label">{{ 'common.total' | translate }}</td>
-          <td class="tfoot-total amount-negativo">R$ {{ total() | number:'1.2-2' }}</td>
+          <td class="tfoot-total" [class.amount-negativo]="total() > 0" [class.amount-positivo]="total() < 0">R$ {{ total() | number:'1.2-2' }}</td>
           <td></td>
         </tr>
       </tfoot>

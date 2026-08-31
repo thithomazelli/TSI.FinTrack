@@ -885,6 +885,13 @@
       <tsi-labels-input [(labels)]="formEntryLabels" />
     </div>
 
+    @if (editingId() && editingHasInstallments()) {
+      <label class="toggle-label toggle-label--group-apply">
+        <input type="checkbox" [(ngModel)]="formEntryApplyToGroup" />
+        Aplicar alterações em todas as parcelas
+      </label>
+    }
+
     <div class="modal-actions">
       <button class="btn btn-ghost" (click)="closeModal()">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary" (click)="saveEntry()" [disabled]="saving() || !formEntryDescription.trim() || formEntryAmount === 0">
