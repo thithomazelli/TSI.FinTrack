@@ -136,7 +136,8 @@ export class DateLangDirective implements OnInit {
         hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
 
         const prev = navBtn('‹');
-        prev.addEventListener('click', () => {
+        prev.addEventListener('click', (e) => {
+          e.stopPropagation();
           popupMonth--;
           if (popupMonth < 0) { popupMonth = 11; popupYear--; }
           renderMonth();
@@ -147,7 +148,8 @@ export class DateLangDirective implements OnInit {
         title.textContent = `${MONTHS_PT[popupMonth]} ${popupYear}`;
 
         const next = navBtn('›');
-        next.addEventListener('click', () => {
+        next.addEventListener('click', (e) => {
+          e.stopPropagation();
           popupMonth++;
           if (popupMonth > 11) { popupMonth = 0; popupYear++; }
           renderMonth();
