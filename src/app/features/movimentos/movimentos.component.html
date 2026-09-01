@@ -423,7 +423,7 @@
         </td>
         <td class="col-muted" (dblclick)="item.kind !== 'savings' && openEdit(item)" (contextmenu)="onRowContextMenu($event, item)">{{ payerName(item) }}</td>
         <td class="col-amount text-right"
-            [class.amount-positivo]="item.amount > 0 && item.kind !== 'transaction'"
+            [class.amount-positivo]="item.kind === 'transaction' ? item.amount < 0 : item.amount > 0"
             [class.amount-negativo]="item.kind === 'transaction' ? item.amount > 0 : item.amount < 0"
             (dblclick)="item.kind !== 'savings' && openEdit(item)"
             (contextmenu)="onRowContextMenu($event, item)">
