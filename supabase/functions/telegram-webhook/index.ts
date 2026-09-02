@@ -764,22 +764,38 @@ async function handleAjuda(chatId: number) {
 async function handleSaldo(chatId: number, userId: string) {
   const { year, month } = currentYearMonth();
   const { start, end } = monthDateRange(year, month);
-  const [{ data: txs }, { data: entries }] = await Promise.all([
-    supabase.from('transactions').select('amount, status').eq('owner_id', userId).gte('date', start).lte('date', end),
+
+  const [{ data: txs }, { data: entries }, { data: balRow }, projData] = await Promise.all([
+    supabase.from('transactions').select('amount, status').eq('owner_id', userId).gte('date', start).lte('date', end).in('status', ['REALIZED', 'PROJECTED', 'ESTIMATED']),
     supabase.from('entries').select('amount').eq('owner_id', userId).gte('date', start).lte('date', end),
+    supabase.from('v_available_balance').select('available').eq('owner_id', userId).maybeSingle(),
+    supabase.rpc('get_balance_up_to_by_owner', { p_owner_id: userId, end_date: end }),
   ]);
-  const totalIncome = (entries ?? []).reduce((s: number, e: { amount: number }) => s + e.amount, 0);
-  const realized    = (txs ?? []).filter((t: { status: string }) => t.status === 'REALIZED').reduce((s: number, t: { amount: number }) => s + t.amount, 0);
-  const projected   = (txs ?? []).reduce((s: number, t: { amount: number }) => s + t.amount, 0);
-  await send(chatId,
+
+  const totalIncome       = (entries ?? []).reduce((s: number, e: { amount: number }) => s + e.amount, 0);
+  const spentRealized     = (txs ?? []).filter((t: { status: string }) => t.status === 'REALIZED').reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+  const spentPending      = (txs ?? []).filter((t: { status: string }) => t.status === 'PROJECTED' || t.status === 'ESTIMATED').reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+  const monthBalance      = totalIncome - spentRealized;
+  const projectedMonth    = totalIncome - (spentRealized + spentPending);
+  const available         = Number(balRow?.available ?? 0);
+  const projectedBalance  = Number(projData.data ?? 0);
+
+  let msg =
     `📊 <b>Saldo — ${String(month).padStart(2,'0')}/${year}</b>\n\n` +
-    `💰 Entradas: <b>${fmt(totalIncome)}</b>\n` +
-    `💸 Gastos realizados: <b>${fmt(realized)}</b>\n` +
-    `📋 Gastos projetados: <b>${fmt(projected)}</b>\n` +
-    `─────────────────\n` +
-    `✅ Saldo realizado: <b>${fmt(totalIncome - realized)}</b>\n` +
-    `🔮 Saldo projetado: <b>${fmt(totalIncome - projected)}</b>`
-  );
+    `${available >= 0 ? '🏦' : '🔴'} Saldo disponível (acumulado): <b>${fmt(available)}</b>\n` +
+    `${projectedBalance >= 0 ? '📊' : '⚠️'} Saldo projetado (acumulado): <b>${fmt(projectedBalance)}</b>\n\n` +
+    `<b>Este mês:</b>\n` +
+    `💰 Receitas: <b>${fmt(totalIncome)}</b>\n` +
+    `💸 Gastos realizados: <b>${fmt(spentRealized)}</b>\n`;
+  if (spentPending > 0) {
+    msg += `⏳ Pendente a pagar: <b>${fmt(spentPending)}</b>\n`;
+  }
+  msg +=
+    `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: <b>${fmt(monthBalance)}</b>\n`;
+  if (spentPending > 0) {
+    msg += `${projectedMonth >= 0 ? '📊' : '⚠️'} Saldo projetado do mês: <b>${fmt(projectedMonth)}</b>`;
+  }
+  await send(chatId, msg);
 }
 
 async function handlePoupanca(chatId: number, userId: string) {

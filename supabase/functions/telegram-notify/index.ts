@@ -34,7 +34,6 @@ async function notifyBills(today: Date) {
     const soon7 = new Date(today);
     soon7.setDate(soon7.getDate() + 7);
 
-    // Faturas em aberto que já venceram OU vencem nos próximos 7 dias
     const { data: bills } = await supabase
       .from('credit_card_bills')
       .select('due_date, total_amount, status, credit_cards(name, last_four_digits)')
@@ -81,8 +80,6 @@ async function notifyPendingDebits(today: Date) {
   soon7.setDate(soon7.getDate() + 7);
 
   for (const sub of subs) {
-    // Lançamentos individuais pendentes (PROJECTED ou ESTIMATED) que não são de cartão
-    // — ex.: aluguel, água, inglês. Cartão é coberto pela notificação de faturas.
     const { data: txs } = await supabase
       .from('transactions')
       .select('description, amount, date, status, credit_card_id')
@@ -151,9 +148,12 @@ async function sendDailyDigest(today: Date) {
     const totalIncome    = (entries ?? []).reduce((s, e) => s + e.amount, 0);
     const spentRealized  = realized.reduce((s, t) => s + t.amount, 0);
     const spentPending   = pending.reduce((s, t) => s + t.amount, 0);
+    // Saldo atual = receitas - gastos realizados (dinheiro disponível no mês)
     const monthBalance   = totalIncome - spentRealized;
+    // Saldo projetado = receitas - (realizados + pendentes)
+    const projectedMonthBalance = totalIncome - (spentRealized + spentPending);
 
-    // Saldo realmente disponível (acumulado, todo o histórico) — via view
+    // Saldo acumulado disponível (todos os meses) — via view
     const { data: balRow } = await supabase
       .from('v_available_balance')
       .select('available')
@@ -161,12 +161,12 @@ async function sendDailyDigest(today: Date) {
       .maybeSingle();
     const available = Number(balRow?.available ?? 0);
 
-    // Saldo projetado acumulado até fim do mês (equivalente ao get_balance_up_to)
+    // Saldo projetado acumulado até fim do mês
     const { data: projData } = await supabase
       .rpc('get_balance_up_to_by_owner', { p_owner_id: sub.user_id, end_date: end });
     const projectedBalance = Number(projData ?? 0);
 
-    // Faturas em aberto vencidas ou a vencer (contagem rápida)
+    // Faturas em aberto vencidas ou a vencer em 7 dias
     const soon7 = new Date(today);
     soon7.setDate(soon7.getDate() + 7);
     const { data: bills } = await supabase
@@ -179,7 +179,7 @@ async function sendDailyDigest(today: Date) {
     const overdueCount = (bills ?? []).filter((b) => b.due_date < todayStr).length;
     const dueSoonCount = (bills ?? []).filter((b) => b.due_date >= todayStr).length;
 
-    // Lançamentos individuais pendentes (não-cartão) — atraso e a vencer
+    // Lançamentos individuais pendentes (débito, não cartão) a vencer em 7 dias
     const { data: pendingTxs } = await supabase
       .from('transactions')
       .select('date')
@@ -190,7 +190,6 @@ async function sendDailyDigest(today: Date) {
     const debitOverdue = (pendingTxs ?? []).filter((t) => t.date < todayStr).length;
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
-    const projectedMonthBalance = totalIncome - (spentRealized + spentPending);
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
     msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
     msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} <b>Saldo projetado: ${fmt(projectedBalance)}</b>\n`;
@@ -199,10 +198,12 @@ async function sendDailyDigest(today: Date) {
     msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
     msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
     if (spentPending > 0) {
-      msg += `⏳ A pagar (projetado + estimado): ${fmt(spentPending)}\n`;
+      msg += `⏳ Pendente a pagar: ${fmt(spentPending)}\n`;
     }
-    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo realizado: ${fmt(monthBalance)}\n`;
-    msg += `${projectedMonthBalance >= 0 ? '📊' : '⚠️'} Saldo projetado do mês: ${fmt(projectedMonthBalance)}\n`;
+    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
+    if (spentPending > 0) {
+      msg += `${projectedMonthBalance >= 0 ? '📊' : '⚠️'} Saldo projetado do mês: ${fmt(projectedMonthBalance)}\n`;
+    }
     if (overdueCount || dueSoonCount) {
       msg += `\n<b>Faturas:</b>\n`;
       if (overdueCount) msg += `  🚨 ${overdueCount} vencida(s)\n`;
@@ -294,6 +295,7 @@ async function sendMonthlyAnalysis(today: Date) {
 
     if (totalIncome === 0 && totalExpenses === 0) continue;
 
+    // Top categorias de gastos (excluindo categorias sem nome / nulas)
     const spentMap: Record<string, number> = {};
     for (const t of realized) {
       if (t.category_id) spentMap[t.category_id] = (spentMap[t.category_id] ?? 0) + t.amount;
@@ -355,7 +357,7 @@ async function sendMidMonthHealth(today: Date) {
   const subs = await getAllSubscriptions();
   const dayOfMonth = today.getDate();
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-  const monthProgress = dayOfMonth / daysInMonth; // fração do mês decorrida
+  const monthProgress = dayOfMonth / daysInMonth;
 
   for (const sub of subs) {
     const { goals, spentMap } = await getCurrentMonthGoalData(sub.user_id, today);
@@ -370,7 +372,6 @@ async function sendMidMonthHealth(today: Date) {
     for (const g of goals) {
       const spent = spentMap[g.category_id] ?? 0;
       const usedPct = g.monthly_limit > 0 ? spent / g.monthly_limit : 0;
-      // "saudável" se o ritmo de gasto acompanha o avanço do mês (margem de 10%)
       if (usedPct <= monthProgress + 0.1) {
         onTrack++;
       } else {
@@ -435,7 +436,6 @@ async function sendMonthEndSummary(today: Date) {
       if (t.category_id) spentMap[t.category_id] = (spentMap[t.category_id] ?? 0) + t.amount;
     }
 
-    // Destaques por meta: quem mais economizou (abaixo da meta) e quem mais estourou
     const { goals } = await getCurrentMonthGoalData(sub.user_id, today);
     const allCatIds = [...new Set([...goals.map((g) => g.category_id), ...Object.keys(spentMap)])];
     const { data: cats } = await supabase.from('categories').select('id, name').in('id', allCatIds);
@@ -445,7 +445,7 @@ async function sendMonthEndSummary(today: Date) {
     let worstSpender: { name: string; diff: number } | null = null;
     for (const g of goals) {
       const spent = spentMap[g.category_id] ?? 0;
-      const diff = g.monthly_limit - spent; // positivo = economizou
+      const diff = g.monthly_limit - spent;
       const name = catMap[g.category_id] ?? g.category_id;
       if (diff > 0 && (!bestSaver || diff > bestSaver.diff)) bestSaver = { name, diff };
       if (diff < 0 && (!worstSpender || diff < worstSpender.diff)) worstSpender = { name, diff };
