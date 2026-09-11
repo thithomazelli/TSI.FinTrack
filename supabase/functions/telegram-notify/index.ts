@@ -153,15 +153,21 @@ async function sendDailyDigest(today: Date) {
     // Saldo projetado = receitas - (realizados + pendentes)
     const projectedMonthBalance = totalIncome - (spentRealized + spentPending);
 
-    // Saldo por conta (realizado + projetado, agrupado por kind) — RPC com owner_id
-    const { data: accountBalances } = await supabase
-      .rpc('get_account_balances_by_owner', { p_owner_id: sub.user_id, end_date: end });
+    // Saldo por conta (realizado + projetado, agrupado por kind) — RPCs com owner_id
+    const [{ data: accountBalances }, { data: periodByKind }] = await Promise.all([
+      supabase.rpc('get_account_balances_by_owner', { p_owner_id: sub.user_id, end_date: end }),
+      supabase.rpc('get_period_balance_by_kind', { p_owner_id: sub.user_id, start_date: start, end_date: end }),
+    ]);
     type AcctRow = { account_id: string; account_name: string; kind: string; available: number; projected: number };
+    type KindRow = { kind: string; period_balance: number };
     const acctRows = (accountBalances ?? []) as AcctRow[];
+    const kindRows = (periodByKind ?? []) as KindRow[];
     const checking = acctRows.filter(a => a.kind !== 'savings');
     const savings  = acctRows.filter(a => a.kind === 'savings');
-    const available       = acctRows.reduce((s, a) => s + Number(a.available), 0);
+    const available        = acctRows.reduce((s, a) => s + Number(a.available), 0);
     const projectedBalance = acctRows.reduce((s, a) => s + Number(a.projected), 0);
+    const checkingPeriod   = Number(kindRows.find(r => r.kind !== 'savings')?.period_balance ?? 0);
+    const savingsPeriod    = Number(kindRows.find(r => r.kind === 'savings')?.period_balance ?? 0);
 
     // Faturas em aberto vencidas ou a vencer em 7 dias
     const soon7 = new Date(today);
@@ -210,15 +216,9 @@ async function sendDailyDigest(today: Date) {
       for (const a of visibleSavings) msg += fmtAcctLine(a);
     }
     msg += '\n';
-    msg += `<b>Este mês (Conta Corrente):</b>\n`;
-    msg += `  Entrada: ${fmt(totalIncome)}\n`;
-    msg += `  Saída: ${fmt(spentRealized + spentPending)}`;
-    if (spentPending > 0) msg += ` (${fmt(spentRealized)} realiz. + ${fmt(spentPending)} pend.)`;
-    msg += '\n';
-    msg += `  ${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
-    if (spentPending > 0) {
-      msg += `  ${projectedMonthBalance >= 0 ? '📊' : '⚠️'} Projetado: ${fmt(projectedMonthBalance)}\n`;
-    }
+    msg += `<b>Este mês:</b>\n`;
+    msg += `  🏦 Conta Corrente: ${checkingPeriod >= 0 ? '+' : ''}${fmt(checkingPeriod)}\n`;
+    msg += `  💰 Poupança: ${savingsPeriod >= 0 ? '+' : ''}${fmt(savingsPeriod)}\n`;
     if (overdueCount || dueSoonCount) {
       msg += `\n<b>Faturas:</b>\n`;
       if (overdueCount) msg += `  🚨 ${overdueCount} vencida(s)\n`;
