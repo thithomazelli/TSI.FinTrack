@@ -153,16 +153,17 @@ async function sendDailyDigest(today: Date) {
     // Saldo projetado = receitas - (realizados + pendentes)
     const projectedMonthBalance = totalIncome - (spentRealized + spentPending);
 
-    // Saldo por conta (acumulado realizado) — RPC com owner_id
-    const { data: accountBalances } = await supabase
-      .rpc('get_account_balances_by_owner', { p_owner_id: sub.user_id });
-    const acctRows = (accountBalances ?? []) as { account_id: string; account_name: string; available: number }[];
+    // Saldo por conta (acumulado realizado + projetado) — RPCs com owner_id
+    const [{ data: accountBalances }, { data: accountProjected }] = await Promise.all([
+      supabase.rpc('get_account_balances_by_owner', { p_owner_id: sub.user_id }),
+      supabase.rpc('get_account_projected_balances_by_owner', { p_owner_id: sub.user_id, end_date: end }),
+    ]);
+    type AcctRow = { account_id: string; account_name: string; available: number };
+    type ProjRow = { account_id: string; account_name: string; projected: number };
+    const acctRows = (accountBalances ?? []) as AcctRow[];
+    const projRows = (accountProjected ?? []) as ProjRow[];
     const available = acctRows.reduce((s, a) => s + Number(a.available), 0);
-
-    // Saldo projetado acumulado até fim do mês
-    const { data: projData } = await supabase
-      .rpc('get_balance_up_to_by_owner', { p_owner_id: sub.user_id, end_date: end });
-    const projectedBalance = Number(projData ?? 0);
+    const projectedBalance = projRows.reduce((s, a) => s + Number(a.projected), 0);
 
     // Faturas em aberto vencidas ou a vencer em 7 dias
     const soon7 = new Date(today);
@@ -189,14 +190,16 @@ async function sendDailyDigest(today: Date) {
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
-    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo total disponível: ${fmt(available)}</b>\n`;
+    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
     const positiveAccts = acctRows.filter(a => Number(a.available) > 0);
-    if (positiveAccts.length > 0) {
-      for (const acct of positiveAccts) {
-        msg += `  ↳ ${acct.account_name}: ${fmt(Number(acct.available))}\n`;
-      }
+    for (const acct of positiveAccts) {
+      msg += `  ↳ ${acct.account_name}: ${fmt(Number(acct.available))}\n`;
     }
-    msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} Saldo projetado (acumulado): ${fmt(projectedBalance)}\n`;
+    msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} <b>Saldo projetado: ${fmt(projectedBalance)}</b>\n`;
+    const positiveProj = projRows.filter(r => Number(r.projected) > 0);
+    for (const acct of positiveProj) {
+      msg += `  ↳ ${acct.account_name}: ${fmt(Number(acct.projected))}\n`;
+    }
     msg += '\n';
     const totalOutflow = spentRealized + spentPending;
     msg += `<b>Este mês:</b>\n`;
