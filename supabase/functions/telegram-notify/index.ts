@@ -216,7 +216,7 @@ async function sendDailyDigest(today: Date) {
       for (const a of visibleChecking) msg += fmtAcctLine(a);
     }
     if (savings.length > 0) {
-      msg += `💰 <b>Poupança Total</b>\n`;
+      msg += `\n💰 <b>Poupança Total</b>\n`;
       msg += `      Atual: ${fmt(savingsAvail)}\n`;
       msg += `      Proj.: ${fmt(savingsProj)}\n`;
       for (const a of visibleSavings) msg += fmtAcctLine(a);
