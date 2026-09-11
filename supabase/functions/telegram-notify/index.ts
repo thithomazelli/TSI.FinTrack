@@ -153,17 +153,15 @@ async function sendDailyDigest(today: Date) {
     // Saldo projetado = receitas - (realizados + pendentes)
     const projectedMonthBalance = totalIncome - (spentRealized + spentPending);
 
-    // Saldo por conta (acumulado realizado + projetado) — RPCs com owner_id
-    const [{ data: accountBalances }, { data: accountProjected }] = await Promise.all([
-      supabase.rpc('get_account_balances_by_owner', { p_owner_id: sub.user_id }),
-      supabase.rpc('get_account_projected_balances_by_owner', { p_owner_id: sub.user_id, end_date: end }),
-    ]);
-    type AcctRow = { account_id: string; account_name: string; available: number };
-    type ProjRow = { account_id: string; account_name: string; projected: number };
+    // Saldo por conta (realizado + projetado, agrupado por kind) — RPC com owner_id
+    const { data: accountBalances } = await supabase
+      .rpc('get_account_balances_by_owner', { p_owner_id: sub.user_id, end_date: end });
+    type AcctRow = { account_id: string; account_name: string; kind: string; available: number; projected: number };
     const acctRows = (accountBalances ?? []) as AcctRow[];
-    const projRows = (accountProjected ?? []) as ProjRow[];
-    const available = acctRows.reduce((s, a) => s + Number(a.available), 0);
-    const projectedBalance = projRows.reduce((s, a) => s + Number(a.projected), 0);
+    const checking = acctRows.filter(a => a.kind !== 'savings');
+    const savings  = acctRows.filter(a => a.kind === 'savings');
+    const available       = acctRows.reduce((s, a) => s + Number(a.available), 0);
+    const projectedBalance = acctRows.reduce((s, a) => s + Number(a.projected), 0);
 
     // Faturas em aberto vencidas ou a vencer em 7 dias
     const soon7 = new Date(today);
@@ -189,16 +187,23 @@ async function sendDailyDigest(today: Date) {
     const debitOverdue = (pendingTxs ?? []).filter((t) => t.date < todayStr).length;
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
+    const fmtAcctLine = (a: AcctRow) =>
+      `  ↳ ${a.account_name}: ${fmt(Number(a.available))} / proj. ${fmt(Number(a.projected))}\n`;
+
+    const checkingAvail = checking.reduce((s, a) => s + Number(a.available), 0);
+    const checkingProj  = checking.reduce((s, a) => s + Number(a.projected), 0);
+    const savingsAvail  = savings.reduce((s, a) => s + Number(a.available), 0);
+    const savingsProj   = savings.reduce((s, a) => s + Number(a.projected), 0);
+
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
-    msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
-    const positiveAccts = acctRows.filter(a => Number(a.available) > 0);
-    for (const acct of positiveAccts) {
-      msg += `  ↳ ${acct.account_name}: ${fmt(Number(acct.available))}\n`;
+
+    if (checking.length > 0) {
+      msg += `🏦 <b>Conta Corrente — ${fmt(checkingAvail)} / proj. ${fmt(checkingProj)}</b>\n`;
+      for (const a of checking) msg += fmtAcctLine(a);
     }
-    msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} <b>Saldo projetado: ${fmt(projectedBalance)}</b>\n`;
-    const positiveProj = projRows.filter(r => Number(r.projected) > 0);
-    for (const acct of positiveProj) {
-      msg += `  ↳ ${acct.account_name}: ${fmt(Number(acct.projected))}\n`;
+    if (savings.length > 0) {
+      msg += `💰 <b>Poupança — ${fmt(savingsAvail)} / proj. ${fmt(savingsProj)}</b>\n`;
+      for (const a of savings) msg += fmtAcctLine(a);
     }
     msg += '\n';
     const totalOutflow = spentRealized + spentPending;
