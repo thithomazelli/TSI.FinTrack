@@ -195,30 +195,29 @@ async function sendDailyDigest(today: Date) {
     const savingsAvail  = savings.reduce((s, a) => s + Number(a.available), 0);
     const savingsProj   = savings.reduce((s, a) => s + Number(a.projected), 0);
 
+    // Only show accounts where at least one of available/projected is non-zero
+    const visibleChecking = checking.filter(a => Number(a.available) !== 0 || Number(a.projected) !== 0);
+    const visibleSavings  = savings.filter(a => Number(a.available) !== 0 || Number(a.projected) !== 0);
+
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
 
     if (checking.length > 0) {
       msg += `🏦 <b>Conta Corrente — ${fmt(checkingAvail)} / proj. ${fmt(checkingProj)}</b>\n`;
-      for (const a of checking) msg += fmtAcctLine(a);
+      for (const a of visibleChecking) msg += fmtAcctLine(a);
     }
     if (savings.length > 0) {
       msg += `💰 <b>Poupança — ${fmt(savingsAvail)} / proj. ${fmt(savingsProj)}</b>\n`;
-      for (const a of savings) msg += fmtAcctLine(a);
+      for (const a of visibleSavings) msg += fmtAcctLine(a);
     }
     msg += '\n';
-    const totalOutflow = spentRealized + spentPending;
-    msg += `<b>Este mês:</b>\n`;
-    msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
+    msg += `<b>Este mês (Conta Corrente):</b>\n`;
+    msg += `  Entrada: ${fmt(totalIncome)}\n`;
+    msg += `  Saída: ${fmt(spentRealized + spentPending)}`;
+    if (spentPending > 0) msg += ` (${fmt(spentRealized)} realiz. + ${fmt(spentPending)} pend.)`;
+    msg += '\n';
+    msg += `  ${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
     if (spentPending > 0) {
-      msg += `🔴 Saída total: ${fmt(totalOutflow)}\n`;
-      msg += `  ↳ 💸 Realizados: ${fmt(spentRealized)}\n`;
-      msg += `  ↳ ⏳ Pendente: ${fmt(spentPending)}\n`;
-    } else {
-      msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
-    }
-    msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
-    if (spentPending > 0) {
-      msg += `${projectedMonthBalance >= 0 ? '📊' : '⚠️'} Saldo projetado do mês: ${fmt(projectedMonthBalance)}\n`;
+      msg += `  ${projectedMonthBalance >= 0 ? '📊' : '⚠️'} Projetado: ${fmt(projectedMonthBalance)}\n`;
     }
     if (overdueCount || dueSoonCount) {
       msg += `\n<b>Faturas:</b>\n`;

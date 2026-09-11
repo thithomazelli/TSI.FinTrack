@@ -1,4 +1,6 @@
--- Per-account available (realized) + projected balance using explicit owner_id.
+-- Per-account available + projected balance, handling savings accounts correctly.
+-- Savings accounts use savings_movements (DEPOSIT/WITHDRAWAL via domain_lists).
+-- Checking accounts use entries (income) and transactions (expenses).
 -- Returns kind ('checking' | 'savings') so callers can group by type.
 -- Safe for Edge Functions running with the service role key.
 create or replace function get_account_balances_by_owner(p_owner_id uuid, end_date date)
@@ -9,24 +11,41 @@ as $$
     a.id as account_id,
     a.name as account_name,
     coalesce(a.kind, 'checking') as kind,
-    -- realized only
-    a.balance
-      + coalesce((select sum(e.amount) from entries e
-                  where e.owner_id = p_owner_id and e.account_id = a.id and e.status = 'REALIZED'), 0)
-      - coalesce((select sum(t.amount) from transactions t
-                  where t.owner_id = p_owner_id and t.account_id = a.id and t.status = 'REALIZED'), 0)
-    as available,
-    -- all statuses up to end_date
-    a.balance
-      + coalesce((select sum(e.amount) from entries e
-                  where e.owner_id = p_owner_id and e.account_id = a.id and e.date <= end_date), 0)
-      - coalesce((select sum(t.amount) from transactions t
-                  where t.owner_id = p_owner_id and t.account_id = a.id and t.date <= end_date), 0)
-    as projected
+    case when coalesce(a.kind, 'checking') = 'savings' then
+      -- Savings: initial balance + deposits - withdrawals (all time = realized)
+      a.balance + coalesce((
+        select sum(case when dl.value = 'DEPOSIT' then sm.amount else -sm.amount end)
+        from savings_movements sm
+        join domain_lists dl on dl.id = sm.type_id
+        where sm.owner_id = p_owner_id and sm.account_id = a.id
+      ), 0)
+    else
+      -- Checking: initial balance + realized entries - realized transactions
+      a.balance
+        + coalesce((select sum(e.amount) from entries e
+                    where e.owner_id = p_owner_id and e.account_id = a.id and e.status = 'REALIZED'), 0)
+        - coalesce((select sum(t.amount) from transactions t
+                    where t.owner_id = p_owner_id and t.account_id = a.id and t.status = 'REALIZED'), 0)
+    end as available,
+    case when coalesce(a.kind, 'checking') = 'savings' then
+      -- Savings projected: same as available (savings movements have no pending status)
+      a.balance + coalesce((
+        select sum(case when dl.value = 'DEPOSIT' then sm.amount else -sm.amount end)
+        from savings_movements sm
+        join domain_lists dl on dl.id = sm.type_id
+        where sm.owner_id = p_owner_id and sm.account_id = a.id and sm.date <= end_date
+      ), 0)
+    else
+      -- Checking projected: initial balance + all entries - all transactions up to end_date
+      a.balance
+        + coalesce((select sum(e.amount) from entries e
+                    where e.owner_id = p_owner_id and e.account_id = a.id and e.date <= end_date), 0)
+        - coalesce((select sum(t.amount) from transactions t
+                    where t.owner_id = p_owner_id and t.account_id = a.id and t.date <= end_date), 0)
+    end as projected
   from accounts a
   where a.owner_id = p_owner_id and not a.is_archived
   order by a.kind, a.name;
 $$;
 
--- Drop old split RPCs if they exist
 drop function if exists get_account_projected_balances_by_owner(uuid, date);
