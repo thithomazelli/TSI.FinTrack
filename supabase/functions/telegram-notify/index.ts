@@ -210,13 +210,13 @@ async function sendDailyDigest(today: Date) {
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
 
     if (checking.length > 0) {
-      msg += `🏦 <b>Conta Corrente</b>\n`;
+      msg += `🏦 <b>Conta Corrente Total</b>\n`;
       msg += `      Atual: ${fmt(checkingAvail)}\n`;
       msg += `      Proj.: ${fmt(checkingProj)}\n`;
       for (const a of visibleChecking) msg += fmtAcctLine(a);
     }
     if (savings.length > 0) {
-      msg += `💰 <b>Poupança</b>\n`;
+      msg += `💰 <b>Poupança Total</b>\n`;
       msg += `      Atual: ${fmt(savingsAvail)}\n`;
       msg += `      Proj.: ${fmt(savingsProj)}\n`;
       for (const a of visibleSavings) msg += fmtAcctLine(a);
