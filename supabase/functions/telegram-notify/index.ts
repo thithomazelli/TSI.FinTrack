@@ -194,7 +194,9 @@ async function sendDailyDigest(today: Date) {
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
     const fmtAcctLine = (a: AcctRow) =>
-      `  ↳ ${a.account_name}: ${fmt(Number(a.available))} / proj. ${fmt(Number(a.projected))}\n`;
+      `  ↳ <b>${a.account_name}</b>\n` +
+      `      Atual: ${fmt(Number(a.available))}\n` +
+      `      Proj.: ${fmt(Number(a.projected))}\n`;
 
     const checkingAvail = checking.reduce((s, a) => s + Number(a.available), 0);
     const checkingProj  = checking.reduce((s, a) => s + Number(a.projected), 0);
@@ -208,11 +210,15 @@ async function sendDailyDigest(today: Date) {
     let msg = `📅 <b>Resumo de hoje — ${monthName}</b>\n\n`;
 
     if (checking.length > 0) {
-      msg += `🏦 <b>Conta Corrente — ${fmt(checkingAvail)} / proj. ${fmt(checkingProj)}</b>\n`;
+      msg += `🏦 <b>Conta Corrente</b>\n`;
+      msg += `      Atual: ${fmt(checkingAvail)}\n`;
+      msg += `      Proj.: ${fmt(checkingProj)}\n`;
       for (const a of visibleChecking) msg += fmtAcctLine(a);
     }
     if (savings.length > 0) {
-      msg += `💰 <b>Poupança — ${fmt(savingsAvail)} / proj. ${fmt(savingsProj)}</b>\n`;
+      msg += `💰 <b>Poupança</b>\n`;
+      msg += `      Atual: ${fmt(savingsAvail)}\n`;
+      msg += `      Proj.: ${fmt(savingsProj)}\n`;
       for (const a of visibleSavings) msg += fmtAcctLine(a);
     }
     msg += '\n';
