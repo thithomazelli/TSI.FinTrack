@@ -194,11 +194,15 @@ async function sendDailyDigest(today: Date) {
     msg += `${available >= 0 ? '🏦' : '🔴'} <b>Saldo disponível: ${fmt(available)}</b>\n`;
     msg += `${projectedBalance >= 0 ? '📊' : '⚠️'} <b>Saldo projetado: ${fmt(projectedBalance)}</b>\n`;
     msg += `<i>(acumulado, considerando todos os meses)</i>\n\n`;
+    const totalOutflow = spentRealized + spentPending;
     msg += `<b>Este mês:</b>\n`;
     msg += `💰 Receitas: ${fmt(totalIncome)}\n`;
-    msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
     if (spentPending > 0) {
-      msg += `⏳ Pendente a pagar: ${fmt(spentPending)}\n`;
+      msg += `🔴 Saída total: ${fmt(totalOutflow)}\n`;
+      msg += `  ↳ 💸 Realizados: ${fmt(spentRealized)}\n`;
+      msg += `  ↳ ⏳ Pendente: ${fmt(spentPending)}\n`;
+    } else {
+      msg += `💸 Gastos realizados: ${fmt(spentRealized)}\n`;
     }
     msg += `${monthBalance >= 0 ? '✅' : '❌'} Saldo atual: ${fmt(monthBalance)}\n`;
     if (spentPending > 0) {
