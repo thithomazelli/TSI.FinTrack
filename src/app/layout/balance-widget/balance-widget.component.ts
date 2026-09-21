@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, e
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BalanceService, BalanceSummary } from '../../core/services/balance.service';
+import { AccountService } from '../../core/services/account.service';
 import { LanguageService } from '../../core/services/language.service';
 
 @Component({
@@ -13,6 +14,7 @@ import { LanguageService } from '../../core/services/language.service';
 })
 export class BalanceWidgetComponent {
   private readonly balanceService = inject(BalanceService);
+  private readonly accountService = inject(AccountService);
   private readonly lang = inject(LanguageService);
 
   readonly summary   = signal<BalanceSummary | null>(null);
@@ -43,14 +45,30 @@ export class BalanceWidgetComponent {
   }
 
   private async fetch(): Promise<void> {
-    const [summary, available, projected] = await Promise.all([
+    const accounts = await this.accountService.getAll();
+    const savingsAccounts = accounts.filter(a => a.kind === 'savings' && !a.isArchived);
+
+    const [summary, totalAvailable, totalProjected, ...savCashValues] = await Promise.all([
       this.balanceService.getSummary(this.year, this.month),
       this.balanceService.getAvailableBalance(),
       this.balanceService.getBalanceUpTo(this.end),
+      // available and projected per savings account (interleaved)
+      ...savingsAccounts.flatMap(a => [
+        this.balanceService.getAvailableBalanceByAccount(a.id),
+        this.balanceService.getBalanceUpToByAccount(this.end, a.id),
+      ]),
     ]);
+
+    // subtract savings from totals to match the movimentos checking card
+    let savAvail = 0, savProj = 0;
+    for (let i = 0; i < savCashValues.length; i += 2) {
+      savAvail += savCashValues[i];
+      savProj  += savCashValues[i + 1];
+    }
+
     this.summary.set(summary);
-    this.available.set(available);
-    this.projected.set(projected);
+    this.available.set(totalAvailable - savAvail);
+    this.projected.set(totalProjected - savProj);
     this.loading.set(false);
   }
 
