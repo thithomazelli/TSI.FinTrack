@@ -315,6 +315,31 @@ export class TransactionService {
       });
   }
 
+  async deleteByInstallmentGroup(groupId: string): Promise<void> {
+    this.logger.info('Deleting all installments for group', groupId);
+    return this.supabase.client
+      .from(TABLE)
+      .delete()
+      .eq('owner_id', this.ownerId)
+      .eq('installment_group_id', groupId)
+      .then(({ error }) => { if (error) throw error; });
+  }
+
+  async bulkMoveInstallmentDates(ids: string[], targetYear: number, targetMonth: number): Promise<void> {
+    this.logger.info('Moving installments to', `${targetYear}-${targetMonth}`, ids);
+    const now = new Date().toISOString();
+    const updates = ids.map(id => ({ id, date: `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`, updated_at: now }));
+    // update one by one (Supabase upsert with array keeps owner_id check via RLS)
+    await Promise.all(updates.map(u =>
+      this.supabase.client
+        .from(TABLE)
+        .update({ date: u.date, updated_at: u.updated_at })
+        .eq('id', u.id)
+        .eq('owner_id', this.ownerId)
+        .then(({ error }) => { if (error) throw error; })
+    ));
+  }
+
   async updatePosition(id: string, position: number): Promise<void> {
     return this.supabase.client
       .from(TABLE)

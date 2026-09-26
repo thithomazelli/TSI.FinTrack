@@ -18,6 +18,14 @@ import { MonthPickerComponent } from '../../shared/components/month-picker/month
 
 type SortCol = 'description' | 'totalInstallments' | 'paid' | 'pending' | 'unitValue' | 'monthlyValue' | 'totalToPayOff' | 'lastInstallmentDate' | 'creditCardName';
 
+interface InstallmentRow {
+  id: string;
+  installmentNumber: number;
+  date: string;
+  amount: number;
+  selected: boolean;
+}
+
 interface InstallmentGroup {
   groupId: string;
   description: string;
@@ -289,6 +297,101 @@ export class InstallmentsComponent implements OnInit {
   readonly endingTotal = computed(() =>
     this.endingGroups().reduce((s, g) => s + g.monthlyValue, 0)
   );
+
+  // ── Antecipar parcelas ────────────────────────────────────────────────────
+  readonly anticipateModalOpen   = signal(false);
+  readonly anticipateGroup       = signal<InstallmentGroup | null>(null);
+  readonly anticipateRows        = signal<InstallmentRow[]>([]);
+  readonly anticipateTargetYear  = signal(new Date().getFullYear());
+  readonly anticipateTargetMonth = signal(new Date().getMonth() + 1);
+  readonly anticipateSaving      = signal(false);
+
+  readonly anticipateAllSelected = computed(() =>
+    this.anticipateRows().length > 0 && this.anticipateRows().every(r => r.selected)
+  );
+
+  readonly anticipateSelectedCount = computed(() =>
+    this.anticipateRows().filter(r => r.selected).length
+  );
+
+  async openAnticipateModal(group: InstallmentGroup, event: MouseEvent): Promise<void> {
+    event.stopPropagation();
+    this.anticipateGroup.set(group);
+    this.anticipateSaving.set(false);
+
+    const instRe = /^(.*?)\s+(\d{1,2})\/(\d{1,2})$/;
+    const start = this.startOfMonth();
+    const txs = await this.txService.getByInstallmentGroup(group.groupId)
+      .catch(() => [] as Transaction[]);
+
+    const pending = txs
+      .filter(t => t.date.slice(0, 10) >= start)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map(t => {
+        const m = instRe.exec(t.description?.trim() ?? '');
+        const num = m ? parseInt(m[2], 10) : (t.installmentNumber ?? 0);
+        return { id: t.id, installmentNumber: num, date: t.date.slice(0, 10), amount: Number(t.amount), selected: true };
+      });
+
+    this.anticipateRows.set(pending);
+    this.anticipateTargetYear.set(this.year());
+    this.anticipateTargetMonth.set(this.month());
+    this.anticipateModalOpen.set(true);
+  }
+
+  toggleAnticipateAll(): void {
+    const all = this.anticipateAllSelected();
+    this.anticipateRows.update(rows => rows.map(r => ({ ...r, selected: !all })));
+  }
+
+  toggleAnticipateRow(id: string): void {
+    this.anticipateRows.update(rows => rows.map(r => r.id === id ? { ...r, selected: !r.selected } : r));
+  }
+
+  async confirmAnticipate(): Promise<void> {
+    const selected = this.anticipateRows().filter(r => r.selected).map(r => r.id);
+    if (!selected.length) return;
+    this.anticipateSaving.set(true);
+    try {
+      await this.txService.bulkMoveInstallmentDates(selected, this.anticipateTargetYear(), this.anticipateTargetMonth());
+      this.anticipateModalOpen.set(false);
+      this.load();
+    } catch (err) {
+      this.logger.error('Failed to anticipate installments', err);
+    } finally {
+      this.anticipateSaving.set(false);
+    }
+  }
+
+  closeAnticipateModal(): void { this.anticipateModalOpen.set(false); }
+
+  // ── Remover compra inteira ─────────────────────────────────────────────────
+  readonly deleteGroupModalOpen  = signal(false);
+  readonly deleteGroupTarget     = signal<InstallmentGroup | null>(null);
+  readonly deleteGroupSaving     = signal(false);
+
+  openDeleteGroupModal(group: InstallmentGroup, event: MouseEvent): void {
+    event.stopPropagation();
+    this.deleteGroupTarget.set(group);
+    this.deleteGroupModalOpen.set(true);
+  }
+
+  closeDeleteGroupModal(): void { this.deleteGroupModalOpen.set(false); }
+
+  async confirmDeleteGroup(): Promise<void> {
+    const group = this.deleteGroupTarget();
+    if (!group) return;
+    this.deleteGroupSaving.set(true);
+    try {
+      await this.txService.deleteByInstallmentGroup(group.groupId);
+      this.deleteGroupModalOpen.set(false);
+      this.load();
+    } catch (err) {
+      this.logger.error('Failed to delete installment group', err);
+    } finally {
+      this.deleteGroupSaving.set(false);
+    }
+  }
 
   ngOnInit(): void {
     this.ccService.getAll(true).then(cards => this.creditCards.set(cards));

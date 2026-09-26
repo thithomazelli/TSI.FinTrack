@@ -103,9 +103,15 @@
                   <span class="desc-text">{{ g.description }}</span>
                   <span class="installment-badge">{{ g.paid }}/{{ g.totalInstallments }}</span>
                 </div>
-                <a class="desc-last-date" (click)="$event.stopPropagation()">
-                  {{ 'installments.lastInstallment' | translate }}: {{ g.lastInstallmentDate | date:'MM/yyyy' }}
-                </a>
+                <div class="desc-footer">
+                  <a class="desc-last-date" (click)="$event.stopPropagation()">
+                    {{ 'installments.lastInstallment' | translate }}: {{ g.lastInstallmentDate | date:'MM/yyyy' }}
+                  </a>
+                  <div class="row-actions">
+                    <button class="row-action-btn row-action-btn--anticipate" title="Antecipar parcelas" (click)="openAnticipateModal(g, $event)">⏩ Antecipar</button>
+                    <button class="row-action-btn row-action-btn--delete" title="Remover compra inteira" (click)="openDeleteGroupModal(g, $event)">🗑 Remover</button>
+                  </div>
+                </div>
               </td>
               <td class="col-muted col-card">{{ g.creditCardName }}</td>
               <td class="text-center col-num">{{ g.totalInstallments }}</td>
@@ -143,3 +149,91 @@
     </div>
   }
 </div>
+
+@if (anticipateModalOpen()) {
+  <div class="modal-backdrop" (click)="closeAnticipateModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Antecipar Parcelas</h3>
+        <button class="modal-close" (click)="closeAnticipateModal()">✕</button>
+      </div>
+      <p class="modal-subtitle">{{ anticipateGroup()?.description }}</p>
+
+      <div class="modal-section-label">Mover para o mês:</div>
+      <div class="anticipate-month-row">
+        <select class="anticipate-select" [ngModel]="anticipateTargetMonth()" (ngModelChange)="anticipateTargetMonth.set(+$event)">
+          @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
+            <option [value]="m">{{ m | number:'2.0-0' }}</option>
+          }
+        </select>
+        <select class="anticipate-select" [ngModel]="anticipateTargetYear()" (ngModelChange)="anticipateTargetYear.set(+$event)">
+          @for (y of [2024,2025,2026,2027,2028,2029,2030]; track y) {
+            <option [value]="y">{{ y }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="modal-section-label">
+        Parcelas pendentes:
+        <button class="link-btn" (click)="toggleAnticipateAll()">
+          {{ anticipateAllSelected() ? 'Desmarcar tudo' : 'Antecipar tudo' }}
+        </button>
+      </div>
+
+      <div class="anticipate-table-wrap">
+        <table class="anticipate-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Parcela</th>
+              <th>Data atual</th>
+              <th class="text-right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of anticipateRows(); track row.id) {
+              <tr [class.row-selected]="row.selected" (click)="toggleAnticipateRow(row.id)">
+                <td><input type="checkbox" [checked]="row.selected" (click)="$event.stopPropagation(); toggleAnticipateRow(row.id)" /></td>
+                <td>Parcela {{ row.installmentNumber }}</td>
+                <td>{{ row.date | date:'dd/MM/yyyy' }}</td>
+                <td class="text-right">R$ {{ row.amount | number:'1.2-2' }}</td>
+              </tr>
+            }
+            @if (anticipateRows().length === 0) {
+              <tr><td colspan="4" class="state-msg">Nenhuma parcela pendente</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="closeAnticipateModal()">Cancelar</button>
+        <button class="btn btn-primary" [disabled]="anticipateSelectedCount() === 0 || anticipateSaving()" (click)="confirmAnticipate()">
+          {{ anticipateSaving() ? 'Salvando...' : 'Antecipar ' + anticipateSelectedCount() + ' parcela(s)' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (deleteGroupModalOpen()) {
+  <div class="modal-backdrop" (click)="closeDeleteGroupModal()">
+    <div class="modal modal--confirm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title modal-title--danger">Remover compra parcelada</h3>
+        <button class="modal-close" (click)="closeDeleteGroupModal()">✕</button>
+      </div>
+      <p class="modal-confirm-text">
+        Isso vai apagar <strong>todas as {{ deleteGroupTarget()?.totalInstallments }} parcelas</strong> de:
+      </p>
+      <p class="modal-confirm-name">{{ deleteGroupTarget()?.description }}</p>
+      <p class="modal-confirm-warning">Esta ação não pode ser desfeita.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="closeDeleteGroupModal()">Cancelar</button>
+        <button class="btn btn-danger" [disabled]="deleteGroupSaving()" (click)="confirmDeleteGroup()">
+          {{ deleteGroupSaving() ? 'Removendo...' : 'Remover tudo' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
