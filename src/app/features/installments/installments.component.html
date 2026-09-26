@@ -152,7 +152,7 @@
 
 @if (anticipateModalOpen()) {
   <div class="modal-backdrop" (click)="closeAnticipateModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal--anticipate" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3 class="modal-title">Antecipar Parcelas</h3>
         <button class="modal-close" (click)="closeAnticipateModal()">✕</button>

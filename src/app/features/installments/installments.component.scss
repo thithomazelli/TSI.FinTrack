@@ -152,6 +152,7 @@ tfoot .totals-row td { border-top: 2px solid var(--color-border); border-bottom:
   background: var(--color-surface); border: 1px solid var(--color-border);
   border-radius: var(--radius-lg); width: 100%; max-width: 520px;
   box-shadow: 0 16px 40px rgba(0,0,0,.25); display: flex; flex-direction: column; gap: 0;
+  &--anticipate { max-width: 720px; }
   &--confirm { max-width: 400px; }
 }
 .modal-header {
@@ -198,7 +199,7 @@ tfoot .totals-row td { border-top: 2px solid var(--color-border); border-bottom:
 
 // ── Anticipate table ──────────────────────────────────────────────────────────
 .anticipate-table-wrap {
-  padding: 0 1.5rem; max-height: 300px; overflow-y: auto;
+  padding: 0 1.5rem; max-height: 480px; overflow-y: auto;
 }
 .anticipate-table {
   width: 100%; border-collapse: collapse; font-size: .85rem;
