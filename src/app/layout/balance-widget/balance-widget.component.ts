@@ -46,29 +46,26 @@ export class BalanceWidgetComponent {
 
   private async fetch(): Promise<void> {
     const accounts = await this.accountService.getAll();
-    const savingsAccounts = accounts.filter(a => a.kind === 'savings' && !a.isArchived);
+    const checkingAccounts = accounts.filter(a => a.kind !== 'savings' && !a.isArchived);
 
-    const [summary, totalAvailable, totalProjected, ...savCashValues] = await Promise.all([
+    const [summary, ...checkingValues] = await Promise.all([
       this.balanceService.getSummary(this.year, this.month),
-      this.balanceService.getAvailableBalance(),
-      this.balanceService.getBalanceUpTo(this.end),
-      // available and projected per savings account (interleaved)
-      ...savingsAccounts.flatMap(a => [
+      // available and projected per checking account (interleaved)
+      ...checkingAccounts.flatMap(a => [
         this.balanceService.getAvailableBalanceByAccount(a.id),
         this.balanceService.getBalanceUpToByAccount(this.end, a.id),
       ]),
     ]);
 
-    // subtract savings from totals to match the movimentos checking card
-    let savAvail = 0, savProj = 0;
-    for (let i = 0; i < savCashValues.length; i += 2) {
-      savAvail += savCashValues[i];
-      savProj  += savCashValues[i + 1];
+    let totalAvail = 0, totalProj = 0;
+    for (let i = 0; i < checkingValues.length; i += 2) {
+      totalAvail += checkingValues[i] as number;
+      totalProj  += checkingValues[i + 1] as number;
     }
 
     this.summary.set(summary);
-    this.available.set(totalAvailable - savAvail);
-    this.projected.set(totalProjected - savProj);
+    this.available.set(totalAvail);
+    this.projected.set(totalProj);
     this.loading.set(false);
   }
 

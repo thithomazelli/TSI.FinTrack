@@ -111,26 +111,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private async fetchBalance(): Promise<void> {
     const accounts = await this.accountService.getAll();
-    const savingsAccounts = accounts.filter(a => a.kind === 'savings' && !a.isArchived);
+    const checkingAccounts = accounts.filter(a => a.kind !== 'savings' && !a.isArchived);
 
-    const [available, projected, summary, ...savCashValues] = await Promise.all([
-      this.balanceService.getAvailableBalance(),
-      this.balanceService.getBalanceUpTo(this.end),
+    const [summary, ...checkingValues] = await Promise.all([
       this.balanceService.getSummary(this.year, this.month),
-      ...savingsAccounts.flatMap(a => [
+      ...checkingAccounts.flatMap(a => [
         this.balanceService.getAvailableBalanceByAccount(a.id),
         this.balanceService.getBalanceUpToByAccount(this.end, a.id),
       ]),
     ]);
 
-    let savAvail = 0, savProj = 0;
-    for (let i = 0; i < savCashValues.length; i += 2) {
-      savAvail += savCashValues[i] as number;
-      savProj  += savCashValues[i + 1] as number;
+    let totalAvail = 0, totalProj = 0;
+    for (let i = 0; i < checkingValues.length; i += 2) {
+      totalAvail += checkingValues[i] as number;
+      totalProj  += checkingValues[i + 1] as number;
     }
 
-    this.availableBalance.set(available - savAvail);
-    this.projectedBalance.set(projected - savProj);
+    this.availableBalance.set(totalAvail);
+    this.projectedBalance.set(totalProj);
     this.balanceSummary.set(summary);
   }
 
