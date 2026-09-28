@@ -10,6 +10,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { AlertService, Alert } from '../../core/services/alert.service';
 import { UserProfileService } from '../../core/services/user-profile.service';
 import { BalanceService } from '../../core/services/balance.service';
+import { AccountService } from '../../core/services/account.service';
 import { LoggingService } from '../../core/services/logging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { LanguageService } from '../../core/services/language.service';
@@ -44,6 +45,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly alertService = inject(AlertService);
   private readonly balanceService = inject(BalanceService);
+  private readonly accountService = inject(AccountService);
   private readonly profileService = inject(UserProfileService);
   private readonly logger = inject(LoggingService);
   private readonly toast = inject(ToastService);
@@ -108,13 +110,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   private async fetchBalance(): Promise<void> {
-    const [available, projected, summary] = await Promise.all([
+    const accounts = await this.accountService.getAll();
+    const savingsAccounts = accounts.filter(a => a.kind === 'savings' && !a.isArchived);
+
+    const [available, projected, summary, ...savCashValues] = await Promise.all([
       this.balanceService.getAvailableBalance(),
       this.balanceService.getBalanceUpTo(this.end),
       this.balanceService.getSummary(this.year, this.month),
+      ...savingsAccounts.flatMap(a => [
+        this.balanceService.getAvailableBalanceByAccount(a.id),
+        this.balanceService.getBalanceUpToByAccount(this.end, a.id),
+      ]),
     ]);
-    this.availableBalance.set(available);
-    this.projectedBalance.set(projected);
+
+    let savAvail = 0, savProj = 0;
+    for (let i = 0; i < savCashValues.length; i += 2) {
+      savAvail += savCashValues[i] as number;
+      savProj  += savCashValues[i + 1] as number;
+    }
+
+    this.availableBalance.set(available - savAvail);
+    this.projectedBalance.set(projected - savProj);
     this.balanceSummary.set(summary);
   }
 
