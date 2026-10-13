@@ -88,6 +88,20 @@ export class TransactionService {
     });
   }
 
+  async getOverdueProjected(beforeDate: string): Promise<Transaction[]> {
+    const { data, error } = await this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('owner_id', this.ownerId)
+      .in('status', ['PROJECTED', 'ESTIMATED'])
+      .is('credit_card_id', null)
+      .lt('date', beforeDate)
+      .order('date', { ascending: true })
+      .range(0, 999);
+    if (error) throw error;
+    return (data ?? []).map((r: any) => this.toModel(r));
+  }
+
   async create(payload: CreateTransactionPayload): Promise<Transaction[]> {
     this.logger.info('Creating transaction', payload.description);
     const ownerId = this.ownerId;

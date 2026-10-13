@@ -26,6 +26,22 @@
       </div>
     </div>
 
+    <!-- Overdue alert banner -->
+    @if (overdueCount() > 0) {
+      <div class="overdue-banner">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="15" height="15">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+        @if (overdueEntries().length > 0 && overdueTransactions().length > 0) {
+          {{ overdueEntries().length }} {{ overdueEntries().length === 1 ? 'receita' : 'receitas' }} e {{ overdueTransactions().length }} {{ overdueTransactions().length === 1 ? 'despesa' : 'despesas' }} de meses anteriores ainda {{ (overdueEntries().length + overdueTransactions().length) === 1 ? 'está projetada' : 'estão projetadas' }} — verifique e marque como realizada(s)
+        } @else if (overdueEntries().length > 0) {
+          {{ overdueEntries().length }} {{ overdueEntries().length === 1 ? 'receita projetada' : 'receitas projetadas' }} de meses anteriores ainda {{ overdueEntries().length === 1 ? 'não foi realizada' : 'não foram realizadas' }}
+        } @else {
+          {{ overdueTransactions().length }} {{ overdueTransactions().length === 1 ? 'despesa projetada' : 'despesas projetadas' }} de meses anteriores ainda {{ overdueTransactions().length === 1 ? 'não foi realizada' : 'não foram realizadas' }}
+        }
+      </div>
+    }
+
     <!-- Top section: three plain divs — same sm-card pattern (collapsible) -->
     <div class="top-row-wrap" [class.top-row-wrap--open]="headerExpanded()">
   <div class="top-row">
