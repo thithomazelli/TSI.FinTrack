@@ -35,8 +35,9 @@ export class AlertService {
   async getAlerts(year: number, month: number): Promise<Alert[]> {
     const prevMonth = month === 1 ? 12 : month - 1;
     const prevYear = month === 1 ? year - 1 : year;
+    const todayStr = new Date().toISOString().split('T')[0];
 
-    const [transactions, prevTransactions, entries, goals, categories, cards, bills] = await Promise.all([
+    const [transactions, prevTransactions, entries, goals, categories, cards, bills, overdueEntries] = await Promise.all([
       this.transactionService.getByMonth({ year, month }),
       this.transactionService.getByMonth({ year: prevYear, month: prevMonth }),
       this.entryService.getByMonth({ year, month }),
@@ -44,9 +45,10 @@ export class AlertService {
       this.categoryService.getAll(),
       this.cardService.getAll(false),
       this.billService.getByMonth(year, month),
+      this.entryService.getOverdueProjected(todayStr),
     ]);
 
-    return this.compute(year, month, transactions, prevTransactions, entries, goals, categories, cards, bills);
+    return this.compute(year, month, transactions, prevTransactions, entries, goals, categories, cards, bills, overdueEntries);
   }
 
   private compute(
@@ -58,7 +60,8 @@ export class AlertService {
     goals: Goal[],
     categories: Category[],
     cards: CreditCard[],
-    bills: CreditCardBill[]
+    bills: CreditCardBill[],
+    overdueEntries: Entry[] = []
   ): Alert[] {
     const alerts: Alert[] = [];
     const today = new Date();
@@ -119,7 +122,21 @@ export class AlertService {
       }
     }
 
-    // 3. Upcoming due dates (credit card bills) — within 3 and 7 days
+    // 3. Overdue projected entries (receitas vencidas)
+    if (overdueEntries.length > 0) {
+      const total = overdueEntries.reduce((s, e) => s + e.amount, 0);
+      const detail = overdueEntries.length === 1
+        ? `${overdueEntries[0].description} — R$ ${total.toFixed(2).replace('.', ',')}`
+        : `${overdueEntries.length} receitas em atraso — total R$ ${total.toFixed(2).replace('.', ',')}`;
+      alerts.push({
+        id: 'overdue-entries',
+        level: 'warning',
+        title: 'Receitas projetadas em atraso',
+        detail,
+      });
+    }
+
+    // 4. Upcoming due dates (credit card bills) — within 3 and 7 days
     for (const bill of bills) {
       if (bill.status === BillStatus.Paid) continue;
       if (!bill.dueDate) continue;

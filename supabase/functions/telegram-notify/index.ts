@@ -73,6 +73,48 @@ async function notifyBills(today: Date) {
   }
 }
 
+async function notifyPendingEntries(today: Date) {
+  const subs = await getAllSubscriptions();
+  const todayStr = today.toISOString().split('T')[0];
+  const soon7 = new Date(today);
+  soon7.setDate(soon7.getDate() + 7);
+
+  for (const sub of subs) {
+    const { data: entries } = await supabase
+      .from('entries')
+      .select('description, amount, date, status')
+      .eq('owner_id', sub.user_id)
+      .in('status', ['PROJECTED', 'ESTIMATED'])
+      .lte('date', soon7.toISOString().split('T')[0])
+      .order('date', { ascending: true });
+
+    if (!entries?.length) continue;
+
+    const overdue: string[] = [];
+    const upcoming: string[] = [];
+
+    for (const e of entries) {
+      const due = new Date(e.date + 'T12:00:00');
+      const daysLeft = Math.round((due.getTime() - today.getTime()) / 86400000);
+      if (e.date < todayStr) {
+        overdue.push(`• ${e.description}\n  🔴 Em atraso há ${Math.abs(daysLeft)} dia(s) — ${fmt(e.amount)}`);
+      } else {
+        const label = daysLeft === 0 ? '<b>HOJE</b>' : daysLeft === 1 ? 'amanhã' : `em ${daysLeft} dias`;
+        upcoming.push(`• ${e.description}\n  Esperada ${label} — ${fmt(e.amount)}`);
+      }
+    }
+
+    let msg = '';
+    if (overdue.length) {
+      msg += '🚨 <b>Receitas em atraso</b>\n\n' + overdue.join('\n\n') + '\n\n';
+    }
+    if (upcoming.length) {
+      msg += '🔔 <b>Receitas a receber</b>\n\n' + upcoming.join('\n\n');
+    }
+    if (msg.trim()) await sendMessage(sub.chat_id, msg.trim());
+  }
+}
+
 async function notifyPendingDebits(today: Date) {
   const subs = await getAllSubscriptions();
   const todayStr = today.toISOString().split('T')[0];
@@ -193,6 +235,16 @@ async function sendDailyDigest(today: Date) {
     const debitOverdue = (pendingTxs ?? []).filter((t) => t.date < todayStr).length;
     const debitDueSoon = (pendingTxs ?? []).filter((t) => t.date >= todayStr).length;
 
+    // Entradas pendentes (receitas projetadas) a receber em 7 dias
+    const { data: pendingEntries } = await supabase
+      .from('entries')
+      .select('date')
+      .eq('owner_id', sub.user_id)
+      .in('status', ['PROJECTED', 'ESTIMATED'])
+      .lte('date', soon7.toISOString().split('T')[0]);
+    const entryOverdue = (pendingEntries ?? []).filter((e) => e.date < todayStr).length;
+    const entryDueSoon = (pendingEntries ?? []).filter((e) => e.date >= todayStr).length;
+
     const fmtAcctLine = (a: AcctRow) =>
       `  ↳ <b>${a.account_name}</b>\n` +
       `      Atual: ${fmt(Number(a.available))}\n` +
@@ -234,6 +286,11 @@ async function sendDailyDigest(today: Date) {
       msg += `\n<b>Contas:</b>\n`;
       if (debitOverdue) msg += `  🚨 ${debitOverdue} em atraso\n`;
       if (debitDueSoon) msg += `  🔔 ${debitDueSoon} a vencer em 7 dias\n`;
+    }
+    if (entryOverdue || entryDueSoon) {
+      msg += `\n<b>Receitas:</b>\n`;
+      if (entryOverdue) msg += `  🚨 ${entryOverdue} em atraso\n`;
+      if (entryDueSoon) msg += `  🔔 ${entryDueSoon} a receber em 7 dias\n`;
     }
     await sendMessage(sub.chat_id, msg.trim());
   }
@@ -511,6 +568,7 @@ Deno.serve(async (req) => {
     await sendDailyDigest(today);
     await notifyBills(today);
     await notifyPendingDebits(today);
+    await notifyPendingEntries(today);
     await notifyGoalsExceeded(today);
   }
 
@@ -533,6 +591,9 @@ Deno.serve(async (req) => {
     await notifyBills(today);
   } else if (type === 'pending_debits') {
     await notifyPendingDebits(today);
+    await notifyPendingEntries(today);
+  } else if (type === 'pending_entries') {
+    await notifyPendingEntries(today);
   } else if (type === 'goals_exceeded') {
     await notifyGoalsExceeded(today);
   } else if (type === 'monthly_analysis') {

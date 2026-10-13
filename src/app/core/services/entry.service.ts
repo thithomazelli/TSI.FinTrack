@@ -63,6 +63,19 @@ export class EntryService {
     });
   }
 
+  async getOverdueProjected(beforeDate: string): Promise<Entry[]> {
+    const { data, error } = await this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('owner_id', this.ownerId)
+      .in('status', ['PROJECTED', 'ESTIMATED'])
+      .lt('date', beforeDate)
+      .order('date', { ascending: true })
+      .range(0, 999);
+    if (error) throw error;
+    return (data ?? []).map((r: any) => this.toModel(r));
+  }
+
   async create(payload: CreateEntryPayload): Promise<Entry> {
     this.logger.info('Creating entry', payload.description);
     if (payload.totalInstallments && payload.totalInstallments > 1) {
