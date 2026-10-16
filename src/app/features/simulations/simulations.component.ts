@@ -281,15 +281,26 @@ export class SimulationsComponent implements OnInit {
   readonly deletedItems = computed(() =>
     this.realItems().filter(i => this.overrides().get(i.id)?.deleted));
 
-  readonly allSelected = computed(() =>
-    this.filteredItems().length > 0 &&
-    this.filteredItems().every(i => this.selectedIds().has(i.id)));
-  readonly selectionCount = computed(() => this.selectedIds().size);
-
   readonly tableSearchFn: GroupSearchFn<SimItem> = (item, q) =>
     item.description.toLowerCase().includes(q) ||
     this.categoryName(item.categoryId).toLowerCase().includes(q) ||
     this.payerName(item).toLowerCase().includes(q);
+
+  // Texto da busca do grid — a seleção e as ações em massa devem respeitar o que está visível
+  readonly searchQuery = signal('');
+  readonly visibleItems = computed<SimItem[]>(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const items = this.filteredItems();
+    return q ? items.filter(i => this.tableSearchFn(i, q)) : items;
+  });
+  readonly selectedVisibleItems = computed(() => {
+    const sel = this.selectedIds();
+    return this.visibleItems().filter(i => sel.has(i.id));
+  });
+  readonly allSelected = computed(() =>
+    this.visibleItems().length > 0 &&
+    this.selectedVisibleItems().length === this.visibleItems().length);
+  readonly selectionCount = computed(() => this.selectedVisibleItems().length);
 
   readonly tableGroups = computed<TableGroup<SimItem>[]>(() => {
     const items = this.filteredItems();
@@ -615,8 +626,7 @@ export class SimulationsComponent implements OnInit {
   }
 
   bulkToggleStatus(): void {
-    const ids = [...this.selectedIds()];
-    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const items = this.selectedVisibleItems();
     this.overrides.update(m => {
       const next = new Map(m);
       for (const item of items) {
@@ -649,7 +659,7 @@ export class SimulationsComponent implements OnInit {
     if (this.allSelected()) {
       this.selectedIds.set(new Set());
     } else {
-      this.selectedIds.set(new Set(this.filteredItems().map(i => i.id)));
+      this.selectedIds.set(new Set(this.visibleItems().map(i => i.id)));
     }
   }
 
@@ -675,7 +685,7 @@ export class SimulationsComponent implements OnInit {
   }
 
   bulkSimDelete(): void {
-    const ids = [...this.selectedIds()];
+    const ids = this.selectedVisibleItems().map(i => i.id);
     this.overrides.update(m => {
       const next = new Map(m);
       for (const id of ids) next.set(id, { ...(next.get(id) ?? {}), deleted: true });
@@ -688,7 +698,7 @@ export class SimulationsComponent implements OnInit {
 
   bulkSimAmount(): void {
     if (this.bulkNewAmount <= 0) return;
-    const ids = [...this.selectedIds()];
+    const ids = this.selectedVisibleItems().map(i => i.id);
     this.overrides.update(m => {
       const next = new Map(m);
       for (const id of ids) next.set(id, { ...(next.get(id) ?? {}), amount: this.bulkNewAmount });
@@ -701,7 +711,7 @@ export class SimulationsComponent implements OnInit {
 
   bulkSimChangeDate(): void {
     if (!this.bulkNewDate) return;
-    const ids = [...this.selectedIds()];
+    const ids = this.selectedVisibleItems().map(i => i.id);
     this.overrides.update(m => {
       const next = new Map(m);
       for (const id of ids) next.set(id, { ...(next.get(id) ?? {}), date: this.bulkNewDate });
@@ -713,7 +723,7 @@ export class SimulationsComponent implements OnInit {
   }
 
   bulkSimMove(): void {
-    const ids = [...this.selectedIds()];
+    const ids = this.selectedVisibleItems().map(i => i.id);
     const y = String(this.bulkTargetYear).padStart(4, '0');
     const mo = String(this.bulkTargetMonth).padStart(2, '0');
     this.overrides.update(m => {

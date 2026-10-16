@@ -258,6 +258,7 @@
       [pageSize]="150"
       [pageSizeOptions]="[50, 100, 150, 250]"
       (rowReordered)="onRowReordered($event)"
+      (queryChange)="searchQuery.set($event)"
     >
       <ng-template #filterBtn>
         <button class="btn-new-item btn-new-entry" (click)="openNewItemModal('entry')">

@@ -278,6 +278,7 @@
       [stickyGroupTop]="stickyHeaderHeight()"
       (rowReordered)="onRowReordered($event)"
       (insertRequested)="onInsertRequested($event)"
+      (queryChange)="searchQuery.set($event)"
     >
       <ng-template #filterBtn>
         <button class="btn-filter" [class.is-active]="filterPanelOpen()" (click)="filterPanelOpen.set(!filterPanelOpen())">

@@ -371,16 +371,29 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
 
   // Multi-seleção
   readonly selectedIds = signal<Set<string>>(new Set());
-  readonly allSelected = computed(() =>
-    this.filteredItems().length > 0 &&
-    this.filteredItems().every(i => this.selectedIds().has(i.id))
-  );
-  readonly selectionCount = computed(() => this.selectedIds().size);
 
   readonly tableSearchFn: GroupSearchFn<MovimentoItem> = (item, q) =>
     item.description.toLowerCase().includes(q) ||
     this.categoryName(item.categoryId).toLowerCase().includes(q) ||
     this.payerName(item).toLowerCase().includes(q);
+
+  // Texto da busca do grid — a seleção e as ações em massa devem respeitar o que está visível
+  readonly searchQuery = signal('');
+  readonly visibleItems = computed<MovimentoItem[]>(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const items = this.filteredItems();
+    return q ? items.filter(i => this.tableSearchFn(i, q)) : items;
+  });
+  /** Itens selecionados que estão visíveis (filtros + busca). Única fonte para ações em massa. */
+  readonly selectedVisibleItems = computed(() => {
+    const sel = this.selectedIds();
+    return this.visibleItems().filter(i => sel.has(i.id));
+  });
+  readonly allSelected = computed(() =>
+    this.visibleItems().length > 0 &&
+    this.selectedVisibleItems().length === this.visibleItems().length
+  );
+  readonly selectionCount = computed(() => this.selectedVisibleItems().length);
 
   readonly activeInsert = signal<GroupInsertEvent | null>(null);
 
@@ -1538,8 +1551,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
   }
 
   async bulkToggleStatus(): Promise<void> {
-    const ids = [...this.selectedIds()];
-    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const items = this.selectedVisibleItems();
     const newStatus = this.bulkNewStatus;
     this.bulkSaving.set(true);
     try {
@@ -1568,14 +1580,15 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
     if (this.allSelected()) {
       this.selectedIds.set(new Set());
     } else {
-      this.selectedIds.set(new Set(this.filteredItems().map(i => i.id)));
+      // Apenas o que está visível no grid (filtros + busca), nunca a lista inteira do período
+      this.selectedIds.set(new Set(this.visibleItems().map(i => i.id)));
     }
   }
 
   private lastClickedIndex = -1;
 
   toggleItem(id: string, event?: MouseEvent): void {
-    const items = this.filteredItems();
+    const items = this.visibleItems();
     const idx = items.findIndex(i => i.id === id);
 
     if (event?.shiftKey && this.lastClickedIndex >= 0) {
@@ -1616,8 +1629,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
 
   // ── Bulk delete ───────────────────────────────────────────────────────────
   async bulkDelete(): Promise<void> {
-    const ids = [...this.selectedIds()];
-    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const items = this.selectedVisibleItems();
     this.bulkSaving.set(true);
     try {
       for (const item of items) {
@@ -1638,8 +1650,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
   // ── Bulk edit amount ───────────────────────────────────────────────────────
   async bulkEditAmount(): Promise<void> {
     if (this.bulkNewAmount <= 0) return;
-    const ids = [...this.selectedIds()];
-    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const items = this.selectedVisibleItems();
     this.bulkSaving.set(true);
     try {
       for (const item of items) {
@@ -1663,8 +1674,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
   // ── Bulk change date ───────────────────────────────────────────────────────
   async bulkChangeDate(): Promise<void> {
     if (!this.bulkNewDate) return;
-    const ids = [...this.selectedIds()];
-    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const items = this.selectedVisibleItems();
     this.bulkSaving.set(true);
     try {
       for (const item of items) {
@@ -1687,8 +1697,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
 
   // ── Bulk change category ──────────────────────────────────────────────────
   async bulkChangeCategory(): Promise<void> {
-    const ids = [...this.selectedIds()];
-    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const items = this.selectedVisibleItems();
     const categoryId = this.bulkNewCategoryId || null;
     this.bulkSaving.set(true);
     try {
@@ -1712,8 +1721,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
 
   // ── Bulk move month ────────────────────────────────────────────────────────
   async bulkMoveMonth(): Promise<void> {
-    const ids = [...this.selectedIds()];
-    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    const items = this.selectedVisibleItems();
     const y = this.bulkTargetYear;
     const m = String(this.bulkTargetMonth).padStart(2, '0');
     this.bulkSaving.set(true);

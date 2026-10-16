@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Backups locais de dados (scripts/delete-from-date.mjs)
+/backups

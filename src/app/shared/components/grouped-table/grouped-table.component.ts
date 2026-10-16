@@ -72,6 +72,8 @@ export class GroupedTableComponent implements AfterViewInit {
 
   readonly rowReordered    = output<GroupReorderEvent>();
   readonly insertRequested = output<GroupInsertEvent>();
+  /** Emits the search text so the parent can scope selection/bulk actions to what is visible. */
+  readonly queryChange     = output<string>();
 
   @ContentChild('theadRow')    theadRowTpl?:    TemplateRef<void>;
   @ContentChild('row')          rowTpl!:          TemplateRef<{ $implicit: any }>;
@@ -231,6 +233,7 @@ export class GroupedTableComponent implements AfterViewInit {
   onSearch(q: string): void {
     this.query.set(q);
     this.currentPage.set(0);
+    this.queryChange.emit(q);
   }
 
   // ── Insert zones ───────────────────────────────────────────────────────────
