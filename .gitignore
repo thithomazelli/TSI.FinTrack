@@ -43,3 +43,4 @@ Thumbs.db
 
 # Backups locais de dados (scripts/delete-from-date.mjs)
 /backups
+.env
