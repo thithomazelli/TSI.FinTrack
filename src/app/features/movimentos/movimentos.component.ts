@@ -433,7 +433,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
         label: 'Entradas',
         items: entries,
         total: entries.reduce((s, e) => s + e.amount, 0),
-        status: entries.some(e => e.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        status: entries.some(e => e.status === 'PROJECTED' || e.status === 'ESTIMATED') ? 'PROJECTED' : 'REALIZED',
         defaultExpanded: false,
       });
     }
@@ -445,7 +445,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
         label: account ? `Débito ${account.name}` : 'Débito',
         items: txs,
         total: txs.reduce((s, t) => s + t.amount, 0),
-        status: txs.some(t => t.status === 'PROJECTED') ? 'PROJECTED' : 'REALIZED',
+        status: txs.some(t => t.status === 'PROJECTED' || t.status === 'ESTIMATED') ? 'PROJECTED' : 'REALIZED',
         defaultExpanded: false,
       });
     }
