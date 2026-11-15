@@ -42,7 +42,7 @@
 
     <ng-template #row let-t>
       <td class="col-check" (click)="$event.stopPropagation()">
-        <input type="checkbox" class="row-checkbox" [checked]="isRowSelected(t.id)" (change)="toggleRowSelect(t.id)" />
+        <input type="checkbox" class="row-checkbox" [checked]="isRowSelected(t.id)" (click)="toggleRowSelect(t.id, $event)" />
       </td>
       <td [class.col-inactive]="!t.isActive" (dblclick)="openEdit(t)">{{ t.description }}</td>
       <td class="col-muted col-freq" (dblclick)="openEdit(t)">{{ frequencyLabel(t) }}</td>

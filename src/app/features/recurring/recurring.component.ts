@@ -396,14 +396,36 @@ export class RecurringComponent implements OnInit {
 
   // ── Row checkboxes ───────────────────────────────────────────────────────────
 
+  private lastRowClickedIndex = -1;
+
+  /** Flat ordered list of all templates as they appear in the table. */
+  private flatTemplates(): RecurringTemplate[] {
+    return this.tableGroups().flatMap(g => g.items);
+  }
+
   isRowSelected(id: string): boolean { return this.rowSelectedIds().has(id); }
 
-  toggleRowSelect(id: string): void {
-    this.rowSelectedIds.update(set => {
-      const next = new Set(set);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+  toggleRowSelect(id: string, event?: MouseEvent): void {
+    const items = this.flatTemplates();
+    const idx = items.findIndex(t => t.id === id);
+
+    if (event?.shiftKey && this.lastRowClickedIndex >= 0) {
+      const from = Math.min(this.lastRowClickedIndex, idx);
+      const to   = Math.max(this.lastRowClickedIndex, idx);
+      const rangeIds = items.slice(from, to + 1).map(t => t.id);
+      this.rowSelectedIds.update(set => {
+        const next = new Set(set);
+        rangeIds.forEach(rid => next.add(rid));
+        return next;
+      });
+    } else {
+      this.rowSelectedIds.update(set => {
+        const next = new Set(set);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+      this.lastRowClickedIndex = idx;
+    }
   }
 
   // ── Project modal ────────────────────────────────────────────────────────────
