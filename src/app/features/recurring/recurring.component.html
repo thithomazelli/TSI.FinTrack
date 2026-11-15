@@ -227,7 +227,7 @@
 
 </div><!-- /page -->
 
-<!-- Change day modal -->
+<!-- Change day / frequency modal -->
 @if (showChangeDayModal()) {
   <div class="modal-backdrop" (click)="closeChangeDayModal()"></div>
   <div class="modal modal--sm"
@@ -235,20 +235,45 @@
        [tsiModalKeyEnter]="applyBulkDayChange.bind(this)"
        [tsiModalKeyEscape]="closeChangeDayModal.bind(this)">
     <div class="modal-header">
-      <h3 class="modal-title">Alterar dia do mês</h3>
+      <h3 class="modal-title">Alterar recorrentes em massa</h3>
       <button class="modal-close" (click)="closeChangeDayModal()">✕</button>
     </div>
     <p class="modal-text">
-      Aplicar novo dia a <strong>{{ rowSelectedIds().size }}</strong> recorrente(s) selecionado(s).
+      Aplicar alterações a <strong>{{ rowSelectedIds().size }}</strong> recorrente(s) selecionado(s).
     </p>
-    <div class="field" [class.has-value]="changeDayValue">
-      <select class="field-input" [(ngModel)]="changeDayValue">
-        @for (d of days; track d) {
-          <option [value]="d">Dia {{ d }}</option>
-        }
-      </select>
-      <label class="field-label">Novo dia do mês</label>
+
+    <div class="fields-row">
+      <div class="field" [class.has-value]="changeDayValue">
+        <select class="field-input" [(ngModel)]="changeDayValue">
+          @for (d of days; track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+        <label class="field-label">Dia do mês</label>
+      </div>
+      <div class="field" [class.has-value]="changeDayFrequency">
+        <select class="field-input" [(ngModel)]="changeDayFrequency">
+          <option value="">Manter atual</option>
+          <option value="monthly">Mensal</option>
+          <option value="sporadic">Esporádico</option>
+        </select>
+        <label class="field-label">Frequência</label>
+      </div>
     </div>
+
+    @if (changeDayFrequency === 'sporadic') {
+      <div class="form-field">
+        <label class="form-label">Meses de ocorrência</label>
+        <div class="month-picker">
+          @for (m of allMonths; track m) {
+            <button class="month-btn" [class.active]="hasChangeDayMonth(m)" (click)="toggleChangeDayMonth(m)">
+              {{ monthLabel(m) }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
     <div class="modal-actions">
       <button class="btn btn-secondary" (click)="closeChangeDayModal()">Cancelar</button>
       <button class="btn btn-primary" (click)="applyBulkDayChange()">Aplicar</button>

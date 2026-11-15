@@ -60,6 +60,8 @@ export class RecurringComponent implements OnInit {
   readonly showProjectModal = signal(false);
   readonly showChangeDayModal = signal(false);
   changeDayValue = 1;
+  changeDayFrequency: 'monthly' | 'sporadic' | '' = '';
+  changeDayMonths: number[] = [];
 
   // Form state (used both for inline insert and edit modal)
   formDescription = '';
@@ -344,8 +346,18 @@ export class RecurringComponent implements OnInit {
 
   openChangeDayModal(): void {
     this.changeDayValue = 1;
+    this.changeDayFrequency = '';
+    this.changeDayMonths = [];
     this.showChangeDayModal.set(true);
   }
+
+  toggleChangeDayMonth(m: number): void {
+    const idx = this.changeDayMonths.indexOf(m);
+    if (idx === -1) this.changeDayMonths = [...this.changeDayMonths, m].sort((a, b) => a - b);
+    else this.changeDayMonths = this.changeDayMonths.filter(x => x !== m);
+  }
+
+  hasChangeDayMonth(m: number): boolean { return this.changeDayMonths.includes(m); }
 
   closeChangeDayModal(): void {
     this.showChangeDayModal.set(false);
@@ -354,22 +366,34 @@ export class RecurringComponent implements OnInit {
   applyBulkDayChange(): void {
     const ids = [...this.rowSelectedIds()];
     if (ids.length === 0) return;
-    const day = this.changeDayValue;
+
+    const payload: Partial<RecurringTemplate> = { dayOfMonth: this.changeDayValue };
+    if (this.changeDayFrequency === 'monthly') {
+      payload.frequency = 'monthly';
+      payload.months = [];
+    } else if (this.changeDayFrequency === 'sporadic') {
+      payload.frequency = 'sporadic';
+      payload.months = [...this.changeDayMonths];
+    }
 
     const ops = ids.map(id =>
-      this.service.update(id, { dayOfMonth: day })
+      this.service.update(id, payload)
         .then(saved => { this.templates.update(list => list.map(t => t.id === id ? saved : t)); })
     );
 
+    const parts: string[] = [`Dia ${this.changeDayValue}`];
+    if (this.changeDayFrequency === 'monthly') parts.push('frequência mensal');
+    else if (this.changeDayFrequency === 'sporadic') parts.push(`meses: ${this.changeDayMonths.map(m => MONTH_NAMES[m - 1]).join(', ') || '—'}`);
+
     Promise.all(ops)
       .then(() => {
-        this.toast.success(`Dia atualizado para ${day} em ${ids.length} recorrente(s).`);
+        this.toast.success(`${parts.join(' · ')} aplicado(s) em ${ids.length} recorrente(s).`);
         this.rowSelectedIds.set(new Set());
         this.closeChangeDayModal();
       })
       .catch((err: unknown) => {
         this.logger.error('Failed bulk day change', err);
-        this.toast.error('Erro ao atualizar dia dos recorrentes.');
+        this.toast.error('Erro ao atualizar recorrentes.');
       });
   }
 
