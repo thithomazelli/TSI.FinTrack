@@ -269,6 +269,7 @@
     <tsi-grouped-table
       [groups]="tableGroups()"
       [searchFn]="tableSearchFn"
+      (queryChange)="tableSearchQuery.set($event)"
       [searchPlaceholder]="'movimentos.search' | translate"
       [emptyMsg]="'movimentos.empty' | translate"
       [draggable]="true"

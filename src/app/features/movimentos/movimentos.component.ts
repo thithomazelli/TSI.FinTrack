@@ -271,6 +271,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
   });
 
   readonly filteredItems = computed<MovimentoItem[]>(() => {
+    const q = this.tableSearchQuery().toLowerCase().trim();
     return this.allItems().filter(item => {
       const tipos = this.filterTipos();
       if (tipos.size > 0 && !tipos.has(item.kind)) return false;
@@ -279,6 +280,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
       if (this.filterCategoryId() && item.categoryId !== this.filterCategoryId()) return false;
       const cardIds = this.filterCardIds();
       if (cardIds.size > 0 && item.kind === 'transaction' && !cardIds.has(item.creditCardId ?? '')) return false;
+      if (q && !this.tableSearchFn(item, q)) return false;
       return true;
     });
   });
@@ -390,6 +392,8 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
     this.filteredItems().every(i => this.selectedIds().has(i.id))
   );
   readonly selectionCount = computed(() => this.selectedIds().size);
+
+  readonly tableSearchQuery = signal('');
 
   readonly tableSearchFn: GroupSearchFn<MovimentoItem> = (item, q) =>
     item.description.toLowerCase().includes(q) ||
