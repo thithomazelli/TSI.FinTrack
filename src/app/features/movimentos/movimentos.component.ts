@@ -1736,9 +1736,9 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
     try {
       for (const item of items) {
         if (item.kind === 'entry') {
-          await this.entryService.update(item.id, { account_id: this.bulkNewAccountId } as any);
+          await this.entryService.update(item.id, { accountId: this.bulkNewAccountId });
         } else {
-          await this.transactionService.update(item.id, { account_id: this.bulkNewAccountId } as any);
+          await this.transactionService.update(item.id, { accountId: this.bulkNewAccountId });
         }
       }
       this.clearSelection();
