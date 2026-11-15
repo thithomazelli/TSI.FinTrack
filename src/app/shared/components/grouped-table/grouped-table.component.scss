@@ -268,6 +268,14 @@
 
 // ng-deep needed: <td> elements come from parent template and carry parent's
 // encapsulation attribute, so a scoped td selector won't match them.
+:host ::ng-deep .gt-data-row td {
+  border-bottom: 1px solid var(--color-border);
+  padding: .6rem 1rem;
+  color: var(--color-text);
+  vertical-align: middle;
+  &.text-right { text-align: right; }
+}
+
 :host ::ng-deep .gt-row--estimated td {
   background: color-mix(in srgb, #f59e0b 6%, var(--color-surface));
 }
