@@ -756,13 +756,14 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
   }
 
   // Bulk actions
-  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | 'date' | 'category' | null>(null);
+  readonly bulkActionOpen = signal<'delete' | 'amount' | 'move' | 'status' | 'date' | 'category' | 'account' | null>(null);
   bulkNewAmount = 0;
   bulkTargetYear = new Date().getFullYear();
   bulkTargetMonth = new Date().getMonth() + 1;
   bulkNewDate = '';
   bulkNewStatus: TransactionStatus = TransactionStatus.Realized;
   bulkNewCategoryId = '';
+  bulkNewAccountId = '';
   readonly bulkSaving = signal(false);
 
   // Gráfico de pizza: saídas por categoria (respeita o filtro atual)
@@ -1622,7 +1623,7 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
     this.bulkActionOpen.set(null);
   }
 
-  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status' | 'date' | 'category'): void {
+  openBulkAction(action: 'delete' | 'amount' | 'move' | 'status' | 'date' | 'category' | 'account'): void {
     this.bulkNewAmount = 0;
     this.bulkTargetYear = new Date().getFullYear();
     this.bulkTargetMonth = new Date().getMonth() + 1;
@@ -1720,6 +1721,31 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
       this.load();
     } catch (err) {
       this.logger.error('Bulk category change failed', err);
+      this.toast.error(this.tr('movimentos.toast.txUpdateError'));
+    } finally {
+      this.bulkSaving.set(false);
+    }
+  }
+
+  // ── Bulk change account ───────────────────────────────────────────────────
+  async bulkChangeAccount(): Promise<void> {
+    if (!this.bulkNewAccountId) return;
+    const ids = [...this.selectedIds()];
+    const items = this.filteredItems().filter(i => ids.includes(i.id));
+    this.bulkSaving.set(true);
+    try {
+      for (const item of items) {
+        if (item.kind === 'entry') {
+          await this.entryService.update(item.id, { account_id: this.bulkNewAccountId } as any);
+        } else {
+          await this.transactionService.update(item.id, { account_id: this.bulkNewAccountId } as any);
+        }
+      }
+      this.clearSelection();
+      this.toast.success(`${items.length} registro(s) com conta alterada`);
+      this.load();
+    } catch (err) {
+      this.logger.error('Bulk account change failed', err);
       this.toast.error(this.tr('movimentos.toast.txUpdateError'));
     } finally {
       this.bulkSaving.set(false);

@@ -254,6 +254,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
             Alterar categoria
           </button>
+          <button class="bulk-btn bulk-btn--category" (click)="openBulkAction('account')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Alterar conta
+          </button>
           <button class="bulk-btn bulk-btn--status" (click)="openBulkAction('status')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
             {{ 'movimentos.bulk.toggleStatus' | translate }}
@@ -640,6 +644,33 @@
       <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
       <button class="btn btn-primary" (click)="bulkChangeCategory()" [disabled]="bulkSaving()">
         {{ bulkSaving() ? ('common.saving' | translate) : 'Alterar categoria' }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Bulk change account modal -->
+@if (bulkActionOpen() === 'account') {
+  <div class="modal-backdrop" (click)="bulkActionOpen.set(null)"></div>
+  <div class="modal modal--sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Alterar conta</h3>
+      <button class="modal-close" (click)="bulkActionOpen.set(null)">✕</button>
+    </div>
+    <p class="modal-text">Defina a nova conta para os {{ selectionCount() }} registro(s) selecionados:</p>
+    <div class="field" [class.has-value]="bulkNewAccountId">
+      <select class="field-input" [(ngModel)]="bulkNewAccountId">
+        <option value="">— Selecione a conta —</option>
+        @for (acc of accounts(); track acc.id) {
+          <option [value]="acc.id">{{ acc.name }}</option>
+        }
+      </select>
+      <label class="field-label">Conta</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="bulkActionOpen.set(null)">{{ 'common.cancel' | translate }}</button>
+      <button class="btn btn-primary" (click)="bulkChangeAccount()" [disabled]="bulkSaving() || !bulkNewAccountId">
+        {{ bulkSaving() ? ('common.saving' | translate) : 'Alterar conta' }}
       </button>
     </div>
   </div>
