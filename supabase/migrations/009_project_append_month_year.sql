@@ -65,7 +65,8 @@ BEGIN
           (owner_id, description, amount, date, status,
            category_id, account_id, credit_card_id, recurring_template_id, labels)
         VALUES
-          (v_owner_id, rec.description || ' - ' || v_month_suffix, rec.amount, v_date, 'PROJECTED',
+          (v_owner_id, rec.description || ' - ' || v_month_suffix, rec.amount, v_date,
+           CASE WHEN rec.credit_card_id IS NOT NULL THEN 'ESTIMATED' ELSE 'PROJECTED' END,
            rec.category_id, rec.account_id, rec.credit_card_id, rec.id, '{}');
         v_created := v_created + 1;
       END IF;
