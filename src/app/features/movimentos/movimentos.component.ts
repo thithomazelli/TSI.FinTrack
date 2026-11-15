@@ -115,8 +115,22 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
   readonly bills = signal<CreditCardBill[]>([]);
   readonly entryTypes = signal<DomainList[]>([]);
 
-  readonly overdueEntries = signal<Entry[]>([]);
-  readonly overdueTransactions = signal<Transaction[]>([]);
+  private readonly _today = new Date().toISOString().split('T')[0];
+
+  readonly overdueEntries = computed(() =>
+    this.allEntries().filter(e =>
+      (e.status === 'PROJECTED' || e.status === 'ESTIMATED') && e.date < this._today
+    )
+  );
+
+  readonly overdueTransactions = computed(() =>
+    this.allTransactions().filter(t =>
+      (t.status === 'PROJECTED' || t.status === 'ESTIMATED') &&
+      !t.creditCardId &&
+      t.date < this._today
+    )
+  );
+
   readonly overdueCount = computed(() => this.overdueEntries().length + this.overdueTransactions().length);
 
   readonly loading = signal(false);
@@ -810,9 +824,6 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
     this.accountService.getAll().then(d => this.accounts.set(d));
     this.cardService.getAll().then(d => this.cards.set(d));
     this.domainListService.getByCode('entry_type').then(d => this.entryTypes.set(d));
-    const todayStr = new Date().toISOString().split('T')[0];
-    this.entryService.getOverdueProjected(todayStr).then(d => this.overdueEntries.set(d));
-    this.transactionService.getOverdueProjected(todayStr).then(d => this.overdueTransactions.set(d));
     if (qYear || qMonth) {
       this.applyMonth(this.year(), this.month());
     } else {
