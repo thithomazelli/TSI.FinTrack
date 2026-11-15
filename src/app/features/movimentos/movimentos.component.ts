@@ -494,12 +494,13 @@ export class MovimentosComponent implements OnInit, AfterViewInit {
     const savingsGroups: TableGroup<MovimentoItem>[] = [];
     for (const [accountId, movs] of savingsMap) {
       const account = this.accounts().find(a => a.id === accountId);
+      const savingsHasOpen = movs.some(m => m.status !== 'REALIZED');
       savingsGroups.push({
         id: `__savings_${accountId}`,
         label: account?.name ?? 'Poupança',
         items: movs,
         total: movs.reduce((s, m) => s + (m.kind === 'transaction' ? -m.amount : m.amount), 0),
-        status: 'REALIZED',
+        status: savingsHasOpen ? 'PROJECTED' : 'REALIZED',
         defaultExpanded: false,
       });
     }
