@@ -93,7 +93,7 @@ export class RecurringComponent implements OnInit {
     this.categoryName(item.categoryId).toLowerCase().includes(q);
 
   readonly tableGroups = computed<TableGroup<RecurringTemplate>[]>(() => {
-    const templates = this.templates();
+    const templates = [...this.templates()].sort((a, b) => a.position - b.position);
     const entries = templates.filter(t => t.type === 'ENTRY');
     const debitTxs = templates.filter(t => t.type === 'TRANSACTION' && !t.creditCardId);
     const cardTxs = templates.filter(t => t.type === 'TRANSACTION' && !!t.creditCardId);
