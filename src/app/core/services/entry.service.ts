@@ -119,7 +119,7 @@ export class EntryService {
       d.setDate(Math.min(baseDate.getDate(), lastDay));
       return {
         owner_id: ownerId,
-        description: `${payload.description} - ${pad(i + 1)}/${pad(total)}`,
+        description: `${payload.description.trim().replace(/ - \d+\/\d+$/, '')} - ${pad(i + 1)}/${pad(total)}`,
         amount: installmentAmount,
         date: d.toISOString().split('T')[0],
         type_id: payload.typeId,

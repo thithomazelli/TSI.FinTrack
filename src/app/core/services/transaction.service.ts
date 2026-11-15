@@ -140,7 +140,7 @@ export class TransactionService {
       const lastDay = new Date(installDate.getFullYear(), installDate.getMonth() + 1, 0).getDate();
       installDate.setDate(Math.min(baseDate.getDate(), lastDay));
       const num = i + 1;
-      const description = `${payload.description} - ${pad(num)}/${pad(total)}`;
+      const description = `${payload.description.trim().replace(/\s+-\s+\d{1,3}\/\d{1,3}$/, '')} - ${pad(num)}/${pad(total)}`;
       return {
         ...this.toRow(
           { ...payload, description, amount: installmentAmount, totalInstallments: total },
