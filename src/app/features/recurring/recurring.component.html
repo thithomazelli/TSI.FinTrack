@@ -3,6 +3,9 @@
   <h2 class="page-title">Recorrentes</h2>
   <div class="header-actions">
     @if (rowSelectedIds().size > 0) {
+      <button class="btn btn-secondary" (click)="openChangeDayModal()">
+        📅 Alterar dia ({{ rowSelectedIds().size }})
+      </button>
       <button class="btn btn-secondary" (click)="openProjectModalFromSelection()">
         ▶ Projetar selecionados ({{ rowSelectedIds().size }})
       </button>
@@ -223,6 +226,35 @@
 }
 
 </div><!-- /page -->
+
+<!-- Change day modal -->
+@if (showChangeDayModal()) {
+  <div class="modal-backdrop" (click)="closeChangeDayModal()"></div>
+  <div class="modal modal--sm"
+       tsiModalKey
+       [tsiModalKeyEnter]="applyBulkDayChange.bind(this)"
+       [tsiModalKeyEscape]="closeChangeDayModal.bind(this)">
+    <div class="modal-header">
+      <h3 class="modal-title">Alterar dia do mês</h3>
+      <button class="modal-close" (click)="closeChangeDayModal()">✕</button>
+    </div>
+    <p class="modal-text">
+      Aplicar novo dia a <strong>{{ rowSelectedIds().size }}</strong> recorrente(s) selecionado(s).
+    </p>
+    <div class="field" [class.has-value]="changeDayValue">
+      <select class="field-input" [(ngModel)]="changeDayValue">
+        @for (d of days; track d) {
+          <option [value]="d">Dia {{ d }}</option>
+        }
+      </select>
+      <label class="field-label">Novo dia do mês</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeChangeDayModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="applyBulkDayChange()">Aplicar</button>
+    </div>
+  </div>
+}
 
 <!-- Project period modal -->
 @if (showProjectModal()) {

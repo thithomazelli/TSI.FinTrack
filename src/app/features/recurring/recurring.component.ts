@@ -58,6 +58,8 @@ export class RecurringComponent implements OnInit {
   readonly editingTemplate = signal<RecurringTemplate | null>(null);
   readonly deletingTemplate = signal<RecurringTemplate | null>(null);
   readonly showProjectModal = signal(false);
+  readonly showChangeDayModal = signal(false);
+  changeDayValue = 1;
 
   // Form state (used both for inline insert and edit modal)
   formDescription = '';
@@ -336,6 +338,39 @@ export class RecurringComponent implements OnInit {
     if (t.type === 'ENTRY') return '__entries';
     if (t.creditCardId) return t.creditCardId;
     return `__debit_${t.accountId ?? '__no_account'}`;
+  }
+
+  // ── Bulk change day ──────────────────────────────────────────────────────────
+
+  openChangeDayModal(): void {
+    this.changeDayValue = 1;
+    this.showChangeDayModal.set(true);
+  }
+
+  closeChangeDayModal(): void {
+    this.showChangeDayModal.set(false);
+  }
+
+  applyBulkDayChange(): void {
+    const ids = [...this.rowSelectedIds()];
+    if (ids.length === 0) return;
+    const day = this.changeDayValue;
+
+    const ops = ids.map(id =>
+      this.service.update(id, { dayOfMonth: day })
+        .then(saved => { this.templates.update(list => list.map(t => t.id === id ? saved : t)); })
+    );
+
+    Promise.all(ops)
+      .then(() => {
+        this.toast.success(`Dia atualizado para ${day} em ${ids.length} recorrente(s).`);
+        this.rowSelectedIds.set(new Set());
+        this.closeChangeDayModal();
+      })
+      .catch((err: unknown) => {
+        this.logger.error('Failed bulk day change', err);
+        this.toast.error('Erro ao atualizar dia dos recorrentes.');
+      });
   }
 
   // ── Project period ───────────────────────────────────────────────────────────
